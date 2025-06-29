@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -176,12 +175,9 @@ const BookingForm = ({ onNext }: { onNext: (data: FormData) => void }) => {
         )}
       </div>
 
-      {/* Question du nom de l'animal */}
+      {/* Champ nom de l'animal - sans question */}
       {showNameInput && (
-        <div className="space-y-4">
-          <Label htmlFor="animal-name" className="text-lg font-semibold text-vet-navy">
-            Quel est son nom ? *
-          </Label>
+        <div>
           <Input
             id="animal-name"
             value={formData.animalName}
