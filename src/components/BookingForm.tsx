@@ -200,9 +200,9 @@ const BookingForm = ({
               </p>
             </div>}
           
-          {/* Options alignées horizontalement avec moins d'espacement */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
-            <div className="flex items-center space-x-3">
+          {/* Options alignées horizontalement avec espacement minimal */}
+          <div className="flex flex-col md:flex-row md:gap-0 gap-1">
+            <div className="flex items-center space-x-3 md:mr-8">
               <Checkbox id="deux-animaux" checked={formData.multipleAnimals.includes('2-animaux')} onCheckedChange={checked => handleMultipleAnimalsChange('2-animaux', checked as boolean)} />
               <Label htmlFor="deux-animaux" className="text-vet-navy cursor-pointer">2ème animal
           </Label>
