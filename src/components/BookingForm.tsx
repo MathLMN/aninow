@@ -1,10 +1,13 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowRight } from "lucide-react";
-import SelectionButton from './SelectionButton';
+import AnimalSpeciesSelection from './AnimalSpeciesSelection';
+import AnimalNameInput from './AnimalNameInput';
+import MultipleAnimalsOptions from './MultipleAnimalsOptions';
+import SecondAnimalForm from './SecondAnimalForm';
+import LitterOptions from './LitterOptions';
+
 interface FormData {
   animalSpecies: string;
   customSpecies: string;
@@ -15,6 +18,7 @@ interface FormData {
   secondCustomSpecies?: string;
   vaccinationType?: string;
 }
+
 const BookingForm = ({
   onNext
 }: {
@@ -30,11 +34,13 @@ const BookingForm = ({
     secondCustomSpecies: '',
     vaccinationType: ''
   });
+
   const [showNameInput, setShowNameInput] = useState(false);
   const [showMultipleOptions, setShowMultipleOptions] = useState(false);
   const [showSecondAnimal, setShowSecondAnimal] = useState(false);
   const [showSecondNameInput, setShowSecondNameInput] = useState(false);
   const [showLitterOptions, setShowLitterOptions] = useState(false);
+
   const handleSpeciesChange = (value: string, selected: boolean) => {
     if (selected) {
       setFormData(prev => ({
@@ -57,42 +63,42 @@ const BookingForm = ({
       setShowLitterOptions(false);
     }
   };
+
   const handleCustomSpeciesChange = (value: string) => {
     setFormData(prev => ({
       ...prev,
       customSpecies: value
     }));
   };
+
   const handleNameChange = (value: string) => {
     setFormData(prev => ({
       ...prev,
       animalName: value
     }));
   };
+
   const handleMultipleAnimalsChange = (option: string, checked: boolean) => {
     let newMultipleAnimals: string[] = [];
     if (checked) {
-      // Si on sélectionne une option, on déselectionne l'autre
       if (option === '2-animaux') {
         newMultipleAnimals = ['2-animaux'];
       } else if (option === 'une-portee') {
         newMultipleAnimals = ['une-portee'];
       }
     } else {
-      // Si on désélectionne, on vide le tableau
       newMultipleAnimals = [];
     }
+
     setFormData(prev => ({
       ...prev,
       multipleAnimals: newMultipleAnimals
     }));
 
-    // Show second animal form if "2 animaux" is selected
     setShowSecondAnimal(newMultipleAnimals.includes('2-animaux'));
-
-    // Show litter options if "Une portée" is selected
     setShowLitterOptions(newMultipleAnimals.includes('une-portee'));
   };
+
   const handleSecondAnimalSpeciesChange = (value: string, selected: boolean) => {
     if (selected) {
       setFormData(prev => ({
@@ -110,18 +116,21 @@ const BookingForm = ({
       setShowSecondNameInput(false);
     }
   };
+
   const handleSecondCustomSpeciesChange = (value: string) => {
     setFormData(prev => ({
       ...prev,
       secondCustomSpecies: value
     }));
   };
+
   const handleSecondAnimalNameChange = (value: string) => {
     setFormData(prev => ({
       ...prev,
       secondAnimalName: value
     }));
   };
+
   const handleVaccinationTypeChange = (value: string, selected: boolean) => {
     if (selected) {
       setFormData(prev => ({
@@ -135,140 +144,91 @@ const BookingForm = ({
       }));
     }
   };
+
   const canProceed = () => {
-    // Basic validation
     if (!formData.animalSpecies) return false;
     if (formData.animalSpecies === 'autre' && !formData.customSpecies) return false;
     if (!formData.animalName) return false;
 
-    // If second animal is selected, validate second animal data
     if (showSecondAnimal) {
       if (!formData.secondAnimalSpecies) return false;
       if (formData.secondAnimalSpecies === 'autre' && !formData.secondCustomSpecies) return false;
       if (!formData.secondAnimalName) return false;
     }
 
-    // If litter is selected, validate vaccination type
     if (showLitterOptions && !formData.vaccinationType) return false;
     return true;
   };
+
   const handleSubmit = () => {
     if (canProceed()) {
       onNext(formData);
     }
   };
-  return <div className="space-y-8">
+
+  return (
+    <div className="space-y-8">
       {/* Question principale : Espèce de l'animal */}
       <div className="space-y-4">
-        <Label className="text-lg font-semibold text-vet-navy">
-          Sélectionnez l'espèce votre animal *
-        </Label>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <SelectionButton id="chat" value="chat" isSelected={formData.animalSpecies === 'chat'} onSelect={handleSpeciesChange}>
-            Chat
-          </SelectionButton>
-          <SelectionButton id="chien" value="chien" isSelected={formData.animalSpecies === 'chien'} onSelect={handleSpeciesChange}>
-            Chien
-          </SelectionButton>
-          <SelectionButton id="autre" value="autre" isSelected={formData.animalSpecies === 'autre'} onSelect={handleSpeciesChange}>
-            Autre (précisez)
-          </SelectionButton>
-        </div>
+        <AnimalSpeciesSelection
+          species={formData.animalSpecies}
+          customSpecies={formData.customSpecies}
+          onSpeciesChange={handleSpeciesChange}
+          onCustomSpeciesChange={handleCustomSpeciesChange}
+          title="Sélectionnez l'espèce votre animal *"
+        />
 
-        {/* Champ pour espèce personnalisée */}
-        {formData.animalSpecies === 'autre' && <div className="mt-4">
-            <Label htmlFor="custom-species" className="text-vet-navy">
-              Précisez l'espèce de votre animal *
-            </Label>
-            <Input id="custom-species" value={formData.customSpecies} onChange={e => handleCustomSpeciesChange(e.target.value)} placeholder="Écrivez l'espèce de votre animal" className="mt-2" />
-          </div>}
-
-        {/* Champ nom de l'animal - avec espacement */}
-        {showNameInput && <div>
-            <Input id="animal-name" value={formData.animalName} onChange={e => handleNameChange(e.target.value)} placeholder="Nom de l'animal" className="text-base" />
-          </div>}
+        {/* Champ nom de l'animal */}
+        {showNameInput && (
+          <AnimalNameInput
+            name={formData.animalName}
+            onNameChange={handleNameChange}
+            placeholder="Nom de l'animal"
+            id="animal-name"
+          />
+        )}
       </div>
 
       {/* Options multiples animaux */}
-      {showMultipleOptions && <div className="space-y-4">
-          {/* Texte d'introduction - seulement si aucune option n'est sélectionnée */}
-          {formData.multipleAnimals.length === 0 && <div>
-              <p className="text-vet-blue italic mb-2">
-                Cochez l'une des options ci-dessous uniquement{' '}
-                <span className="text-vet-blue italic">si vous venez avec plusieurs animaux.</span>
-              </p>
-            </div>}
-          
-          {/* Options alignées horizontalement avec espacement minimal */}
-          <div className="flex flex-col md:flex-row md:gap-0 gap-1">
-            <div className="flex items-center space-x-3 md:mr-8">
-              <Checkbox id="deux-animaux" checked={formData.multipleAnimals.includes('2-animaux')} onCheckedChange={checked => handleMultipleAnimalsChange('2-animaux', checked as boolean)} />
-              <Label htmlFor="deux-animaux" className="text-vet-navy cursor-pointer">2ème animal
-          </Label>
-            </div>
-            
-            <div className="flex items-center space-x-3">
-              <Checkbox id="une-portee" checked={formData.multipleAnimals.includes('une-portee')} onCheckedChange={checked => handleMultipleAnimalsChange('une-portee', checked as boolean)} />
-              <Label htmlFor="une-portee" className="text-vet-navy cursor-pointer">
-                Une portée
-              </Label>
-            </div>
-          </div>
-        </div>}
+      {showMultipleOptions && (
+        <MultipleAnimalsOptions
+          multipleAnimals={formData.multipleAnimals}
+          onMultipleAnimalsChange={handleMultipleAnimalsChange}
+        />
+      )}
 
       {/* Deuxième animal */}
-      {showSecondAnimal && <div className="space-y-4 pl-4 border-l-2 border-vet-sage/30">
-          <Label className="text-lg font-semibold text-vet-navy">Sélectionnez l'espèce de votre 2ème animal *</Label>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <SelectionButton id="second-chat" value="chat" isSelected={formData.secondAnimalSpecies === 'chat'} onSelect={handleSecondAnimalSpeciesChange}>
-              Chat
-            </SelectionButton>
-            <SelectionButton id="second-chien" value="chien" isSelected={formData.secondAnimalSpecies === 'chien'} onSelect={handleSecondAnimalSpeciesChange}>
-              Chien
-            </SelectionButton>
-            <SelectionButton id="second-autre" value="autre" isSelected={formData.secondAnimalSpecies === 'autre'} onSelect={handleSecondAnimalSpeciesChange}>
-              Autre (précisez)
-            </SelectionButton>
-          </div>
-
-          {formData.secondAnimalSpecies === 'autre' && <div className="mt-4">
-              <Label htmlFor="second-custom-species" className="text-vet-navy">
-                Précisez l'espèce du 2e animal *
-              </Label>
-              <Input id="second-custom-species" value={formData.secondCustomSpecies} onChange={e => handleSecondCustomSpeciesChange(e.target.value)} placeholder="Écrivez l'espèce du 2e animal" className="mt-2" />
-            </div>}
-
-          {/* Champ nom du 2e animal - sans question */}
-          {showSecondNameInput && <div>
-              <Input id="second-animal-name" value={formData.secondAnimalName} onChange={e => handleSecondAnimalNameChange(e.target.value)} placeholder="Nom du 2e animal" className="text-base" />
-            </div>}
-        </div>}
+      {showSecondAnimal && (
+        <SecondAnimalForm
+          formData={formData}
+          onSecondAnimalSpeciesChange={handleSecondAnimalSpeciesChange}
+          onSecondCustomSpeciesChange={handleSecondCustomSpeciesChange}
+          onSecondAnimalNameChange={handleSecondAnimalNameChange}
+          showSecondNameInput={showSecondNameInput}
+        />
+      )}
 
       {/* Options pour une portée */}
-      {showLitterOptions && <div className="space-y-4 pl-4 border-l-2 border-vet-sage/30">
-          <Label className="text-lg font-semibold text-vet-navy">
-            Vous souhaitez *
-          </Label>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <SelectionButton id="vacc-id" value="vaccinations-identifications" isSelected={formData.vaccinationType === 'vaccinations-identifications'} onSelect={handleVaccinationTypeChange}>
-              Vaccinations et identifications
-            </SelectionButton>
-            <SelectionButton id="vacc-only" value="vaccinations-seulement" isSelected={formData.vaccinationType === 'vaccinations-seulement'} onSelect={handleVaccinationTypeChange}>
-              Vaccinations uniquement
-            </SelectionButton>
-          </div>
-        </div>}
+      {showLitterOptions && (
+        <LitterOptions
+          vaccinationType={formData.vaccinationType}
+          onVaccinationTypeChange={handleVaccinationTypeChange}
+        />
+      )}
 
       {/* Bouton Suivant */}
       <div className="flex justify-center pt-6">
-        <Button onClick={handleSubmit} disabled={!canProceed()} className="bg-vet-sage hover:bg-vet-sage/90 text-white px-8 py-3 text-lg">
+        <Button 
+          onClick={handleSubmit} 
+          disabled={!canProceed()} 
+          className="bg-vet-sage hover:bg-vet-sage/90 text-white px-8 py-3 text-lg"
+        >
           Suivant
           <ArrowRight className="ml-2 h-5 w-5" />
         </Button>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default BookingForm;
