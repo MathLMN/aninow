@@ -35,6 +35,9 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
     onOptionsChange(newOptions);
   };
 
+  // Filter out selected options from the available options
+  const availableOptions = convenienceOptions.filter(option => !selectedOptions.includes(option.value));
+
   return (
     <div className="space-y-3 sm:space-y-4 border-2 border-vet-blue/20 rounded-xl p-3 sm:p-4 bg-white/50 backdrop-blur-sm">
       <Label className="text-base sm:text-lg font-semibold text-vet-navy block leading-tight">
@@ -76,15 +79,13 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
         </div>
       )}
 
-      {/* Vertical list of options as tags */}
+      {/* Vertical list of available options as tags */}
       <div className="space-y-2">
-        {convenienceOptions.map((option) => (
+        {availableOptions.map((option) => (
           <button
             key={option.value}
             onClick={() => handleOptionToggle(option.value)}
-            className={`w-full text-left px-3 py-2 rounded-full border text-sm font-medium transition-all hover:shadow-sm ${option.color} ${
-              selectedOptions.includes(option.value) ? 'ring-2 ring-offset-1 ring-gray-400' : ''
-            }`}
+            className={`w-full text-left px-3 py-2 rounded-full border text-sm font-medium transition-all hover:shadow-sm ${option.color}`}
           >
             {option.label}
           </button>
