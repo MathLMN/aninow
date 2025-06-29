@@ -66,30 +66,24 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
         </div>
       )}
 
-      {/* Available options list */}
-      <div className="max-h-48 overflow-y-auto space-y-2">
+      {/* Available options as colored badges */}
+      <div className="flex flex-wrap gap-2">
         {convenienceOptions.map((option) => {
           const isSelected = selectedOptions.includes(option.value);
           
           return (
-            <div
+            <button
               key={option.value}
               onClick={() => handleOptionToggle(option.value)}
-              className={`flex items-center justify-between p-3 rounded-md border cursor-pointer transition-all ${
+              disabled={isSelected}
+              className={`inline-flex items-center px-3 py-2 rounded-full border text-sm transition-all cursor-pointer ${
                 isSelected 
-                  ? 'bg-gray-50 border-gray-300' 
-                  : 'hover:bg-gray-50 border-gray-200'
-              }`}
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:shadow-md'
+              } ${option.color}`}
             >
-              <span className="text-sm sm:text-base text-gray-700">
-                {option.label}
-              </span>
-              {!isSelected && (
-                <button className="text-xs text-gray-500 hover:text-gray-700">
-                  Ajouter
-                </button>
-              )}
-            </div>
+              <span>{option.label}</span>
+            </button>
           );
         })}
       </div>
