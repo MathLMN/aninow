@@ -1,96 +1,67 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
+/* Palette de couleurs vétérinaire */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 237 24% 91%; /* #EDE3DA - Beige doux */
+    --foreground: 240 35% 18%; /* #1B1B3A - Bleu marine foncé */
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 240 35% 18%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 240 35% 18%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 240 35% 18%; /* #1B1B3A - Bleu marine */
+    --primary-foreground: 237 24% 91%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 196 35% 70%; /* #96C3CE - Bleu clair */
+    --secondary-foreground: 240 35% 18%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 237 24% 91%; /* #EDE3DA - Beige */
+    --muted-foreground: 18 12% 43%; /* #7A6363 - Gris-brun */
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 166 34% 41%; /* #4D9380 - Vert sauge */
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 196 35% 85%;
+    --input: 196 35% 85%;
+    --ring: 166 34% 41%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Couleurs personnalisées vétérinaire */
+    --vet-navy: 240 35% 18%; /* #1B1B3A */
+    --vet-brown: 18 12% 43%; /* #7A6363 */
+    --vet-blue: 196 35% 70%; /* #96C3CE */
+    --vet-beige: 237 24% 91%; /* #EDE3DA */
+    --vet-sage: 166 34% 41%; /* #4D9380 */
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --background: 240 35% 18%;
+    --foreground: 237 24% 91%;
+    --card: 240 35% 18%;
+    --card-foreground: 237 24% 91%;
+    --popover: 240 35% 18%;
+    --popover-foreground: 237 24% 91%;
+    --primary: 237 24% 91%;
+    --primary-foreground: 240 35% 18%;
+    --secondary: 196 35% 30%;
+    --secondary-foreground: 237 24% 91%;
+    --muted: 240 35% 25%;
+    --muted-foreground: 196 35% 70%;
+    --accent: 166 34% 41%;
+    --accent-foreground: 0 0% 100%;
+    --border: 240 35% 25%;
+    --input: 240 35% 25%;
+    --ring: 166 34% 41%;
   }
 }
 
@@ -100,6 +71,27 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
   }
+}
+
+/* Classes utilitaires personnalisées */
+@layer utilities {
+  .bg-vet-navy { background-color: hsl(var(--vet-navy)); }
+  .bg-vet-brown { background-color: hsl(var(--vet-brown)); }
+  .bg-vet-blue { background-color: hsl(var(--vet-blue)); }
+  .bg-vet-beige { background-color: hsl(var(--vet-beige)); }
+  .bg-vet-sage { background-color: hsl(var(--vet-sage)); }
+  
+  .text-vet-navy { color: hsl(var(--vet-navy)); }
+  .text-vet-brown { color: hsl(var(--vet-brown)); }
+  .text-vet-blue { color: hsl(var(--vet-blue)); }
+  .text-vet-beige { color: hsl(var(--vet-beige)); }
+  .text-vet-sage { color: hsl(var(--vet-sage)); }
+  
+  .border-vet-navy { border-color: hsl(var(--vet-navy)); }
+  .border-vet-brown { border-color: hsl(var(--vet-brown)); }
+  .border-vet-blue { border-color: hsl(var(--vet-blue)); }
+  .border-vet-beige { border-color: hsl(var(--vet-beige)); }
+  .border-vet-sage { border-color: hsl(var(--vet-sage)); }
 }
