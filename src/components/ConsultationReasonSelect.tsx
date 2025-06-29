@@ -23,10 +23,10 @@ const ConsultationReasonSelect: React.FC<ConsultationReasonSelectProps> = ({
           <SelectValue placeholder="Cliquez et choisissez le motif" />
         </SelectTrigger>
         <SelectContent className="bg-white border border-gray-300 shadow-lg">
-          <SelectItem value="symptomes-anomalie" className="text-base py-3">
+          <SelectItem value="symptomes-anomalie" className="text-sm py-2">
             Symptômes ou anomalie (boiterie, vomissements,...)
           </SelectItem>
-          <SelectItem value="consultation-convenance" className="text-base py-3">
+          <SelectItem value="consultation-convenance" className="text-sm py-2">
             Consultation de convenance (vaccins, contrôle,...)
           </SelectItem>
         </SelectContent>
