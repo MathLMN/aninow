@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+import { X } from "lucide-react";
 
 interface ConvenienceConsultationSelectProps {
   selectedOptions: string[];
@@ -13,14 +13,14 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
   onOptionsChange
 }) => {
   const convenienceOptions = [
-    { value: 'bilan-annuel-vaccination', label: 'Bilan annuel / vaccination' },
-    { value: 'coupe-griffes', label: 'Coupe de griffes' },
-    { value: 'controle', label: 'Contrôle' },
-    { value: 'bilan-senior', label: 'Bilan sénior' },
-    { value: 'premiere-consultation', label: '1ère consultation chiot/ chaton' },
-    { value: 'castration-sterilisation', label: 'Castration/ Stérilisation (pré-opératoire)' },
-    { value: 'detartrage-extractions', label: 'Détartrage/ Extractions dentaires (pré-opératoire)' },
-    { value: 'autre', label: 'Autre (Précisez)' }
+    { value: 'bilan-annuel-vaccination', label: 'Bilan annuel / vaccination', color: 'bg-red-100 text-red-700 border-red-200' },
+    { value: 'controle', label: 'Contrôle', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
+    { value: 'coupe-griffes', label: 'Coupe de griffes', color: 'bg-orange-100 text-orange-700 border-orange-200' },
+    { value: 'bilan-senior', label: 'Bilan sénior', color: 'bg-green-100 text-green-700 border-green-200' },
+    { value: 'premiere-consultation', label: '1ère consultation chiot/ chaton', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+    { value: 'castration-sterilisation', label: 'Castration/ Stérilisation (pré-opératoire)', color: 'bg-purple-100 text-purple-700 border-purple-200' },
+    { value: 'detartrage-extractions', label: 'Détartrage/ Extractions dentaires (pré-opératoire)', color: 'bg-pink-100 text-pink-700 border-pink-200' },
+    { value: 'autre', label: 'Autre (Précisez)', color: 'bg-gray-100 text-gray-700 border-gray-200' }
   ];
 
   const handleOptionToggle = (value: string) => {
@@ -30,29 +30,68 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
     onOptionsChange(newOptions);
   };
 
+  const handleRemoveOption = (value: string) => {
+    const newOptions = selectedOptions.filter(opt => opt !== value);
+    onOptionsChange(newOptions);
+  };
+
   return (
     <div className="space-y-4 border border-gray-300 rounded-md p-4 bg-white">
       <Label className="text-base sm:text-lg font-semibold text-vet-navy block">
         Ajoutez un ou plusieurs motifs *
       </Label>
 
-      {/* Options list */}
+      {/* Selected options as tags at the top */}
+      {selectedOptions.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {selectedOptions.map((selectedValue) => {
+            const option = convenienceOptions.find(opt => opt.value === selectedValue);
+            if (!option) return null;
+            
+            return (
+              <div
+                key={selectedValue}
+                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full border text-sm ${option.color}`}
+              >
+                <span>{option.label}</span>
+                <button
+                  onClick={() => handleRemoveOption(selectedValue)}
+                  className="hover:bg-black/10 rounded-full p-0.5"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Available options list */}
       <div className="max-h-48 overflow-y-auto space-y-2">
-        {convenienceOptions.map((option) => (
-          <div key={option.value} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded">
-            <Checkbox
-              id={option.value}
-              checked={selectedOptions.includes(option.value)}
-              onCheckedChange={() => handleOptionToggle(option.value)}
-            />
-            <Label
-              htmlFor={option.value}
-              className="flex-1 cursor-pointer text-sm sm:text-base"
+        {convenienceOptions.map((option) => {
+          const isSelected = selectedOptions.includes(option.value);
+          
+          return (
+            <div
+              key={option.value}
+              onClick={() => handleOptionToggle(option.value)}
+              className={`flex items-center justify-between p-3 rounded-md border cursor-pointer transition-all ${
+                isSelected 
+                  ? 'bg-gray-50 border-gray-300' 
+                  : 'hover:bg-gray-50 border-gray-200'
+              }`}
             >
-              {option.label}
-            </Label>
-          </div>
-        ))}
+              <span className="text-sm sm:text-base text-gray-700">
+                {option.label}
+              </span>
+              {!isSelected && (
+                <button className="text-xs text-gray-500 hover:text-gray-700">
+                  Ajouter
+                </button>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Selected count */}
