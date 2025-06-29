@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Heart } from "lucide-react";
+import { Heart, Settings } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 const PublicBooking = () => {
@@ -13,14 +13,14 @@ const PublicBooking = () => {
       <header className="bg-vet-navy text-vet-beige shadow-lg">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+            <div className="flex items-center space-x-3">
               <Heart className="h-6 w-6 text-vet-sage" />
               <span className="text-xl font-bold">AniNow</span>
-            </Link>
-            <Link to="/">
+            </div>
+            <Link to="/vet/login">
               <Button variant="ghost" className="text-vet-beige hover:bg-white/10">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Retour
+                <Settings className="h-4 w-4 mr-2" />
+                Espace Clinique
               </Button>
             </Link>
           </div>

@@ -4,7 +4,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
 // Pages publiques (formulaire de RDV)
@@ -28,11 +27,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* Page d'accueil */}
-          <Route path="/" element={<Index />} />
-          
-          {/* Interface publique - Formulaire de RDV */}
-          <Route path="/booking" element={<PublicBooking />} />
+          {/* Page d'accueil - Formulaire de RDV */}
+          <Route path="/" element={<PublicBooking />} />
           <Route path="/booking/slots" element={<AppointmentSlots />} />
           <Route path="/booking/confirmation" element={<BookingConfirmation />} />
           
