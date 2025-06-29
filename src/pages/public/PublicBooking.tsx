@@ -42,9 +42,6 @@ const PublicBooking = () => {
             <h1 className="text-3xl font-bold text-vet-navy mb-2">
               Prendre un rendez-vous
             </h1>
-            <p className="text-vet-brown text-lg">
-              Remplissez le formulaire ci-dessous pour planifier votre visite
-            </p>
           </div>
 
           {/* Formulaire */}
@@ -53,9 +50,6 @@ const PublicBooking = () => {
               <CardTitle className="text-2xl text-vet-navy">
                 Informations sur votre animal
               </CardTitle>
-              <CardDescription className="text-vet-brown">
-                Commençons par les informations de base sur votre animal
-              </CardDescription>
             </CardHeader>
             <CardContent className="p-8">
               <BookingForm onNext={handleFormNext} />
