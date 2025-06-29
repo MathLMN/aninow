@@ -194,7 +194,7 @@ const BookingForm = ({
       {showMultipleOptions && <div className="space-y-4">
           {/* Texte d'introduction - seulement si aucune option n'est sélectionnée */}
           {formData.multipleAnimals.length === 0 && <div>
-              <p className="text-vet-brown mb-2">
+              <p className="text-vet-blue italic mb-2">
                 Cochez l'une des options ci-dessous uniquement{' '}
                 <span className="text-vet-blue italic">si vous venez avec plusieurs animaux.</span>
               </p>
