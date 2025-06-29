@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -183,20 +184,20 @@ const BookingForm = ({ onNext }: { onNext: (data: FormData) => void }) => {
             />
           </div>
         )}
-      </div>
 
-      {/* Champ nom de l'animal - sans question */}
-      {showNameInput && (
-        <div>
-          <Input
-            id="animal-name"
-            value={formData.animalName}
-            onChange={(e) => handleNameChange(e.target.value)}
-            placeholder="Nom de l'animal"
-            className="text-base"
-          />
-        </div>
-      )}
+        {/* Champ nom de l'animal - avec espacement */}
+        {showNameInput && (
+          <div>
+            <Input
+              id="animal-name"
+              value={formData.animalName}
+              onChange={(e) => handleNameChange(e.target.value)}
+              placeholder="Nom de l'animal"
+              className="text-base"
+            />
+          </div>
+        )}
+      </div>
 
       {/* Options multiples animaux */}
       {showMultipleOptions && (
