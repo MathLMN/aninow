@@ -36,14 +36,14 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
   };
 
   return (
-    <div className="space-y-4 border border-gray-300 rounded-md p-4 bg-white">
-      <Label className="text-base sm:text-lg font-semibold text-vet-navy block">
+    <div className="space-y-3 sm:space-y-4 border border-gray-300 rounded-md p-3 sm:p-4 bg-white">
+      <Label className="text-sm sm:text-lg font-semibold text-vet-navy block">
         Ajoutez un ou plusieurs motifs *
       </Label>
 
-      {/* Selected options as tags at the top */}
+      {/* Selected options as tags at the top - Mobile optimized */}
       {selectedOptions.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2">
           {selectedOptions.map((selectedValue) => {
             const option = convenienceOptions.find(opt => opt.value === selectedValue);
             if (!option) return null;
@@ -51,14 +51,14 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
             return (
               <div
                 key={selectedValue}
-                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full border text-sm ${option.color}`}
+                className={`inline-flex items-center gap-1 px-2 py-1 sm:px-3 rounded-full border text-xs sm:text-sm ${option.color}`}
               >
-                <span>{option.label}</span>
+                <span className="leading-tight">{option.label}</span>
                 <button
                   onClick={() => handleRemoveOption(selectedValue)}
-                  className="hover:bg-black/10 rounded-full p-0.5"
+                  className="hover:bg-black/10 rounded-full p-0.5 flex-shrink-0"
                 >
-                  <X className="h-3 w-3" />
+                  <X className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                 </button>
               </div>
             );
@@ -66,8 +66,8 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
         </div>
       )}
 
-      {/* Available options as colored badges */}
-      <div className="flex flex-wrap gap-2">
+      {/* Available options as colored badges - Mobile optimized */}
+      <div className="flex flex-wrap gap-1.5 sm:gap-2">
         {convenienceOptions.map((option) => {
           const isSelected = selectedOptions.includes(option.value);
           
@@ -76,10 +76,10 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
               key={option.value}
               onClick={() => handleOptionToggle(option.value)}
               disabled={isSelected}
-              className={`inline-flex items-center px-3 py-2 rounded-full border text-sm transition-all cursor-pointer ${
+              className={`inline-flex items-center px-2 py-1.5 sm:px-3 sm:py-2 rounded-full border text-xs sm:text-sm transition-all cursor-pointer leading-tight ${
                 isSelected 
                   ? 'opacity-50 cursor-not-allowed' 
-                  : 'hover:shadow-md'
+                  : 'hover:shadow-md active:scale-95'
               } ${option.color}`}
             >
               <span>{option.label}</span>
@@ -88,9 +88,9 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
         })}
       </div>
 
-      {/* Selected count */}
+      {/* Selected count - Mobile optimized */}
       {selectedOptions.length > 0 && (
-        <div className="text-sm text-vet-navy">
+        <div className="text-xs sm:text-sm text-vet-navy">
           {selectedOptions.length} option{selectedOptions.length > 1 ? 's' : ''} sélectionnée{selectedOptions.length > 1 ? 's' : ''}
         </div>
       )}
