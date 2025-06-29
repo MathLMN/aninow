@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Calendar, Clock, Mail, Phone, Heart } from "lucide-react";
@@ -13,12 +12,13 @@ const BookingConfirmation = () => {
           <div className="flex items-center justify-center">
             <div className="flex items-center space-x-3">
               <Heart className="h-6 w-6 text-vet-sage" />
-              <span className="text-xl font-bold">VetBooking</span>
+              <span className="text-xl font-bold">AniNow</span>
             </div>
           </div>
         </div>
       </header>
 
+      {/* Main content */}
       <main className="container mx-auto px-6 py-12">
         <div className="max-w-2xl mx-auto">
           {/* Confirmation */}

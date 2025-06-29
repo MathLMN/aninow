@@ -44,7 +44,7 @@ const VetLayout = ({ children }: VetLayoutProps) => {
               </Button>
               <Link to="/vet/dashboard" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
                 <Heart className="h-6 w-6 text-vet-sage" />
-                <span className="text-xl font-bold">VetBooking</span>
+                <span className="text-xl font-bold">AniNow</span>
               </Link>
             </div>
 
@@ -97,7 +97,7 @@ const VetLayout = ({ children }: VetLayoutProps) => {
             <div className="p-6 border-b border-vet-blue/20">
               <div className="flex items-center space-x-3">
                 <Heart className="h-8 w-8 text-vet-sage" />
-                <span className="text-xl font-bold text-vet-navy">VetBooking</span>
+                <span className="text-xl font-bold text-vet-navy">AniNow</span>
               </div>
             </div>
             

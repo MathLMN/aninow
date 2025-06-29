@@ -14,7 +14,7 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Heart className="h-8 w-8 text-vet-sage" />
-              <h1 className="text-2xl font-bold">VetBooking</h1>
+              <h1 className="text-2xl font-bold">AniNow</h1>
             </div>
             <p className="text-vet-blue">Système de prise de rendez-vous vétérinaire</p>
           </div>
@@ -25,7 +25,7 @@ const Index = () => {
       <main className="container mx-auto px-6 py-12">
         <div className="text-center mb-12 animate-fade-in">
           <h2 className="text-4xl font-bold text-vet-navy mb-4">
-            Bienvenue sur VetBooking
+            Bienvenue sur AniNow
           </h2>
           <p className="text-xl text-vet-brown max-w-2xl mx-auto">
             Solution complète de prise de rendez-vous en ligne pour les cliniques vétérinaires

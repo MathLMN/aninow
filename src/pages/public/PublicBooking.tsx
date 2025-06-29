@@ -15,7 +15,7 @@ const PublicBooking = () => {
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
               <Heart className="h-6 w-6 text-vet-sage" />
-              <span className="text-xl font-bold">VetBooking</span>
+              <span className="text-xl font-bold">AniNow</span>
             </Link>
             <Link to="/">
               <Button variant="ghost" className="text-vet-beige hover:bg-white/10">

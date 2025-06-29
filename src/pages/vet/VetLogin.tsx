@@ -27,7 +27,7 @@ const VetLogin = () => {
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center space-x-3 hover:opacity-80 transition-opacity">
             <Heart className="h-10 w-10 text-vet-sage" />
-            <span className="text-2xl font-bold text-vet-navy">VetBooking</span>
+            <span className="text-2xl font-bold text-vet-navy">AniNow</span>
           </Link>
           <p className="text-vet-brown mt-2">Espace Vétérinaire</p>
         </div>
