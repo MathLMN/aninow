@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, Settings, ArrowLeft, ArrowRight } from "lucide-react";
@@ -205,13 +204,6 @@ const ConsultationReason = () => {
                     </div>
                   </div>
                 )}
-
-                {/* Message informatif - Mobile optimized */}
-                <div className="bg-vet-beige/20 p-2 sm:p-4 rounded-md mx-1 sm:mx-0">
-                  <p className="text-xs sm:text-sm text-vet-navy italic leading-tight text-center sm:text-left">
-                    Précisez le(s) motif(s) puis cliquez sur <span className="text-vet-sage font-medium">Suivant</span> pour continuer.
-                  </p>
-                </div>
 
                 {/* Bouton Suivant - Mobile optimized */}
                 <div className="pt-2 sm:pt-6">
