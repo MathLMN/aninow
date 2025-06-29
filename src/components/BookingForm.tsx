@@ -32,6 +32,7 @@ const BookingForm = ({ onNext }: { onNext: (data: FormData) => void }) => {
   const [showNameInput, setShowNameInput] = useState(false);
   const [showMultipleOptions, setShowMultipleOptions] = useState(false);
   const [showSecondAnimal, setShowSecondAnimal] = useState(false);
+  const [showSecondNameInput, setShowSecondNameInput] = useState(false);
   const [showLitterOptions, setShowLitterOptions] = useState(false);
 
   const handleSpeciesChange = (value: string, selected: boolean) => {
@@ -44,6 +45,7 @@ const BookingForm = ({ onNext }: { onNext: (data: FormData) => void }) => {
       setShowNameInput(false);
       setShowMultipleOptions(false);
       setShowSecondAnimal(false);
+      setShowSecondNameInput(false);
       setShowLitterOptions(false);
     }
   };
@@ -77,8 +79,10 @@ const BookingForm = ({ onNext }: { onNext: (data: FormData) => void }) => {
   const handleSecondAnimalSpeciesChange = (value: string, selected: boolean) => {
     if (selected) {
       setFormData(prev => ({ ...prev, secondAnimalSpecies: value, secondCustomSpecies: '' }));
+      setShowSecondNameInput(true);
     } else {
       setFormData(prev => ({ ...prev, secondAnimalSpecies: '', secondCustomSpecies: '' }));
+      setShowSecondNameInput(false);
     }
   };
 
@@ -277,18 +281,18 @@ const BookingForm = ({ onNext }: { onNext: (data: FormData) => void }) => {
             </div>
           )}
 
-          <div className="mt-4">
-            <Label htmlFor="second-animal-name" className="text-vet-navy">
-              Quel est son nom ? *
-            </Label>
-            <Input
-              id="second-animal-name"
-              value={formData.secondAnimalName}
-              onChange={(e) => handleSecondAnimalNameChange(e.target.value)}
-              placeholder="Nom du 2e animal"
-              className="mt-2"
-            />
-          </div>
+          {/* Champ nom du 2e animal - sans question */}
+          {showSecondNameInput && (
+            <div>
+              <Input
+                id="second-animal-name"
+                value={formData.secondAnimalName}
+                onChange={(e) => handleSecondAnimalNameChange(e.target.value)}
+                placeholder="Nom du 2e animal"
+                className="text-base"
+              />
+            </div>
+          )}
         </div>
       )}
 
