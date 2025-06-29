@@ -219,9 +219,7 @@ const BookingForm = ({
 
       {/* Deuxième animal */}
       {showSecondAnimal && <div className="space-y-4 pl-4 border-l-2 border-vet-sage/30">
-          <Label className="text-lg font-semibold text-vet-navy">
-            Le 2e animal est *
-          </Label>
+          <Label className="text-lg font-semibold text-vet-navy">Le 2e animal est un *</Label>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <SelectionButton id="second-chat" value="chat" isSelected={formData.secondAnimalSpecies === 'chat'} onSelect={handleSecondAnimalSpeciesChange}>
