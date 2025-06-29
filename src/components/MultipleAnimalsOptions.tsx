@@ -16,7 +16,7 @@ const MultipleAnimalsOptions: React.FC<MultipleAnimalsOptionsProps> = ({
     <div className="space-y-4">
       {multipleAnimals.length === 0 && (
         <div>
-          <p className="text-vet-blue italic mb-2">
+          <p className="text-vet-blue italic mb-2 text-sm">
             Cochez l'une des options ci-dessous uniquement{' '}
             <span className="text-vet-blue italic">si vous venez avec plusieurs animaux.</span>
           </p>
