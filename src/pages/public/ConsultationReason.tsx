@@ -8,41 +8,29 @@ import ConvenienceConsultationSelect from "@/components/ConvenienceConsultationS
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
-import { useFormMemory } from "@/hooks/useFormMemory";
 
 const ConsultationReason = () => {
   const navigate = useNavigate();
-  const { formData, updateFormData } = useFormMemory();
-  
-  const [consultationReason, setConsultationReason] = useState(formData.consultationReason || '');
-  const [convenienceOptions, setConvenienceOptions] = useState<string[]>(formData.convenienceOptions || []);
-  const [secondAnimalDifferentReason, setSecondAnimalDifferentReason] = useState(formData.secondAnimalDifferentReason || false);
-  const [secondAnimalConsultationReason, setSecondAnimalConsultationReason] = useState(formData.secondAnimalConsultationReason || '');
-  const [secondAnimalConvenienceOptions, setSecondAnimalConvenienceOptions] = useState<string[]>(formData.secondAnimalConvenienceOptions || []);
+  const [consultationReason, setConsultationReason] = useState('');
+  const [convenienceOptions, setConvenienceOptions] = useState<string[]>([]);
+  const [secondAnimalDifferentReason, setSecondAnimalDifferentReason] = useState(false);
+  const [secondAnimalConsultationReason, setSecondAnimalConsultationReason] = useState('');
+  const [secondAnimalConvenienceOptions, setSecondAnimalConvenienceOptions] = useState<string[]>([]);
   const [hasTwoAnimals, setHasTwoAnimals] = useState(false);
 
   useEffect(() => {
     // Vérifier que les données du formulaire précédent existent
-    if (!formData.animalSpecies) {
+    const bookingData = localStorage.getItem('bookingFormData');
+    if (!bookingData) {
       navigate('/');
       return;
     }
 
+    const parsedData = JSON.parse(bookingData);
     // Vérifier si l'utilisateur a sélectionné "2 animaux"
-    const hasSecondAnimal = formData.multipleAnimals?.includes('2-animaux');
+    const hasSecondAnimal = parsedData.multipleAnimals?.includes('2-animaux');
     setHasTwoAnimals(hasSecondAnimal);
-  }, [navigate, formData]);
-
-  // Synchroniser les changements avec le hook de mémorisation
-  useEffect(() => {
-    updateFormData({
-      consultationReason,
-      convenienceOptions,
-      secondAnimalDifferentReason,
-      secondAnimalConsultationReason,
-      secondAnimalConvenienceOptions
-    });
-  }, [consultationReason, convenienceOptions, secondAnimalDifferentReason, secondAnimalConsultationReason, secondAnimalConvenienceOptions, updateFormData]);
+  }, [navigate]);
 
   const handleBack = () => {
     navigate('/');
@@ -57,7 +45,21 @@ const ConsultationReason = () => {
        (secondAnimalConsultationReason !== 'consultation-convenance' || secondAnimalConvenienceOptions.length > 0));
 
     if (isFirstAnimalValid && isSecondAnimalValid) {
-      console.log('Updated booking data:', formData);
+      // Récupérer les données existantes et ajouter le motif de consultation
+      const existingData = JSON.parse(localStorage.getItem('bookingFormData') || '{}');
+      const updatedData = {
+        ...existingData,
+        consultationReason,
+        convenienceOptions,
+        secondAnimalDifferentReason,
+        secondAnimalConsultationReason: secondAnimalDifferentReason ? secondAnimalConsultationReason : consultationReason,
+        secondAnimalConvenienceOptions: secondAnimalDifferentReason ? secondAnimalConvenienceOptions : convenienceOptions
+      };
+      
+      localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
+      console.log('Updated booking data:', updatedData);
+      
+      // Naviguer vers la page suivante (créneaux)
       navigate('/booking/slots');
     }
   };

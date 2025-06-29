@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import AnimalSpeciesSelection from './AnimalSpeciesSelection';
@@ -7,59 +7,55 @@ import AnimalNameInput from './AnimalNameInput';
 import MultipleAnimalsOptions from './MultipleAnimalsOptions';
 import SecondAnimalForm from './SecondAnimalForm';
 import LitterOptions from './LitterOptions';
-import { useFormMemory, BookingFormData } from '@/hooks/useFormMemory';
+
+interface FormData {
+  animalSpecies: string;
+  customSpecies: string;
+  animalName: string;
+  multipleAnimals: string[];
+  secondAnimalSpecies?: string;
+  secondAnimalName?: string;
+  secondCustomSpecies?: string;
+  vaccinationType?: string;
+}
 
 const BookingForm = ({
   onNext
 }: {
-  onNext: (data: BookingFormData) => void;
+  onNext: (data: FormData) => void;
 }) => {
-  const { formData, updateFormData } = useFormMemory();
-  
+  const [formData, setFormData] = useState<FormData>({
+    animalSpecies: '',
+    customSpecies: '',
+    animalName: '',
+    multipleAnimals: [],
+    secondAnimalSpecies: '',
+    secondAnimalName: '',
+    secondCustomSpecies: '',
+    vaccinationType: ''
+  });
+
   const [showNameInput, setShowNameInput] = useState(false);
   const [showMultipleOptions, setShowMultipleOptions] = useState(false);
   const [showSecondAnimal, setShowSecondAnimal] = useState(false);
   const [showSecondNameInput, setShowSecondNameInput] = useState(false);
   const [showLitterOptions, setShowLitterOptions] = useState(false);
 
-  // Restaurer l'état de l'interface basé sur les données sauvegardées
-  useEffect(() => {
-    if (formData.animalSpecies) {
-      setShowNameInput(true);
-      setShowMultipleOptions(true);
-    }
-
-    if (formData.multipleAnimals.includes('2-animaux')) {
-      setShowSecondAnimal(true);
-      if (formData.secondAnimalSpecies) {
-        setShowSecondNameInput(true);
-      }
-    }
-
-    if (formData.multipleAnimals.includes('une-portee')) {
-      setShowLitterOptions(true);
-    }
-  }, [formData]);
-
   const handleSpeciesChange = (value: string, selected: boolean) => {
     if (selected) {
-      updateFormData({
+      setFormData(prev => ({
+        ...prev,
         animalSpecies: value,
         customSpecies: ''
-      });
+      }));
       setShowNameInput(true);
       setShowMultipleOptions(true);
     } else {
-      updateFormData({
+      setFormData(prev => ({
+        ...prev,
         animalSpecies: '',
-        customSpecies: '',
-        animalName: '',
-        multipleAnimals: [],
-        secondAnimalSpecies: '',
-        secondAnimalName: '',
-        secondCustomSpecies: '',
-        vaccinationType: ''
-      });
+        customSpecies: ''
+      }));
       setShowNameInput(false);
       setShowMultipleOptions(false);
       setShowSecondAnimal(false);
@@ -69,11 +65,17 @@ const BookingForm = ({
   };
 
   const handleCustomSpeciesChange = (value: string) => {
-    updateFormData({ customSpecies: value });
+    setFormData(prev => ({
+      ...prev,
+      customSpecies: value
+    }));
   };
 
   const handleNameChange = (value: string) => {
-    updateFormData({ animalName: value });
+    setFormData(prev => ({
+      ...prev,
+      animalName: value
+    }));
   };
 
   const handleMultipleAnimalsChange = (option: string, checked: boolean) => {
@@ -88,15 +90,10 @@ const BookingForm = ({
       newMultipleAnimals = [];
     }
 
-    updateFormData({ 
-      multipleAnimals: newMultipleAnimals,
-      ...(newMultipleAnimals.length === 0 && {
-        secondAnimalSpecies: '',
-        secondAnimalName: '',
-        secondCustomSpecies: '',
-        vaccinationType: ''
-      })
-    });
+    setFormData(prev => ({
+      ...prev,
+      multipleAnimals: newMultipleAnimals
+    }));
 
     setShowSecondAnimal(newMultipleAnimals.includes('2-animaux'));
     setShowLitterOptions(newMultipleAnimals.includes('une-portee'));
@@ -104,34 +101,47 @@ const BookingForm = ({
 
   const handleSecondAnimalSpeciesChange = (value: string, selected: boolean) => {
     if (selected) {
-      updateFormData({
+      setFormData(prev => ({
+        ...prev,
         secondAnimalSpecies: value,
         secondCustomSpecies: ''
-      });
+      }));
       setShowSecondNameInput(true);
     } else {
-      updateFormData({
+      setFormData(prev => ({
+        ...prev,
         secondAnimalSpecies: '',
-        secondCustomSpecies: '',
-        secondAnimalName: ''
-      });
+        secondCustomSpecies: ''
+      }));
       setShowSecondNameInput(false);
     }
   };
 
   const handleSecondCustomSpeciesChange = (value: string) => {
-    updateFormData({ secondCustomSpecies: value });
+    setFormData(prev => ({
+      ...prev,
+      secondCustomSpecies: value
+    }));
   };
 
   const handleSecondAnimalNameChange = (value: string) => {
-    updateFormData({ secondAnimalName: value });
+    setFormData(prev => ({
+      ...prev,
+      secondAnimalName: value
+    }));
   };
 
   const handleVaccinationTypeChange = (value: string, selected: boolean) => {
     if (selected) {
-      updateFormData({ vaccinationType: value });
+      setFormData(prev => ({
+        ...prev,
+        vaccinationType: value
+      }));
     } else {
-      updateFormData({ vaccinationType: '' });
+      setFormData(prev => ({
+        ...prev,
+        vaccinationType: ''
+      }));
     }
   };
 
