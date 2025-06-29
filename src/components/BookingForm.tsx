@@ -59,12 +59,18 @@ const BookingForm = ({ onNext }: { onNext: (data: FormData) => void }) => {
   };
 
   const handleMultipleAnimalsChange = (option: string, checked: boolean) => {
-    let newMultipleAnimals = [...formData.multipleAnimals];
+    let newMultipleAnimals: string[] = [];
     
     if (checked) {
-      newMultipleAnimals.push(option);
+      // Si on sélectionne une option, on déselectionne l'autre
+      if (option === '2-animaux') {
+        newMultipleAnimals = ['2-animaux'];
+      } else if (option === 'une-portee') {
+        newMultipleAnimals = ['une-portee'];
+      }
     } else {
-      newMultipleAnimals = newMultipleAnimals.filter(item => item !== option);
+      // Si on désélectionne, on vide le tableau
+      newMultipleAnimals = [];
     }
     
     setFormData(prev => ({ ...prev, multipleAnimals: newMultipleAnimals }));
@@ -195,14 +201,18 @@ const BookingForm = ({ onNext }: { onNext: (data: FormData) => void }) => {
       {/* Options multiples animaux */}
       {showMultipleOptions && (
         <div className="space-y-4">
-          <div>
-            <p className="text-vet-brown mb-2">
-              Cochez l'une des options ci-dessous uniquement{' '}
-              <span className="text-vet-blue italic">si vous venez avec plusieurs animaux.</span>
-            </p>
-          </div>
+          {/* Texte d'introduction - seulement si aucune option n'est sélectionnée */}
+          {formData.multipleAnimals.length === 0 && (
+            <div>
+              <p className="text-vet-brown mb-2">
+                Cochez l'une des options ci-dessous uniquement{' '}
+                <span className="text-vet-blue italic">si vous venez avec plusieurs animaux.</span>
+              </p>
+            </div>
+          )}
           
-          <div className="space-y-3">
+          {/* Options alignées horizontalement */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="flex items-center space-x-3">
               <Checkbox 
                 id="deux-animaux"
