@@ -1,7 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Label } from "@/components/ui/label";
-import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { X, ChevronDown } from "lucide-react";
 
 interface ConvenienceConsultationSelectProps {
   selectedOptions: string[];
@@ -12,6 +15,8 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
   selectedOptions,
   onOptionsChange
 }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   const convenienceOptions = [
     { value: 'bilan-annuel-vaccination', label: 'Bilan annuel / vaccination', color: 'bg-red-100 text-red-700 border-red-200' },
     { value: 'controle', label: 'Contrôle', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
@@ -41,7 +46,45 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
         Ajoutez un ou plusieurs motifs *
       </Label>
 
-      {/* Selected options as tags at the top - Mobile optimized */}
+      {/* Menu déroulant */}
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            className="w-full h-11 sm:h-12 justify-between text-sm sm:text-base bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+          >
+            <span className="text-left truncate">
+              {selectedOptions.length === 0 
+                ? "Sélectionnez un ou plusieurs motifs" 
+                : `${selectedOptions.length} motif${selectedOptions.length > 1 ? 's' : ''} sélectionné${selectedOptions.length > 1 ? 's' : ''}`
+              }
+            </span>
+            <ChevronDown className="h-4 w-4 opacity-50 flex-shrink-0" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0 bg-white border border-gray-300 shadow-lg z-50" align="start">
+          <div className="max-h-64 overflow-y-auto">
+            {convenienceOptions.map((option) => (
+              <div
+                key={option.value}
+                className="flex items-center space-x-2 p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                onClick={() => handleOptionToggle(option.value)}
+              >
+                <Checkbox
+                  checked={selectedOptions.includes(option.value)}
+                  onChange={() => {}}
+                  className="pointer-events-none"
+                />
+                <label className="text-sm cursor-pointer flex-1 leading-tight">
+                  {option.label}
+                </label>
+              </div>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
+
+      {/* Selected options as tags - Mobile optimized */}
       {selectedOptions.length > 0 && (
         <div className="flex flex-wrap gap-1.5 sm:gap-2">
           {selectedOptions.map((selectedValue) => {
@@ -65,28 +108,6 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
           })}
         </div>
       )}
-
-      {/* Available options as colored badges - Mobile optimized */}
-      <div className="flex flex-wrap gap-1.5 sm:gap-2">
-        {convenienceOptions.map((option) => {
-          const isSelected = selectedOptions.includes(option.value);
-          
-          return (
-            <button
-              key={option.value}
-              onClick={() => handleOptionToggle(option.value)}
-              disabled={isSelected}
-              className={`inline-flex items-center px-2 py-1.5 sm:px-3 sm:py-2 rounded-full border text-xs sm:text-sm transition-all cursor-pointer leading-tight ${
-                isSelected 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'hover:shadow-md active:scale-95'
-              } ${option.color}`}
-            >
-              <span>{option.label}</span>
-            </button>
-          );
-        })}
-      </div>
 
       {/* Selected count - Mobile optimized */}
       {selectedOptions.length > 0 && (
