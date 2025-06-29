@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowRight } from "lucide-react";
+import SelectionButton from './SelectionButton';
 
 interface FormData {
   animalSpecies: string;
@@ -35,10 +35,18 @@ const BookingForm = ({ onNext }: { onNext: (data: FormData) => void }) => {
   const [showSecondAnimal, setShowSecondAnimal] = useState(false);
   const [showLitterOptions, setShowLitterOptions] = useState(false);
 
-  const handleSpeciesChange = (value: string) => {
-    setFormData(prev => ({ ...prev, animalSpecies: value, customSpecies: '' }));
-    setShowNameInput(true);
-    setShowMultipleOptions(true);
+  const handleSpeciesChange = (value: string, selected: boolean) => {
+    if (selected) {
+      setFormData(prev => ({ ...prev, animalSpecies: value, customSpecies: '' }));
+      setShowNameInput(true);
+      setShowMultipleOptions(true);
+    } else {
+      setFormData(prev => ({ ...prev, animalSpecies: '', customSpecies: '' }));
+      setShowNameInput(false);
+      setShowMultipleOptions(false);
+      setShowSecondAnimal(false);
+      setShowLitterOptions(false);
+    }
   };
 
   const handleCustomSpeciesChange = (value: string) => {
@@ -67,8 +75,12 @@ const BookingForm = ({ onNext }: { onNext: (data: FormData) => void }) => {
     setShowLitterOptions(newMultipleAnimals.includes('une-portee'));
   };
 
-  const handleSecondAnimalSpeciesChange = (value: string) => {
-    setFormData(prev => ({ ...prev, secondAnimalSpecies: value, secondCustomSpecies: '' }));
+  const handleSecondAnimalSpeciesChange = (value: string, selected: boolean) => {
+    if (selected) {
+      setFormData(prev => ({ ...prev, secondAnimalSpecies: value, secondCustomSpecies: '' }));
+    } else {
+      setFormData(prev => ({ ...prev, secondAnimalSpecies: '', secondCustomSpecies: '' }));
+    }
   };
 
   const handleSecondCustomSpeciesChange = (value: string) => {
@@ -79,8 +91,12 @@ const BookingForm = ({ onNext }: { onNext: (data: FormData) => void }) => {
     setFormData(prev => ({ ...prev, secondAnimalName: value }));
   };
 
-  const handleVaccinationTypeChange = (value: string) => {
-    setFormData(prev => ({ ...prev, vaccinationType: value }));
+  const handleVaccinationTypeChange = (value: string, selected: boolean) => {
+    if (selected) {
+      setFormData(prev => ({ ...prev, vaccinationType: value }));
+    } else {
+      setFormData(prev => ({ ...prev, vaccinationType: '' }));
+    }
   };
 
   const canProceed = () => {
@@ -116,24 +132,32 @@ const BookingForm = ({ onNext }: { onNext: (data: FormData) => void }) => {
           Sélectionnez l'espèce votre animal *
         </Label>
         
-        <RadioGroup 
-          value={formData.animalSpecies} 
-          onValueChange={handleSpeciesChange}
-          className="grid grid-cols-1 md:grid-cols-3 gap-3"
-        >
-          <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-vet-beige/30 transition-colors">
-            <RadioGroupItem value="chat" id="chat" />
-            <Label htmlFor="chat" className="flex-1 cursor-pointer">Chat</Label>
-          </div>
-          <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-vet-beige/30 transition-colors">
-            <RadioGroupItem value="chien" id="chien" />
-            <Label htmlFor="chien" className="flex-1 cursor-pointer">Chien</Label>
-          </div>
-          <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-vet-beige/30 transition-colors">
-            <RadioGroupItem value="autre" id="autre" />
-            <Label htmlFor="autre" className="flex-1 cursor-pointer">Autre (précisez)</Label>
-          </div>
-        </RadioGroup>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <SelectionButton
+            id="chat"
+            value="chat"
+            isSelected={formData.animalSpecies === 'chat'}
+            onSelect={handleSpeciesChange}
+          >
+            Chat
+          </SelectionButton>
+          <SelectionButton
+            id="chien"
+            value="chien"
+            isSelected={formData.animalSpecies === 'chien'}
+            onSelect={handleSpeciesChange}
+          >
+            Chien
+          </SelectionButton>
+          <SelectionButton
+            id="autre"
+            value="autre"
+            isSelected={formData.animalSpecies === 'autre'}
+            onSelect={handleSpeciesChange}
+          >
+            Autre (précisez)
+          </SelectionButton>
+        </div>
 
         {/* Champ pour espèce personnalisée */}
         {formData.animalSpecies === 'autre' && (
@@ -215,24 +239,32 @@ const BookingForm = ({ onNext }: { onNext: (data: FormData) => void }) => {
             Le 2e animal est *
           </Label>
           
-          <RadioGroup 
-            value={formData.secondAnimalSpecies} 
-            onValueChange={handleSecondAnimalSpeciesChange}
-            className="grid grid-cols-1 md:grid-cols-3 gap-3"
-          >
-            <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-vet-beige/30 transition-colors">
-              <RadioGroupItem value="chat" id="second-chat" />
-              <Label htmlFor="second-chat" className="flex-1 cursor-pointer">Chat</Label>
-            </div>
-            <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-vet-beige/30 transition-colors">
-              <RadioGroupItem value="chien" id="second-chien" />
-              <Label htmlFor="second-chien" className="flex-1 cursor-pointer">Chien</Label>
-            </div>
-            <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-vet-beige/30 transition-colors">
-              <RadioGroupItem value="autre" id="second-autre" />
-              <Label htmlFor="second-autre" className="flex-1 cursor-pointer">Autre (précisez)</Label>
-            </div>
-          </RadioGroup>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <SelectionButton
+              id="second-chat"
+              value="chat"
+              isSelected={formData.secondAnimalSpecies === 'chat'}
+              onSelect={handleSecondAnimalSpeciesChange}
+            >
+              Chat
+            </SelectionButton>
+            <SelectionButton
+              id="second-chien"
+              value="chien"
+              isSelected={formData.secondAnimalSpecies === 'chien'}
+              onSelect={handleSecondAnimalSpeciesChange}
+            >
+              Chien
+            </SelectionButton>
+            <SelectionButton
+              id="second-autre"
+              value="autre"
+              isSelected={formData.secondAnimalSpecies === 'autre'}
+              onSelect={handleSecondAnimalSpeciesChange}
+            >
+              Autre (précisez)
+            </SelectionButton>
+          </div>
 
           {formData.secondAnimalSpecies === 'autre' && (
             <div className="mt-4">
@@ -271,24 +303,24 @@ const BookingForm = ({ onNext }: { onNext: (data: FormData) => void }) => {
             Vous souhaitez *
           </Label>
           
-          <RadioGroup 
-            value={formData.vaccinationType} 
-            onValueChange={handleVaccinationTypeChange}
-            className="grid grid-cols-1 md:grid-cols-2 gap-3"
-          >
-            <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-vet-beige/30 transition-colors">
-              <RadioGroupItem value="vaccinations-identifications" id="vacc-id" />
-              <Label htmlFor="vacc-id" className="flex-1 cursor-pointer">
-                Vaccinations et identifications
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-vet-beige/30 transition-colors">
-              <RadioGroupItem value="vaccinations-seulement" id="vacc-only" />
-              <Label htmlFor="vacc-only" className="flex-1 cursor-pointer">
-                Vaccinations uniquement
-              </Label>
-            </div>
-          </RadioGroup>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <SelectionButton
+              id="vacc-id"
+              value="vaccinations-identifications"
+              isSelected={formData.vaccinationType === 'vaccinations-identifications'}
+              onSelect={handleVaccinationTypeChange}
+            >
+              Vaccinations et identifications
+            </SelectionButton>
+            <SelectionButton
+              id="vacc-only"
+              value="vaccinations-seulement"
+              isSelected={formData.vaccinationType === 'vaccinations-seulement'}
+              onSelect={handleVaccinationTypeChange}
+            >
+              Vaccinations uniquement
+            </SelectionButton>
+          </div>
         </div>
       )}
 
