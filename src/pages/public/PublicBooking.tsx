@@ -10,9 +10,9 @@ const PublicBooking = () => {
 
   const handleFormNext = (formData: any) => {
     console.log('Form data:', formData);
-    // Stocker les données du formulaire et naviguer vers la sélection de créneaux
+    // Stocker les données du formulaire et naviguer vers la sélection du motif
     localStorage.setItem('bookingFormData', JSON.stringify(formData));
-    navigate('/booking/slots');
+    navigate('/booking/reason');
   };
 
   return (
