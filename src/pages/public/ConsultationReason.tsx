@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, Settings, ArrowLeft, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import ConsultationReasonSelect from "@/components/ConsultationReasonSelect";
+import ConvenienceConsultationSelect from "@/components/ConvenienceConsultationSelect";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
@@ -11,8 +12,10 @@ import { useState, useEffect } from "react";
 const ConsultationReason = () => {
   const navigate = useNavigate();
   const [consultationReason, setConsultationReason] = useState('');
+  const [convenienceOptions, setConvenienceOptions] = useState<string[]>([]);
   const [secondAnimalDifferentReason, setSecondAnimalDifferentReason] = useState(false);
   const [secondAnimalConsultationReason, setSecondAnimalConsultationReason] = useState('');
+  const [secondAnimalConvenienceOptions, setSecondAnimalConvenienceOptions] = useState<string[]>([]);
   const [hasTwoAnimals, setHasTwoAnimals] = useState(false);
 
   useEffect(() => {
@@ -34,14 +37,23 @@ const ConsultationReason = () => {
   };
 
   const handleNext = () => {
-    if (consultationReason && (!secondAnimalDifferentReason || secondAnimalConsultationReason)) {
+    const isFirstAnimalValid = consultationReason !== '' && 
+      (consultationReason !== 'consultation-convenance' || convenienceOptions.length > 0);
+    
+    const isSecondAnimalValid = !secondAnimalDifferentReason || 
+      (secondAnimalConsultationReason !== '' && 
+       (secondAnimalConsultationReason !== 'consultation-convenance' || secondAnimalConvenienceOptions.length > 0));
+
+    if (isFirstAnimalValid && isSecondAnimalValid) {
       // Récupérer les données existantes et ajouter le motif de consultation
       const existingData = JSON.parse(localStorage.getItem('bookingFormData') || '{}');
       const updatedData = {
         ...existingData,
         consultationReason,
+        convenienceOptions,
         secondAnimalDifferentReason,
-        secondAnimalConsultationReason: secondAnimalDifferentReason ? secondAnimalConsultationReason : consultationReason
+        secondAnimalConsultationReason: secondAnimalDifferentReason ? secondAnimalConsultationReason : consultationReason,
+        secondAnimalConvenienceOptions: secondAnimalDifferentReason ? secondAnimalConvenienceOptions : convenienceOptions
       };
       
       localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
@@ -53,7 +65,10 @@ const ConsultationReason = () => {
   };
 
   const canProceed = consultationReason !== '' && 
-    (!secondAnimalDifferentReason || secondAnimalConsultationReason !== '');
+    (consultationReason !== 'consultation-convenance' || convenienceOptions.length > 0) &&
+    (!secondAnimalDifferentReason || 
+     (secondAnimalConsultationReason !== '' && 
+      (secondAnimalConsultationReason !== 'consultation-convenance' || secondAnimalConvenienceOptions.length > 0)));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20">
@@ -103,10 +118,20 @@ const ConsultationReason = () => {
               <div className="space-y-6 sm:space-y-8">
                 {/* Si pas de deuxième animal OU si le motif n'est pas différent pour le 2e animal */}
                 {(!hasTwoAnimals || !secondAnimalDifferentReason) && (
-                  <ConsultationReasonSelect
-                    value={consultationReason}
-                    onValueChange={setConsultationReason}
-                  />
+                  <div className="space-y-4">
+                    <ConsultationReasonSelect
+                      value={consultationReason}
+                      onValueChange={setConsultationReason}
+                    />
+                    
+                    {/* Sélection des options de convenance pour le premier animal */}
+                    {consultationReason === 'consultation-convenance' && (
+                      <ConvenienceConsultationSelect
+                        selectedOptions={convenienceOptions}
+                        onOptionsChange={setConvenienceOptions}
+                      />
+                    )}
+                  </div>
                 )}
 
                 {/* Checkbox pour motif différent pour le 2e animal - seulement si 2 animaux */}
@@ -134,6 +159,12 @@ const ConsultationReason = () => {
                         value={consultationReason}
                         onValueChange={setConsultationReason}
                       />
+                      {consultationReason === 'consultation-convenance' && (
+                        <ConvenienceConsultationSelect
+                          selectedOptions={convenienceOptions}
+                          onOptionsChange={setConvenienceOptions}
+                        />
+                      )}
                     </div>
 
                     {/* Animal 2 */}
@@ -147,17 +178,23 @@ const ConsultationReason = () => {
                           value={secondAnimalConsultationReason}
                           onValueChange={setSecondAnimalConsultationReason}
                         />
+                        {secondAnimalConsultationReason === 'consultation-convenance' && (
+                          <ConvenienceConsultationSelect
+                            selectedOptions={secondAnimalConvenienceOptions}
+                            onOptionsChange={setSecondAnimalConvenienceOptions}
+                          />
+                        )}
                       </div>
-                    </div>
-
-                    {/* Message informatif */}
-                    <div className="bg-vet-beige/20 p-3 sm:p-4 rounded-md">
-                      <p className="text-xs sm:text-sm text-vet-navy italic leading-tight">
-                        Précisez le(s) motif(s) puis cliquez sur <span className="text-vet-sage font-medium">Suivant</span> pour continuer.
-                      </p>
                     </div>
                   </div>
                 )}
+
+                {/* Message informatif */}
+                <div className="bg-vet-beige/20 p-3 sm:p-4 rounded-md">
+                  <p className="text-xs sm:text-sm text-vet-navy italic leading-tight">
+                    Précisez le(s) motif(s) puis cliquez sur <span className="text-vet-sage font-medium">Suivant</span> pour continuer.
+                  </p>
+                </div>
 
                 {/* Bouton Suivant */}
                 <div className="flex justify-center pt-4 sm:pt-6">
