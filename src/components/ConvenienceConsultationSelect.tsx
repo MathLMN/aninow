@@ -18,14 +18,14 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
   const [isOpen, setIsOpen] = useState(false);
 
   const convenienceOptions = [
-    { value: 'bilan-annuel-vaccination', label: 'Bilan annuel / vaccination', color: 'bg-red-100 text-red-700 border-red-200' },
-    { value: 'controle', label: 'Contrôle', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
-    { value: 'coupe-griffes', label: 'Coupe de griffes', color: 'bg-orange-100 text-orange-700 border-orange-200' },
-    { value: 'bilan-senior', label: 'Bilan sénior', color: 'bg-green-100 text-green-700 border-green-200' },
-    { value: 'premiere-consultation', label: '1ère consultation chiot/ chaton', color: 'bg-blue-100 text-blue-700 border-blue-200' },
-    { value: 'castration-sterilisation', label: 'Castration/ Stérilisation (pré-opératoire)', color: 'bg-purple-100 text-purple-700 border-purple-200' },
-    { value: 'detartrage-extractions', label: 'Détartrage/ Extractions dentaires (pré-opératoire)', color: 'bg-pink-100 text-pink-700 border-pink-200' },
-    { value: 'autre', label: 'Autre (Précisez)', color: 'bg-gray-100 text-gray-700 border-gray-200' }
+    { value: 'bilan-annuel-vaccination', label: 'Bilan annuel / vaccination', color: 'bg-red-100 text-red-700 border-red-200', emoji: '💉' },
+    { value: 'controle', label: 'Contrôle', color: 'bg-yellow-100 text-yellow-700 border-yellow-200', emoji: '🔍' },
+    { value: 'coupe-griffes', label: 'Coupe de griffes', color: 'bg-orange-100 text-orange-700 border-orange-200', emoji: '✂️' },
+    { value: 'bilan-senior', label: 'Bilan sénior', color: 'bg-green-100 text-green-700 border-green-200', emoji: '👴' },
+    { value: 'premiere-consultation', label: '1ère consultation chiot/ chaton', color: 'bg-blue-100 text-blue-700 border-blue-200', emoji: '🐱' },
+    { value: 'castration-sterilisation', label: 'Castration/ Stérilisation (pré-opératoire)', color: 'bg-purple-100 text-purple-700 border-purple-200', emoji: '🏥' },
+    { value: 'detartrage-extractions', label: 'Détartrage/ Extractions dentaires (pré-opératoire)', color: 'bg-pink-100 text-pink-700 border-pink-200', emoji: '🦷' },
+    { value: 'autre', label: 'Autre (Précisez)', color: 'bg-gray-100 text-gray-700 border-gray-200', emoji: '📝' }
   ];
 
   const handleOptionToggle = (value: string) => {
@@ -41,19 +41,19 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
   };
 
   return (
-    <div className="space-y-3 sm:space-y-4 border border-gray-300 rounded-md p-3 sm:p-4 bg-white">
-      <Label className="text-sm sm:text-lg font-semibold text-vet-navy block">
+    <div className="space-y-3 sm:space-y-4 border-2 border-vet-blue/20 rounded-xl p-3 sm:p-4 bg-white/50 backdrop-blur-sm">
+      <Label className="text-base sm:text-lg font-semibold text-vet-navy block leading-tight">
         Ajoutez un ou plusieurs motifs *
       </Label>
 
-      {/* Menu déroulant */}
+      {/* Menu déroulant mobile-first */}
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="w-full h-11 sm:h-12 justify-between text-sm sm:text-base bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            className="w-full h-12 sm:h-11 justify-between text-base bg-white border-2 border-gray-200 rounded-lg hover:border-vet-sage/50 hover:bg-gray-50 transition-all active:scale-[0.98]"
           >
-            <span className="text-left truncate">
+            <span className="text-left truncate flex items-center">
               {selectedOptions.length === 0 
                 ? "Sélectionnez un ou plusieurs motifs" 
                 : `${selectedOptions.length} motif${selectedOptions.length > 1 ? 's' : ''} sélectionné${selectedOptions.length > 1 ? 's' : ''}`
@@ -62,12 +62,12 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
             <ChevronDown className="h-4 w-4 opacity-50 flex-shrink-0" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0 bg-white border border-gray-300 shadow-lg z-50" align="start">
-          <div className="max-h-64 overflow-y-auto">
+        <PopoverContent className="w-full p-0 bg-white border-2 border-gray-200 shadow-xl z-50 rounded-lg" align="start">
+          <div className="max-h-72 overflow-y-auto">
             {convenienceOptions.map((option) => (
               <div
                 key={option.value}
-                className="flex items-center space-x-2 p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                className="flex items-center space-x-3 p-4 hover:bg-vet-beige/30 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors active:bg-vet-beige/50"
                 onClick={() => handleOptionToggle(option.value)}
               >
                 <Checkbox
@@ -75,7 +75,8 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
                   onChange={() => {}}
                   className="pointer-events-none"
                 />
-                <label className="text-sm cursor-pointer flex-1 leading-tight">
+                <span className="text-lg mr-2">{option.emoji}</span>
+                <label className="text-base cursor-pointer flex-1 leading-tight">
                   {option.label}
                 </label>
               </div>
@@ -86,7 +87,7 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
 
       {/* Selected options as tags - Mobile optimized */}
       {selectedOptions.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 sm:gap-2">
+        <div className="flex flex-wrap gap-2">
           {selectedOptions.map((selectedValue) => {
             const option = convenienceOptions.find(opt => opt.value === selectedValue);
             if (!option) return null;
@@ -94,14 +95,15 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
             return (
               <div
                 key={selectedValue}
-                className={`inline-flex items-center gap-1 px-2 py-1 sm:px-3 rounded-full border text-xs sm:text-sm ${option.color}`}
+                className={`inline-flex items-center gap-2 px-3 py-2 rounded-full border-2 text-sm font-medium ${option.color} shadow-sm`}
               >
+                <span className="text-base">{option.emoji}</span>
                 <span className="leading-tight">{option.label}</span>
                 <button
                   onClick={() => handleRemoveOption(selectedValue)}
-                  className="hover:bg-black/10 rounded-full p-0.5 flex-shrink-0"
+                  className="hover:bg-black/10 rounded-full p-1 flex-shrink-0 transition-colors active:scale-90"
                 >
-                  <X className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                  <X className="h-3 w-3" />
                 </button>
               </div>
             );
@@ -111,8 +113,8 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
 
       {/* Selected count - Mobile optimized */}
       {selectedOptions.length > 0 && (
-        <div className="text-xs sm:text-sm text-vet-navy">
-          {selectedOptions.length} option{selectedOptions.length > 1 ? 's' : ''} sélectionnée{selectedOptions.length > 1 ? 's' : ''}
+        <div className="text-sm sm:text-base text-vet-sage font-medium text-center bg-vet-sage/10 p-2 rounded-lg">
+          ✅ {selectedOptions.length} option{selectedOptions.length > 1 ? 's' : ''} sélectionnée{selectedOptions.length > 1 ? 's' : ''}
         </div>
       )}
     </div>

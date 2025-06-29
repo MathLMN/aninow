@@ -167,9 +167,9 @@ const BookingForm = ({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-6">
       {/* Question principale : Espèce de l'animal */}
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         <AnimalSpeciesSelection
           species={formData.animalSpecies}
           customSpecies={formData.customSpecies}
@@ -180,51 +180,68 @@ const BookingForm = ({
 
         {/* Champ nom de l'animal */}
         {showNameInput && (
-          <AnimalNameInput
-            name={formData.animalName}
-            onNameChange={handleNameChange}
-            placeholder="Nom de l'animal"
-            id="animal-name"
-          />
+          <div className="animate-fade-in">
+            <AnimalNameInput
+              name={formData.animalName}
+              onNameChange={handleNameChange}
+              placeholder="Nom de l'animal"
+              id="animal-name"
+            />
+          </div>
         )}
       </div>
 
       {/* Options multiples animaux */}
       {showMultipleOptions && (
-        <MultipleAnimalsOptions
-          multipleAnimals={formData.multipleAnimals}
-          onMultipleAnimalsChange={handleMultipleAnimalsChange}
-        />
+        <div className="animate-fade-in">
+          <MultipleAnimalsOptions
+            multipleAnimals={formData.multipleAnimals}
+            onMultipleAnimalsChange={handleMultipleAnimalsChange}
+          />
+        </div>
       )}
 
       {/* Deuxième animal */}
       {showSecondAnimal && (
-        <SecondAnimalForm
-          formData={formData}
-          onSecondAnimalSpeciesChange={handleSecondAnimalSpeciesChange}
-          onSecondCustomSpeciesChange={handleSecondCustomSpeciesChange}
-          onSecondAnimalNameChange={handleSecondAnimalNameChange}
-          showSecondNameInput={showSecondNameInput}
-        />
+        <div className="animate-fade-in bg-vet-beige/20 p-3 sm:p-4 rounded-lg border border-vet-blue/20">
+          <SecondAnimalForm
+            formData={formData}
+            onSecondAnimalSpeciesChange={handleSecondAnimalSpeciesChange}
+            onSecondCustomSpeciesChange={handleSecondCustomSpeciesChange}
+            onSecondAnimalNameChange={handleSecondAnimalNameChange}
+            showSecondNameInput={showSecondNameInput}
+          />
+        </div>
       )}
 
       {/* Options pour une portée */}
       {showLitterOptions && (
-        <LitterOptions
-          vaccinationType={formData.vaccinationType}
-          onVaccinationTypeChange={handleVaccinationTypeChange}
-        />
+        <div className="animate-fade-in bg-vet-sage/10 p-3 sm:p-4 rounded-lg border border-vet-sage/20">
+          <LitterOptions
+            vaccinationType={formData.vaccinationType}
+            onVaccinationTypeChange={handleVaccinationTypeChange}
+          />
+        </div>
       )}
 
-      {/* Bouton Suivant */}
-      <div className="flex justify-center pt-6">
+      {/* Message informatif - Mobile optimized */}
+      {(showNameInput || showMultipleOptions) && (
+        <div className="bg-vet-blue/10 p-3 rounded-md border border-vet-blue/20">
+          <p className="text-xs sm:text-sm text-vet-navy text-center leading-relaxed">
+            📋 Complétez les informations puis cliquez sur <span className="font-semibold text-vet-sage">Suivant</span>
+          </p>
+        </div>
+      )}
+
+      {/* Bouton Suivant - Mobile first */}
+      <div className="pt-3 sm:pt-4">
         <Button 
           onClick={handleSubmit} 
           disabled={!canProceed()} 
-          className="bg-vet-sage hover:bg-vet-sage/90 text-white px-8 py-3 text-lg"
+          className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white w-full h-12 sm:h-11 text-base sm:text-lg font-medium rounded-lg shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-200"
         >
           Suivant
-          <ArrowRight className="ml-2 h-5 w-5" />
+          <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
       </div>
     </div>

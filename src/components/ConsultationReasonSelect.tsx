@@ -13,21 +13,30 @@ const ConsultationReasonSelect: React.FC<ConsultationReasonSelectProps> = ({
   onValueChange
 }) => {
   return (
-    <div className="space-y-2 sm:space-y-4">
-      <Label className="text-sm sm:text-lg font-semibold text-vet-navy block">
+    <div className="space-y-2 sm:space-y-3">
+      <Label className="text-base sm:text-lg font-semibold text-vet-navy block leading-tight">
         Pour quel motif souhaitez-vous une consultation ? *
       </Label>
       
       <Select value={value} onValueChange={onValueChange}>
-        <SelectTrigger className="w-full h-11 sm:h-12 text-sm sm:text-base bg-white border border-gray-300 rounded-md">
-          <SelectValue placeholder="Cliquez et choisissez le motif" />
+        <SelectTrigger className="w-full h-12 sm:h-11 text-base sm:text-base bg-white border-2 border-gray-200 rounded-lg hover:border-vet-sage/50 focus:border-vet-sage transition-colors">
+          <SelectValue 
+            placeholder="Cliquez et choisissez le motif" 
+            className="text-gray-500"
+          />
         </SelectTrigger>
-        <SelectContent className="bg-white border border-gray-300 shadow-lg z-50">
-          <SelectItem value="symptomes-anomalie" className="text-sm py-2.5 leading-tight">
-            Symptômes ou anomalie (boiterie, vomissements,...)
+        <SelectContent className="bg-white border-2 border-gray-200 shadow-xl z-50 rounded-lg">
+          <SelectItem 
+            value="symptomes-anomalie" 
+            className="text-base py-3 px-4 leading-tight hover:bg-vet-beige/50 cursor-pointer"
+          >
+            🩺 Symptômes ou anomalie (boiterie, vomissements,...)
           </SelectItem>
-          <SelectItem value="consultation-convenance" className="text-sm py-2.5 leading-tight">
-            Consultation de convenance (vaccins, contrôle,...)
+          <SelectItem 
+            value="consultation-convenance" 
+            className="text-base py-3 px-4 leading-tight hover:bg-vet-beige/50 cursor-pointer"
+          >
+            💉 Consultation de convenance (vaccins, contrôle,...)
           </SelectItem>
         </SelectContent>
       </Select>
