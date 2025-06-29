@@ -29,7 +29,7 @@ const SelectionButton: React.FC<SelectionButtonProps> = ({
       type="button"
       onClick={handleClick}
       className={cn(
-        "flex items-center justify-center p-3 border rounded-lg transition-all duration-200 cursor-pointer text-left",
+        "flex items-center justify-center p-2 border rounded-md transition-all duration-200 cursor-pointer text-left text-sm",
         isSelected 
           ? "bg-[#4D9380] text-white border-[#4D9380] shadow-md" 
           : "bg-white hover:bg-vet-beige/30 border-gray-300 hover:border-[#4D9380]/50",
