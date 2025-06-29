@@ -14,10 +14,6 @@ const ConsultationReasonSelect: React.FC<ConsultationReasonSelectProps> = ({
 }) => {
   return (
     <div className="space-y-4">
-      <Label className="text-lg font-semibold text-vet-navy">
-        Pour quel motif souhaitez-vous une consultation ? *
-      </Label>
-      
       <Select value={value} onValueChange={onValueChange}>
         <SelectTrigger className="w-full h-12 text-base bg-white border border-gray-300 rounded-md">
           <SelectValue placeholder="Cliquez et choisissez le motif" />
