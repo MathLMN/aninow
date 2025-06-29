@@ -154,19 +154,6 @@ const ConsultationReason = () => {
                         Précisez le(s) motif(s) puis cliquez sur <span className="text-vet-sage font-medium">Suivant</span> pour continuer.
                       </p>
                     </div>
-
-                    {/* Checkbox confirmant que le motif est différent */}
-                    <div className="flex items-center space-x-3">
-                      <Checkbox 
-                        id="confirm-different-reason"
-                        checked={true}
-                        disabled={true}
-                        className="data-[state=checked]:bg-vet-sage"
-                      />
-                      <Label htmlFor="confirm-different-reason" className="text-vet-navy">
-                        Le motif est différent pour le 2e animal
-                      </Label>
-                    </div>
                   </div>
                 )}
 
