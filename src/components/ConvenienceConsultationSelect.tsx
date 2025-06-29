@@ -44,16 +44,6 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
         Ajoutez un ou plusieurs motifs *
       </Label>
 
-      {/* Search input placeholder */}
-      <div className="relative">
-        <input
-          type="text"
-          placeholder="Rechercher une option"
-          className="w-full h-12 px-4 text-base bg-white border-2 border-gray-200 rounded-lg focus:border-vet-sage focus:outline-none"
-          readOnly
-        />
-      </div>
-
       {/* Selected options as tags at the top */}
       {selectedOptions.length > 0 && (
         <div className="flex flex-wrap gap-2">
