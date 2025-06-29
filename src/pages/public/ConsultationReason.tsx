@@ -13,9 +13,11 @@ const ConsultationReason = () => {
   const navigate = useNavigate();
   const [consultationReason, setConsultationReason] = useState('');
   const [convenienceOptions, setConvenienceOptions] = useState<string[]>([]);
+  const [customText, setCustomText] = useState('');
   const [secondAnimalDifferentReason, setSecondAnimalDifferentReason] = useState(false);
   const [secondAnimalConsultationReason, setSecondAnimalConsultationReason] = useState('');
   const [secondAnimalConvenienceOptions, setSecondAnimalConvenienceOptions] = useState<string[]>([]);
+  const [secondAnimalCustomText, setSecondAnimalCustomText] = useState('');
   const [hasTwoAnimals, setHasTwoAnimals] = useState(false);
 
   useEffect(() => {
@@ -38,11 +40,15 @@ const ConsultationReason = () => {
 
   const handleNext = () => {
     const isFirstAnimalValid = consultationReason !== '' && 
-      (consultationReason !== 'consultation-convenance' || convenienceOptions.length > 0);
+      (consultationReason !== 'consultation-convenance' || 
+       (convenienceOptions.length > 0 && 
+        (!convenienceOptions.includes('autre') || customText.trim() !== '')));
     
     const isSecondAnimalValid = !secondAnimalDifferentReason || 
       (secondAnimalConsultationReason !== '' && 
-       (secondAnimalConsultationReason !== 'consultation-convenance' || secondAnimalConvenienceOptions.length > 0));
+       (secondAnimalConsultationReason !== 'consultation-convenance' || 
+        (secondAnimalConvenienceOptions.length > 0 &&
+         (!secondAnimalConvenienceOptions.includes('autre') || secondAnimalCustomText.trim() !== ''))));
 
     if (isFirstAnimalValid && isSecondAnimalValid) {
       // Récupérer les données existantes et ajouter le motif de consultation
@@ -51,9 +57,11 @@ const ConsultationReason = () => {
         ...existingData,
         consultationReason,
         convenienceOptions,
+        customText,
         secondAnimalDifferentReason,
         secondAnimalConsultationReason: secondAnimalDifferentReason ? secondAnimalConsultationReason : consultationReason,
-        secondAnimalConvenienceOptions: secondAnimalDifferentReason ? secondAnimalConvenienceOptions : convenienceOptions
+        secondAnimalConvenienceOptions: secondAnimalDifferentReason ? secondAnimalConvenienceOptions : convenienceOptions,
+        secondAnimalCustomText: secondAnimalDifferentReason ? secondAnimalCustomText : customText
       };
       
       localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
@@ -65,10 +73,14 @@ const ConsultationReason = () => {
   };
 
   const canProceed = consultationReason !== '' && 
-    (consultationReason !== 'consultation-convenance' || convenienceOptions.length > 0) &&
+    (consultationReason !== 'consultation-convenance' || 
+     (convenienceOptions.length > 0 && 
+      (!convenienceOptions.includes('autre') || customText.trim() !== ''))) &&
     (!secondAnimalDifferentReason || 
      (secondAnimalConsultationReason !== '' && 
-      (secondAnimalConsultationReason !== 'consultation-convenance' || secondAnimalConvenienceOptions.length > 0)));
+      (secondAnimalConsultationReason !== 'consultation-convenance' || 
+       (secondAnimalConvenienceOptions.length > 0 &&
+        (!secondAnimalConvenienceOptions.includes('autre') || secondAnimalCustomText.trim() !== '')))));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20">
@@ -128,6 +140,8 @@ const ConsultationReason = () => {
                       <ConvenienceConsultationSelect
                         selectedOptions={convenienceOptions}
                         onOptionsChange={setConvenienceOptions}
+                        customText={customText}
+                        onCustomTextChange={setCustomText}
                       />
                     )}
                   </div>
@@ -162,6 +176,8 @@ const ConsultationReason = () => {
                         <ConvenienceConsultationSelect
                           selectedOptions={convenienceOptions}
                           onOptionsChange={setConvenienceOptions}
+                          customText={customText}
+                          onCustomTextChange={setCustomText}
                         />
                       )}
                     </div>
@@ -181,6 +197,8 @@ const ConsultationReason = () => {
                           <ConvenienceConsultationSelect
                             selectedOptions={secondAnimalConvenienceOptions}
                             onOptionsChange={setSecondAnimalConvenienceOptions}
+                            customText={secondAnimalCustomText}
+                            onCustomTextChange={setSecondAnimalCustomText}
                           />
                         )}
                       </div>

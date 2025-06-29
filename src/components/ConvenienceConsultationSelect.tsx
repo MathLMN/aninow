@@ -1,16 +1,21 @@
 
 import React, { useState } from 'react';
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
 
 interface ConvenienceConsultationSelectProps {
   selectedOptions: string[];
   onOptionsChange: (options: string[]) => void;
+  customText?: string;
+  onCustomTextChange?: (text: string) => void;
 }
 
 const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps> = ({
   selectedOptions,
-  onOptionsChange
+  onOptionsChange,
+  customText = '',
+  onCustomTextChange
 }) => {
   const convenienceOptions = [
     { value: 'bilan-annuel-vaccination', label: 'Bilan annuel / vaccination', color: 'bg-red-100 text-red-600 border-red-200' },
@@ -28,11 +33,27 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
       ? selectedOptions.filter(opt => opt !== value)
       : [...selectedOptions, value];
     onOptionsChange(newOptions);
+    
+    // Clear custom text if "autre" is deselected
+    if (value === 'autre' && !newOptions.includes('autre') && onCustomTextChange) {
+      onCustomTextChange('');
+    }
   };
 
   const handleRemoveOption = (value: string) => {
     const newOptions = selectedOptions.filter(opt => opt !== value);
     onOptionsChange(newOptions);
+    
+    // Clear custom text if "autre" is removed
+    if (value === 'autre' && onCustomTextChange) {
+      onCustomTextChange('');
+    }
+  };
+
+  const handleCustomTextChange = (value: string) => {
+    if (onCustomTextChange) {
+      onCustomTextChange(value);
+    }
   };
 
   // Filter out selected options from the available options
@@ -66,6 +87,22 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Custom text input for "autre" option */}
+      {selectedOptions.includes('autre') && (
+        <div className="animate-fade-in space-y-2">
+          <Label className="text-sm font-medium text-vet-navy">
+            Précisez le motif de consultation
+          </Label>
+          <Input
+            type="text"
+            placeholder="Tapez votre motif de consultation..."
+            value={customText}
+            onChange={(e) => handleCustomTextChange(e.target.value)}
+            className="w-full h-12 text-base bg-white border-2 border-gray-200 rounded-lg focus:border-vet-sage focus:outline-none"
+          />
         </div>
       )}
 
