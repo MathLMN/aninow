@@ -4,14 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Heart, Settings } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import BookingForm from "@/components/BookingForm";
+import { useFormMemory, BookingFormData } from "@/hooks/useFormMemory";
 
 const PublicBooking = () => {
   const navigate = useNavigate();
+  const { updateFormData } = useFormMemory();
 
-  const handleFormNext = (formData: any) => {
+  const handleFormNext = (formData: BookingFormData) => {
     console.log('Form data:', formData);
-    // Stocker les données du formulaire et naviguer vers la sélection du motif
-    localStorage.setItem('bookingFormData', JSON.stringify(formData));
+    // Les données sont déjà sauvegardées par le hook useFormMemory
     navigate('/booking/reason');
   };
 
