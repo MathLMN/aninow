@@ -54,44 +54,44 @@ const getTagColorClasses = (color: string, isSelected: boolean) => {
   if (isSelected) {
     switch (color) {
       case 'red':
-        return 'bg-red-500 text-white border-red-500 hover:bg-red-600';
+        return 'bg-red-300 text-red-800 border-red-300 hover:bg-red-400';
       case 'orange':
-        return 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600';
+        return 'bg-orange-300 text-orange-800 border-orange-300 hover:bg-orange-400';
       case 'yellow':
-        return 'bg-yellow-500 text-white border-yellow-500 hover:bg-yellow-600';
+        return 'bg-yellow-200 text-yellow-800 border-yellow-200 hover:bg-yellow-300';
       case 'purple':
-        return 'bg-purple-500 text-white border-purple-500 hover:bg-purple-600';
+        return 'bg-purple-300 text-purple-800 border-purple-300 hover:bg-purple-400';
       case 'green':
-        return 'bg-green-500 text-white border-green-500 hover:bg-green-600';
+        return 'bg-green-300 text-green-800 border-green-300 hover:bg-green-400';
       case 'blue':
-        return 'bg-blue-500 text-white border-blue-500 hover:bg-blue-600';
+        return 'bg-blue-300 text-blue-800 border-blue-300 hover:bg-blue-400';
       case 'pink':
-        return 'bg-pink-500 text-white border-pink-500 hover:bg-pink-600';
+        return 'bg-pink-300 text-pink-800 border-pink-300 hover:bg-pink-400';
       case 'gray':
-        return 'bg-gray-500 text-white border-gray-500 hover:bg-gray-600';
+        return 'bg-gray-300 text-gray-800 border-gray-300 hover:bg-gray-400';
       default:
-        return 'bg-gray-500 text-white border-gray-500 hover:bg-gray-600';
+        return 'bg-gray-300 text-gray-800 border-gray-300 hover:bg-gray-400';
     }
   } else {
     switch (color) {
       case 'red':
-        return 'bg-white text-red-700 border-red-300 hover:bg-red-50';
+        return 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100';
       case 'orange':
-        return 'bg-white text-orange-700 border-orange-300 hover:bg-orange-50';
+        return 'bg-orange-50 text-orange-600 border-orange-200 hover:bg-orange-100';
       case 'yellow':
-        return 'bg-white text-yellow-700 border-yellow-300 hover:bg-yellow-50';
+        return 'bg-yellow-50 text-yellow-600 border-yellow-200 hover:bg-yellow-100';
       case 'purple':
-        return 'bg-white text-purple-700 border-purple-300 hover:bg-purple-50';
+        return 'bg-purple-50 text-purple-600 border-purple-200 hover:bg-purple-100';
       case 'green':
-        return 'bg-white text-green-700 border-green-300 hover:bg-green-50';
+        return 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100';
       case 'blue':
-        return 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50';
+        return 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100';
       case 'pink':
-        return 'bg-white text-pink-700 border-pink-300 hover:bg-pink-50';
+        return 'bg-pink-50 text-pink-600 border-pink-200 hover:bg-pink-100';
       case 'gray':
-        return 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50';
+        return 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100';
       default:
-        return 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50';
+        return 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100';
     }
   }
 };
