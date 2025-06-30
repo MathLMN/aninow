@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,7 +8,6 @@ import NotFound from "./pages/NotFound";
 // Pages publiques (formulaire de RDV)
 import PublicBooking from "./pages/public/PublicBooking";
 import ConsultationReason from "./pages/public/ConsultationReason";
-import SymptomSelection from "./pages/public/SymptomSelection";
 import ConditionalQuestions from "./pages/public/ConditionalQuestions";
 import AppointmentSlots from "./pages/public/AppointmentSlots";
 import BookingConfirmation from "./pages/public/BookingConfirmation";
@@ -33,7 +31,6 @@ const App = () => (
           {/* Page d'accueil - Formulaire de RDV */}
           <Route path="/" element={<PublicBooking />} />
           <Route path="/booking/reason" element={<ConsultationReason />} />
-          <Route path="/booking/symptoms" element={<SymptomSelection />} />
           <Route path="/booking/questions" element={<ConditionalQuestions />} />
           <Route path="/booking/slots" element={<AppointmentSlots />} />
           <Route path="/booking/confirmation" element={<BookingConfirmation />} />
