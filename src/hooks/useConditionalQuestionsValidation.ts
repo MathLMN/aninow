@@ -55,7 +55,7 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
     requiredQuestions.push('general_form', 'eating', 'drinking', 'eye_condition');
   }
 
-  // Ajouter les questions spécifiques à la boiterie si nécessaire
+  // Ajouter les questions spécifiques à la boiterie si nécessaire (sans la question "drinking")
   if (hasLameness) {
     requiredQuestions.push('general_form', 'eating', 'pain_complaints', 'paw_position');
   }
