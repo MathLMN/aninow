@@ -118,13 +118,13 @@ const SymptomSelector: React.FC<SymptomSelectorProps> = ({
     <div className="space-y-4 sm:space-y-6">
       {/* Barre de recherche */}
       <div className="relative">
-        <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+        <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
         <Input
           type="text"
           placeholder="Rechercher une option"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 h-12 text-sm sm:text-base bg-white border-2 border-gray-200 rounded-lg hover:border-vet-sage/50 focus:border-vet-sage transition-colors"
+          className="pl-10 h-10 text-sm sm:text-base bg-white border-2 border-gray-200 rounded-lg hover:border-vet-sage/50 focus:border-vet-sage transition-colors"
         />
       </div>
 
