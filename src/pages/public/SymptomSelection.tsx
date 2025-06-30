@@ -51,10 +51,10 @@ const SymptomSelection = () => {
   const canProceed = selectedSymptoms.length > 0 || customSymptom.trim() !== '';
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #EDE3DA 0%, #ffffff 100%)' }}>
+    <div className="min-h-screen relative" style={{ background: 'linear-gradient(135deg, #EDE3DA 0%, #ffffff 100%)' }}>
       <Header />
 
-      <main className="container mx-auto px-3 sm:px-6 py-3 sm:py-8">
+      <main className="container mx-auto px-3 sm:px-6 py-3 sm:py-8 pb-20">
         <div className="max-w-4xl mx-auto">
           {/* Bouton retour */}
           <div className="mb-3 sm:mb-6">
@@ -88,23 +88,23 @@ const SymptomSelection = () => {
                   customSymptom={customSymptom}
                   onCustomSymptomChange={setCustomSymptom}
                 />
-
-                {/* Bouton Suivant */}
-                <div className="pt-3 sm:pt-4">
-                  <Button 
-                    onClick={handleNext} 
-                    disabled={!canProceed} 
-                    className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white w-full h-12 sm:h-11 text-base sm:text-lg font-medium rounded-lg shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-200"
-                  >
-                    Suivant
-                    <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
-                  </Button>
-                </div>
               </div>
             </CardContent>
           </Card>
         </div>
       </main>
+
+      {/* Bouton Continuer fixe en bas à droite */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button 
+          onClick={handleNext} 
+          disabled={!canProceed} 
+          className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+        >
+          Continuer
+          <ArrowRight className="ml-1 h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 };

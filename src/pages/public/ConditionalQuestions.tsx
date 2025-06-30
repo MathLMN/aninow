@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -76,12 +77,12 @@ const ConditionalQuestions = () => {
   }
 
   return (
-    <div className="min-h-screen" style={{
+    <div className="min-h-screen relative" style={{
       background: 'linear-gradient(135deg, #EDE3DA 0%, #ffffff 100%)'
     }}>
       <Header />
 
-      <main className="container mx-auto px-3 sm:px-6 py-4 sm:py-6 pb-6">
+      <main className="container mx-auto px-3 sm:px-6 py-4 sm:py-6 pb-20">
         <div className="max-w-2xl mx-auto">
           {/* Bouton retour */}
           <div className="mb-4 sm:mb-6">
@@ -117,23 +118,23 @@ const ConditionalQuestions = () => {
                     </p>
                   </div>
                 )}
-
-                {/* Bouton Suivant */}
-                <div className="pt-4 sm:pt-6">
-                  <Button 
-                    onClick={handleNext} 
-                    disabled={!canProceed} 
-                    className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white w-full h-12 sm:h-14 text-base sm:text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-200"
-                  >
-                    Suivant
-                    <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
-                  </Button>
-                </div>
               </div>
             </CardContent>
           </Card>
         </div>
       </main>
+
+      {/* Bouton Continuer fixe en bas à droite */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button 
+          onClick={handleNext} 
+          disabled={!canProceed} 
+          className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+        >
+          Continuer
+          <ArrowRight className="ml-1 h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 };
