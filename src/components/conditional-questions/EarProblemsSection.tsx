@@ -4,9 +4,10 @@ import SelectionButton from "@/components/SelectionButton";
 interface EarProblemsSectionProps {
   answers: {[key: string]: string | File};
   onAnswerChange: (questionKey: string, value: string) => void;
+  keyPrefix?: string;
 }
 
-const EarProblemsSection = ({ answers, onAnswerChange }: EarProblemsSectionProps) => {
+const EarProblemsSection = ({ answers, onAnswerChange, keyPrefix = '' }: EarProblemsSectionProps) => {
   const questions = [
     {
       key: 'general_form',
@@ -43,9 +44,9 @@ const EarProblemsSection = ({ answers, onAnswerChange }: EarProblemsSectionProps
             {question.options.map((option) => (
               <SelectionButton
                 key={option}
-                id={`${question.key}-${option}`}
+                id={`${keyPrefix}${question.key}-${option}`}
                 value={option}
-                isSelected={answers[question.key] === option}
+                isSelected={answers[keyPrefix + question.key] === option}
                 onSelect={(value) => onAnswerChange(question.key, value)}
                 className="p-2 text-sm font-medium"
               >

@@ -5,9 +5,10 @@ interface LumpSectionProps {
   answers: {[key: string]: string | File};
   onAnswerChange: (questionKey: string, value: string) => void;
   onFileChange: (questionKey: string, file: File | null) => void;
+  keyPrefix?: string;
 }
 
-const LumpSection = ({ answers, onAnswerChange, onFileChange }: LumpSectionProps) => {
+const LumpSection = ({ answers, onAnswerChange, onFileChange, keyPrefix = '' }: LumpSectionProps) => {
   const questions = [
     {
       key: 'general_form',
@@ -39,9 +40,9 @@ const LumpSection = ({ answers, onAnswerChange, onFileChange }: LumpSectionProps
             {question.options.map((option) => (
               <SelectionButton
                 key={option}
-                id={`${question.key}-${option}`}
+                id={`${keyPrefix}${question.key}-${option}`}
                 value={option}
-                isSelected={answers[question.key] === option}
+                isSelected={answers[keyPrefix + question.key] === option}
                 onSelect={(value) => onAnswerChange(question.key, value)}
                 className="p-2 text-sm font-medium"
               >
@@ -64,10 +65,10 @@ const LumpSection = ({ answers, onAnswerChange, onFileChange }: LumpSectionProps
             accept="image/*"
             onChange={(e) => onFileChange('lump_photo', e.target.files?.[0] || null)}
             className="hidden"
-            id="lump-photo-upload"
+            id={`${keyPrefix}lump-photo-upload`}
           />
           <label
-            htmlFor="lump-photo-upload"
+            htmlFor={`${keyPrefix}lump-photo-upload`}
             className="cursor-pointer flex flex-col items-center space-y-2"
           >
             <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,9 +78,9 @@ const LumpSection = ({ answers, onAnswerChange, onFileChange }: LumpSectionProps
               Cliquez pour choisir un fichier ou faites-le glisser ici
             </span>
           </label>
-          {answers['lump_photo'] && answers['lump_photo'] instanceof File && (
+          {answers[keyPrefix + 'lump_photo'] && answers[keyPrefix + 'lump_photo'] instanceof File && (
             <p className="text-sm text-vet-sage mt-2">
-              Fichier sélectionné: {answers['lump_photo'].name}
+              Fichier sélectionné: {(answers[keyPrefix + 'lump_photo'] as File).name}
             </p>
           )}
         </div>

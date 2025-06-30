@@ -4,9 +4,10 @@ import SelectionButton from "@/components/SelectionButton";
 interface SkinItchingSectionProps {
   answers: {[key: string]: string | File};
   onAnswerChange: (questionKey: string, value: string) => void;
+  keyPrefix?: string;
 }
 
-const SkinItchingSection = ({ answers, onAnswerChange }: SkinItchingSectionProps) => {
+const SkinItchingSection = ({ answers, onAnswerChange, keyPrefix = '' }: SkinItchingSectionProps) => {
   const questions = [
     {
       key: 'skin_itching_areas',
@@ -38,9 +39,9 @@ const SkinItchingSection = ({ answers, onAnswerChange }: SkinItchingSectionProps
             {question.options.map((option) => (
               <SelectionButton
                 key={option}
-                id={`${question.key}-${option}`}
+                id={`${keyPrefix}${question.key}-${option}`}
                 value={option}
-                isSelected={answers[question.key] === option}
+                isSelected={answers[keyPrefix + question.key] === option}
                 onSelect={(value) => onAnswerChange(question.key, value)}
                 className="p-2 text-sm font-medium"
               >

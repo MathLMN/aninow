@@ -4,9 +4,10 @@ import SelectionButton from "@/components/SelectionButton";
 interface ListlessSectionProps {
   answers: {[key: string]: string | File};
   onAnswerChange: (questionKey: string, value: string) => void;
+  keyPrefix?: string;
 }
 
-const ListlessSection = ({ answers, onAnswerChange }: ListlessSectionProps) => {
+const ListlessSection = ({ answers, onAnswerChange, keyPrefix = '' }: ListlessSectionProps) => {
   const questions = [
     {
       key: 'eating',
@@ -33,9 +34,9 @@ const ListlessSection = ({ answers, onAnswerChange }: ListlessSectionProps) => {
             {question.options.map((option) => (
               <SelectionButton
                 key={option}
-                id={`${question.key}-${option}`}
+                id={`${keyPrefix}${question.key}-${option}`}
                 value={option}
-                isSelected={answers[question.key] === option}
+                isSelected={answers[keyPrefix + question.key] === option}
                 onSelect={(value) => onAnswerChange(question.key, value)}
                 className="p-2 text-sm font-medium"
               >

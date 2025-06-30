@@ -4,9 +4,10 @@ import SelectionButton from "@/components/SelectionButton";
 interface BloodInStoolSectionProps {
   answers: {[key: string]: string | File};
   onAnswerChange: (questionKey: string, value: string) => void;
+  keyPrefix?: string;
 }
 
-const BloodInStoolSection = ({ answers, onAnswerChange }: BloodInStoolSectionProps) => {
+const BloodInStoolSection = ({ answers, onAnswerChange, keyPrefix = '' }: BloodInStoolSectionProps) => {
   const question = {
     key: 'stool_consistency',
     title: 'Quelle est la consistance des selles ?',
@@ -24,9 +25,9 @@ const BloodInStoolSection = ({ answers, onAnswerChange }: BloodInStoolSectionPro
         {question.options.map((option) => (
           <SelectionButton
             key={option}
-            id={`${question.key}-${option}`}
+            id={`${keyPrefix}${question.key}-${option}`}
             value={option}
-            isSelected={answers[question.key] === option}
+            isSelected={answers[keyPrefix + question.key] === option}
             onSelect={(value) => onAnswerChange(question.key, value)}
             className="p-2 text-sm font-medium"
           >

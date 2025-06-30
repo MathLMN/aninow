@@ -4,9 +4,10 @@ import SelectionButton from "@/components/SelectionButton";
 interface AggressiveSectionProps {
   answers: {[key: string]: string | File};
   onAnswerChange: (questionKey: string, value: string) => void;
+  keyPrefix?: string;
 }
 
-const AggressiveSection = ({ answers, onAnswerChange }: AggressiveSectionProps) => {
+const AggressiveSection = ({ answers, onAnswerChange, keyPrefix = '' }: AggressiveSectionProps) => {
   const questions = [
     {
       key: 'general_form',
@@ -38,9 +39,9 @@ const AggressiveSection = ({ answers, onAnswerChange }: AggressiveSectionProps) 
             {question.options.map((option) => (
               <SelectionButton
                 key={option}
-                id={`${question.key}-${option}`}
+                id={`${keyPrefix}${question.key}-${option}`}
                 value={option}
-                isSelected={answers[question.key] === option}
+                isSelected={answers[keyPrefix + question.key] === option}
                 onSelect={(value) => onAnswerChange(question.key, value)}
                 className="p-2 text-sm font-medium"
               >

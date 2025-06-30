@@ -4,9 +4,10 @@ import SelectionButton from "@/components/SelectionButton";
 interface LamenessSectionProps {
   answers: {[key: string]: string | File};
   onAnswerChange: (questionKey: string, value: string) => void;
+  keyPrefix?: string;
 }
 
-const LamenessSection = ({ answers, onAnswerChange }: LamenessSectionProps) => {
+const LamenessSection = ({ answers, onAnswerChange, keyPrefix = '' }: LamenessSectionProps) => {
   const questions = [
     {
       key: 'pain_complaints',
@@ -33,9 +34,9 @@ const LamenessSection = ({ answers, onAnswerChange }: LamenessSectionProps) => {
             {question.options.map((option) => (
               <SelectionButton
                 key={option}
-                id={`${question.key}-${option}`}
+                id={`${keyPrefix}${question.key}-${option}`}
                 value={option}
-                isSelected={answers[question.key] === option}
+                isSelected={answers[keyPrefix + question.key] === option}
                 onSelect={(value) => onAnswerChange(question.key, value)}
                 className="p-2 text-sm font-medium"
               >

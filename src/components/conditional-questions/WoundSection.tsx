@@ -5,9 +5,10 @@ interface WoundSectionProps {
   answers: {[key: string]: string | File};
   onAnswerChange: (questionKey: string, value: string) => void;
   onFileChange: (questionKey: string, file: File | null) => void;
+  keyPrefix?: string;
 }
 
-const WoundSection = ({ answers, onAnswerChange, onFileChange }: WoundSectionProps) => {
+const WoundSection = ({ answers, onAnswerChange, onFileChange, keyPrefix = '' }: WoundSectionProps) => {
   const questions = [
     {
       key: 'wound_location',
@@ -44,9 +45,9 @@ const WoundSection = ({ answers, onAnswerChange, onFileChange }: WoundSectionPro
             {question.options.map((option) => (
               <SelectionButton
                 key={option}
-                id={`${question.key}-${option}`}
+                id={`${keyPrefix}${question.key}-${option}`}
                 value={option}
-                isSelected={answers[question.key] === option}
+                isSelected={answers[keyPrefix + question.key] === option}
                 onSelect={(value) => onAnswerChange(question.key, value)}
                 className="p-2 text-sm font-medium"
               >
@@ -69,10 +70,10 @@ const WoundSection = ({ answers, onAnswerChange, onFileChange }: WoundSectionPro
             accept="image/*"
             onChange={(e) => onFileChange('wound_photo', e.target.files?.[0] || null)}
             className="hidden"
-            id="wound-photo-upload"
+            id={`${keyPrefix}wound-photo-upload`}
           />
           <label
-            htmlFor="wound-photo-upload"
+            htmlFor={`${keyPrefix}wound-photo-upload`}
             className="cursor-pointer flex flex-col items-center space-y-2"
           >
             <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,9 +83,9 @@ const WoundSection = ({ answers, onAnswerChange, onFileChange }: WoundSectionPro
               Cliquez pour choisir un fichier ou faites-le glisser ici
             </span>
           </label>
-          {answers['wound_photo'] && answers['wound_photo'] instanceof File && (
+          {answers[keyPrefix + 'wound_photo'] && answers[keyPrefix + 'wound_photo'] instanceof File && (
             <p className="text-sm text-vet-sage mt-2">
-              Fichier sélectionné: {answers['wound_photo'].name}
+              Fichier sélectionné: {(answers[keyPrefix + 'wound_photo'] as File).name}
             </p>
           )}
         </div>
