@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import SelectionButton from "@/components/SelectionButton";
 
@@ -29,7 +28,12 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     symptom.toLowerCase().includes('problemes-urinaires') || symptom.toLowerCase().includes('problèmes urinaires')
   ) || customSymptom.toLowerCase().includes('problèmes urinaires');
 
-  if (!needsQuestions && !hasBloodInStool && !hasUrinaryProblems) {
+  // Vérifier si "démangeaisons cutanées" est sélectionné
+  const hasSkinItching = selectedSymptoms.some(symptom => 
+    symptom.toLowerCase().includes('demangeaisons-cutanees') || symptom.toLowerCase().includes('démangeaisons cutanées')
+  ) || customSymptom.toLowerCase().includes('démangeaisons cutanées');
+
+  if (!needsQuestions && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching) {
     return null;
   }
 
@@ -93,6 +97,27 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
         key: 'genital_licking',
         title: 'Se lèche-t-il les parties intimes ?',
         options: ['Pas du tout', 'Un peu', 'Beaucoup']
+      }
+    );
+  }
+
+  // Questions spécifiques aux démangeaisons cutanées
+  if (hasSkinItching) {
+    questions.push(
+      {
+        key: 'skin_itching_areas',
+        title: 'Sur quelle(s) zone(s) du corps ?',
+        options: ['Généralisée', 'Plusieurs zones', 'Une zone localisée']
+      },
+      {
+        key: 'antiparasitic_treatment',
+        title: 'Quand a-t-il eu son dernier traitement antiparasitaire ?',
+        options: ['moins d\'1 mois', '1 à 3 mois', 'plus de 3 mois', 'Jamais']
+      },
+      {
+        key: 'hair_loss',
+        title: 'Est-ce qu\'il y a une perte de poils localisée ?',
+        options: ['Aucune', 'Légère', 'Importante']
       }
     );
   }
