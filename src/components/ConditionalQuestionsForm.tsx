@@ -65,7 +65,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     <div className="space-y-8 sm:space-y-12">
       {questions.map((question) => (
         <div key={question.key} className="space-y-4 sm:space-y-6">
-          <h3 className="text-lg font-semibold text-vet-navy text-left mb-4 sm:mb-6">
+          <h3 className="text-base sm:text-lg text-vet-navy text-left mb-4 sm:mb-6">
             {question.title}
             <span className="text-red-500 ml-1">*</span>
           </h3>
