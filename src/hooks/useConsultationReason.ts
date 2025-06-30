@@ -1,5 +1,4 @@
 
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -34,12 +33,14 @@ export const useConsultationReason = () => {
 
   // Effet pour gérer la logique conditionnelle du deuxième animal
   useEffect(() => {
-    if (hasTwoAnimals && consultationReason === 'symptomes-anomalie') {
-      // Si animal 1 a "symptomes-anomalie", forcer animal 2 à "consultation-convenance"
+    // Ne forcer "consultation-convenance" pour l'animal 2 que si :
+    // 1. Il y a deux animaux
+    // 2. Le client a coché "motif différent pour le 2e animal"  
+    // 3. L'animal 1 a "symptomes-anomalie"
+    if (hasTwoAnimals && secondAnimalDifferentReason && consultationReason === 'symptomes-anomalie') {
       setSecondAnimalConsultationReason('consultation-convenance');
-      setSecondAnimalDifferentReason(true);
     }
-  }, [consultationReason, hasTwoAnimals]);
+  }, [consultationReason, hasTwoAnimals, secondAnimalDifferentReason]);
 
   const handleNext = () => {
     const isFirstAnimalValid = consultationReason !== '' && 
@@ -96,7 +97,8 @@ export const useConsultationReason = () => {
        (secondAnimalConvenienceOptions.length > 0 &&
         (!secondAnimalConvenienceOptions.includes('autre') || secondAnimalCustomText.trim() !== '')))));
 
-  const shouldForceConvenienceForAnimal2 = hasTwoAnimals && consultationReason === 'symptomes-anomalie';
+  // La fonction ne force "consultation-convenance" pour l'animal 2 que si le client a coché la case
+  const shouldForceConvenienceForAnimal2 = hasTwoAnimals && secondAnimalDifferentReason && consultationReason === 'symptomes-anomalie';
 
   return {
     consultationReason,
@@ -123,4 +125,3 @@ export const useConsultationReason = () => {
     shouldForceConvenienceForAnimal2
   };
 };
-
