@@ -49,6 +49,12 @@ export const useSymptomDetection = (selectedSymptoms: string[], customSymptom: s
     symptom.toLowerCase().includes('boiterie')
   ) || customSymptom.toLowerCase().includes('boiterie');
 
+  // Vérifier si "difficultés respiratoires" est sélectionné
+  const hasBreathingDifficulties = selectedSymptoms.some(symptom => 
+    symptom.toLowerCase().includes('difficultes-respiratoires') || 
+    symptom.toLowerCase().includes('difficultés respiratoires')
+  ) || customSymptom.toLowerCase().includes('difficultés respiratoires');
+
   return {
     needsQuestions,
     hasBloodInStool,
@@ -57,6 +63,7 @@ export const useSymptomDetection = (selectedSymptoms: string[], customSymptom: s
     hasWound,
     hasEarProblems,
     hasEyeDischarge,
-    hasLameness
+    hasLameness,
+    hasBreathingDifficulties
   };
 };

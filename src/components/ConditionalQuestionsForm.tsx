@@ -9,6 +9,7 @@ import WoundSection from "@/components/conditional-questions/WoundSection";
 import EarProblemsSection from "@/components/conditional-questions/EarProblemsSection";
 import EyeDischargeSection from "@/components/conditional-questions/EyeDischargeSection";
 import LamenessSection from "@/components/conditional-questions/LamenessSection";
+import BreathingDifficultiesSection from "@/components/conditional-questions/BreathingDifficultiesSection";
 
 interface ConditionalQuestionsFormProps {
   selectedSymptoms: string[];
@@ -27,10 +28,11 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     hasWound,
     hasEarProblems,
     hasEyeDischarge,
-    hasLameness
+    hasLameness,
+    hasBreathingDifficulties
   } = useSymptomDetection(selectedSymptoms, customSymptom);
 
-  if (!needsQuestions && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems && !hasEyeDischarge && !hasLameness) {
+  if (!needsQuestions && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems && !hasEyeDischarge && !hasLameness && !hasBreathingDifficulties) {
     return null;
   }
 
@@ -47,7 +49,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
   };
 
   // Déterminer si on doit afficher les questions générales
-  const shouldShowGeneralQuestions = needsQuestions || hasEarProblems || hasEyeDischarge || hasLameness;
+  const shouldShowGeneralQuestions = needsQuestions || hasEarProblems || hasEyeDischarge || hasLameness || hasBreathingDifficulties;
 
   return (
     <div className="space-y-8 sm:space-y-12">
@@ -104,6 +106,13 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
 
       {hasLameness && (
         <LamenessSection 
+          answers={answers}
+          onAnswerChange={handleAnswerChange}
+        />
+      )}
+
+      {hasBreathingDifficulties && (
+        <BreathingDifficultiesSection 
           answers={answers}
           onAnswerChange={handleAnswerChange}
         />
