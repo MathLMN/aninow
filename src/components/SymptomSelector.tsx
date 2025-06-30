@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,10 +13,10 @@ interface SymptomSelectorProps {
 }
 
 const SYMPTOMS = [
-  // Couleur rouge/orange - symptômes digestifs
-  { id: 'vomissements', label: 'Vomissements', color: 'red' },
-  { id: 'diarrhee', label: 'Diarrhée', color: 'red' },
-  { id: 'sang-selles', label: 'Sang dans les selles', color: 'red' },
+  // Couleur orange - symptômes digestifs spécifiques
+  { id: 'vomissements', label: 'Vomissements', color: 'orange' },
+  { id: 'diarrhee', label: 'Diarrhée', color: 'orange' },
+  { id: 'sang-selles', label: 'Sang dans les selles', color: 'orange' },
   
   // Couleur jaune - symptômes urinaires
   { id: 'problemes-urinaires', label: 'Problèmes urinaires', color: 'yellow' },
@@ -32,9 +31,9 @@ const SYMPTOMS = [
   { id: 'ecoulements-yeux', label: 'Ecoulements des yeux', color: 'green' },
   { id: 'toux', label: 'Toux', color: 'green' },
   
-  // Couleur violette - symptômes locomoteurs
-  { id: 'boiterie', label: 'Boiterie', color: 'purple' },
-  { id: 'difficultes-respiratoires', label: 'Difficultés respiratoires', color: 'purple' },
+  // Couleur rose - symptômes locomoteurs spécifiques
+  { id: 'boiterie', label: 'Boiterie', color: 'pink' },
+  { id: 'difficultes-respiratoires', label: 'Difficultés respiratoires', color: 'pink' },
   
   // Couleur bleue - symptômes comportementaux et généraux
   { id: 'perte-appetit', label: 'Perte d\'appétit', color: 'blue' },
@@ -55,6 +54,8 @@ const getTagColorClasses = (color: string, isSelected: boolean) => {
     switch (color) {
       case 'red':
         return 'bg-red-500 text-white border-red-500 hover:bg-red-600';
+      case 'orange':
+        return 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600';
       case 'yellow':
         return 'bg-yellow-500 text-white border-yellow-500 hover:bg-yellow-600';
       case 'purple':
@@ -63,6 +64,8 @@ const getTagColorClasses = (color: string, isSelected: boolean) => {
         return 'bg-green-500 text-white border-green-500 hover:bg-green-600';
       case 'blue':
         return 'bg-blue-500 text-white border-blue-500 hover:bg-blue-600';
+      case 'pink':
+        return 'bg-pink-500 text-white border-pink-500 hover:bg-pink-600';
       case 'gray':
         return 'bg-gray-500 text-white border-gray-500 hover:bg-gray-600';
       default:
@@ -72,6 +75,8 @@ const getTagColorClasses = (color: string, isSelected: boolean) => {
     switch (color) {
       case 'red':
         return 'bg-white text-red-700 border-red-300 hover:bg-red-50';
+      case 'orange':
+        return 'bg-white text-orange-700 border-orange-300 hover:bg-orange-50';
       case 'yellow':
         return 'bg-white text-yellow-700 border-yellow-300 hover:bg-yellow-50';
       case 'purple':
@@ -80,6 +85,8 @@ const getTagColorClasses = (color: string, isSelected: boolean) => {
         return 'bg-white text-green-700 border-green-300 hover:bg-green-50';
       case 'blue':
         return 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50';
+      case 'pink':
+        return 'bg-white text-pink-700 border-pink-300 hover:bg-pink-50';
       case 'gray':
         return 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50';
       default:
