@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import SelectionButton from "@/components/SelectionButton";
 
@@ -9,7 +8,7 @@ interface ConditionalQuestionsFormProps {
 }
 
 const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersChange }: ConditionalQuestionsFormProps) => {
-  const [answers, setAnswers] = useState<{[key: string]: string}>({});
+  const [answers, setAnswers] = useState<{[key: string]: string | File}>({});
 
   // Vérifier si des symptômes nécessitent les questions générales
   const symptomsRequiringQuestions = ['vomissements', 'diarrhée', 'toux', 'cris/gémissements'];
@@ -212,9 +211,9 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
                 Cliquez pour choisir un fichier ou faites-le glisser ici
               </span>
             </label>
-            {answers['wound_photo'] && (
+            {answers['wound_photo'] && answers['wound_photo'] instanceof File && (
               <p className="text-sm text-vet-sage mt-2">
-                Fichier sélectionné: {(answers['wound_photo'] as File).name}
+                Fichier sélectionné: {answers['wound_photo'].name}
               </p>
             )}
           </div>
