@@ -62,14 +62,29 @@ const ConditionalQuestions = () => {
     symptom.toLowerCase().includes('sang-selles') || symptom.toLowerCase().includes('sang dans les selles')
   ) || bookingData?.customSymptom?.toLowerCase()?.includes('sang dans les selles');
 
-  let requiredQuestions = ['general_form', 'eating', 'drinking'];
+  // Vérifier si "problèmes urinaires" est sélectionné
+  const hasUrinaryProblems = bookingData?.selectedSymptoms?.some((symptom: string) => 
+    symptom.toLowerCase().includes('problemes-urinaires') || symptom.toLowerCase().includes('problèmes urinaires')
+  ) || bookingData?.customSymptom?.toLowerCase()?.includes('problèmes urinaires');
+
+  let requiredQuestions: string[] = [];
+  
+  // Ajouter les questions générales si nécessaire
+  if (needsQuestions) {
+    requiredQuestions.push('general_form', 'eating', 'drinking');
+  }
   
   // Ajouter la question sur la consistance des selles si nécessaire
   if (hasBloodInStool) {
     requiredQuestions.push('stool_consistency');
   }
 
-  const allQuestionsAnswered = (needsQuestions || hasBloodInStool) ? requiredQuestions.every(key => answers[key]) : true;
+  // Ajouter les questions spécifiques aux problèmes urinaires si nécessaire
+  if (hasUrinaryProblems) {
+    requiredQuestions.push('urine_quantity', 'urination_frequency', 'blood_in_urine', 'genital_licking');
+  }
+
+  const allQuestionsAnswered = (needsQuestions || hasBloodInStool || hasUrinaryProblems) ? requiredQuestions.every(key => answers[key]) : true;
   const canProceed = allQuestionsAnswered;
 
   if (!bookingData) {
@@ -111,7 +126,7 @@ const ConditionalQuestions = () => {
                   onAnswersChange={handleAnswersChange} 
                 />
 
-                {!needsQuestions && !hasBloodInStool && (
+                {!needsQuestions && !hasBloodInStool && !hasUrinaryProblems && (
                   <div className="text-center text-vet-brown/60 py-8">
                     <p className="text-sm sm:text-base">
                       Aucune question complémentaire n'est nécessaire pour les symptômes sélectionnés.

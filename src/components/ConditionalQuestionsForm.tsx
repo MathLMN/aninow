@@ -11,7 +11,7 @@ interface ConditionalQuestionsFormProps {
 const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersChange }: ConditionalQuestionsFormProps) => {
   const [answers, setAnswers] = useState<{[key: string]: string}>({});
 
-  // Vérifier si des symptômes nécessitent ces questions
+  // Vérifier si des symptômes nécessitent les questions générales
   const symptomsRequiringQuestions = ['vomissements', 'diarrhée', 'toux', 'cris/gémissements'];
   const needsQuestions = selectedSymptoms.some(symptom => 
     symptomsRequiringQuestions.includes(symptom.toLowerCase())
@@ -24,7 +24,12 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     symptom.toLowerCase().includes('sang-selles') || symptom.toLowerCase().includes('sang dans les selles')
   ) || customSymptom.toLowerCase().includes('sang dans les selles');
 
-  if (!needsQuestions && !hasBloodInStool) {
+  // Vérifier si "problèmes urinaires" est sélectionné
+  const hasUrinaryProblems = selectedSymptoms.some(symptom => 
+    symptom.toLowerCase().includes('problemes-urinaires') || symptom.toLowerCase().includes('problèmes urinaires')
+  ) || customSymptom.toLowerCase().includes('problèmes urinaires');
+
+  if (!needsQuestions && !hasBloodInStool && !hasUrinaryProblems) {
     return null;
   }
 
@@ -34,31 +39,62 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     onAnswersChange(newAnswers);
   };
 
-  const questions = [
-    {
-      key: 'general_form',
-      title: 'Quelle est sa forme générale ?',
-      options: ['En forme', 'Pas en forme', 'Amorphe (avachi)']
-    },
-    {
-      key: 'eating',
-      title: "Est-ce qu'il mange ?",
-      options: ['Mange normalement', 'Mange peu', 'Ne mange pas']
-    },
-    {
-      key: 'drinking',
-      title: "Est-ce qu'il boit de l'eau ?",
-      options: ['Soif normale', 'Soif excessive', 'Pas soif']
-    }
-  ];
+  const questions = [];
 
-  // Ajouter la question sur la consistance des selles si "sang dans les selles" est sélectionné
+  // Questions générales pour certains symptômes
+  if (needsQuestions) {
+    questions.push(
+      {
+        key: 'general_form',
+        title: 'Quelle est sa forme générale ?',
+        options: ['En forme', 'Pas en forme', 'Amorphe (avachi)']
+      },
+      {
+        key: 'eating',
+        title: "Est-ce qu'il mange ?",
+        options: ['Mange normalement', 'Mange peu', 'Ne mange pas']
+      },
+      {
+        key: 'drinking',
+        title: "Est-ce qu'il boit de l'eau ?",
+        options: ['Soif normale', 'Soif excessive', 'Pas soif']
+      }
+    );
+  }
+
+  // Question pour "sang dans les selles"
   if (hasBloodInStool) {
     questions.push({
       key: 'stool_consistency',
       title: 'Quelle est la consistance des selles ?',
       options: ['Selles normales', 'Selles molles', 'Selles fermes']
     });
+  }
+
+  // Questions spécifiques aux problèmes urinaires
+  if (hasUrinaryProblems) {
+    questions.push(
+      {
+        key: 'urine_quantity',
+        title: "Quelle est la quantité d'urine ?",
+        options: ['Normale', 'Quelques gouttes', 'Aucune']
+      },
+      {
+        key: 'urination_frequency',
+        title: 'Quelle est la fréquence des mictions ?',
+        options: ['Normale', 'Très rapprochées', 'Rares']
+      },
+      {
+        key: 'blood_in_urine',
+        title: "Est-ce qu'il y a une présence de sang dans les urines ?",
+        options: ['Non', 'Légère teinte rosée', 'Sang visible']
+      },
+      {
+        key: 'genital_licking',
+        title: 'Se lèche-t-il les parties intimes ?',
+        options: ['Pas du tout', 'Un peu', 'Beaucoup']
+      }
+    );
   }
 
   return (
