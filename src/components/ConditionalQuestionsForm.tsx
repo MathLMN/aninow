@@ -64,7 +64,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
                 value={option}
                 isSelected={answers[question.key] === option}
                 onSelect={(value) => handleAnswerChange(question.key, value)}
-                className="h-16 sm:h-20 text-sm sm:text-base font-medium"
+                className="p-2 text-sm font-medium"
               >
                 <span className="text-center leading-tight">{option}</span>
               </SelectionButton>
