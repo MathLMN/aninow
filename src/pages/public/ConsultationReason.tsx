@@ -170,9 +170,6 @@ const ConsultationReason = () => {
                     <div className="space-y-2 sm:space-y-4 p-3 bg-vet-blue/10 rounded-lg sm:p-4">
                       <h3 className="text-sm sm:text-lg font-semibold text-vet-blue">Animal 2</h3>
                       <div className="space-y-2 sm:space-y-4">
-                        <Label className="text-sm sm:text-lg font-semibold text-vet-navy block">
-                          Choisissez le motif de consultation
-                        </Label>
                         <ConsultationReasonSelect
                           value={secondAnimalConsultationReason}
                           onValueChange={setSecondAnimalConsultationReason}
