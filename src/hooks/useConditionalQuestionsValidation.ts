@@ -25,7 +25,7 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
 
   let requiredQuestions: string[] = [];
   
-  // Ajouter les questions générales si nécessaire
+  // Ajouter les questions générales si nécessaire (inclut maintenant "cris/gémissements")
   if (needsQuestions) {
     requiredQuestions.push('general_form', 'eating', 'drinking');
   }
