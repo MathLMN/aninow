@@ -228,7 +228,7 @@ const BookingForm = ({
       {(showNameInput || showMultipleOptions) && (
         <div className="bg-vet-blue/10 p-3 rounded-md border border-vet-blue/20">
           <p className="text-xs sm:text-sm text-vet-navy text-center leading-relaxed">
-            📋 Complétez les informations puis cliquez sur <span className="font-semibold text-vet-sage">Suivant</span>
+            📋 Complétez les informations puis cliquez sur <span className="font-semibold text-vet-sage">continuer</span>
           </p>
         </div>
       )}
@@ -240,7 +240,7 @@ const BookingForm = ({
           disabled={!canProceed()} 
           className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white w-full h-12 sm:h-11 text-base sm:text-lg font-medium rounded-lg shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-200"
         >
-          Suivant
+          continuer
           <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
       </div>
