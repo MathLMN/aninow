@@ -128,8 +128,8 @@ const SymptomSelector: React.FC<SymptomSelectorProps> = ({
         />
       </div>
 
-      {/* Tags des symptômes */}
-      <div className="flex flex-wrap gap-2">
+      {/* Tags des symptômes en liste verticale */}
+      <div className="flex flex-col gap-2">
         {filteredSymptoms.map((symptom) => {
           const isSelected = selectedSymptoms.includes(symptom.id);
           return (
@@ -138,7 +138,7 @@ const SymptomSelector: React.FC<SymptomSelectorProps> = ({
               type="button"
               onClick={() => handleSymptomToggle(symptom.id, !isSelected)}
               className={`
-                inline-flex items-center px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium border transition-all duration-200 cursor-pointer hover:shadow-sm active:scale-95
+                inline-flex items-center justify-start px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium border transition-all duration-200 cursor-pointer hover:shadow-sm active:scale-[0.98] w-full
                 ${getTagColorClasses(symptom.color, isSelected)}
               `}
             >
