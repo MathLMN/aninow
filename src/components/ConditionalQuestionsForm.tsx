@@ -13,6 +13,7 @@ import EyeDischargeSection from "@/components/conditional-questions/EyeDischarge
 import LamenessSection from "@/components/conditional-questions/LamenessSection";
 import BreathingDifficultiesSection from "@/components/conditional-questions/BreathingDifficultiesSection";
 import LumpSection from "@/components/conditional-questions/LumpSection";
+import ListlessSection from "@/components/conditional-questions/ListlessSection";
 
 interface ConditionalQuestionsFormProps {
   selectedSymptoms: string[];
@@ -35,10 +36,11 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     hasEyeDischarge,
     hasLameness,
     hasBreathingDifficulties,
-    hasLump
+    hasLump,
+    hasListlessness
   } = useSymptomDetection(selectedSymptoms, customSymptom);
 
-  if (!needsQuestions && !hasLossOfAppetite && !hasExcessiveThirst && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems && !hasEyeDischarge && !hasLameness && !hasBreathingDifficulties && !hasLump) {
+  if (!needsQuestions && !hasLossOfAppetite && !hasExcessiveThirst && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems && !hasEyeDischarge && !hasLameness && !hasBreathingDifficulties && !hasLump && !hasListlessness) {
     return null;
   }
 
@@ -54,7 +56,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     onAnswersChange(newAnswers);
   };
 
-  // Déterminer si on doit afficher les questions générales (sans perte d'appétit ni soif excessive)
+  // Déterminer si on doit afficher les questions générales (sans perte d'appétit ni soif excessive ni abattement)
   const shouldShowGeneralQuestions = needsQuestions || hasEarProblems || hasEyeDischarge || hasLameness || hasBreathingDifficulties;
 
   return (
@@ -76,6 +78,13 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
 
       {hasExcessiveThirst && (
         <ExcessiveThirstSection 
+          answers={answers}
+          onAnswerChange={handleAnswerChange}
+        />
+      )}
+
+      {hasListlessness && (
+        <ListlessSection 
           answers={answers}
           onAnswerChange={handleAnswerChange}
         />

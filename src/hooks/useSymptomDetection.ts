@@ -70,6 +70,14 @@ export const useSymptomDetection = (selectedSymptoms: string[], customSymptom: s
     symptom.toLowerCase().includes('grosseur')
   ) || customSymptom.toLowerCase().includes('grosseur');
 
+  // Vérifier si "semble abattu" est sélectionné
+  const hasListlessness = selectedSymptoms.some(symptom => 
+    symptom.toLowerCase().includes('semble-abattu') || 
+    symptom.toLowerCase().includes('semble abattu') ||
+    symptom.toLowerCase().includes('abattu')
+  ) || customSymptom.toLowerCase().includes('semble abattu') ||
+       customSymptom.toLowerCase().includes('abattu');
+
   return {
     needsQuestions,
     hasLossOfAppetite,
@@ -82,6 +90,7 @@ export const useSymptomDetection = (selectedSymptoms: string[], customSymptom: s
     hasEyeDischarge,
     hasLameness,
     hasBreathingDifficulties,
-    hasLump
+    hasLump,
+    hasListlessness
   };
 };

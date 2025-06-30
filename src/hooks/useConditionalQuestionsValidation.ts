@@ -19,7 +19,8 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
     hasEyeDischarge,
     hasLameness,
     hasBreathingDifficulties,
-    hasLump
+    hasLump,
+    hasListlessness
   } = useSymptomDetection(bookingData?.selectedSymptoms || [], bookingData?.customSymptom || '');
 
   let requiredQuestions: string[] = [];
@@ -37,6 +38,11 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
   // Ajouter les questions pour la soif excessive (sans la question drinking)
   if (hasExcessiveThirst) {
     requiredQuestions.push('general_form', 'eating');
+  }
+
+  // Ajouter les questions pour "semble abattu" (sans la question general_form)
+  if (hasListlessness) {
+    requiredQuestions.push('eating', 'drinking');
   }
   
   // Ajouter la question sur la consistance des selles si nécessaire
@@ -84,7 +90,7 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
     requiredQuestions.push('general_form', 'lump_body_area', 'lump_size_evolution');
   }
 
-  const hasAnyConditions = needsQuestions || hasLossOfAppetite || hasExcessiveThirst || hasBloodInStool || hasUrinaryProblems || hasSkinItching || hasWound || hasEarProblems || hasEyeDischarge || hasLameness || hasBreathingDifficulties || hasLump;
+  const hasAnyConditions = needsQuestions || hasLossOfAppetite || hasExcessiveThirst || hasBloodInStool || hasUrinaryProblems || hasSkinItching || hasWound || hasEarProblems || hasEyeDischarge || hasLameness || hasBreathingDifficulties || hasLump || hasListlessness;
   const allQuestionsAnswered = hasAnyConditions ? requiredQuestions.every(key => answers[key]) : true;
 
   return {
@@ -101,6 +107,7 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
     hasEyeDischarge,
     hasLameness,
     hasBreathingDifficulties,
-    hasLump
+    hasLump,
+    hasListlessness
   };
 };
