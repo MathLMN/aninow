@@ -1,0 +1,47 @@
+
+export const useSymptomDetection = (selectedSymptoms: string[], customSymptom: string) => {
+  // Vérifier si des symptômes nécessitent les questions générales
+  const symptomsRequiringQuestions = ['vomissements', 'diarrhée', 'toux', 'cris/gémissements'];
+  const needsQuestions = selectedSymptoms.some(symptom => 
+    symptomsRequiringQuestions.includes(symptom.toLowerCase())
+  ) || symptomsRequiringQuestions.some(symptom => 
+    customSymptom.toLowerCase().includes(symptom)
+  );
+
+  // Vérifier si "sang dans les selles" est sélectionné
+  const hasBloodInStool = selectedSymptoms.some(symptom => 
+    symptom.toLowerCase().includes('sang-selles') || symptom.toLowerCase().includes('sang dans les selles')
+  ) || customSymptom.toLowerCase().includes('sang dans les selles');
+
+  // Vérifier si "problèmes urinaires" est sélectionné
+  const hasUrinaryProblems = selectedSymptoms.some(symptom => 
+    symptom.toLowerCase().includes('problemes-urinaires') || symptom.toLowerCase().includes('problèmes urinaires')
+  ) || customSymptom.toLowerCase().includes('problèmes urinaires');
+
+  // Vérifier si "démangeaisons cutanées" est sélectionné
+  const hasSkinItching = selectedSymptoms.some(symptom => 
+    symptom.toLowerCase().includes('demangeaisons-cutanees') || symptom.toLowerCase().includes('démangeaisons cutanées')
+  ) || customSymptom.toLowerCase().includes('démangeaisons cutanées');
+
+  // Vérifier si "plaie" est sélectionné
+  const hasWound = selectedSymptoms.some(symptom => 
+    symptom.toLowerCase().includes('plaie')
+  ) || customSymptom.toLowerCase().includes('plaie');
+
+  // Vérifier si "démangeaisons de l'oreille" ou "otite" est sélectionné
+  const hasEarProblems = selectedSymptoms.some(symptom => 
+    symptom.toLowerCase().includes('demangeaisons-oreille') || 
+    symptom.toLowerCase().includes('démangeaisons de l\'oreille') ||
+    symptom.toLowerCase().includes('otite')
+  ) || customSymptom.toLowerCase().includes('démangeaisons de l\'oreille') || 
+       customSymptom.toLowerCase().includes('otite');
+
+  return {
+    needsQuestions,
+    hasBloodInStool,
+    hasUrinaryProblems,
+    hasSkinItching,
+    hasWound,
+    hasEarProblems
+  };
+};
