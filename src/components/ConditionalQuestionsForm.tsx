@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import SelectionButton from "@/components/SelectionButton";
 
 interface ConditionalQuestionsFormProps {
   selectedSymptoms: string[];
@@ -48,28 +48,26 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 sm:space-y-12">
       {questions.map((question) => (
-        <div key={question.key} className="space-y-4">
-          <h3 className="text-lg sm:text-xl font-semibold text-vet-navy text-center">
+        <div key={question.key} className="space-y-4 sm:space-y-6">
+          <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-vet-navy text-center mb-4 sm:mb-6">
             {question.title}
             <span className="text-red-500 ml-1">*</span>
           </h3>
-          <div className="grid grid-cols-1 gap-3">
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {question.options.map((option) => (
-              <Button
+              <SelectionButton
                 key={option}
-                type="button"
-                variant="outline"
-                className={`h-auto p-4 sm:p-6 text-center justify-center text-sm sm:text-base font-medium rounded-xl transition-all duration-200 border-2 ${
-                  answers[question.key] === option
-                    ? 'bg-vet-sage text-white border-vet-sage shadow-lg'
-                    : 'bg-white hover:bg-vet-beige/30 border-vet-brown/20 text-vet-brown hover:border-vet-sage/50'
-                }`}
-                onClick={() => handleAnswerChange(question.key, option)}
+                id={`${question.key}-${option}`}
+                value={option}
+                isSelected={answers[question.key] === option}
+                onSelect={(value) => handleAnswerChange(question.key, value)}
+                className="h-16 sm:h-20 text-sm sm:text-base font-medium"
               >
-                {option}
-              </Button>
+                <span className="text-center leading-tight">{option}</span>
+              </SelectionButton>
             ))}
           </div>
         </div>

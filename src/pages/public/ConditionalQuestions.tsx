@@ -77,7 +77,7 @@ const ConditionalQuestions = () => {
       <Header />
 
       <main className="container mx-auto px-3 sm:px-6 py-4 sm:py-6 pb-6">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           {/* Bouton retour */}
           <div className="mb-4 sm:mb-6">
             <Button 
@@ -91,8 +91,8 @@ const ConditionalQuestions = () => {
           </div>
 
           {/* Titre */}
-          <div className="text-center mb-4 sm:mb-6 animate-fade-in">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-vet-navy mb-1 sm:mb-2 leading-tight">
+          <div className="text-center mb-6 sm:mb-8 animate-fade-in">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-vet-navy mb-2 sm:mb-3 leading-tight">
               Quelques questions complémentaires
             </h1>
             <p className="text-sm sm:text-base text-vet-brown/80 px-2">
@@ -102,8 +102,8 @@ const ConditionalQuestions = () => {
 
           {/* Formulaire */}
           <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/20 shadow-lg">
-            <CardContent className="p-3 sm:p-6">
-              <div className="space-y-4 sm:space-y-6">
+            <CardContent className="p-4 sm:p-8">
+              <div className="space-y-6 sm:space-y-8">
                 
                 <ConditionalQuestionsForm
                   selectedSymptoms={bookingData.selectedSymptoms || []}
@@ -112,7 +112,7 @@ const ConditionalQuestions = () => {
                 />
 
                 {!needsQuestions && (
-                  <div className="text-center text-vet-brown/60 py-8">
+                  <div className="text-center text-vet-brown/60 py-12 sm:py-16">
                     <p className="text-sm sm:text-base">
                       Aucune question complémentaire n'est nécessaire pour les symptômes sélectionnés.
                     </p>
@@ -120,7 +120,7 @@ const ConditionalQuestions = () => {
                 )}
 
                 {/* Bouton Suivant */}
-                <div className="pt-4 sm:pt-6">
+                <div className="pt-6 sm:pt-8">
                   <Button 
                     onClick={handleNext} 
                     disabled={!canProceed} 
