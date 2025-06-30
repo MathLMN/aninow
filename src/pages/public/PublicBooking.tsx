@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Settings } from "lucide-react";
@@ -22,7 +23,7 @@ const PublicBooking = () => {
               <img src="/lovable-uploads/44fb068f-1799-4a6c-9ad1-1308c67a7645.png" alt="AniNow" className="h-6 w-auto sm:h-8" />
             </div>
             <Link to="/vet/login">
-              <Button variant="ghost" className="text-vet-beige hover:bg-white/10 text-xs px-2 py-1 sm:text-sm sm:px-3 sm:py-2">
+              <Button variant="ghost" className="bg-vet-blue text-white hover:bg-vet-blue/90 text-xs px-2 py-1 sm:text-sm sm:px-3 sm:py-2">
                 <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                 <span className="hidden xs:inline">Espace </span>Clinique
               </Button>
