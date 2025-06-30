@@ -14,7 +14,7 @@ const ConditionalQuestions = () => {
   const [bookingData, setBookingData] = useState<any>(null);
 
   useEffect(() => {
-    // Vérifier que l'utilisateur vient bien de la page symptômes
+    // Vérifier que l'utilisateur vient bien de la page motif de consultation
     const storedData = localStorage.getItem('bookingFormData');
     if (!storedData) {
       navigate('/');
@@ -26,13 +26,13 @@ const ConditionalQuestions = () => {
     // Vérifier que des symptômes ont été sélectionnés ou qu'un symptôme personnalisé a été saisi
     const hasSymptoms = parsedData.selectedSymptoms?.length > 0 || parsedData.customSymptom?.trim() !== '';
     if (!hasSymptoms) {
-      navigate('/booking/symptoms');
+      navigate('/booking/reason');
       return;
     }
   }, [navigate]);
 
   const handleBack = () => {
-    navigate('/booking/symptoms');
+    navigate('/booking/reason');
   };
 
   const handleNext = () => {
