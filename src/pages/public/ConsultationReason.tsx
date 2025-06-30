@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, Settings, ArrowLeft, ArrowRight } from "lucide-react";
@@ -205,15 +206,15 @@ const ConsultationReason = () => {
                   </div>
                 )}
 
-                {/* Bouton Suivant - Mobile optimized */}
-                <div className="pt-2 sm:pt-6">
+                {/* Bouton Suivant - Identique à celui de la première page */}
+                <div className="pt-3 sm:pt-4">
                   <Button 
                     onClick={handleNext} 
                     disabled={!canProceed} 
-                    className="bg-vet-sage hover:bg-vet-sage/90 text-white px-4 py-3 text-sm sm:px-8 sm:py-3 sm:text-lg w-full h-12 sm:h-auto sm:w-auto sm:mx-auto sm:block"
+                    className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white w-full h-12 sm:h-11 text-base sm:text-lg font-medium rounded-lg shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-200"
                   >
                     Suivant
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                   </Button>
                 </div>
               </div>
