@@ -23,9 +23,11 @@ const ConditionalQuestions = () => {
     const parsedData = JSON.parse(storedData);
     setBookingData(parsedData);
 
-    // Vérifier que des symptômes ont été sélectionnés ou qu'un symptôme personnalisé a été saisi
-    const hasSymptoms = parsedData.selectedSymptoms?.length > 0 || parsedData.customSymptom?.trim() !== '';
-    if (!hasSymptoms) {
+    // Vérifier que au moins un animal a des symptômes sélectionnés
+    const hasFirstAnimalSymptoms = parsedData.selectedSymptoms?.length > 0 || parsedData.customSymptom?.trim() !== '';
+    const hasSecondAnimalSymptoms = parsedData.secondAnimalSelectedSymptoms?.length > 0 || parsedData.secondAnimalCustomSymptom?.trim() !== '';
+    
+    if (!hasFirstAnimalSymptoms && !hasSecondAnimalSymptoms) {
       navigate('/booking/reason');
       return;
     }

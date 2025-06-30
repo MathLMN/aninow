@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useSymptomDetection } from "@/hooks/useSymptomDetection";
 import GeneralQuestionsSection from "@/components/conditional-questions/GeneralQuestionsSection";
@@ -19,9 +20,10 @@ interface ConditionalQuestionsFormProps {
   selectedSymptoms: string[];
   customSymptom: string;
   onAnswersChange: (answers: any) => void;
+  animalPrefix?: string;
 }
 
-const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersChange }: ConditionalQuestionsFormProps) => {
+const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersChange, animalPrefix = '' }: ConditionalQuestionsFormProps) => {
   const [answers, setAnswers] = useState<{[key: string]: string | File}>({});
 
   const {
@@ -46,19 +48,26 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
   }
 
   const handleAnswerChange = (questionKey: string, value: string) => {
-    const newAnswers = { ...answers, [questionKey]: value };
+    const prefixedKey = animalPrefix + questionKey;
+    const newAnswers = { ...answers, [prefixedKey]: value };
     setAnswers(newAnswers);
     onAnswersChange(newAnswers);
   };
 
   const handleFileChange = (questionKey: string, file: File | null) => {
-    const newAnswers = { ...answers, [questionKey]: file };
+    const prefixedKey = animalPrefix + questionKey;
+    const newAnswers = { ...answers, [prefixedKey]: file };
     setAnswers(newAnswers);
     onAnswersChange(newAnswers);
   };
 
   // Déterminer si on doit afficher les questions générales (sans perte d'appétit ni soif excessive ni abattement ni agressivité)
   const shouldShowGeneralQuestions = needsQuestions || hasEarProblems || hasEyeDischarge || hasLameness || hasBreathingDifficulties;
+
+  // Fonction pour obtenir la réponse avec le bon préfixe
+  const getAnswerWithPrefix = (key: string) => {
+    return answers[animalPrefix + key];
+  };
 
   return (
     <div className="space-y-8 sm:space-y-12">
@@ -67,6 +76,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
           answers={answers}
           onAnswerChange={handleAnswerChange}
           excludeDrinking={hasLameness}
+          keyPrefix={animalPrefix}
         />
       )}
 
@@ -74,6 +84,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
         <LossOfAppetiteSection 
           answers={answers}
           onAnswerChange={handleAnswerChange}
+          keyPrefix={animalPrefix}
         />
       )}
 
@@ -81,6 +92,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
         <ExcessiveThirstSection 
           answers={answers}
           onAnswerChange={handleAnswerChange}
+          keyPrefix={animalPrefix}
         />
       )}
 
@@ -88,6 +100,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
         <ListlessSection 
           answers={answers}
           onAnswerChange={handleAnswerChange}
+          keyPrefix={animalPrefix}
         />
       )}
 
@@ -95,6 +108,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
         <BloodInStoolSection 
           answers={answers}
           onAnswerChange={handleAnswerChange}
+          keyPrefix={animalPrefix}
         />
       )}
 
@@ -102,6 +116,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
         <UrinaryProblemsSection 
           answers={answers}
           onAnswerChange={handleAnswerChange}
+          keyPrefix={animalPrefix}
         />
       )}
 
@@ -109,6 +124,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
         <SkinItchingSection 
           answers={answers}
           onAnswerChange={handleAnswerChange}
+          keyPrefix={animalPrefix}
         />
       )}
 
@@ -117,6 +133,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
           answers={answers}
           onAnswerChange={handleAnswerChange}
           onFileChange={handleFileChange}
+          keyPrefix={animalPrefix}
         />
       )}
 
@@ -124,6 +141,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
         <EarProblemsSection 
           answers={answers}
           onAnswerChange={handleAnswerChange}
+          keyPrefix={animalPrefix}
         />
       )}
 
@@ -131,6 +149,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
         <EyeDischargeSection 
           answers={answers}
           onAnswerChange={handleAnswerChange}
+          keyPrefix={animalPrefix}
         />
       )}
 
@@ -138,6 +157,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
         <LamenessSection 
           answers={answers}
           onAnswerChange={handleAnswerChange}
+          keyPrefix={animalPrefix}
         />
       )}
 
@@ -145,6 +165,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
         <BreathingDifficultiesSection 
           answers={answers}
           onAnswerChange={handleAnswerChange}
+          keyPrefix={animalPrefix}
         />
       )}
 
@@ -153,6 +174,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
           answers={answers}
           onAnswerChange={handleAnswerChange}
           onFileChange={handleFileChange}
+          keyPrefix={animalPrefix}
         />
       )}
 
@@ -160,6 +182,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
         <AggressiveSection 
           answers={answers}
           onAnswerChange={handleAnswerChange}
+          keyPrefix={animalPrefix}
         />
       )}
     </div>

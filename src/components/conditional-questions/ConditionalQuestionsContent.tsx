@@ -24,6 +24,13 @@ const ConditionalQuestionsContent = ({
 }: ConditionalQuestionsContentProps) => {
   const isMobile = useIsMobile();
 
+  // Déterminer si on a des symptômes pour chaque animal
+  const hasFirstAnimalSymptoms = (bookingData.selectedSymptoms?.length > 0 || bookingData.customSymptom?.trim() !== '') && 
+    bookingData.consultationReason === 'symptomes-anomalie';
+  
+  const hasSecondAnimalSymptoms = (bookingData.secondAnimalSelectedSymptoms?.length > 0 || bookingData.secondAnimalCustomSymptom?.trim() !== '') && 
+    bookingData.secondAnimalConsultationReason === 'symptomes-anomalie';
+
   return (
     <>
       {/* Formulaire */}
@@ -31,11 +38,35 @@ const ConditionalQuestionsContent = ({
         <CardContent className="p-3 sm:p-6">
           <div className="space-y-4 sm:space-y-6">
             
-            <ConditionalQuestionsForm 
-              selectedSymptoms={bookingData.selectedSymptoms || []} 
-              customSymptom={bookingData.customSymptom || ''} 
-              onAnswersChange={onAnswersChange} 
-            />
+            {/* Questions pour l'animal 1 */}
+            {hasFirstAnimalSymptoms && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-vet-navy border-b border-gray-200 pb-2">
+                  Questions pour {bookingData.animalName || 'Animal 1'}
+                </h3>
+                <ConditionalQuestionsForm 
+                  selectedSymptoms={bookingData.selectedSymptoms || []} 
+                  customSymptom={bookingData.customSymptom || ''} 
+                  onAnswersChange={onAnswersChange}
+                  animalPrefix="animal1_"
+                />
+              </div>
+            )}
+
+            {/* Questions pour l'animal 2 */}
+            {hasSecondAnimalSymptoms && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-vet-navy border-b border-gray-200 pb-2">
+                  Questions pour {bookingData.secondAnimalName || 'Animal 2'}
+                </h3>
+                <ConditionalQuestionsForm 
+                  selectedSymptoms={bookingData.secondAnimalSelectedSymptoms || []} 
+                  customSymptom={bookingData.secondAnimalCustomSymptom || ''} 
+                  onAnswersChange={onAnswersChange}
+                  animalPrefix="animal2_"
+                />
+              </div>
+            )}
 
             {!hasAnyConditions && (
               <div className="text-center text-vet-brown/60 py-8">
