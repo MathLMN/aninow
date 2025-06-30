@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -33,6 +34,15 @@ const ConsultationReason = () => {
     const hasSecondAnimal = parsedData.multipleAnimals?.includes('2-animaux');
     setHasTwoAnimals(hasSecondAnimal);
   }, [navigate]);
+
+  // Effet pour gérer la logique conditionnelle du deuxième animal
+  useEffect(() => {
+    if (hasTwoAnimals && consultationReason === 'symptomes-anomalie') {
+      // Si animal 1 a "symptomes-anomalie", forcer animal 2 à "consultation-convenance"
+      setSecondAnimalConsultationReason('consultation-convenance');
+      setSecondAnimalDifferentReason(true);
+    }
+  }, [consultationReason, hasTwoAnimals]);
 
   const handleBack = () => {
     navigate('/');
@@ -81,6 +91,9 @@ const ConsultationReason = () => {
       (secondAnimalConsultationReason !== 'consultation-convenance' || 
        (secondAnimalConvenienceOptions.length > 0 &&
         (!secondAnimalConvenienceOptions.includes('autre') || secondAnimalCustomText.trim() !== '')))));
+
+  // Détermine si on doit forcer la consultation de convenance pour l'animal 2
+  const shouldForceConvenienceForAnimal2 = hasTwoAnimals && consultationReason === 'symptomes-anomalie';
 
   return (
     <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #EDE3DA 0%, #ffffff 100%)' }}>
@@ -131,8 +144,8 @@ const ConsultationReason = () => {
                   </div>
                 )}
 
-                {/* Checkbox pour motif différent pour le 2e animal - Mobile optimized */}
-                {hasTwoAnimals && (
+                {/* Checkbox pour motif différent pour le 2e animal - Masqué si symptômes pour animal 1 */}
+                {hasTwoAnimals && !shouldForceConvenienceForAnimal2 && (
                   <div className="flex items-start space-x-2 p-2 sm:p-0">
                     <Checkbox 
                       id="different-reason-second-animal"
@@ -146,8 +159,17 @@ const ConsultationReason = () => {
                   </div>
                 )}
 
+                {/* Message informatif quand consultation forcée pour animal 2 */}
+                {shouldForceConvenienceForAnimal2 && (
+                  <div className="bg-vet-blue/10 p-3 rounded-md border border-vet-blue/20">
+                    <p className="text-xs sm:text-sm text-vet-navy text-center leading-relaxed">
+                      ℹ️ Pour le 2e animal, seule une consultation de convenance est possible
+                    </p>
+                  </div>
+                )}
+
                 {/* Sections séparées pour chaque animal si motif différent - Mobile optimized */}
-                {hasTwoAnimals && secondAnimalDifferentReason && (
+                {hasTwoAnimals && (secondAnimalDifferentReason || shouldForceConvenienceForAnimal2) && (
                   <div className="space-y-4 sm:space-y-8">
                     {/* Animal 1 */}
                     <div className="space-y-2 sm:space-y-4 p-3 bg-vet-beige/30 rounded-lg sm:p-4">
@@ -170,17 +192,31 @@ const ConsultationReason = () => {
                     <div className="space-y-2 sm:space-y-4 p-3 bg-vet-blue/10 rounded-lg sm:p-4">
                       <h3 className="text-sm sm:text-lg font-semibold text-vet-blue">Animal 2</h3>
                       <div className="space-y-2 sm:space-y-4">
-                        <ConsultationReasonSelect
-                          value={secondAnimalConsultationReason}
-                          onValueChange={setSecondAnimalConsultationReason}
-                        />
-                        {secondAnimalConsultationReason === 'consultation-convenance' && (
-                          <ConvenienceConsultationSelect
-                            selectedOptions={secondAnimalConvenienceOptions}
-                            onOptionsChange={setSecondAnimalConvenienceOptions}
-                            customText={secondAnimalCustomText}
-                            onCustomTextChange={setSecondAnimalCustomText}
+                        {/* Si pas de consultation forcée, afficher le sélecteur normal */}
+                        {!shouldForceConvenienceForAnimal2 && (
+                          <ConsultationReasonSelect
+                            value={secondAnimalConsultationReason}
+                            onValueChange={setSecondAnimalConsultationReason}
                           />
+                        )}
+                        
+                        {/* Si consultation forcée ou consultation de convenance sélectionnée, afficher les options */}
+                        {(shouldForceConvenienceForAnimal2 || secondAnimalConsultationReason === 'consultation-convenance') && (
+                          <>
+                            {shouldForceConvenienceForAnimal2 && (
+                              <div className="mb-3">
+                                <Label className="text-sm sm:text-base font-medium text-vet-navy block">
+                                  💉 Consultation de convenance (motif automatique)
+                                </Label>
+                              </div>
+                            )}
+                            <ConvenienceConsultationSelect
+                              selectedOptions={secondAnimalConvenienceOptions}
+                              onOptionsChange={setSecondAnimalConvenienceOptions}
+                              customText={secondAnimalCustomText}
+                              onCustomTextChange={setSecondAnimalCustomText}
+                            />
+                          </>
                         )}
                       </div>
                     </div>
