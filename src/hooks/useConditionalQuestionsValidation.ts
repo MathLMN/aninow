@@ -1,4 +1,3 @@
-
 import { useSymptomDetection } from "@/hooks/useSymptomDetection";
 
 interface ValidationProps {
@@ -9,6 +8,7 @@ interface ValidationProps {
 export const useConditionalQuestionsValidation = ({ bookingData, answers }: ValidationProps) => {
   const {
     needsQuestions,
+    hasLossOfAppetite,
     hasBloodInStool,
     hasUrinaryProblems,
     hasSkinItching,
@@ -24,6 +24,11 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
   // Ajouter les questions générales si nécessaire
   if (needsQuestions) {
     requiredQuestions.push('general_form', 'eating', 'drinking');
+  }
+
+  // Ajouter les questions pour la perte d'appétit (sans la question eating)
+  if (hasLossOfAppetite) {
+    requiredQuestions.push('general_form', 'drinking');
   }
   
   // Ajouter la question sur la consistance des selles si nécessaire
@@ -66,13 +71,14 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
     requiredQuestions.push('general_form', 'eating', 'drinking', 'panting');
   }
 
-  const hasAnyConditions = needsQuestions || hasBloodInStool || hasUrinaryProblems || hasSkinItching || hasWound || hasEarProblems || hasEyeDischarge || hasLameness || hasBreathingDifficulties;
+  const hasAnyConditions = needsQuestions || hasLossOfAppetite || hasBloodInStool || hasUrinaryProblems || hasSkinItching || hasWound || hasEarProblems || hasEyeDischarge || hasLameness || hasBreathingDifficulties;
   const allQuestionsAnswered = hasAnyConditions ? requiredQuestions.every(key => answers[key]) : true;
 
   return {
     canProceed: allQuestionsAnswered,
     hasAnyConditions,
     needsQuestions,
+    hasLossOfAppetite,
     hasBloodInStool,
     hasUrinaryProblems,
     hasSkinItching,

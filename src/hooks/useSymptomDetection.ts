@@ -1,4 +1,3 @@
-
 export const useSymptomDetection = (selectedSymptoms: string[], customSymptom: string) => {
   // Vérifier si des symptômes nécessitent les questions générales
   const symptomsRequiringQuestions = ['vomissements', 'diarrhée', 'toux', 'cris/gémissements'];
@@ -7,6 +6,11 @@ export const useSymptomDetection = (selectedSymptoms: string[], customSymptom: s
   ) || symptomsRequiringQuestions.some(symptom => 
     customSymptom.toLowerCase().includes(symptom)
   );
+
+  // Vérifier si "perte d'appétit" est sélectionné
+  const hasLossOfAppetite = selectedSymptoms.some(symptom => 
+    symptom.toLowerCase().includes('perte-appetit') || symptom.toLowerCase().includes('perte d\'appétit')
+  ) || customSymptom.toLowerCase().includes('perte d\'appétit');
 
   // Vérifier si "sang dans les selles" est sélectionné
   const hasBloodInStool = selectedSymptoms.some(symptom => 
@@ -57,6 +61,7 @@ export const useSymptomDetection = (selectedSymptoms: string[], customSymptom: s
 
   return {
     needsQuestions,
+    hasLossOfAppetite,
     hasBloodInStool,
     hasUrinaryProblems,
     hasSkinItching,
