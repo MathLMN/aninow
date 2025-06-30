@@ -78,6 +78,11 @@ export const useSymptomDetection = (selectedSymptoms: string[], customSymptom: s
   ) || customSymptom.toLowerCase().includes('semble abattu') ||
        customSymptom.toLowerCase().includes('abattu');
 
+  // Vérifier si "agressif" est sélectionné
+  const hasAggression = selectedSymptoms.some(symptom => 
+    symptom.toLowerCase().includes('agressif')
+  ) || customSymptom.toLowerCase().includes('agressif');
+
   return {
     needsQuestions,
     hasLossOfAppetite,
@@ -91,6 +96,7 @@ export const useSymptomDetection = (selectedSymptoms: string[], customSymptom: s
     hasLameness,
     hasBreathingDifficulties,
     hasLump,
-    hasListlessness
+    hasListlessness,
+    hasAggression
   };
 };

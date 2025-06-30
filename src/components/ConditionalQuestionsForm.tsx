@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useSymptomDetection } from "@/hooks/useSymptomDetection";
 import GeneralQuestionsSection from "@/components/conditional-questions/GeneralQuestionsSection";
@@ -14,6 +13,7 @@ import LamenessSection from "@/components/conditional-questions/LamenessSection"
 import BreathingDifficultiesSection from "@/components/conditional-questions/BreathingDifficultiesSection";
 import LumpSection from "@/components/conditional-questions/LumpSection";
 import ListlessSection from "@/components/conditional-questions/ListlessSection";
+import AggressiveSection from "@/components/conditional-questions/AggressiveSection";
 
 interface ConditionalQuestionsFormProps {
   selectedSymptoms: string[];
@@ -37,10 +37,11 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     hasLameness,
     hasBreathingDifficulties,
     hasLump,
-    hasListlessness
+    hasListlessness,
+    hasAggression
   } = useSymptomDetection(selectedSymptoms, customSymptom);
 
-  if (!needsQuestions && !hasLossOfAppetite && !hasExcessiveThirst && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems && !hasEyeDischarge && !hasLameness && !hasBreathingDifficulties && !hasLump && !hasListlessness) {
+  if (!needsQuestions && !hasLossOfAppetite && !hasExcessiveThirst && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems && !hasEyeDischarge && !hasLameness && !hasBreathingDifficulties && !hasLump && !hasListlessness && !hasAggression) {
     return null;
   }
 
@@ -56,7 +57,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     onAnswersChange(newAnswers);
   };
 
-  // Déterminer si on doit afficher les questions générales (sans perte d'appétit ni soif excessive ni abattement)
+  // Déterminer si on doit afficher les questions générales (sans perte d'appétit ni soif excessive ni abattement ni agressivité)
   const shouldShowGeneralQuestions = needsQuestions || hasEarProblems || hasEyeDischarge || hasLameness || hasBreathingDifficulties;
 
   return (
@@ -152,6 +153,13 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
           answers={answers}
           onAnswerChange={handleAnswerChange}
           onFileChange={handleFileChange}
+        />
+      )}
+
+      {hasAggression && (
+        <AggressiveSection 
+          answers={answers}
+          onAnswerChange={handleAnswerChange}
         />
       )}
     </div>

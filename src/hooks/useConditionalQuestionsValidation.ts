@@ -1,4 +1,3 @@
-
 import { useSymptomDetection } from "@/hooks/useSymptomDetection";
 
 interface ValidationProps {
@@ -20,7 +19,8 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
     hasLameness,
     hasBreathingDifficulties,
     hasLump,
-    hasListlessness
+    hasListlessness,
+    hasAggression
   } = useSymptomDetection(bookingData?.selectedSymptoms || [], bookingData?.customSymptom || '');
 
   let requiredQuestions: string[] = [];
@@ -90,7 +90,12 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
     requiredQuestions.push('general_form', 'lump_body_area', 'lump_size_evolution');
   }
 
-  const hasAnyConditions = needsQuestions || hasLossOfAppetite || hasExcessiveThirst || hasBloodInStool || hasUrinaryProblems || hasSkinItching || hasWound || hasEarProblems || hasEyeDischarge || hasLameness || hasBreathingDifficulties || hasLump || hasListlessness;
+  // Ajouter les questions spécifiques à l'agressivité si nécessaire
+  if (hasAggression) {
+    requiredQuestions.push('general_form', 'pain_complaints', 'bite_history');
+  }
+
+  const hasAnyConditions = needsQuestions || hasLossOfAppetite || hasExcessiveThirst || hasBloodInStool || hasUrinaryProblems || hasSkinItching || hasWound || hasEarProblems || hasEyeDischarge || hasLameness || hasBreathingDifficulties || hasLump || hasListlessness || hasAggression;
   const allQuestionsAnswered = hasAnyConditions ? requiredQuestions.every(key => answers[key]) : true;
 
   return {
@@ -108,6 +113,7 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
     hasLameness,
     hasBreathingDifficulties,
     hasLump,
-    hasListlessness
+    hasListlessness,
+    hasAggression
   };
 };
