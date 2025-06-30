@@ -5,12 +5,14 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import ConditionalQuestionsForm from "@/components/ConditionalQuestionsForm";
+
 const ConditionalQuestions = () => {
   const navigate = useNavigate();
   const [answers, setAnswers] = useState<{
     [key: string]: any;
   }>({});
   const [bookingData, setBookingData] = useState<any>(null);
+
   useEffect(() => {
     // Vérifier que l'utilisateur vient bien de la page symptômes
     const storedData = localStorage.getItem('bookingFormData');
@@ -28,9 +30,11 @@ const ConditionalQuestions = () => {
       return;
     }
   }, [navigate]);
+
   const handleBack = () => {
     navigate('/booking/symptoms');
   };
+
   const handleNext = () => {
     const existingData = JSON.parse(localStorage.getItem('bookingFormData') || '{}');
     const updatedData = {
@@ -43,6 +47,7 @@ const ConditionalQuestions = () => {
     // Naviguer vers la page suivante (créneaux)
     navigate('/booking/slots');
   };
+
   const handleAnswersChange = (newAnswers: any) => {
     setAnswers(newAnswers);
   };
@@ -50,15 +55,30 @@ const ConditionalQuestions = () => {
   // Vérifier si toutes les questions requises ont été répondues
   const symptomsRequiringQuestions = ['vomissements', 'diarrhée', 'toux', 'cris/gémissements'];
   const needsQuestions = bookingData?.selectedSymptoms?.some((symptom: string) => symptomsRequiringQuestions.includes(symptom.toLowerCase())) || symptomsRequiringQuestions.some((symptom: string) => bookingData?.customSymptom?.toLowerCase()?.includes(symptom));
-  const requiredQuestions = ['general_form', 'eating', 'drinking'];
-  const allQuestionsAnswered = needsQuestions ? requiredQuestions.every(key => answers[key]) : true;
+  
+  // Vérifier si "sang dans les selles" est sélectionné
+  const hasBloodInStool = bookingData?.selectedSymptoms?.some((symptom: string) => 
+    symptom.toLowerCase().includes('sang-selles') || symptom.toLowerCase().includes('sang dans les selles')
+  ) || bookingData?.customSymptom?.toLowerCase()?.includes('sang dans les selles');
+
+  let requiredQuestions = ['general_form', 'eating', 'drinking'];
+  
+  // Ajouter la question sur la consistance des selles si nécessaire
+  if (hasBloodInStool) {
+    requiredQuestions.push('stool_consistency');
+  }
+
+  const allQuestionsAnswered = (needsQuestions || hasBloodInStool) ? requiredQuestions.every(key => answers[key]) : true;
   const canProceed = allQuestionsAnswered;
+
   if (!bookingData) {
     return null;
   }
-  return <div className="min-h-screen" style={{
-    background: 'linear-gradient(135deg, #EDE3DA 0%, #ffffff 100%)'
-  }}>
+
+  return (
+    <div className="min-h-screen" style={{
+      background: 'linear-gradient(135deg, #EDE3DA 0%, #ffffff 100%)'
+    }}>
       <Header />
 
       <main className="container mx-auto px-3 sm:px-6 py-4 sm:py-6 pb-6">
@@ -84,17 +104,27 @@ const ConditionalQuestions = () => {
             <CardContent className="p-3 sm:p-6">
               <div className="space-y-4 sm:space-y-6">
                 
-                <ConditionalQuestionsForm selectedSymptoms={bookingData.selectedSymptoms || []} customSymptom={bookingData.customSymptom || ''} onAnswersChange={handleAnswersChange} />
+                <ConditionalQuestionsForm 
+                  selectedSymptoms={bookingData.selectedSymptoms || []} 
+                  customSymptom={bookingData.customSymptom || ''} 
+                  onAnswersChange={handleAnswersChange} 
+                />
 
-                {!needsQuestions && <div className="text-center text-vet-brown/60 py-8">
+                {!needsQuestions && !hasBloodInStool && (
+                  <div className="text-center text-vet-brown/60 py-8">
                     <p className="text-sm sm:text-base">
                       Aucune question complémentaire n'est nécessaire pour les symptômes sélectionnés.
                     </p>
-                  </div>}
+                  </div>
+                )}
 
                 {/* Bouton Suivant */}
                 <div className="pt-4 sm:pt-6">
-                  <Button onClick={handleNext} disabled={!canProceed} className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white w-full h-12 sm:h-14 text-base sm:text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-200">
+                  <Button 
+                    onClick={handleNext} 
+                    disabled={!canProceed} 
+                    className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white w-full h-12 sm:h-14 text-base sm:text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-200"
+                  >
                     Suivant
                     <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                   </Button>
@@ -104,6 +134,8 @@ const ConditionalQuestions = () => {
           </Card>
         </div>
       </main>
-    </div>;
+    </div>
+  );
 };
+
 export default ConditionalQuestions;

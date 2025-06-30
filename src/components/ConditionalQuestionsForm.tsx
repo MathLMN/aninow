@@ -19,7 +19,12 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     customSymptom.toLowerCase().includes(symptom)
   );
 
-  if (!needsQuestions) {
+  // Vérifier si "sang dans les selles" est sélectionné pour ajouter la question sur la consistance
+  const hasBloodInStool = selectedSymptoms.some(symptom => 
+    symptom.toLowerCase().includes('sang-selles') || symptom.toLowerCase().includes('sang dans les selles')
+  ) || customSymptom.toLowerCase().includes('sang dans les selles');
+
+  if (!needsQuestions && !hasBloodInStool) {
     return null;
   }
 
@@ -46,6 +51,15 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
       options: ['Soif normale', 'Soif excessive', 'Pas soif']
     }
   ];
+
+  // Ajouter la question sur la consistance des selles si "sang dans les selles" est sélectionné
+  if (hasBloodInStool) {
+    questions.push({
+      key: 'stool_consistency',
+      title: 'Quelle est la consistance des selles ?',
+      options: ['Selles normales', 'Selles molles', 'Selles fermes']
+    });
+  }
 
   return (
     <div className="space-y-8 sm:space-y-12">
