@@ -1,12 +1,13 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Stethoscope, ArrowLeft, ArrowRight } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import ConsultationReasonSelect from "@/components/ConsultationReasonSelect";
 import ConvenienceConsultationSelect from "@/components/ConvenienceConsultationSelect";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
+import Header from "@/components/Header";
 
 const ConsultationReason = () => {
   const navigate = useNavigate();
@@ -83,26 +84,7 @@ const ConsultationReason = () => {
 
   return (
     <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #EDE3DA 0%, #ffffff 100%)' }}>
-      {/* Header - Optimized for mobile */}
-      <header className="bg-vet-navy text-vet-beige shadow-lg">
-        <div className="container mx-auto px-3 sm:px-6 py-2 sm:py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <img 
-                src="/lovable-uploads/44fb068f-1799-4a6c-9ad1-1308c67a7645.png" 
-                alt="AniNow" 
-                className="h-4 w-auto sm:h-6"
-              />
-            </div>
-            <Link to="/vet/login">
-              <Button variant="ghost" className="text-vet-beige hover:bg-white/10 text-xs px-2 py-1 sm:text-sm sm:px-4 sm:py-2">
-                <Stethoscope className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                <span className="hidden xs:inline">Espace </span>Clinique
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <main className="container mx-auto px-3 sm:px-6 py-3 sm:py-8">
         <div className="max-w-4xl mx-auto">

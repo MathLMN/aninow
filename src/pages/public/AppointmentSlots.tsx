@@ -1,9 +1,9 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, Clock, Heart } from "lucide-react";
+import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import Header from "@/components/Header";
 
 const AppointmentSlots = () => {
   const navigate = useNavigate();
@@ -32,23 +32,7 @@ const AppointmentSlots = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20">
-      {/* Header */}
-      <header className="bg-vet-navy text-vet-beige shadow-lg">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-              <Heart className="h-6 w-6 text-vet-sage" />
-              <span className="text-xl font-bold">VetBooking</span>
-            </Link>
-            <Link to="/booking">
-              <Button variant="ghost" className="text-vet-beige hover:bg-white/10">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Retour au formulaire
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <main className="container mx-auto px-6 py-8">
         <div className="max-w-6xl mx-auto">

@@ -2,21 +2,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Calendar, Clock, Mail, Phone, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
+import Header from "@/components/Header";
 
 const BookingConfirmation = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20">
-      {/* Header */}
-      <header className="bg-vet-navy text-vet-beige shadow-lg">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-center">
-            <div className="flex items-center space-x-3">
-              <Heart className="h-6 w-6 text-vet-sage" />
-              <span className="text-xl font-bold">AniNow</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Main content */}
       <main className="container mx-auto px-6 py-12">
