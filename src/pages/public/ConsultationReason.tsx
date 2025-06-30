@@ -1,7 +1,6 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Settings, ArrowLeft, ArrowRight } from "lucide-react";
+import { Stethoscope, ArrowLeft, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import ConsultationReasonSelect from "@/components/ConsultationReasonSelect";
 import ConvenienceConsultationSelect from "@/components/ConvenienceConsultationSelect";
@@ -97,7 +96,7 @@ const ConsultationReason = () => {
             </div>
             <Link to="/vet/login">
               <Button variant="ghost" className="text-vet-beige hover:bg-white/10 text-xs px-2 py-1 sm:text-sm sm:px-4 sm:py-2">
-                <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                <Stethoscope className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                 <span className="hidden xs:inline">Espace </span>Clinique
               </Button>
             </Link>
