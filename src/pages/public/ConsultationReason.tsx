@@ -5,95 +5,36 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ConsultationReasonSelect from "@/components/ConsultationReasonSelect";
 import ConvenienceConsultationSelect from "@/components/ConvenienceConsultationSelect";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { useState, useEffect } from "react";
+import SecondAnimalSection from "@/components/SecondAnimalSection";
 import Header from "@/components/Header";
+import { useConsultationReason } from "@/hooks/useConsultationReason";
 
 const ConsultationReason = () => {
   const navigate = useNavigate();
-  const [consultationReason, setConsultationReason] = useState('');
-  const [convenienceOptions, setConvenienceOptions] = useState<string[]>([]);
-  const [customText, setCustomText] = useState('');
-  const [secondAnimalDifferentReason, setSecondAnimalDifferentReason] = useState(false);
-  const [secondAnimalConsultationReason, setSecondAnimalConsultationReason] = useState('');
-  const [secondAnimalConvenienceOptions, setSecondAnimalConvenienceOptions] = useState<string[]>([]);
-  const [secondAnimalCustomText, setSecondAnimalCustomText] = useState('');
-  const [hasTwoAnimals, setHasTwoAnimals] = useState(false);
-
-  useEffect(() => {
-    // Vérifier que les données du formulaire précédent existent
-    const bookingData = localStorage.getItem('bookingFormData');
-    if (!bookingData) {
-      navigate('/');
-      return;
-    }
-
-    const parsedData = JSON.parse(bookingData);
-    // Vérifier si l'utilisateur a sélectionné "2 animaux"
-    const hasSecondAnimal = parsedData.multipleAnimals?.includes('2-animaux');
-    setHasTwoAnimals(hasSecondAnimal);
-  }, [navigate]);
-
-  // Effet pour gérer la logique conditionnelle du deuxième animal
-  useEffect(() => {
-    if (hasTwoAnimals && consultationReason === 'symptomes-anomalie') {
-      // Si animal 1 a "symptomes-anomalie", forcer animal 2 à "consultation-convenance"
-      setSecondAnimalConsultationReason('consultation-convenance');
-      setSecondAnimalDifferentReason(true);
-    }
-  }, [consultationReason, hasTwoAnimals]);
+  const {
+    consultationReason,
+    setConsultationReason,
+    convenienceOptions,
+    setConvenienceOptions,
+    customText,
+    setCustomText,
+    secondAnimalDifferentReason,
+    setSecondAnimalDifferentReason,
+    secondAnimalConsultationReason,
+    setSecondAnimalConsultationReason,
+    secondAnimalConvenienceOptions,
+    setSecondAnimalConvenienceOptions,
+    secondAnimalCustomText,
+    setSecondAnimalCustomText,
+    hasTwoAnimals,
+    handleNext,
+    canProceed,
+    shouldForceConvenienceForAnimal2
+  } = useConsultationReason();
 
   const handleBack = () => {
     navigate('/');
   };
-
-  const handleNext = () => {
-    const isFirstAnimalValid = consultationReason !== '' && 
-      (consultationReason !== 'consultation-convenance' || 
-       (convenienceOptions.length > 0 && 
-        (!convenienceOptions.includes('autre') || customText.trim() !== '')));
-    
-    const isSecondAnimalValid = !secondAnimalDifferentReason || 
-      (secondAnimalConsultationReason !== '' && 
-       (secondAnimalConsultationReason !== 'consultation-convenance' || 
-        (secondAnimalConvenienceOptions.length > 0 &&
-         (!secondAnimalConvenienceOptions.includes('autre') || secondAnimalCustomText.trim() !== ''))));
-
-    if (isFirstAnimalValid && isSecondAnimalValid) {
-      // Récupérer les données existantes et ajouter le motif de consultation
-      const existingData = JSON.parse(localStorage.getItem('bookingFormData') || '{}');
-      const updatedData = {
-        ...existingData,
-        consultationReason,
-        convenienceOptions,
-        customText,
-        secondAnimalDifferentReason,
-        secondAnimalConsultationReason: secondAnimalDifferentReason ? secondAnimalConsultationReason : consultationReason,
-        secondAnimalConvenienceOptions: secondAnimalDifferentReason ? secondAnimalConvenienceOptions : convenienceOptions,
-        secondAnimalCustomText: secondAnimalDifferentReason ? secondAnimalCustomText : customText
-      };
-      
-      localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
-      console.log('Updated booking data:', updatedData);
-      
-      // Naviguer vers la page suivante (créneaux)
-      navigate('/booking/slots');
-    }
-  };
-
-  const canProceed = consultationReason !== '' && 
-    (consultationReason !== 'consultation-convenance' || 
-     (convenienceOptions.length > 0 && 
-      (!convenienceOptions.includes('autre') || customText.trim() !== ''))) &&
-    (!secondAnimalDifferentReason || 
-     (secondAnimalConsultationReason !== '' && 
-      (secondAnimalConsultationReason !== 'consultation-convenance' || 
-       (secondAnimalConvenienceOptions.length > 0 &&
-        (!secondAnimalConvenienceOptions.includes('autre') || secondAnimalCustomText.trim() !== '')))));
-
-  // Détermine si on doit forcer la consultation de convenance pour l'animal 2
-  const shouldForceConvenienceForAnimal2 = hasTwoAnimals && consultationReason === 'symptomes-anomalie';
 
   return (
     <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #EDE3DA 0%, #ffffff 100%)' }}>
@@ -144,84 +85,24 @@ const ConsultationReason = () => {
                   </div>
                 )}
 
-                {/* Checkbox pour motif différent pour le 2e animal - Masqué si symptômes pour animal 1 */}
-                {hasTwoAnimals && !shouldForceConvenienceForAnimal2 && (
-                  <div className="flex items-start space-x-2 p-2 sm:p-0">
-                    <Checkbox 
-                      id="different-reason-second-animal"
-                      checked={secondAnimalDifferentReason}
-                      onCheckedChange={(checked) => setSecondAnimalDifferentReason(checked as boolean)}
-                      className="mt-0.5 sm:mt-1"
-                    />
-                    <Label htmlFor="different-reason-second-animal" className="text-vet-navy cursor-pointer text-sm leading-tight sm:text-base">
-                      Le motif est différent pour le 2e animal
-                    </Label>
-                  </div>
-                )}
-
-                {/* Message informatif quand consultation forcée pour animal 2 */}
-                {shouldForceConvenienceForAnimal2 && (
-                  <div className="bg-vet-blue/10 p-3 rounded-md border border-vet-blue/20">
-                    <p className="text-xs sm:text-sm text-vet-navy text-center leading-relaxed">
-                      ℹ️ Pour le 2e animal, seule une consultation de convenance est possible
-                    </p>
-                  </div>
-                )}
-
-                {/* Sections séparées pour chaque animal si motif différent - Mobile optimized */}
-                {hasTwoAnimals && (secondAnimalDifferentReason || shouldForceConvenienceForAnimal2) && (
-                  <div className="space-y-4 sm:space-y-8">
-                    {/* Animal 1 */}
-                    <div className="space-y-2 sm:space-y-4 p-3 bg-vet-beige/30 rounded-lg sm:p-4">
-                      <h3 className="text-sm sm:text-lg font-semibold text-vet-blue">Animal 1</h3>
-                      <ConsultationReasonSelect
-                        value={consultationReason}
-                        onValueChange={setConsultationReason}
-                      />
-                      {consultationReason === 'consultation-convenance' && (
-                        <ConvenienceConsultationSelect
-                          selectedOptions={convenienceOptions}
-                          onOptionsChange={setConvenienceOptions}
-                          customText={customText}
-                          onCustomTextChange={setCustomText}
-                        />
-                      )}
-                    </div>
-
-                    {/* Animal 2 */}
-                    <div className="space-y-2 sm:space-y-4 p-3 bg-vet-blue/10 rounded-lg sm:p-4">
-                      <h3 className="text-sm sm:text-lg font-semibold text-vet-blue">Animal 2</h3>
-                      <div className="space-y-2 sm:space-y-4">
-                        {/* Si pas de consultation forcée, afficher le sélecteur normal */}
-                        {!shouldForceConvenienceForAnimal2 && (
-                          <ConsultationReasonSelect
-                            value={secondAnimalConsultationReason}
-                            onValueChange={setSecondAnimalConsultationReason}
-                          />
-                        )}
-                        
-                        {/* Si consultation forcée ou consultation de convenance sélectionnée, afficher les options */}
-                        {(shouldForceConvenienceForAnimal2 || secondAnimalConsultationReason === 'consultation-convenance') && (
-                          <>
-                            {shouldForceConvenienceForAnimal2 && (
-                              <div className="mb-3">
-                                <Label className="text-sm sm:text-base font-medium text-vet-navy block">
-                                  💉 Consultation de convenance (motif automatique)
-                                </Label>
-                              </div>
-                            )}
-                            <ConvenienceConsultationSelect
-                              selectedOptions={secondAnimalConvenienceOptions}
-                              onOptionsChange={setSecondAnimalConvenienceOptions}
-                              customText={secondAnimalCustomText}
-                              onCustomTextChange={setSecondAnimalCustomText}
-                            />
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                <SecondAnimalSection
+                  hasTwoAnimals={hasTwoAnimals}
+                  shouldForceConvenienceForAnimal2={shouldForceConvenienceForAnimal2}
+                  secondAnimalDifferentReason={secondAnimalDifferentReason}
+                  onSecondAnimalDifferentReasonChange={setSecondAnimalDifferentReason}
+                  consultationReason={consultationReason}
+                  onConsultationReasonChange={setConsultationReason}
+                  convenienceOptions={convenienceOptions}
+                  onConvenienceOptionsChange={setConvenienceOptions}
+                  customText={customText}
+                  onCustomTextChange={setCustomText}
+                  secondAnimalConsultationReason={secondAnimalConsultationReason}
+                  onSecondAnimalConsultationReasonChange={setSecondAnimalConsultationReason}
+                  secondAnimalConvenienceOptions={secondAnimalConvenienceOptions}
+                  onSecondAnimalConvenienceOptionsChange={setSecondAnimalConvenienceOptions}
+                  secondAnimalCustomText={secondAnimalCustomText}
+                  onSecondAnimalCustomTextChange={setSecondAnimalCustomText}
+                />
 
                 {/* Bouton Suivant - Identique à celui de la première page */}
                 <div className="pt-3 sm:pt-4">
