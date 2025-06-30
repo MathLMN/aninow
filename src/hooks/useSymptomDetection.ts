@@ -1,11 +1,10 @@
-
 export const useSymptomDetection = (selectedSymptoms: string[], customSymptom: string) => {
   // Vérifier si des symptômes nécessitent les questions générales
-  const symptomsRequiringQuestions = ['vomissements', 'diarrhée', 'toux', 'cris/gémissements'];
+  const symptomsRequiringQuestions = ['vomissements', 'diarrhée', 'toux', 'cris-gemissements'];
   const needsQuestions = selectedSymptoms.some(symptom => 
     symptomsRequiringQuestions.includes(symptom.toLowerCase())
   ) || symptomsRequiringQuestions.some(symptom => 
-    customSymptom.toLowerCase().includes(symptom)
+    customSymptom.toLowerCase().includes(symptom.replace('-', '/'))
   );
 
   // Vérifier si "perte d'appétit" est sélectionné
