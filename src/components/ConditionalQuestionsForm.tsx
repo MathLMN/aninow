@@ -1,7 +1,9 @@
+
 import { useState } from "react";
 import { useSymptomDetection } from "@/hooks/useSymptomDetection";
 import GeneralQuestionsSection from "@/components/conditional-questions/GeneralQuestionsSection";
 import LossOfAppetiteSection from "@/components/conditional-questions/LossOfAppetiteSection";
+import ExcessiveThirstSection from "@/components/conditional-questions/ExcessiveThirstSection";
 import BloodInStoolSection from "@/components/conditional-questions/BloodInStoolSection";
 import UrinaryProblemsSection from "@/components/conditional-questions/UrinaryProblemsSection";
 import SkinItchingSection from "@/components/conditional-questions/SkinItchingSection";
@@ -23,6 +25,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
   const {
     needsQuestions,
     hasLossOfAppetite,
+    hasExcessiveThirst,
     hasBloodInStool,
     hasUrinaryProblems,
     hasSkinItching,
@@ -33,7 +36,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     hasBreathingDifficulties
   } = useSymptomDetection(selectedSymptoms, customSymptom);
 
-  if (!needsQuestions && !hasLossOfAppetite && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems && !hasEyeDischarge && !hasLameness && !hasBreathingDifficulties) {
+  if (!needsQuestions && !hasLossOfAppetite && !hasExcessiveThirst && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems && !hasEyeDischarge && !hasLameness && !hasBreathingDifficulties) {
     return null;
   }
 
@@ -49,7 +52,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     onAnswersChange(newAnswers);
   };
 
-  // Déterminer si on doit afficher les questions générales (sans perte d'appétit)
+  // Déterminer si on doit afficher les questions générales (sans perte d'appétit ni soif excessive)
   const shouldShowGeneralQuestions = needsQuestions || hasEarProblems || hasEyeDischarge || hasLameness || hasBreathingDifficulties;
 
   return (
@@ -64,6 +67,13 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
 
       {hasLossOfAppetite && (
         <LossOfAppetiteSection 
+          answers={answers}
+          onAnswerChange={handleAnswerChange}
+        />
+      )}
+
+      {hasExcessiveThirst && (
+        <ExcessiveThirstSection 
           answers={answers}
           onAnswerChange={handleAnswerChange}
         />
