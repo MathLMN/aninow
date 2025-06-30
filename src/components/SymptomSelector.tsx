@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -111,6 +112,25 @@ const SymptomSelector: React.FC<SymptomSelectorProps> = ({
     );
   }, [searchTerm]);
 
+  // Regrouper les symptômes par couleur
+  const groupedSymptoms = useMemo(() => {
+    const groups: { [color: string]: typeof SYMPTOMS } = {};
+    
+    filteredSymptoms.forEach(symptom => {
+      if (!groups[symptom.color]) {
+        groups[symptom.color] = [];
+      }
+      groups[symptom.color].push(symptom);
+    });
+    
+    // Ordre des couleurs pour un affichage cohérent
+    const colorOrder = ['orange', 'yellow', 'purple', 'green', 'pink', 'blue', 'gray', 'red'];
+    return colorOrder.filter(color => groups[color]).map(color => ({
+      color,
+      symptoms: groups[color]
+    }));
+  }, [filteredSymptoms]);
+
   const handleSymptomToggle = (symptomId: string, selected: boolean) => {
     if (selected) {
       onSymptomsChange([...selectedSymptoms, symptomId]);
@@ -135,24 +155,28 @@ const SymptomSelector: React.FC<SymptomSelectorProps> = ({
         />
       </div>
 
-      {/* Tags des symptômes */}
-      <div className="flex flex-wrap gap-2">
-        {filteredSymptoms.map((symptom) => {
-          const isSelected = selectedSymptoms.includes(symptom.id);
-          return (
-            <button
-              key={symptom.id}
-              type="button"
-              onClick={() => handleSymptomToggle(symptom.id, !isSelected)}
-              className={`
-                inline-flex items-center px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium border transition-all duration-200 cursor-pointer hover:shadow-sm active:scale-95
-                ${getTagColorClasses(symptom.color, isSelected)}
-              `}
-            >
-              {symptom.label}
-            </button>
-          );
-        })}
+      {/* Tags des symptômes regroupés par couleur */}
+      <div className="space-y-3">
+        {groupedSymptoms.map(({ color, symptoms }) => (
+          <div key={color} className="flex flex-wrap gap-2">
+            {symptoms.map((symptom) => {
+              const isSelected = selectedSymptoms.includes(symptom.id);
+              return (
+                <button
+                  key={symptom.id}
+                  type="button"
+                  onClick={() => handleSymptomToggle(symptom.id, !isSelected)}
+                  className={`
+                    inline-flex items-center px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium border transition-all duration-200 cursor-pointer hover:shadow-sm active:scale-95
+                    ${getTagColorClasses(symptom.color, isSelected)}
+                  `}
+                >
+                  {symptom.label}
+                </button>
+              );
+            })}
+          </div>
+        ))}
       </div>
 
       {/* Zone de texte personnalisée si "Autre" est sélectionné */}
