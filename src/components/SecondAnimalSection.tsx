@@ -3,8 +3,6 @@ import React from 'react';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import AnimalConsultationForm from "@/components/AnimalConsultationForm";
-import ConsultationReasonSelect from "@/components/ConsultationReasonSelect";
-import ConvenienceConsultationSelect from "@/components/ConvenienceConsultationSelect";
 
 interface SecondAnimalSectionProps {
   hasTwoAnimals: boolean;
@@ -47,26 +45,6 @@ const SecondAnimalSection: React.FC<SecondAnimalSectionProps> = ({
 
   return (
     <>
-      {/* Formulaire commun si pas de motif différent */}
-      {!secondAnimalDifferentReason && !shouldForceConvenienceForAnimal2 && (
-        <div className="space-y-3 sm:space-y-4">
-          <ConsultationReasonSelect
-            value={consultationReason}
-            onValueChange={onConsultationReasonChange}
-          />
-          
-          {/* Sélection des options de convenance pour les deux animaux */}
-          {consultationReason === 'consultation-convenance' && (
-            <ConvenienceConsultationSelect
-              selectedOptions={convenienceOptions}
-              onOptionsChange={onConvenienceOptionsChange}
-              customText={customText}
-              onCustomTextChange={onCustomTextChange}
-            />
-          )}
-        </div>
-      )}
-
       {/* Checkbox pour motif différent pour le 2e animal - Masqué si symptômes pour animal 1 */}
       {!shouldForceConvenienceForAnimal2 && (
         <div className="flex items-start space-x-2 p-2 sm:p-0">
@@ -82,25 +60,17 @@ const SecondAnimalSection: React.FC<SecondAnimalSectionProps> = ({
         </div>
       )}
 
-      {/* Message informatif quand consultation forcée pour animal 2 - SEULEMENT si checkbox pas cochée */}
-      {shouldForceConvenienceForAnimal2 && !secondAnimalDifferentReason && (
+      {/* Message informatif quand consultation forcée pour animal 2 */}
+      {shouldForceConvenienceForAnimal2 && (
         <div className="bg-vet-blue/10 p-3 rounded-md border border-vet-blue/20">
           <p className="text-xs sm:text-sm text-vet-navy text-center leading-relaxed">
             ℹ️ Pour le 2e animal, seule une consultation de convenance est possible
           </p>
-          <div className="mt-3">
-            <ConvenienceConsultationSelect
-              selectedOptions={secondAnimalConvenienceOptions}
-              onOptionsChange={onSecondAnimalConvenienceOptionsChange}
-              customText={secondAnimalCustomText}
-              onCustomTextChange={onSecondAnimalCustomTextChange}
-            />
-          </div>
         </div>
       )}
 
-      {/* Sections séparées pour chaque animal - SEULEMENT si checkbox motif différent cochée */}
-      {secondAnimalDifferentReason && (
+      {/* Sections séparées pour chaque animal si motif différent */}
+      {(secondAnimalDifferentReason || shouldForceConvenienceForAnimal2) && (
         <div className="space-y-4 sm:space-y-8">
           {/* Animal 1 */}
           <AnimalConsultationForm
