@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import SelectionButton from "@/components/SelectionButton";
 
@@ -33,12 +34,23 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     symptom.toLowerCase().includes('demangeaisons-cutanees') || symptom.toLowerCase().includes('démangeaisons cutanées')
   ) || customSymptom.toLowerCase().includes('démangeaisons cutanées');
 
-  if (!needsQuestions && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching) {
+  // Vérifier si "plaie" est sélectionné
+  const hasWound = selectedSymptoms.some(symptom => 
+    symptom.toLowerCase().includes('plaie')
+  ) || customSymptom.toLowerCase().includes('plaie');
+
+  if (!needsQuestions && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound) {
     return null;
   }
 
   const handleAnswerChange = (questionKey: string, value: string) => {
     const newAnswers = { ...answers, [questionKey]: value };
+    setAnswers(newAnswers);
+    onAnswersChange(newAnswers);
+  };
+
+  const handleFileChange = (questionKey: string, file: File | null) => {
+    const newAnswers = { ...answers, [questionKey]: file };
     setAnswers(newAnswers);
     onAnswersChange(newAnswers);
   };
@@ -122,6 +134,32 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     );
   }
 
+  // Questions spécifiques aux plaies
+  if (hasWound) {
+    questions.push(
+      {
+        key: 'wound_location',
+        title: 'Sur quelle(s) zone(s) du corps ?',
+        options: ['Généralisée', 'Plusieurs zones', 'Une zone localisée']
+      },
+      {
+        key: 'wound_oozing',
+        title: 'La plaie est suintante (pus ou liquide) ?',
+        options: ['Ne suinte pas', 'Légèrement', 'Abondamment']
+      },
+      {
+        key: 'wound_depth',
+        title: 'La plaie semble superficielle ou profonde ?',
+        options: ['Superficielle', 'Légèrement profonde', 'Très profonde']
+      },
+      {
+        key: 'wound_bleeding',
+        title: 'La plaie saigne ?',
+        options: ['Ne saigne pas', 'Légèrement', 'Abondamment']
+      }
+    );
+  }
+
   return (
     <div className="space-y-8 sm:space-y-12">
       {questions.map((question) => (
@@ -147,6 +185,41 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
           </div>
         </div>
       ))}
+
+      {/* Champ de téléchargement de photo pour les plaies */}
+      {hasWound && (
+        <div className="space-y-4 sm:space-y-6">
+          <h3 className="text-base sm:text-lg text-vet-navy text-left mb-4 sm:mb-6">
+            Ajoutez une photo de la plaie ci-dessous (optionnel)
+          </h3>
+          
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-vet-sage/50 transition-colors">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleFileChange('wound_photo', e.target.files?.[0] || null)}
+              className="hidden"
+              id="wound-photo-upload"
+            />
+            <label
+              htmlFor="wound-photo-upload"
+              className="cursor-pointer flex flex-col items-center space-y-2"
+            >
+              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              <span className="text-sm text-gray-600">
+                Cliquez pour choisir un fichier ou faites-le glisser ici
+              </span>
+            </label>
+            {answers['wound_photo'] && (
+              <p className="text-sm text-vet-sage mt-2">
+                Fichier sélectionné: {(answers['wound_photo'] as File).name}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -72,6 +72,11 @@ const ConditionalQuestions = () => {
     symptom.toLowerCase().includes('demangeaisons-cutanees') || symptom.toLowerCase().includes('démangeaisons cutanées')
   ) || bookingData?.customSymptom?.toLowerCase()?.includes('démangeaisons cutanées');
 
+  // Vérifier si "plaie" est sélectionné
+  const hasWound = bookingData?.selectedSymptoms?.some((symptom: string) => 
+    symptom.toLowerCase().includes('plaie')
+  ) || bookingData?.customSymptom?.toLowerCase()?.includes('plaie');
+
   let requiredQuestions: string[] = [];
   
   // Ajouter les questions générales si nécessaire
@@ -94,7 +99,12 @@ const ConditionalQuestions = () => {
     requiredQuestions.push('skin_itching_areas', 'antiparasitic_treatment', 'hair_loss');
   }
 
-  const allQuestionsAnswered = (needsQuestions || hasBloodInStool || hasUrinaryProblems || hasSkinItching) ? requiredQuestions.every(key => answers[key]) : true;
+  // Ajouter les questions spécifiques aux plaies si nécessaire
+  if (hasWound) {
+    requiredQuestions.push('wound_location', 'wound_oozing', 'wound_depth', 'wound_bleeding');
+  }
+
+  const allQuestionsAnswered = (needsQuestions || hasBloodInStool || hasUrinaryProblems || hasSkinItching || hasWound) ? requiredQuestions.every(key => answers[key]) : true;
   const canProceed = allQuestionsAnswered;
 
   if (!bookingData) {
@@ -136,7 +146,7 @@ const ConditionalQuestions = () => {
                   onAnswersChange={handleAnswersChange} 
                 />
 
-                {!needsQuestions && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && (
+                {!needsQuestions && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && (
                   <div className="text-center text-vet-brown/60 py-8">
                     <p className="text-sm sm:text-base">
                       Aucune question complémentaire n'est nécessaire pour les symptômes sélectionnés.
