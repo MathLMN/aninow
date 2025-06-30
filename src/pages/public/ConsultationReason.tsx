@@ -3,8 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import ConsultationReasonSelect from "@/components/ConsultationReasonSelect";
-import ConvenienceConsultationSelect from "@/components/ConvenienceConsultationSelect";
 import SecondAnimalSection from "@/components/SecondAnimalSection";
 import Header from "@/components/Header";
 import { useConsultationReason } from "@/hooks/useConsultationReason";
@@ -67,26 +65,6 @@ const ConsultationReason = () => {
           <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl relative">
             <CardContent className="p-3 sm:p-8">
               <div className="space-y-4 sm:space-y-8">
-                {/* Si pas de deuxième animal OU si le motif n'est pas différent pour le 2e animal */}
-                {(!hasTwoAnimals || !secondAnimalDifferentReason) && (
-                  <div className="space-y-3 sm:space-y-4">
-                    <ConsultationReasonSelect
-                      value={consultationReason}
-                      onValueChange={setConsultationReason}
-                    />
-                    
-                    {/* Sélection des options de convenance pour le premier animal */}
-                    {consultationReason === 'consultation-convenance' && (
-                      <ConvenienceConsultationSelect
-                        selectedOptions={convenienceOptions}
-                        onOptionsChange={setConvenienceOptions}
-                        customText={customText}
-                        onCustomTextChange={setCustomText}
-                      />
-                    )}
-                  </div>
-                )}
-
                 <SecondAnimalSection
                   hasTwoAnimals={hasTwoAnimals}
                   shouldForceConvenienceForAnimal2={shouldForceConvenienceForAnimal2}
