@@ -1,8 +1,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
 
 interface ConditionalQuestionsFormProps {
   selectedSymptoms: string[];
@@ -11,7 +9,6 @@ interface ConditionalQuestionsFormProps {
 }
 
 const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersChange }: ConditionalQuestionsFormProps) => {
-  const form = useForm();
   const [answers, setAnswers] = useState<{[key: string]: string}>({});
 
   // Vérifier si des symptômes nécessitent ces questions
@@ -51,22 +48,23 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {questions.map((question) => (
-        <div key={question.key} className="space-y-3">
-          <h3 className="text-base sm:text-lg font-medium text-vet-brown">
-            {question.title} <span className="text-red-500">*</span>
+        <div key={question.key} className="space-y-4">
+          <h3 className="text-lg sm:text-xl font-semibold text-vet-navy text-center">
+            {question.title}
+            <span className="text-red-500 ml-1">*</span>
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+          <div className="grid grid-cols-1 gap-3">
             {question.options.map((option) => (
               <Button
                 key={option}
                 type="button"
                 variant="outline"
-                className={`h-auto p-3 sm:p-4 text-left justify-start whitespace-normal text-xs sm:text-sm transition-all duration-200 ${
+                className={`h-auto p-4 sm:p-6 text-center justify-center text-sm sm:text-base font-medium rounded-xl transition-all duration-200 border-2 ${
                   answers[question.key] === option
-                    ? 'bg-vet-sage text-white border-vet-sage'
-                    : 'bg-white hover:bg-vet-beige/20 border-vet-brown/20 text-vet-brown'
+                    ? 'bg-vet-sage text-white border-vet-sage shadow-lg'
+                    : 'bg-white hover:bg-vet-beige/30 border-vet-brown/20 text-vet-brown hover:border-vet-sage/50'
                 }`}
                 onClick={() => handleAnswerChange(question.key, option)}
               >

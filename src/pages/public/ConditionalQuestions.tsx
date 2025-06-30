@@ -76,10 +76,10 @@ const ConditionalQuestions = () => {
     <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #EDE3DA 0%, #ffffff 100%)' }}>
       <Header />
 
-      <main className="container mx-auto px-3 sm:px-6 py-3 sm:py-8">
-        <div className="max-w-4xl mx-auto">
+      <main className="container mx-auto px-3 sm:px-6 py-4 sm:py-6 pb-6">
+        <div className="max-w-2xl mx-auto">
           {/* Bouton retour */}
-          <div className="mb-3 sm:mb-6">
+          <div className="mb-4 sm:mb-6">
             <Button 
               variant="ghost" 
               onClick={handleBack}
@@ -91,18 +91,18 @@ const ConditionalQuestions = () => {
           </div>
 
           {/* Titre */}
-          <div className="text-center mb-4 sm:mb-8 animate-fade-in">
-            <h1 className="text-xl sm:text-3xl font-bold text-vet-navy mb-2 px-2">
+          <div className="text-center mb-4 sm:mb-6 animate-fade-in">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-vet-navy mb-1 sm:mb-2 leading-tight">
               Quelques questions complémentaires
             </h1>
-            <p className="text-sm sm:text-base text-vet-brown/80">
+            <p className="text-sm sm:text-base text-vet-brown/80 px-2">
               Aidez-nous à mieux comprendre la situation
             </p>
           </div>
 
           {/* Formulaire */}
-          <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
-            <CardContent className="p-3 sm:p-8">
+          <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/20 shadow-lg">
+            <CardContent className="p-3 sm:p-6">
               <div className="space-y-4 sm:space-y-6">
                 
                 <ConditionalQuestionsForm
@@ -120,11 +120,11 @@ const ConditionalQuestions = () => {
                 )}
 
                 {/* Bouton Suivant */}
-                <div className="pt-3 sm:pt-4">
+                <div className="pt-4 sm:pt-6">
                   <Button 
                     onClick={handleNext} 
                     disabled={!canProceed} 
-                    className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white w-full h-12 sm:h-11 text-base sm:text-lg font-medium rounded-lg shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-200"
+                    className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white w-full h-12 sm:h-14 text-base sm:text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-200"
                   >
                     Suivant
                     <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
