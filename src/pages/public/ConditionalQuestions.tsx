@@ -5,15 +5,13 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
-import SymptomSelector from "@/components/SymptomSelector";
 
-const SymptomSelection = () => {
+const ConditionalQuestions = () => {
   const navigate = useNavigate();
-  const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
-  const [customSymptom, setCustomSymptom] = useState('');
+  const [answers, setAnswers] = useState<{[key: string]: any}>({});
 
   useEffect(() => {
-    // Vérifier que l'utilisateur vient bien de la page motif avec "symptomes-anomalie"
+    // Vérifier que l'utilisateur vient bien de la page symptômes
     const bookingData = localStorage.getItem('bookingFormData');
     if (!bookingData) {
       navigate('/');
@@ -21,34 +19,35 @@ const SymptomSelection = () => {
     }
 
     const parsedData = JSON.parse(bookingData);
-    if (parsedData.consultationReason !== 'symptomes-anomalie') {
-      navigate('/booking/reason');
+    
+    // Vérifier que des symptômes ont été sélectionnés ou qu'un symptôme personnalisé a été saisi
+    const hasSymptoms = parsedData.selectedSymptoms?.length > 0 || parsedData.customSymptom?.trim() !== '';
+    if (!hasSymptoms) {
+      navigate('/booking/symptoms');
       return;
     }
   }, [navigate]);
 
   const handleBack = () => {
-    navigate('/booking/reason');
+    navigate('/booking/symptoms');
   };
 
   const handleNext = () => {
-    if (selectedSymptoms.length > 0 || customSymptom.trim() !== '') {
-      const existingData = JSON.parse(localStorage.getItem('bookingFormData') || '{}');
-      const updatedData = {
-        ...existingData,
-        selectedSymptoms,
-        customSymptom: customSymptom.trim()
-      };
-      
-      localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
-      console.log('Updated booking data with symptoms:', updatedData);
-      
-      // Naviguer vers la page des questions conditionnelles
-      navigate('/booking/questions');
-    }
+    // TODO: Validation logic will be added when questions are implemented
+    const existingData = JSON.parse(localStorage.getItem('bookingFormData') || '{}');
+    const updatedData = {
+      ...existingData,
+      conditionalAnswers: answers
+    };
+    
+    localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
+    console.log('Updated booking data with conditional answers:', updatedData);
+    
+    // Naviguer vers la page suivante (créneaux)
+    navigate('/booking/slots');
   };
 
-  const canProceed = selectedSymptoms.length > 0 || customSymptom.trim() !== '';
+  const canProceed = true; // TODO: Update this when validation logic is added
 
   return (
     <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #EDE3DA 0%, #ffffff 100%)' }}>
@@ -71,10 +70,10 @@ const SymptomSelection = () => {
           {/* Titre */}
           <div className="text-center mb-4 sm:mb-8 animate-fade-in">
             <h1 className="text-xl sm:text-3xl font-bold text-vet-navy mb-2 px-2">
-              Quels symptômes vous amènent à consulter ?
+              Quelques questions complémentaires
             </h1>
             <p className="text-sm sm:text-base text-vet-brown/80">
-              Sélectionnez un ou plusieurs symptômes *
+              Aidez-nous à mieux comprendre la situation
             </p>
           </div>
 
@@ -82,12 +81,13 @@ const SymptomSelection = () => {
           <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
             <CardContent className="p-3 sm:p-8">
               <div className="space-y-4 sm:space-y-6">
-                <SymptomSelector
-                  selectedSymptoms={selectedSymptoms}
-                  onSymptomsChange={setSelectedSymptoms}
-                  customSymptom={customSymptom}
-                  onCustomSymptomChange={setCustomSymptom}
-                />
+                
+                {/* Placeholder pour les questions conditionnelles */}
+                <div className="text-center text-vet-brown/60 py-8">
+                  <p className="text-sm sm:text-base">
+                    Les questions conditionnelles seront ajoutées ici selon la logique que vous fournirez.
+                  </p>
+                </div>
 
                 {/* Bouton Suivant */}
                 <div className="pt-3 sm:pt-4">
@@ -109,4 +109,4 @@ const SymptomSelection = () => {
   );
 };
 
-export default SymptomSelection;
+export default ConditionalQuestions;

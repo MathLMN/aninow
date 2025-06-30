@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 import PublicBooking from "./pages/public/PublicBooking";
 import ConsultationReason from "./pages/public/ConsultationReason";
 import SymptomSelection from "./pages/public/SymptomSelection";
+import ConditionalQuestions from "./pages/public/ConditionalQuestions";
 import AppointmentSlots from "./pages/public/AppointmentSlots";
 import BookingConfirmation from "./pages/public/BookingConfirmation";
 
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/" element={<PublicBooking />} />
           <Route path="/booking/reason" element={<ConsultationReason />} />
           <Route path="/booking/symptoms" element={<SymptomSelection />} />
+          <Route path="/booking/questions" element={<ConditionalQuestions />} />
           <Route path="/booking/slots" element={<AppointmentSlots />} />
           <Route path="/booking/confirmation" element={<BookingConfirmation />} />
           
