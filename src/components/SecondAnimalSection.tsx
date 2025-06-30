@@ -83,16 +83,24 @@ const SecondAnimalSection: React.FC<SecondAnimalSectionProps> = ({
       )}
 
       {/* Message informatif quand consultation forcée pour animal 2 */}
-      {shouldForceConvenienceForAnimal2 && (
+      {shouldForceConvenienceForAnimal2 && !secondAnimalDifferentReason && (
         <div className="bg-vet-blue/10 p-3 rounded-md border border-vet-blue/20">
           <p className="text-xs sm:text-sm text-vet-navy text-center leading-relaxed">
             ℹ️ Pour le 2e animal, seule une consultation de convenance est possible
           </p>
+          <div className="mt-3">
+            <ConvenienceConsultationSelect
+              selectedOptions={secondAnimalConvenienceOptions}
+              onOptionsChange={onSecondAnimalConvenienceOptionsChange}
+              customText={secondAnimalCustomText}
+              onCustomTextChange={onSecondAnimalCustomTextChange}
+            />
+          </div>
         </div>
       )}
 
-      {/* Sections séparées pour chaque animal si motif différent */}
-      {(secondAnimalDifferentReason || shouldForceConvenienceForAnimal2) && (
+      {/* Sections séparées pour chaque animal si motif différent coché */}
+      {secondAnimalDifferentReason && (
         <div className="space-y-4 sm:space-y-8">
           {/* Animal 1 */}
           <AnimalConsultationForm
