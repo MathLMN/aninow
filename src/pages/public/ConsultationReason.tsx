@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, Settings, ArrowLeft, ArrowRight } from "lucide-react";
+import { Settings, ArrowLeft, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import ConsultationReasonSelect from "@/components/ConsultationReasonSelect";
 import ConvenienceConsultationSelect from "@/components/ConvenienceConsultationSelect";
@@ -83,14 +83,17 @@ const ConsultationReason = () => {
         (!secondAnimalConvenienceOptions.includes('autre') || secondAnimalCustomText.trim() !== '')))));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #EDE3DA 0%, #ffffff 100%)' }}>
       {/* Header - Optimized for mobile */}
       <header className="bg-vet-navy text-vet-beige shadow-lg">
         <div className="container mx-auto px-3 sm:px-6 py-2 sm:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Heart className="h-4 w-4 sm:h-6 sm:w-6 text-vet-sage" />
-              <span className="text-base sm:text-xl font-bold">AniNow</span>
+              <img 
+                src="/lovable-uploads/44fb068f-1799-4a6c-9ad1-1308c67a7645.png" 
+                alt="AniNow" 
+                className="h-4 w-auto sm:h-6"
+              />
             </div>
             <Link to="/vet/login">
               <Button variant="ghost" className="text-vet-beige hover:bg-white/10 text-xs px-2 py-1 sm:text-sm sm:px-4 sm:py-2">
