@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,6 +13,10 @@ export const useConsultationReason = () => {
   const [secondAnimalConvenienceOptions, setSecondAnimalConvenienceOptions] = useState<string[]>([]);
   const [secondAnimalCustomText, setSecondAnimalCustomText] = useState('');
   const [hasTwoAnimals, setHasTwoAnimals] = useState(false);
+  
+  // États pour les symptômes
+  const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
+  const [customSymptom, setCustomSymptom] = useState('');
 
   useEffect(() => {
     // Vérifier que les données du formulaire précédent existent
@@ -36,35 +41,13 @@ export const useConsultationReason = () => {
     }
   }, [consultationReason, hasTwoAnimals]);
 
-  // Effet pour navigation automatique vers les symptômes
-  useEffect(() => {
-    if (consultationReason === 'symptomes-anomalie') {
-      // Sauvegarder les données et naviguer automatiquement
-      const existingData = JSON.parse(localStorage.getItem('bookingFormData') || '{}');
-      const updatedData = {
-        ...existingData,
-        consultationReason,
-        convenienceOptions,
-        customText,
-        secondAnimalDifferentReason,
-        secondAnimalConsultationReason: secondAnimalDifferentReason ? secondAnimalConsultationReason : consultationReason,
-        secondAnimalConvenienceOptions: secondAnimalDifferentReason ? secondAnimalConvenienceOptions : convenienceOptions,
-        secondAnimalCustomText: secondAnimalDifferentReason ? secondAnimalCustomText : customText
-      };
-      
-      localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
-      console.log('Auto-navigation to symptoms with data:', updatedData);
-      
-      // Navigation automatique vers la sélection des symptômes
-      navigate('/booking/symptoms');
-    }
-  }, [consultationReason, convenienceOptions, customText, secondAnimalDifferentReason, secondAnimalConsultationReason, secondAnimalConvenienceOptions, secondAnimalCustomText, navigate]);
-
   const handleNext = () => {
     const isFirstAnimalValid = consultationReason !== '' && 
       (consultationReason !== 'consultation-convenance' || 
        (convenienceOptions.length > 0 && 
-        (!convenienceOptions.includes('autre') || customText.trim() !== '')));
+        (!convenienceOptions.includes('autre') || customText.trim() !== ''))) &&
+      (consultationReason !== 'symptomes-anomalie' || 
+       selectedSymptoms.length > 0 || customSymptom.trim() !== '');
     
     const isSecondAnimalValid = !secondAnimalDifferentReason || 
       (secondAnimalConsultationReason !== '' && 
@@ -80,6 +63,8 @@ export const useConsultationReason = () => {
         consultationReason,
         convenienceOptions,
         customText,
+        selectedSymptoms,
+        customSymptom: customSymptom.trim(),
         secondAnimalDifferentReason,
         secondAnimalConsultationReason: secondAnimalDifferentReason ? secondAnimalConsultationReason : consultationReason,
         secondAnimalConvenienceOptions: secondAnimalDifferentReason ? secondAnimalConvenienceOptions : convenienceOptions,
@@ -89,10 +74,10 @@ export const useConsultationReason = () => {
       localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
       console.log('Updated booking data:', updatedData);
       
-      // Si le motif principal est "symptomes-anomalie", aller vers la sélection des symptômes
+      // Si le motif principal est "symptomes-anomalie", aller vers les questions conditionnelles
       // Sinon, aller directement vers les créneaux
       if (consultationReason === 'symptomes-anomalie') {
-        navigate('/booking/symptoms');
+        navigate('/booking/questions');
       } else {
         navigate('/booking/slots');
       }
@@ -103,6 +88,8 @@ export const useConsultationReason = () => {
     (consultationReason !== 'consultation-convenance' || 
      (convenienceOptions.length > 0 && 
       (!convenienceOptions.includes('autre') || customText.trim() !== ''))) &&
+    (consultationReason !== 'symptomes-anomalie' || 
+     selectedSymptoms.length > 0 || customSymptom.trim() !== '') &&
     (!secondAnimalDifferentReason || 
      (secondAnimalConsultationReason !== '' && 
       (secondAnimalConsultationReason !== 'consultation-convenance' || 
@@ -118,6 +105,10 @@ export const useConsultationReason = () => {
     setConvenienceOptions,
     customText,
     setCustomText,
+    selectedSymptoms,
+    setSelectedSymptoms,
+    customSymptom,
+    setCustomSymptom,
     secondAnimalDifferentReason,
     setSecondAnimalDifferentReason,
     secondAnimalConsultationReason,
@@ -132,3 +123,4 @@ export const useConsultationReason = () => {
     shouldForceConvenienceForAnimal2
   };
 };
+

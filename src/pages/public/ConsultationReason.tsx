@@ -1,10 +1,12 @@
 
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ConsultationReasonSelect from "@/components/ConsultationReasonSelect";
 import ConvenienceConsultationSelect from "@/components/ConvenienceConsultationSelect";
+import SymptomSelector from "@/components/SymptomSelector";
 import SecondAnimalSection from "@/components/SecondAnimalSection";
 import Header from "@/components/Header";
 import { useConsultationReason } from "@/hooks/useConsultationReason";
@@ -20,6 +22,10 @@ const ConsultationReason = () => {
     setConvenienceOptions,
     customText,
     setCustomText,
+    selectedSymptoms,
+    setSelectedSymptoms,
+    customSymptom,
+    setCustomSymptom,
     secondAnimalDifferentReason,
     setSecondAnimalDifferentReason,
     secondAnimalConsultationReason,
@@ -84,6 +90,23 @@ const ConsultationReason = () => {
                         onCustomTextChange={setCustomText}
                       />
                     )}
+
+                    {/* Sélection des symptômes pour le premier animal */}
+                    {consultationReason === 'symptomes-anomalie' && (
+                      <div className="space-y-3 sm:space-y-4">
+                        <div className="border-t border-gray-200 pt-4">
+                          <h3 className="text-base sm:text-lg font-semibold text-vet-navy mb-3">
+                            Quels symptômes vous amènent à consulter ? *
+                          </h3>
+                          <SymptomSelector
+                            selectedSymptoms={selectedSymptoms}
+                            onSymptomsChange={setSelectedSymptoms}
+                            customSymptom={customSymptom}
+                            onCustomSymptomChange={setCustomSymptom}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -143,3 +166,4 @@ const ConsultationReason = () => {
 };
 
 export default ConsultationReason;
+
