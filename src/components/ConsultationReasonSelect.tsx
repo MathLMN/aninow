@@ -19,7 +19,7 @@ const ConsultationReasonSelect: React.FC<ConsultationReasonSelectProps> = ({
       </Label>
       
       <Select value={value} onValueChange={onValueChange}>
-        <SelectTrigger className="w-full h-12 sm:h-11 text-base sm:text-base bg-white border-2 border-gray-200 rounded-lg hover:border-vet-sage/50 focus:border-vet-sage transition-colors">
+        <SelectTrigger className="w-full h-12 sm:h-11 text-sm sm:text-base bg-white border-2 border-gray-200 rounded-lg hover:border-vet-sage/50 focus:border-vet-sage transition-colors">
           <SelectValue 
             placeholder="Cliquez et choisissez le motif" 
             className="text-gray-500"
@@ -28,13 +28,13 @@ const ConsultationReasonSelect: React.FC<ConsultationReasonSelectProps> = ({
         <SelectContent className="bg-white border-2 border-gray-200 shadow-xl z-50 rounded-lg">
           <SelectItem 
             value="symptomes-anomalie" 
-            className="text-base py-3 px-4 leading-tight hover:bg-vet-beige/50 cursor-pointer"
+            className="text-sm sm:text-base py-2 sm:py-3 px-3 sm:px-4 leading-tight hover:bg-vet-beige/50 cursor-pointer"
           >
             🩺 Symptômes ou anomalie (boiterie, vomissements,...)
           </SelectItem>
           <SelectItem 
             value="consultation-convenance" 
-            className="text-base py-3 px-4 leading-tight hover:bg-vet-beige/50 cursor-pointer"
+            className="text-sm sm:text-base py-2 sm:py-3 px-3 sm:px-4 leading-tight hover:bg-vet-beige/50 cursor-pointer"
           >
             💉 Consultation de convenance (vaccins, contrôle,...)
           </SelectItem>

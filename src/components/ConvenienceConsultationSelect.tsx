@@ -60,14 +60,14 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
   const availableOptions = convenienceOptions.filter(option => !selectedOptions.includes(option.value));
 
   return (
-    <div className="space-y-3 sm:space-y-4 border-2 border-vet-blue/20 rounded-xl p-3 sm:p-4 bg-white/50 backdrop-blur-sm">
-      <Label className="text-base sm:text-lg font-semibold text-vet-navy block leading-tight">
+    <div className="space-y-2 sm:space-y-4 border-2 border-vet-blue/20 rounded-xl p-2 sm:p-4 bg-white/50 backdrop-blur-sm">
+      <Label className="text-sm sm:text-lg font-semibold text-vet-navy block leading-tight">
         Ajoutez un ou plusieurs motifs *
       </Label>
 
       {/* Selected options as tags at the top */}
       {selectedOptions.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1 sm:gap-2">
           {selectedOptions.map((selectedValue) => {
             const option = convenienceOptions.find(opt => opt.value === selectedValue);
             if (!option) return null;
@@ -75,14 +75,14 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
             return (
               <div
                 key={selectedValue}
-                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm font-medium ${option.color}`}
+                className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border text-xs sm:text-sm font-medium ${option.color}`}
               >
                 <span className="leading-tight">{option.label}</span>
                 <button
                   onClick={() => handleRemoveOption(selectedValue)}
                   className="hover:bg-black/10 rounded-full p-0.5 flex-shrink-0 transition-colors"
                 >
-                  <X className="h-3 w-3" />
+                  <X className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                 </button>
               </div>
             );
@@ -93,7 +93,7 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
       {/* Custom text input for "autre" option */}
       {selectedOptions.includes('autre') && (
         <div className="animate-fade-in space-y-2">
-          <Label className="text-sm font-medium text-vet-navy">
+          <Label className="text-xs sm:text-sm font-medium text-vet-navy">
             Précisez le motif de consultation
           </Label>
           <Input
@@ -101,18 +101,18 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
             placeholder="Tapez votre motif de consultation..."
             value={customText}
             onChange={(e) => handleCustomTextChange(e.target.value)}
-            className="w-full h-12 text-base bg-white border-2 border-gray-200 rounded-lg focus:border-vet-sage focus:outline-none"
+            className="w-full h-10 sm:h-12 text-sm sm:text-base bg-white border-2 border-gray-200 rounded-lg focus:border-vet-sage focus:outline-none"
           />
         </div>
       )}
 
       {/* Vertical list of available options as tags */}
-      <div className="space-y-2">
+      <div className="space-y-1 sm:space-y-2">
         {availableOptions.map((option) => (
           <button
             key={option.value}
             onClick={() => handleOptionToggle(option.value)}
-            className={`w-full text-left px-3 py-2 rounded-full border text-sm font-medium transition-all hover:shadow-sm ${option.color}`}
+            className={`w-full text-left px-2 sm:px-3 py-1.5 sm:py-2 rounded-full border text-xs sm:text-sm font-medium transition-all hover:shadow-sm ${option.color}`}
           >
             {option.label}
           </button>
@@ -121,7 +121,7 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
 
       {/* Selected count */}
       {selectedOptions.length > 0 && (
-        <div className="text-sm sm:text-base text-vet-sage font-medium text-center bg-vet-sage/10 p-2 rounded-lg">
+        <div className="text-xs sm:text-base text-vet-sage font-medium text-center bg-vet-sage/10 p-1.5 sm:p-2 rounded-lg">
           ✅ {selectedOptions.length} option{selectedOptions.length > 1 ? 's' : ''} sélectionnée{selectedOptions.length > 1 ? 's' : ''}
         </div>
       )}
