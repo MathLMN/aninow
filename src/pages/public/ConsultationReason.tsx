@@ -1,5 +1,4 @@
 
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -73,7 +72,7 @@ const ConsultationReason = () => {
           <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl relative">
             <CardContent className="p-3 sm:p-8">
               <div className="space-y-4 sm:space-y-8">
-                {/* Si pas de deuxième animal OU si le motif n'est pas différent pour le 2e animal */}
+                {/* Affichage unifié tant que pas de motif différent pour le 2e animal */}
                 {(!hasTwoAnimals || !secondAnimalDifferentReason) && (
                   <div className="space-y-3 sm:space-y-4">
                     <ConsultationReasonSelect
@@ -81,7 +80,7 @@ const ConsultationReason = () => {
                       onValueChange={setConsultationReason}
                     />
                     
-                    {/* Sélection des options de convenance pour le premier animal */}
+                    {/* Sélection des options de convenance */}
                     {consultationReason === 'consultation-convenance' && (
                       <ConvenienceConsultationSelect
                         selectedOptions={convenienceOptions}
@@ -91,7 +90,7 @@ const ConsultationReason = () => {
                       />
                     )}
 
-                    {/* Sélection des symptômes pour le premier animal */}
+                    {/* Sélection des symptômes - Affiché directement même avec 2 animaux */}
                     {consultationReason === 'symptomes-anomalie' && (
                       <div className="space-y-3 sm:space-y-4">
                         <div className="border-t border-gray-200 pt-4">
@@ -166,4 +165,3 @@ const ConsultationReason = () => {
 };
 
 export default ConsultationReason;
-
