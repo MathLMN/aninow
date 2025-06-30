@@ -65,8 +65,13 @@ export const useConsultationReason = () => {
       localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
       console.log('Updated booking data:', updatedData);
       
-      // Naviguer vers la page suivante (créneaux)
-      navigate('/booking/slots');
+      // Si le motif principal est "symptomes-anomalie", aller vers la sélection des symptômes
+      // Sinon, aller directement vers les créneaux
+      if (consultationReason === 'symptomes-anomalie') {
+        navigate('/booking/symptoms');
+      } else {
+        navigate('/booking/slots');
+      }
     }
   };
 
