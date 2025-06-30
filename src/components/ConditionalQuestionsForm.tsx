@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import SelectionButton from "@/components/SelectionButton";
 
@@ -38,7 +39,15 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     symptom.toLowerCase().includes('plaie')
   ) || customSymptom.toLowerCase().includes('plaie');
 
-  if (!needsQuestions && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound) {
+  // Vérifier si "démangeaisons de l'oreille" ou "otite" est sélectionné
+  const hasEarProblems = selectedSymptoms.some(symptom => 
+    symptom.toLowerCase().includes('demangeaisons-oreille') || 
+    symptom.toLowerCase().includes('démangeaisons de l\'oreille') ||
+    symptom.toLowerCase().includes('otite')
+  ) || customSymptom.toLowerCase().includes('démangeaisons de l\'oreille') || 
+       customSymptom.toLowerCase().includes('otite');
+
+  if (!needsQuestions && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems) {
     return null;
   }
 
@@ -155,6 +164,32 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
         key: 'wound_bleeding',
         title: 'La plaie saigne ?',
         options: ['Ne saigne pas', 'Légèrement', 'Abondamment']
+      }
+    );
+  }
+
+  // Questions spécifiques aux problèmes d'oreille (démangeaisons de l'oreille et otite)
+  if (hasEarProblems) {
+    questions.push(
+      {
+        key: 'general_form',
+        title: 'Quelle est sa forme générale ?',
+        options: ['En forme', 'Pas en forme', 'Amorphe (avachi)']
+      },
+      {
+        key: 'ear_redness',
+        title: "Est-ce l'oreille est rouge ?",
+        options: ['Non', 'Légèrement', 'Rouge vif']
+      },
+      {
+        key: 'head_shaking',
+        title: "Est-ce qu'il se secoue la tête ?",
+        options: ['Non', 'Quelques fois', 'Fréquemment']
+      },
+      {
+        key: 'pain_complaints',
+        title: "Est-ce qu'il se plaint de douleurs ?",
+        options: ['Ne se plaint pas', 'Gémissements légers', 'Cris fréquents']
       }
     );
   }

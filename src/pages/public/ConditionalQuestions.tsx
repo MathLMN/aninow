@@ -79,6 +79,14 @@ const ConditionalQuestions = () => {
     symptom.toLowerCase().includes('plaie')
   ) || bookingData?.customSymptom?.toLowerCase()?.includes('plaie');
 
+  // Vérifier si "démangeaisons de l'oreille" ou "otite" est sélectionné
+  const hasEarProblems = bookingData?.selectedSymptoms?.some((symptom: string) => 
+    symptom.toLowerCase().includes('demangeaisons-oreille') || 
+    symptom.toLowerCase().includes('démangeaisons de l\'oreille') ||
+    symptom.toLowerCase().includes('otite')
+  ) || bookingData?.customSymptom?.toLowerCase()?.includes('démangeaisons de l\'oreille') || 
+       bookingData?.customSymptom?.toLowerCase()?.includes('otite');
+
   let requiredQuestions: string[] = [];
   
   // Ajouter les questions générales si nécessaire
@@ -106,7 +114,12 @@ const ConditionalQuestions = () => {
     requiredQuestions.push('wound_location', 'wound_oozing', 'wound_depth', 'wound_bleeding');
   }
 
-  const allQuestionsAnswered = (needsQuestions || hasBloodInStool || hasUrinaryProblems || hasSkinItching || hasWound) ? requiredQuestions.every(key => answers[key]) : true;
+  // Ajouter les questions spécifiques aux problèmes d'oreille si nécessaire
+  if (hasEarProblems) {
+    requiredQuestions.push('general_form', 'ear_redness', 'head_shaking', 'pain_complaints');
+  }
+
+  const allQuestionsAnswered = (needsQuestions || hasBloodInStool || hasUrinaryProblems || hasSkinItching || hasWound || hasEarProblems) ? requiredQuestions.every(key => answers[key]) : true;
   const canProceed = allQuestionsAnswered;
 
   if (!bookingData) {
@@ -148,7 +161,7 @@ const ConditionalQuestions = () => {
                   onAnswersChange={handleAnswersChange} 
                 />
 
-                {!needsQuestions && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && (
+                {!needsQuestions && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems && (
                   <div className="text-center text-vet-brown/60 py-8">
                     <p className="text-sm sm:text-base">
                       Aucune question complémentaire n'est nécessaire pour les symptômes sélectionnés.
