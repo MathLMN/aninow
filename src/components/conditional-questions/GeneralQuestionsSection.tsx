@@ -4,10 +4,11 @@ import SelectionButton from "@/components/SelectionButton";
 interface GeneralQuestionsSectionProps {
   answers: {[key: string]: string | File};
   onAnswerChange: (questionKey: string, value: string) => void;
+  excludeDrinking?: boolean;
 }
 
-const GeneralQuestionsSection = ({ answers, onAnswerChange }: GeneralQuestionsSectionProps) => {
-  const questions = [
+const GeneralQuestionsSection = ({ answers, onAnswerChange, excludeDrinking = false }: GeneralQuestionsSectionProps) => {
+  const allQuestions = [
     {
       key: 'general_form',
       title: 'Quelle est sa forme générale ?',
@@ -24,6 +25,11 @@ const GeneralQuestionsSection = ({ answers, onAnswerChange }: GeneralQuestionsSe
       options: ['Soif normale', 'Soif excessive', 'Pas soif']
     }
   ];
+
+  // Filtrer les questions selon le contexte
+  const questions = excludeDrinking 
+    ? allQuestions.filter(q => q.key !== 'drinking')
+    : allQuestions;
 
   return (
     <>

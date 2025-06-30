@@ -55,6 +55,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
         <GeneralQuestionsSection 
           answers={answers}
           onAnswerChange={handleAnswerChange}
+          excludeDrinking={hasLameness}
         />
       )}
 
