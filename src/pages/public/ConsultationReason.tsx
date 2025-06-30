@@ -8,9 +8,11 @@ import ConvenienceConsultationSelect from "@/components/ConvenienceConsultationS
 import SecondAnimalSection from "@/components/SecondAnimalSection";
 import Header from "@/components/Header";
 import { useConsultationReason } from "@/hooks/useConsultationReason";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const ConsultationReason = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const {
     consultationReason,
     setConsultationReason,
@@ -62,7 +64,7 @@ const ConsultationReason = () => {
           </div>
 
           {/* Formulaire - Mobile optimized */}
-          <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
+          <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl relative">
             <CardContent className="p-3 sm:p-8">
               <div className="space-y-4 sm:space-y-8">
                 {/* Si pas de deuxième animal OU si le motif n'est pas différent pour le 2e animal */}
@@ -104,22 +106,38 @@ const ConsultationReason = () => {
                   onSecondAnimalCustomTextChange={setSecondAnimalCustomText}
                 />
               </div>
+
+              {/* Bouton Continuer - Desktop/Tablet: dans la card, Mobile: fixe */}
+              {!isMobile && (
+                <div className="flex justify-end mt-6 pt-4 border-t border-gray-100">
+                  <Button 
+                    onClick={handleNext} 
+                    disabled={!canProceed} 
+                    className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+                  >
+                    Continuer
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
       </main>
 
-      {/* Bouton Continuer fixe en bas à droite */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <Button 
-          onClick={handleNext} 
-          disabled={!canProceed} 
-          className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
-        >
-          Continuer
-          <ArrowRight className="ml-1 h-4 w-4" />
-        </Button>
-      </div>
+      {/* Bouton Continuer fixe en bas à droite - Mobile seulement */}
+      {isMobile && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <Button 
+            onClick={handleNext} 
+            disabled={!canProceed} 
+            className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+          >
+            Continuer
+            <ArrowRight className="ml-1 h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

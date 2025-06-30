@@ -6,9 +6,11 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import SymptomSelector from "@/components/SymptomSelector";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const SymptomSelection = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [customSymptom, setCustomSymptom] = useState('');
 
@@ -79,7 +81,7 @@ const SymptomSelection = () => {
           </div>
 
           {/* Formulaire */}
-          <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
+          <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl relative">
             <CardContent className="p-3 sm:p-8">
               <div className="space-y-4 sm:space-y-6">
                 <SymptomSelector
@@ -89,22 +91,38 @@ const SymptomSelection = () => {
                   onCustomSymptomChange={setCustomSymptom}
                 />
               </div>
+
+              {/* Bouton Continuer - Desktop/Tablet: dans la card, Mobile: fixe */}
+              {!isMobile && (
+                <div className="flex justify-end mt-6 pt-4 border-t border-gray-100">
+                  <Button 
+                    onClick={handleNext} 
+                    disabled={!canProceed} 
+                    className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+                  >
+                    Continuer
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
       </main>
 
-      {/* Bouton Continuer fixe en bas à droite */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <Button 
-          onClick={handleNext} 
-          disabled={!canProceed} 
-          className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
-        >
-          Continuer
-          <ArrowRight className="ml-1 h-4 w-4" />
-        </Button>
-      </div>
+      {/* Bouton Continuer fixe en bas à droite - Mobile seulement */}
+      {isMobile && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <Button 
+            onClick={handleNext} 
+            disabled={!canProceed} 
+            className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+          >
+            Continuer
+            <ArrowRight className="ml-1 h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
