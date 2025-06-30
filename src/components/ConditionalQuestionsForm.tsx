@@ -7,6 +7,7 @@ import UrinaryProblemsSection from "@/components/conditional-questions/UrinaryPr
 import SkinItchingSection from "@/components/conditional-questions/SkinItchingSection";
 import WoundSection from "@/components/conditional-questions/WoundSection";
 import EarProblemsSection from "@/components/conditional-questions/EarProblemsSection";
+import EyeDischargeSection from "@/components/conditional-questions/EyeDischargeSection";
 
 interface ConditionalQuestionsFormProps {
   selectedSymptoms: string[];
@@ -23,10 +24,11 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     hasUrinaryProblems,
     hasSkinItching,
     hasWound,
-    hasEarProblems
+    hasEarProblems,
+    hasEyeDischarge
   } = useSymptomDetection(selectedSymptoms, customSymptom);
 
-  if (!needsQuestions && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems) {
+  if (!needsQuestions && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems && !hasEyeDischarge) {
     return null;
   }
 
@@ -82,6 +84,13 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
 
       {hasEarProblems && (
         <EarProblemsSection 
+          answers={answers}
+          onAnswerChange={handleAnswerChange}
+        />
+      )}
+
+      {hasEyeDischarge && (
+        <EyeDischargeSection 
           answers={answers}
           onAnswerChange={handleAnswerChange}
         />

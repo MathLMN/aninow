@@ -36,12 +36,21 @@ export const useSymptomDetection = (selectedSymptoms: string[], customSymptom: s
   ) || customSymptom.toLowerCase().includes('démangeaisons de l\'oreille') || 
        customSymptom.toLowerCase().includes('otite');
 
+  // Vérifier si "écoulement des yeux" est sélectionné
+  const hasEyeDischarge = selectedSymptoms.some(symptom => 
+    symptom.toLowerCase().includes('ecoulements-yeux') || 
+    symptom.toLowerCase().includes('écoulement des yeux') ||
+    symptom.toLowerCase().includes('ecoulement des yeux')
+  ) || customSymptom.toLowerCase().includes('écoulement des yeux') ||
+       customSymptom.toLowerCase().includes('ecoulement des yeux');
+
   return {
     needsQuestions,
     hasBloodInStool,
     hasUrinaryProblems,
     hasSkinItching,
     hasWound,
-    hasEarProblems
+    hasEarProblems,
+    hasEyeDischarge
   };
 };

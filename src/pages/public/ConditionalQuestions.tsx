@@ -87,6 +87,14 @@ const ConditionalQuestions = () => {
   ) || bookingData?.customSymptom?.toLowerCase()?.includes('démangeaisons de l\'oreille') || 
        bookingData?.customSymptom?.toLowerCase()?.includes('otite');
 
+  // Vérifier si "écoulement des yeux" est sélectionné
+  const hasEyeDischarge = bookingData?.selectedSymptoms?.some((symptom: string) => 
+    symptom.toLowerCase().includes('ecoulements-yeux') || 
+    symptom.toLowerCase().includes('écoulement des yeux') ||
+    symptom.toLowerCase().includes('ecoulement des yeux')
+  ) || bookingData?.customSymptom?.toLowerCase()?.includes('écoulement des yeux') ||
+       bookingData?.customSymptom?.toLowerCase()?.includes('ecoulement des yeux');
+
   let requiredQuestions: string[] = [];
   
   // Ajouter les questions générales si nécessaire
@@ -119,7 +127,12 @@ const ConditionalQuestions = () => {
     requiredQuestions.push('general_form', 'ear_redness', 'head_shaking', 'pain_complaints');
   }
 
-  const allQuestionsAnswered = (needsQuestions || hasBloodInStool || hasUrinaryProblems || hasSkinItching || hasWound || hasEarProblems) ? requiredQuestions.every(key => answers[key]) : true;
+  // Ajouter la question sur l'état de l'œil si nécessaire
+  if (hasEyeDischarge) {
+    requiredQuestions.push('eye_condition');
+  }
+
+  const allQuestionsAnswered = (needsQuestions || hasBloodInStool || hasUrinaryProblems || hasSkinItching || hasWound || hasEarProblems || hasEyeDischarge) ? requiredQuestions.every(key => answers[key]) : true;
   const canProceed = allQuestionsAnswered;
 
   if (!bookingData) {
@@ -161,7 +174,7 @@ const ConditionalQuestions = () => {
                   onAnswersChange={handleAnswersChange} 
                 />
 
-                {!needsQuestions && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems && (
+                {!needsQuestions && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems && !hasEyeDischarge && (
                   <div className="text-center text-vet-brown/60 py-8">
                     <p className="text-sm sm:text-base">
                       Aucune question complémentaire n'est nécessaire pour les symptômes sélectionnés.
