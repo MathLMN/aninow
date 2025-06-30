@@ -44,6 +44,11 @@ export const useSymptomDetection = (selectedSymptoms: string[], customSymptom: s
   ) || customSymptom.toLowerCase().includes('écoulement des yeux') ||
        customSymptom.toLowerCase().includes('ecoulement des yeux');
 
+  // Vérifier si "boiterie" est sélectionné
+  const hasLameness = selectedSymptoms.some(symptom => 
+    symptom.toLowerCase().includes('boiterie')
+  ) || customSymptom.toLowerCase().includes('boiterie');
+
   return {
     needsQuestions,
     hasBloodInStool,
@@ -51,6 +56,7 @@ export const useSymptomDetection = (selectedSymptoms: string[], customSymptom: s
     hasSkinItching,
     hasWound,
     hasEarProblems,
-    hasEyeDischarge
+    hasEyeDischarge,
+    hasLameness
   };
 };

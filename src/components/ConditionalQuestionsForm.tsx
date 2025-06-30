@@ -8,6 +8,7 @@ import SkinItchingSection from "@/components/conditional-questions/SkinItchingSe
 import WoundSection from "@/components/conditional-questions/WoundSection";
 import EarProblemsSection from "@/components/conditional-questions/EarProblemsSection";
 import EyeDischargeSection from "@/components/conditional-questions/EyeDischargeSection";
+import LamenessSection from "@/components/conditional-questions/LamenessSection";
 
 interface ConditionalQuestionsFormProps {
   selectedSymptoms: string[];
@@ -25,10 +26,11 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     hasSkinItching,
     hasWound,
     hasEarProblems,
-    hasEyeDischarge
+    hasEyeDischarge,
+    hasLameness
   } = useSymptomDetection(selectedSymptoms, customSymptom);
 
-  if (!needsQuestions && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems && !hasEyeDischarge) {
+  if (!needsQuestions && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems && !hasEyeDischarge && !hasLameness) {
     return null;
   }
 
@@ -45,7 +47,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
   };
 
   // Déterminer si on doit afficher les questions générales
-  const shouldShowGeneralQuestions = needsQuestions || hasEarProblems || hasEyeDischarge;
+  const shouldShowGeneralQuestions = needsQuestions || hasEarProblems || hasEyeDischarge || hasLameness;
 
   return (
     <div className="space-y-8 sm:space-y-12">
@@ -94,6 +96,13 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
 
       {hasEyeDischarge && (
         <EyeDischargeSection 
+          answers={answers}
+          onAnswerChange={handleAnswerChange}
+        />
+      )}
+
+      {hasLameness && (
+        <LamenessSection 
           answers={answers}
           onAnswerChange={handleAnswerChange}
         />
