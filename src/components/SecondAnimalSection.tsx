@@ -82,7 +82,7 @@ const SecondAnimalSection: React.FC<SecondAnimalSectionProps> = ({
         </div>
       )}
 
-      {/* Message informatif quand consultation forcée pour animal 2 */}
+      {/* Message informatif quand consultation forcée pour animal 2 - SEULEMENT si checkbox pas cochée */}
       {shouldForceConvenienceForAnimal2 && !secondAnimalDifferentReason && (
         <div className="bg-vet-blue/10 p-3 rounded-md border border-vet-blue/20">
           <p className="text-xs sm:text-sm text-vet-navy text-center leading-relaxed">
@@ -99,7 +99,7 @@ const SecondAnimalSection: React.FC<SecondAnimalSectionProps> = ({
         </div>
       )}
 
-      {/* Sections séparées pour chaque animal si motif différent coché */}
+      {/* Sections séparées pour chaque animal - SEULEMENT si checkbox motif différent cochée */}
       {secondAnimalDifferentReason && (
         <div className="space-y-4 sm:space-y-8">
           {/* Animal 1 */}
