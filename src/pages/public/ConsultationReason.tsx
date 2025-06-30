@@ -25,6 +25,10 @@ const ConsultationReason = () => {
     setSelectedSymptoms,
     customSymptom,
     setCustomSymptom,
+    secondAnimalSelectedSymptoms,
+    setSecondAnimalSelectedSymptoms,
+    secondAnimalCustomSymptom,
+    setSecondAnimalCustomSymptom,
     secondAnimalDifferentReason,
     setSecondAnimalDifferentReason,
     secondAnimalConsultationReason,
@@ -120,12 +124,20 @@ const ConsultationReason = () => {
                   onConvenienceOptionsChange={setConvenienceOptions}
                   customText={customText}
                   onCustomTextChange={setCustomText}
+                  selectedSymptoms={selectedSymptoms}
+                  onSymptomsChange={setSelectedSymptoms}
+                  customSymptom={customSymptom}
+                  onCustomSymptomChange={setCustomSymptom}
                   secondAnimalConsultationReason={secondAnimalConsultationReason}
                   onSecondAnimalConsultationReasonChange={setSecondAnimalConsultationReason}
                   secondAnimalConvenienceOptions={secondAnimalConvenienceOptions}
                   onSecondAnimalConvenienceOptionsChange={setSecondAnimalConvenienceOptions}
                   secondAnimalCustomText={secondAnimalCustomText}
                   onSecondAnimalCustomTextChange={setSecondAnimalCustomText}
+                  secondAnimalSelectedSymptoms={secondAnimalSelectedSymptoms}
+                  onSecondAnimalSymptomsChange={setSecondAnimalSelectedSymptoms}
+                  secondAnimalCustomSymptom={secondAnimalCustomSymptom}
+                  onSecondAnimalCustomSymptomChange={setSecondAnimalCustomSymptom}
                 />
               </div>
 

@@ -15,12 +15,20 @@ interface SecondAnimalSectionProps {
   onConvenienceOptionsChange: (options: string[]) => void;
   customText: string;
   onCustomTextChange: (text: string) => void;
+  selectedSymptoms: string[];
+  onSymptomsChange: (symptoms: string[]) => void;
+  customSymptom: string;
+  onCustomSymptomChange: (symptom: string) => void;
   secondAnimalConsultationReason: string;
   onSecondAnimalConsultationReasonChange: (value: string) => void;
   secondAnimalConvenienceOptions: string[];
   onSecondAnimalConvenienceOptionsChange: (options: string[]) => void;
   secondAnimalCustomText: string;
   onSecondAnimalCustomTextChange: (text: string) => void;
+  secondAnimalSelectedSymptoms?: string[];
+  onSecondAnimalSymptomsChange?: (symptoms: string[]) => void;
+  secondAnimalCustomSymptom?: string;
+  onSecondAnimalCustomSymptomChange?: (symptom: string) => void;
 }
 
 const SecondAnimalSection: React.FC<SecondAnimalSectionProps> = ({
@@ -34,12 +42,20 @@ const SecondAnimalSection: React.FC<SecondAnimalSectionProps> = ({
   onConvenienceOptionsChange,
   customText,
   onCustomTextChange,
+  selectedSymptoms,
+  onSymptomsChange,
+  customSymptom,
+  onCustomSymptomChange,
   secondAnimalConsultationReason,
   onSecondAnimalConsultationReasonChange,
   secondAnimalConvenienceOptions,
   onSecondAnimalConvenienceOptionsChange,
   secondAnimalCustomText,
-  onSecondAnimalCustomTextChange
+  onSecondAnimalCustomTextChange,
+  secondAnimalSelectedSymptoms = [],
+  onSecondAnimalSymptomsChange = () => {},
+  secondAnimalCustomSymptom = '',
+  onSecondAnimalCustomSymptomChange = () => {}
 }) => {
   if (!hasTwoAnimals) return null;
 
@@ -81,6 +97,10 @@ const SecondAnimalSection: React.FC<SecondAnimalSectionProps> = ({
             onConvenienceOptionsChange={onConvenienceOptionsChange}
             customText={customText}
             onCustomTextChange={onCustomTextChange}
+            selectedSymptoms={selectedSymptoms}
+            onSymptomsChange={onSymptomsChange}
+            customSymptom={customSymptom}
+            onCustomSymptomChange={onCustomSymptomChange}
             containerClassName="p-3 bg-vet-beige/30 rounded-lg sm:p-4"
           />
 
@@ -93,6 +113,10 @@ const SecondAnimalSection: React.FC<SecondAnimalSectionProps> = ({
             onConvenienceOptionsChange={onSecondAnimalConvenienceOptionsChange}
             customText={secondAnimalCustomText}
             onCustomTextChange={onSecondAnimalCustomTextChange}
+            selectedSymptoms={secondAnimalSelectedSymptoms}
+            onSymptomsChange={onSecondAnimalSymptomsChange}
+            customSymptom={secondAnimalCustomSymptom}
+            onCustomSymptomChange={onSecondAnimalCustomSymptomChange}
             isForced={shouldForceConvenienceForAnimal2}
             containerClassName="p-3 bg-vet-blue/10 rounded-lg sm:p-4"
           />

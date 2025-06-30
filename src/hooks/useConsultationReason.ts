@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,9 +12,13 @@ export const useConsultationReason = () => {
   const [secondAnimalCustomText, setSecondAnimalCustomText] = useState('');
   const [hasTwoAnimals, setHasTwoAnimals] = useState(false);
   
-  // États pour les symptômes
+  // États pour les symptômes - Animal 1
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [customSymptom, setCustomSymptom] = useState('');
+
+  // États pour les symptômes - Animal 2
+  const [secondAnimalSelectedSymptoms, setSecondAnimalSelectedSymptoms] = useState<string[]>([]);
+  const [secondAnimalCustomSymptom, setSecondAnimalCustomSymptom] = useState('');
 
   useEffect(() => {
     // Vérifier que les données du formulaire précédent existent
@@ -54,7 +57,9 @@ export const useConsultationReason = () => {
       (secondAnimalConsultationReason !== '' && 
        (secondAnimalConsultationReason !== 'consultation-convenance' || 
         (secondAnimalConvenienceOptions.length > 0 &&
-         (!secondAnimalConvenienceOptions.includes('autre') || secondAnimalCustomText.trim() !== ''))));
+         (!secondAnimalConvenienceOptions.includes('autre') || secondAnimalCustomText.trim() !== ''))) &&
+       (secondAnimalConsultationReason !== 'symptomes-anomalie' || 
+        secondAnimalSelectedSymptoms.length > 0 || secondAnimalCustomSymptom.trim() !== ''));
 
     if (isFirstAnimalValid && isSecondAnimalValid) {
       // Récupérer les données existantes et ajouter le motif de consultation
@@ -69,7 +74,9 @@ export const useConsultationReason = () => {
         secondAnimalDifferentReason,
         secondAnimalConsultationReason: secondAnimalDifferentReason ? secondAnimalConsultationReason : consultationReason,
         secondAnimalConvenienceOptions: secondAnimalDifferentReason ? secondAnimalConvenienceOptions : convenienceOptions,
-        secondAnimalCustomText: secondAnimalDifferentReason ? secondAnimalCustomText : customText
+        secondAnimalCustomText: secondAnimalDifferentReason ? secondAnimalCustomText : customText,
+        secondAnimalSelectedSymptoms: secondAnimalDifferentReason ? secondAnimalSelectedSymptoms : selectedSymptoms,
+        secondAnimalCustomSymptom: secondAnimalDifferentReason ? secondAnimalCustomSymptom.trim() : customSymptom.trim()
       };
       
       localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
@@ -77,7 +84,8 @@ export const useConsultationReason = () => {
       
       // Si le motif principal est "symptomes-anomalie", aller vers les questions conditionnelles
       // Sinon, aller directement vers les créneaux
-      if (consultationReason === 'symptomes-anomalie') {
+      if (consultationReason === 'symptomes-anomalie' || 
+          (secondAnimalDifferentReason && secondAnimalConsultationReason === 'symptomes-anomalie')) {
         navigate('/booking/questions');
       } else {
         navigate('/booking/slots');
@@ -95,7 +103,9 @@ export const useConsultationReason = () => {
      (secondAnimalConsultationReason !== '' && 
       (secondAnimalConsultationReason !== 'consultation-convenance' || 
        (secondAnimalConvenienceOptions.length > 0 &&
-        (!secondAnimalConvenienceOptions.includes('autre') || secondAnimalCustomText.trim() !== '')))));
+        (!secondAnimalConvenienceOptions.includes('autre') || secondAnimalCustomText.trim() !== ''))) &&
+      (secondAnimalConsultationReason !== 'symptomes-anomalie' || 
+       secondAnimalSelectedSymptoms.length > 0 || secondAnimalCustomSymptom.trim() !== '')));
 
   // La fonction ne force "consultation-convenance" pour l'animal 2 que si le client a coché la case
   const shouldForceConvenienceForAnimal2 = hasTwoAnimals && secondAnimalDifferentReason && consultationReason === 'symptomes-anomalie';
@@ -111,6 +121,10 @@ export const useConsultationReason = () => {
     setSelectedSymptoms,
     customSymptom,
     setCustomSymptom,
+    secondAnimalSelectedSymptoms,
+    setSecondAnimalSelectedSymptoms,
+    secondAnimalCustomSymptom,
+    setSecondAnimalCustomSymptom,
     secondAnimalDifferentReason,
     setSecondAnimalDifferentReason,
     secondAnimalConsultationReason,

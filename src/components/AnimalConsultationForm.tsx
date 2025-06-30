@@ -3,6 +3,7 @@ import React from 'react';
 import { Label } from "@/components/ui/label";
 import ConsultationReasonSelect from "@/components/ConsultationReasonSelect";
 import ConvenienceConsultationSelect from "@/components/ConvenienceConsultationSelect";
+import SymptomSelector from "@/components/SymptomSelector";
 
 interface AnimalConsultationFormProps {
   title: string;
@@ -12,6 +13,10 @@ interface AnimalConsultationFormProps {
   onConvenienceOptionsChange: (options: string[]) => void;
   customText: string;
   onCustomTextChange: (text: string) => void;
+  selectedSymptoms?: string[];
+  onSymptomsChange?: (symptoms: string[]) => void;
+  customSymptom?: string;
+  onCustomSymptomChange?: (symptom: string) => void;
   isForced?: boolean;
   containerClassName?: string;
 }
@@ -24,6 +29,10 @@ const AnimalConsultationForm: React.FC<AnimalConsultationFormProps> = ({
   onConvenienceOptionsChange,
   customText,
   onCustomTextChange,
+  selectedSymptoms = [],
+  onSymptomsChange = () => {},
+  customSymptom = '',
+  onCustomSymptomChange = () => {},
   isForced = false,
   containerClassName = ""
 }) => {
@@ -54,6 +63,23 @@ const AnimalConsultationForm: React.FC<AnimalConsultationFormProps> = ({
             onCustomTextChange={onCustomTextChange}
           />
         </>
+      )}
+
+      {/* Affichage automatique des symptômes si "symptômes ou anomalie" est sélectionné */}
+      {consultationReason === 'symptomes-anomalie' && (
+        <div className="space-y-3 sm:space-y-4">
+          <div className="border-t border-gray-200 pt-4">
+            <h4 className="text-base sm:text-lg font-semibold text-vet-navy mb-3">
+              Quels symptômes vous amènent à consulter ? *
+            </h4>
+            <SymptomSelector
+              selectedSymptoms={selectedSymptoms}
+              onSymptomsChange={onSymptomsChange}
+              customSymptom={customSymptom}
+              onCustomSymptomChange={onCustomSymptomChange}
+            />
+          </div>
+        </div>
       )}
     </div>
   );
