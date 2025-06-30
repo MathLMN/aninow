@@ -44,9 +44,12 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     onAnswersChange(newAnswers);
   };
 
+  // Déterminer si on doit afficher les questions générales
+  const shouldShowGeneralQuestions = needsQuestions || hasEarProblems || hasEyeDischarge;
+
   return (
     <div className="space-y-8 sm:space-y-12">
-      {needsQuestions && (
+      {shouldShowGeneralQuestions && (
         <GeneralQuestionsSection 
           answers={answers}
           onAnswerChange={handleAnswerChange}

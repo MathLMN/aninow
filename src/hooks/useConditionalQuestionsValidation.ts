@@ -49,9 +49,9 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
     requiredQuestions.push('general_form', 'ear_redness', 'head_shaking', 'pain_complaints');
   }
 
-  // Ajouter la question sur l'état de l'œil si nécessaire
+  // Ajouter les questions pour l'écoulement des yeux si nécessaire
   if (hasEyeDischarge) {
-    requiredQuestions.push('eye_condition');
+    requiredQuestions.push('general_form', 'eating', 'drinking', 'eye_condition');
   }
 
   const hasAnyConditions = needsQuestions || hasBloodInStool || hasUrinaryProblems || hasSkinItching || hasWound || hasEarProblems || hasEyeDischarge;
