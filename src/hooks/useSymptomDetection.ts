@@ -65,6 +65,11 @@ export const useSymptomDetection = (selectedSymptoms: string[], customSymptom: s
     symptom.toLowerCase().includes('difficultés respiratoires')
   ) || customSymptom.toLowerCase().includes('difficultés respiratoires');
 
+  // Vérifier si "grosseur(s)" est sélectionné
+  const hasLump = selectedSymptoms.some(symptom => 
+    symptom.toLowerCase().includes('grosseur')
+  ) || customSymptom.toLowerCase().includes('grosseur');
+
   return {
     needsQuestions,
     hasLossOfAppetite,
@@ -76,6 +81,7 @@ export const useSymptomDetection = (selectedSymptoms: string[], customSymptom: s
     hasEarProblems,
     hasEyeDischarge,
     hasLameness,
-    hasBreathingDifficulties
+    hasBreathingDifficulties,
+    hasLump
   };
 };

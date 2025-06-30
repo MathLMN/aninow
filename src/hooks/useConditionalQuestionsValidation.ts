@@ -18,7 +18,8 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
     hasEarProblems,
     hasEyeDischarge,
     hasLameness,
-    hasBreathingDifficulties
+    hasBreathingDifficulties,
+    hasLump
   } = useSymptomDetection(bookingData?.selectedSymptoms || [], bookingData?.customSymptom || '');
 
   let requiredQuestions: string[] = [];
@@ -78,7 +79,12 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
     requiredQuestions.push('general_form', 'eating', 'drinking', 'panting');
   }
 
-  const hasAnyConditions = needsQuestions || hasLossOfAppetite || hasExcessiveThirst || hasBloodInStool || hasUrinaryProblems || hasSkinItching || hasWound || hasEarProblems || hasEyeDischarge || hasLameness || hasBreathingDifficulties;
+  // Ajouter les questions spécifiques aux grosseurs si nécessaire
+  if (hasLump) {
+    requiredQuestions.push('general_form', 'lump_body_area', 'lump_size_evolution');
+  }
+
+  const hasAnyConditions = needsQuestions || hasLossOfAppetite || hasExcessiveThirst || hasBloodInStool || hasUrinaryProblems || hasSkinItching || hasWound || hasEarProblems || hasEyeDischarge || hasLameness || hasBreathingDifficulties || hasLump;
   const allQuestionsAnswered = hasAnyConditions ? requiredQuestions.every(key => answers[key]) : true;
 
   return {
@@ -94,6 +100,7 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
     hasEarProblems,
     hasEyeDischarge,
     hasLameness,
-    hasBreathingDifficulties
+    hasBreathingDifficulties,
+    hasLump
   };
 };

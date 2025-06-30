@@ -12,6 +12,7 @@ import EarProblemsSection from "@/components/conditional-questions/EarProblemsSe
 import EyeDischargeSection from "@/components/conditional-questions/EyeDischargeSection";
 import LamenessSection from "@/components/conditional-questions/LamenessSection";
 import BreathingDifficultiesSection from "@/components/conditional-questions/BreathingDifficultiesSection";
+import LumpSection from "@/components/conditional-questions/LumpSection";
 
 interface ConditionalQuestionsFormProps {
   selectedSymptoms: string[];
@@ -33,10 +34,11 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     hasEarProblems,
     hasEyeDischarge,
     hasLameness,
-    hasBreathingDifficulties
+    hasBreathingDifficulties,
+    hasLump
   } = useSymptomDetection(selectedSymptoms, customSymptom);
 
-  if (!needsQuestions && !hasLossOfAppetite && !hasExcessiveThirst && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems && !hasEyeDischarge && !hasLameness && !hasBreathingDifficulties) {
+  if (!needsQuestions && !hasLossOfAppetite && !hasExcessiveThirst && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems && !hasEyeDischarge && !hasLameness && !hasBreathingDifficulties && !hasLump) {
     return null;
   }
 
@@ -133,6 +135,14 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
         <BreathingDifficultiesSection 
           answers={answers}
           onAnswerChange={handleAnswerChange}
+        />
+      )}
+
+      {hasLump && (
+        <LumpSection 
+          answers={answers}
+          onAnswerChange={handleAnswerChange}
+          onFileChange={handleFileChange}
         />
       )}
     </div>
