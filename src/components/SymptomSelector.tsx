@@ -3,8 +3,8 @@ import React, { useState, useMemo } from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { Search } from "lucide-react";
-import SelectionButton from "@/components/SelectionButton";
 
 interface SymptomSelectorProps {
   selectedSymptoms: string[];
@@ -50,22 +50,41 @@ const SYMPTOMS = [
   { id: 'autre', label: 'Autre (précisez)', color: 'red' }
 ];
 
-const getButtonColorClasses = (color: string) => {
-  switch (color) {
-    case 'red':
-      return 'text-red-700 hover:bg-red-50 data-[selected=true]:bg-red-500 data-[selected=true]:text-white';
-    case 'yellow':
-      return 'text-yellow-700 hover:bg-yellow-50 data-[selected=true]:bg-yellow-500 data-[selected=true]:text-white';
-    case 'purple':
-      return 'text-purple-700 hover:bg-purple-50 data-[selected=true]:bg-purple-500 data-[selected=true]:text-white';
-    case 'green':
-      return 'text-green-700 hover:bg-green-50 data-[selected=true]:bg-green-500 data-[selected=true]:text-white';
-    case 'blue':
-      return 'text-blue-700 hover:bg-blue-50 data-[selected=true]:bg-blue-500 data-[selected=true]:text-white';
-    case 'gray':
-      return 'text-gray-700 hover:bg-gray-50 data-[selected=true]:bg-gray-500 data-[selected=true]:text-white';
-    default:
-      return 'text-gray-700 hover:bg-gray-50 data-[selected=true]:bg-gray-500 data-[selected=true]:text-white';
+const getTagColorClasses = (color: string, isSelected: boolean) => {
+  if (isSelected) {
+    switch (color) {
+      case 'red':
+        return 'bg-red-500 text-white border-red-500 hover:bg-red-600';
+      case 'yellow':
+        return 'bg-yellow-500 text-white border-yellow-500 hover:bg-yellow-600';
+      case 'purple':
+        return 'bg-purple-500 text-white border-purple-500 hover:bg-purple-600';
+      case 'green':
+        return 'bg-green-500 text-white border-green-500 hover:bg-green-600';
+      case 'blue':
+        return 'bg-blue-500 text-white border-blue-500 hover:bg-blue-600';
+      case 'gray':
+        return 'bg-gray-500 text-white border-gray-500 hover:bg-gray-600';
+      default:
+        return 'bg-gray-500 text-white border-gray-500 hover:bg-gray-600';
+    }
+  } else {
+    switch (color) {
+      case 'red':
+        return 'bg-white text-red-700 border-red-300 hover:bg-red-50';
+      case 'yellow':
+        return 'bg-white text-yellow-700 border-yellow-300 hover:bg-yellow-50';
+      case 'purple':
+        return 'bg-white text-purple-700 border-purple-300 hover:bg-purple-50';
+      case 'green':
+        return 'bg-white text-green-700 border-green-300 hover:bg-green-50';
+      case 'blue':
+        return 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50';
+      case 'gray':
+        return 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50';
+      default:
+        return 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50';
+    }
   }
 };
 
@@ -109,23 +128,24 @@ const SymptomSelector: React.FC<SymptomSelectorProps> = ({
         />
       </div>
 
-      {/* Liste des symptômes */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-        {filteredSymptoms.map((symptom) => (
-          <button
-            key={symptom.id}
-            type="button"
-            onClick={() => handleSymptomToggle(symptom.id, !selectedSymptoms.includes(symptom.id))}
-            data-selected={selectedSymptoms.includes(symptom.id)}
-            className={`
-              p-3 border rounded-lg transition-all duration-200 cursor-pointer text-left text-sm sm:text-base
-              border-gray-300 bg-white hover:border-current
-              ${getButtonColorClasses(symptom.color)}
-            `}
-          >
-            {symptom.label}
-          </button>
-        ))}
+      {/* Tags des symptômes */}
+      <div className="flex flex-wrap gap-2">
+        {filteredSymptoms.map((symptom) => {
+          const isSelected = selectedSymptoms.includes(symptom.id);
+          return (
+            <button
+              key={symptom.id}
+              type="button"
+              onClick={() => handleSymptomToggle(symptom.id, !isSelected)}
+              className={`
+                inline-flex items-center px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium border transition-all duration-200 cursor-pointer hover:shadow-sm active:scale-95
+                ${getTagColorClasses(symptom.color, isSelected)}
+              `}
+            >
+              {symptom.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Zone de texte personnalisée si "Autre" est sélectionné */}
