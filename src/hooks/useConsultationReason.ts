@@ -36,10 +36,10 @@ export const useConsultationReason = () => {
     }
   }, [consultationReason, hasTwoAnimals]);
 
-  // Effet pour navigation automatique vers les symptômes
+  // Effet pour navigation automatique vers les symptômes - DÉSACTIVÉ si 2 animaux
   useEffect(() => {
-    if (consultationReason === 'symptomes-anomalie') {
-      // Sauvegarder les données et naviguer automatiquement
+    if (consultationReason === 'symptomes-anomalie' && !hasTwoAnimals) {
+      // Sauvegarder les données et naviguer automatiquement SEULEMENT si pas de 2e animal
       const existingData = JSON.parse(localStorage.getItem('bookingFormData') || '{}');
       const updatedData = {
         ...existingData,
@@ -58,7 +58,7 @@ export const useConsultationReason = () => {
       // Navigation automatique vers la sélection des symptômes
       navigate('/booking/symptoms');
     }
-  }, [consultationReason, convenienceOptions, customText, secondAnimalDifferentReason, secondAnimalConsultationReason, secondAnimalConvenienceOptions, secondAnimalCustomText, navigate]);
+  }, [consultationReason, convenienceOptions, customText, secondAnimalDifferentReason, secondAnimalConsultationReason, secondAnimalConvenienceOptions, secondAnimalCustomText, navigate, hasTwoAnimals]);
 
   const handleNext = () => {
     const isFirstAnimalValid = consultationReason !== '' && 
