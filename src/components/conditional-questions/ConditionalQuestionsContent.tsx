@@ -24,11 +24,16 @@ const ConditionalQuestionsContent = ({
 }: ConditionalQuestionsContentProps) => {
   const isMobile = useIsMobile();
 
+  // Vérifier si l'utilisateur a sélectionné "2 animaux"
+  const hasTwoAnimals = bookingData.multipleAnimals?.includes('2-animaux');
+
   // Déterminer si on a des symptômes pour chaque animal
   const hasFirstAnimalSymptoms = (bookingData.selectedSymptoms?.length > 0 || bookingData.customSymptom?.trim() !== '') && 
     bookingData.consultationReason === 'symptomes-anomalie';
   
-  const hasSecondAnimalSymptoms = (bookingData.secondAnimalSelectedSymptoms?.length > 0 || bookingData.secondAnimalCustomSymptom?.trim() !== '') && 
+  // Pour le deuxième animal, vérifier d'abord qu'il y a bien 2 animaux sélectionnés
+  const hasSecondAnimalSymptoms = hasTwoAnimals && 
+    (bookingData.secondAnimalSelectedSymptoms?.length > 0 || bookingData.secondAnimalCustomSymptom?.trim() !== '') && 
     bookingData.secondAnimalConsultationReason === 'symptomes-anomalie';
 
   return (
@@ -53,7 +58,7 @@ const ConditionalQuestionsContent = ({
               </div>
             )}
 
-            {/* Questions pour l'animal 2 */}
+            {/* Questions pour l'animal 2 - Seulement si 2 animaux sélectionnés */}
             {hasSecondAnimalSymptoms && (
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-vet-navy border-b border-gray-200 pb-2">

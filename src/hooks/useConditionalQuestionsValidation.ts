@@ -7,16 +7,36 @@ interface ValidationProps {
 }
 
 export const useConditionalQuestionsValidation = ({ bookingData, answers }: ValidationProps) => {
+  // Vérifier si l'utilisateur a sélectionné "2 animaux"
+  const hasTwoAnimals = bookingData?.multipleAnimals?.includes('2-animaux');
+
   // Validation pour l'animal 1
   const animal1Detection = useSymptomDetection(bookingData?.selectedSymptoms || [], bookingData?.customSymptom || '');
   
-  // Validation pour l'animal 2
-  const animal2Detection = useSymptomDetection(bookingData?.secondAnimalSelectedSymptoms || [], bookingData?.secondAnimalCustomSymptom || '');
+  // Validation pour l'animal 2 - seulement si 2 animaux sélectionnés
+  const animal2Detection = hasTwoAnimals ? useSymptomDetection(bookingData?.secondAnimalSelectedSymptoms || [], bookingData?.secondAnimalCustomSymptom || '') : {
+    needsQuestions: false,
+    hasLossOfAppetite: false,
+    hasExcessiveThirst: false,
+    hasListlessness: false,
+    hasBloodInStool: false,
+    hasUrinaryProblems: false,
+    hasSkinItching: false,
+    hasWound: false,
+    hasEarProblems: false,
+    hasEyeDischarge: false,
+    hasLameness: false,
+    hasBreathingDifficulties: false,
+    hasLump: false,
+    hasAggression: false
+  };
 
   const hasFirstAnimalSymptoms = (bookingData?.selectedSymptoms?.length > 0 || bookingData?.customSymptom?.trim() !== '') && 
     bookingData?.consultationReason === 'symptomes-anomalie';
   
-  const hasSecondAnimalSymptoms = (bookingData?.secondAnimalSelectedSymptoms?.length > 0 || bookingData?.secondAnimalCustomSymptom?.trim() !== '') && 
+  // Pour le deuxième animal, vérifier d'abord qu'il y a bien 2 animaux sélectionnés
+  const hasSecondAnimalSymptoms = hasTwoAnimals &&
+    (bookingData?.secondAnimalSelectedSymptoms?.length > 0 || bookingData?.secondAnimalCustomSymptom?.trim() !== '') && 
     bookingData?.secondAnimalConsultationReason === 'symptomes-anomalie';
 
   // Fonction pour générer les questions requises pour un animal
