@@ -8,21 +8,14 @@ import Header from "@/components/Header";
 import SelectionButton from "@/components/SelectionButton";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-const SymptomDuration = () => {
+const AdditionalConsultationPoints = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const [selectedDuration, setSelectedDuration] = useState('');
+  const [hasAdditionalPoints, setHasAdditionalPoints] = useState('');
   const [bookingData, setBookingData] = useState<any>(null);
 
-  const durationOptions = [
-    '1 à 2 jours',
-    '3 à 5 jours', 
-    '1 semaine',
-    'Plusieurs semaines'
-  ];
-
   useEffect(() => {
-    // Vérifier que l'utilisateur vient bien des questions conditionnelles
+    // Vérifier que l'utilisateur vient bien de la page de durée des symptômes
     const storedData = localStorage.getItem('bookingFormData');
     if (!storedData) {
       navigate('/');
@@ -42,25 +35,25 @@ const SymptomDuration = () => {
   }, [navigate]);
 
   const handleBack = () => {
-    navigate('/booking/questions');
+    navigate('/booking/duration');
   };
 
   const handleNext = () => {
-    if (!selectedDuration) return;
+    if (!hasAdditionalPoints) return;
 
     const existingData = JSON.parse(localStorage.getItem('bookingFormData') || '{}');
     const updatedData = {
       ...existingData,
-      symptomDuration: selectedDuration
+      hasAdditionalConsultationPoints: hasAdditionalPoints
     };
     localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
-    console.log('Updated booking data with symptom duration:', updatedData);
+    console.log('Updated booking data with additional consultation points:', updatedData);
 
-    // Naviguer vers la page des points supplémentaires
-    navigate('/booking/additional-points');
+    // Naviguer vers la page des créneaux
+    navigate('/booking/slots');
   };
 
-  const canProceed = selectedDuration !== '';
+  const canProceed = hasAdditionalPoints !== '';
 
   if (!bookingData) {
     return null;
@@ -89,7 +82,7 @@ const SymptomDuration = () => {
           {/* Titre */}
           <div className="text-center mb-4 sm:mb-8 animate-fade-in">
             <h1 className="text-xl sm:text-3xl font-bold text-vet-navy mb-2 px-2">
-              Durée des symptômes
+              Points supplémentaires
             </h1>
           </div>
 
@@ -98,23 +91,30 @@ const SymptomDuration = () => {
             <CardContent className="p-3 sm:p-6">
               <div className="space-y-4 sm:space-y-6">
                 <h3 className="text-base sm:text-lg text-vet-navy text-left mb-4 sm:mb-6">
-                  Depuis combien de temps observez-vous ce(s) symptôme(s) ?
+                  Il y aura-t-il d'autres points à voir pendant la consultation ?
                   <span className="text-red-500 ml-1">*</span>
                 </h3>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                  {durationOptions.map((option) => (
-                    <SelectionButton
-                      key={option}
-                      id={`symptom-duration-${option}`}
-                      value={option}
-                      isSelected={selectedDuration === option}
-                      onSelect={setSelectedDuration}
-                      className="p-3 text-sm font-medium"
-                    >
-                      <span className="text-center leading-tight">{option}</span>
-                    </SelectionButton>
-                  ))}
+                  <SelectionButton
+                    id="additional-points-yes"
+                    value="oui"
+                    isSelected={hasAdditionalPoints === 'oui'}
+                    onSelect={setHasAdditionalPoints}
+                    className="p-4 text-base font-medium"
+                  >
+                    <span className="text-center">Oui</span>
+                  </SelectionButton>
+                  
+                  <SelectionButton
+                    id="additional-points-no"
+                    value="non"
+                    isSelected={hasAdditionalPoints === 'non'}
+                    onSelect={setHasAdditionalPoints}
+                    className="p-4 text-base font-medium"
+                  >
+                    <span className="text-center">Non</span>
+                  </SelectionButton>
                 </div>
               </div>
 
@@ -153,4 +153,4 @@ const SymptomDuration = () => {
   );
 };
 
-export default SymptomDuration;
+export default AdditionalConsultationPoints;

@@ -11,6 +11,7 @@ import PublicBooking from "./pages/public/PublicBooking";
 import ConsultationReason from "./pages/public/ConsultationReason";
 import ConditionalQuestions from "./pages/public/ConditionalQuestions";
 import SymptomDuration from "./pages/public/SymptomDuration";
+import AdditionalConsultationPoints from "./pages/public/AdditionalConsultationPoints";
 import AppointmentSlots from "./pages/public/AppointmentSlots";
 import BookingConfirmation from "./pages/public/BookingConfirmation";
 
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/booking/reason" element={<ConsultationReason />} />
           <Route path="/booking/questions" element={<ConditionalQuestions />} />
           <Route path="/booking/duration" element={<SymptomDuration />} />
+          <Route path="/booking/additional-points" element={<AdditionalConsultationPoints />} />
           <Route path="/booking/slots" element={<AppointmentSlots />} />
           <Route path="/booking/confirmation" element={<BookingConfirmation />} />
           
