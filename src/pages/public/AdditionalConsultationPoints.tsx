@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,7 +31,7 @@ const AdditionalConsultationPoints = () => {
       parsedData.secondAnimalConsultationReason === 'symptomes-anomalie';
     
     if (!hasSymptomConsultation) {
-      navigate('/booking/slots');
+      navigate('/booking/animal-info');
       return;
     }
   }, [navigate]);
@@ -56,8 +55,8 @@ const AdditionalConsultationPoints = () => {
     localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
     console.log('Updated booking data with additional consultation points:', updatedData);
 
-    // Naviguer vers la page des créneaux
-    navigate('/booking/slots');
+    // Naviguer vers la page des informations animal
+    navigate('/booking/animal-info');
   };
 
   const canProceed = hasAdditionalPoints !== '' && 

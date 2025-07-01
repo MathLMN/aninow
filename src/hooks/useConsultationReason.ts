@@ -84,12 +84,12 @@ export const useConsultationReason = () => {
       console.log('Updated booking data:', updatedData);
       
       // Si le motif principal est "symptomes-anomalie", aller vers les questions conditionnelles
-      // Sinon, aller directement vers les créneaux
+      // Sinon, aller directement vers les informations animal
       if (consultationReason === 'symptomes-anomalie' || 
           (secondAnimalDifferentReason && secondAnimalConsultationReason === 'symptomes-anomalie')) {
         navigate('/booking/questions');
       } else {
-        navigate('/booking/slots');
+        navigate('/booking/animal-info');
       }
     }
   };
