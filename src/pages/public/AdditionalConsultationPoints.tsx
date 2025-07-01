@@ -6,12 +6,15 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Header from "@/components/Header";
 import SelectionButton from "@/components/SelectionButton";
+import AdditionalPointsSelector from "@/components/AdditionalPointsSelector";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const AdditionalConsultationPoints = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [hasAdditionalPoints, setHasAdditionalPoints] = useState('');
+  const [selectedPoints, setSelectedPoints] = useState<string[]>([]);
+  const [customPoint, setCustomPoint] = useState('');
   const [bookingData, setBookingData] = useState<any>(null);
 
   useEffect(() => {
@@ -44,7 +47,11 @@ const AdditionalConsultationPoints = () => {
     const existingData = JSON.parse(localStorage.getItem('bookingFormData') || '{}');
     const updatedData = {
       ...existingData,
-      hasAdditionalConsultationPoints: hasAdditionalPoints
+      hasAdditionalConsultationPoints: hasAdditionalPoints,
+      ...(hasAdditionalPoints === 'oui' && {
+        additionalPoints: selectedPoints,
+        customAdditionalPoint: customPoint
+      })
     };
     localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
     console.log('Updated booking data with additional consultation points:', updatedData);
@@ -53,7 +60,9 @@ const AdditionalConsultationPoints = () => {
     navigate('/booking/slots');
   };
 
-  const canProceed = hasAdditionalPoints !== '';
+  const canProceed = hasAdditionalPoints !== '' && 
+    (hasAdditionalPoints === 'non' || 
+     (hasAdditionalPoints === 'oui' && (selectedPoints.length > 0 || customPoint.trim() !== '')));
 
   if (!bookingData) {
     return null;
@@ -95,13 +104,20 @@ const AdditionalConsultationPoints = () => {
                   <span className="text-red-500 ml-1">*</span>
                 </h3>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                {/* Boutons Oui/Non plus petits */}
+                <div className="flex gap-3 justify-center sm:justify-start">
                   <SelectionButton
                     id="additional-points-yes"
                     value="oui"
                     isSelected={hasAdditionalPoints === 'oui'}
-                    onSelect={setHasAdditionalPoints}
-                    className="p-4 text-base font-medium"
+                    onSelect={(value) => {
+                      setHasAdditionalPoints(value);
+                      if (value !== 'oui') {
+                        setSelectedPoints([]);
+                        setCustomPoint('');
+                      }
+                    }}
+                    className="px-6 py-2 text-sm font-medium min-w-[80px]"
                   >
                     <span className="text-center">Oui</span>
                   </SelectionButton>
@@ -110,12 +126,34 @@ const AdditionalConsultationPoints = () => {
                     id="additional-points-no"
                     value="non"
                     isSelected={hasAdditionalPoints === 'non'}
-                    onSelect={setHasAdditionalPoints}
-                    className="p-4 text-base font-medium"
+                    onSelect={(value) => {
+                      setHasAdditionalPoints(value);
+                      if (value !== 'oui') {
+                        setSelectedPoints([]);
+                        setCustomPoint('');
+                      }
+                    }}
+                    className="px-6 py-2 text-sm font-medium min-w-[80px]"
                   >
                     <span className="text-center">Non</span>
                   </SelectionButton>
                 </div>
+
+                {/* Sélection des points supplémentaires si "oui" est sélectionné */}
+                {hasAdditionalPoints === 'oui' && (
+                  <div className="mt-6 pt-4 border-t border-gray-200">
+                    <h4 className="text-sm sm:text-base text-vet-navy mb-4">
+                      Sélectionnez parmi cette liste :
+                      <span className="text-red-500 ml-1">*</span>
+                    </h4>
+                    <AdditionalPointsSelector
+                      selectedPoints={selectedPoints}
+                      onPointsChange={setSelectedPoints}
+                      customPoint={customPoint}
+                      onCustomPointChange={setCustomPoint}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Bouton Continuer - Desktop/Tablet: dans la card, Mobile: fixe */}
