@@ -46,8 +46,8 @@ const ConditionalQuestions = () => {
     localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
     console.log('Updated booking data with conditional answers:', updatedData);
 
-    // Naviguer vers la page suivante (créneaux)
-    navigate('/booking/slots');
+    // Naviguer vers la page de durée des symptômes
+    navigate('/booking/duration');
   };
 
   const handleAnswersChange = (newAnswers: any) => {
