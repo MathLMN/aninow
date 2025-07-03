@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -67,8 +66,8 @@ const AnimalInfo = () => {
     localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
     console.log('Updated booking data with animal info:', updatedData);
 
-    // Naviguer vers la page des créneaux
-    navigate('/booking/slots');
+    // Naviguer vers la page de commentaire au lieu des créneaux
+    navigate('/booking/comment');
   };
 
   if (!bookingData) {
