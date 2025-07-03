@@ -19,6 +19,7 @@ interface AnimalConsultationFormProps {
   onCustomSymptomChange?: (symptom: string) => void;
   isForced?: boolean;
   containerClassName?: string;
+  animalName?: string;
 }
 
 const AnimalConsultationForm: React.FC<AnimalConsultationFormProps> = ({
@@ -34,11 +35,15 @@ const AnimalConsultationForm: React.FC<AnimalConsultationFormProps> = ({
   customSymptom = '',
   onCustomSymptomChange = () => {},
   isForced = false,
-  containerClassName = ""
+  containerClassName = "",
+  animalName
 }) => {
+  // Utiliser le nom de l'animal dans le titre si fourni
+  const displayTitle = animalName ? `Motif pour ${animalName}` : title;
+
   return (
     <div className={`space-y-2 sm:space-y-4 ${containerClassName}`}>
-      <h3 className="text-sm sm:text-lg font-semibold text-vet-blue">{title}</h3>
+      <h3 className="text-sm sm:text-lg font-semibold text-vet-blue">{displayTitle}</h3>
       
       {!isForced && (
         <ConsultationReasonSelect
