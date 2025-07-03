@@ -1,8 +1,6 @@
-
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-
 interface AnimalInfoSelectorProps {
   animalName: string;
   animalNumber?: number;
@@ -13,45 +11,20 @@ interface AnimalInfoSelectorProps {
 }
 
 // Listes temporaires - à remplacer par les vraies listes plus tard
-const BREEDS = [
-  'Labrador',
-  'Golden Retriever',
-  'Berger Allemand',
-  'Bulldog Français',
-  'Chihuahua',
-  'Yorkshire Terrier',
-  'Caniche',
-  'Boxer',
-  'Beagle',
-  'Border Collie',
-  'Autre'
-];
-
-const AGES = [
-  'Moins de 6 mois',
-  '6 mois à 1 an',
-  '1 à 2 ans',
-  '2 à 5 ans',
-  '5 à 8 ans',
-  '8 à 12 ans',
-  'Plus de 12 ans'
-];
-
+const BREEDS = ['Labrador', 'Golden Retriever', 'Berger Allemand', 'Bulldog Français', 'Chihuahua', 'Yorkshire Terrier', 'Caniche', 'Boxer', 'Beagle', 'Border Collie', 'Autre'];
+const AGES = ['Moins de 6 mois', '6 mois à 1 an', '1 à 2 ans', '2 à 5 ans', '5 à 8 ans', '8 à 12 ans', 'Plus de 12 ans'];
 const AnimalInfoSelector: React.FC<AnimalInfoSelectorProps> = ({
   animalName,
   animalNumber,
   selectedBreed,
   onBreedChange,
   selectedAge,
-  onAgeChange,
+  onAgeChange
 }) => {
   const title = animalNumber ? `Animal ${animalNumber} - ${animalName}` : animalName;
-
-  return (
-    <div className="space-y-4 sm:space-y-6">
-      {animalNumber && (
-        <div className="bg-vet-beige/20 rounded-lg p-3 sm:p-4 border border-vet-beige/40">
-          <h3 className="text-base sm:text-lg font-semibold text-vet-blue mb-4">
+  return <div className="space-y-4 sm:space-y-6">
+      {animalNumber && <div className="bg-vet-beige/20 rounded-lg p-3 sm:p-4 border border-vet-beige/40">
+          <h3 className="sm:text-lg font-semibold text-vet-blue mb-4 text-sm">
             {title}
           </h3>
           
@@ -67,11 +40,9 @@ const AnimalInfoSelector: React.FC<AnimalInfoSelectorProps> = ({
                   <SelectValue placeholder="Écrivez pour trouver la race" />
                 </SelectTrigger>
                 <SelectContent>
-                  {BREEDS.map((breed) => (
-                    <SelectItem key={breed} value={breed}>
+                  {BREEDS.map(breed => <SelectItem key={breed} value={breed}>
                       {breed}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -87,20 +58,16 @@ const AnimalInfoSelector: React.FC<AnimalInfoSelectorProps> = ({
                   <SelectValue placeholder="Écrivez ou sélectionnez parmi la liste" />
                 </SelectTrigger>
                 <SelectContent>
-                  {AGES.map((age) => (
-                    <SelectItem key={age} value={age}>
+                  {AGES.map(age => <SelectItem key={age} value={age}>
                       {age}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
           </div>
-        </div>
-      )}
+        </div>}
       
-      {!animalNumber && (
-        <>
+      {!animalNumber && <>
           <h3 className="text-base sm:text-lg font-semibold text-vet-blue mb-4">
             Informations sur {animalName}
           </h3>
@@ -117,11 +84,9 @@ const AnimalInfoSelector: React.FC<AnimalInfoSelectorProps> = ({
                   <SelectValue placeholder="Écrivez pour trouver la race" />
                 </SelectTrigger>
                 <SelectContent>
-                  {BREEDS.map((breed) => (
-                    <SelectItem key={breed} value={breed}>
+                  {BREEDS.map(breed => <SelectItem key={breed} value={breed}>
                       {breed}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -137,19 +102,14 @@ const AnimalInfoSelector: React.FC<AnimalInfoSelectorProps> = ({
                   <SelectValue placeholder="Écrivez ou sélectionnez parmi la liste" />
                 </SelectTrigger>
                 <SelectContent>
-                  {AGES.map((age) => (
-                    <SelectItem key={age} value={age}>
+                  {AGES.map(age => <SelectItem key={age} value={age}>
                       {age}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
           </div>
-        </>
-      )}
-    </div>
-  );
+        </>}
+    </div>;
 };
-
 export default AnimalInfoSelector;
