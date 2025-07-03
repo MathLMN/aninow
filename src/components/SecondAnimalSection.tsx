@@ -29,6 +29,8 @@ interface SecondAnimalSectionProps {
   onSecondAnimalSymptomsChange?: (symptoms: string[]) => void;
   secondAnimalCustomSymptom?: string;
   onSecondAnimalCustomSymptomChange?: (symptom: string) => void;
+  firstAnimalName?: string;
+  secondAnimalName?: string;
 }
 
 const SecondAnimalSection: React.FC<SecondAnimalSectionProps> = ({
@@ -55,7 +57,9 @@ const SecondAnimalSection: React.FC<SecondAnimalSectionProps> = ({
   secondAnimalSelectedSymptoms = [],
   onSecondAnimalSymptomsChange = () => {},
   secondAnimalCustomSymptom = '',
-  onSecondAnimalCustomSymptomChange = () => {}
+  onSecondAnimalCustomSymptomChange = () => {},
+  firstAnimalName,
+  secondAnimalName
 }) => {
   if (!hasTwoAnimals) return null;
 
@@ -91,6 +95,8 @@ const SecondAnimalSection: React.FC<SecondAnimalSectionProps> = ({
           {/* Animal 1 */}
           <AnimalConsultationForm
             title="Animal 1"
+            animalName={firstAnimalName}
+            animalNumber={1}
             consultationReason={consultationReason}
             onConsultationReasonChange={onConsultationReasonChange}
             convenienceOptions={convenienceOptions}
@@ -107,6 +113,8 @@ const SecondAnimalSection: React.FC<SecondAnimalSectionProps> = ({
           {/* Animal 2 */}
           <AnimalConsultationForm
             title="Animal 2"
+            animalName={secondAnimalName}
+            animalNumber={2}
             consultationReason={secondAnimalConsultationReason}
             onConsultationReasonChange={onSecondAnimalConsultationReasonChange}
             convenienceOptions={secondAnimalConvenienceOptions}
