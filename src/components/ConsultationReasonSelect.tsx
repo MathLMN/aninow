@@ -15,7 +15,7 @@ const ConsultationReasonSelect: React.FC<ConsultationReasonSelectProps> = ({
   return (
     <div className="space-y-2 sm:space-y-3">
       <Label className="text-base sm:text-lg font-semibold text-vet-navy block leading-tight">
-        Pour quel motif souhaitez-vous une consultation ? *
+        Pour quel motif souhaitez-vous une consultation ? <span className="text-vet-navy ml-1">*</span>
       </Label>
       
       <Select value={value} onValueChange={onValueChange}>

@@ -20,6 +20,7 @@ interface AnimalConsultationFormProps {
   isForced?: boolean;
   containerClassName?: string;
   animalName?: string;
+  animalNumber?: number;
 }
 
 const AnimalConsultationForm: React.FC<AnimalConsultationFormProps> = ({
@@ -36,10 +37,15 @@ const AnimalConsultationForm: React.FC<AnimalConsultationFormProps> = ({
   onCustomSymptomChange = () => {},
   isForced = false,
   containerClassName = "",
-  animalName
+  animalName,
+  animalNumber
 }) => {
-  // Utiliser le nom de l'animal dans le titre si fourni
-  const displayTitle = animalName ? `Motif pour ${animalName}` : title;
+  // Construire le titre avec le numéro et le prénom de l'animal si fournis
+  const displayTitle = animalNumber && animalName 
+    ? `Animal ${animalNumber} - ${animalName}` 
+    : animalName 
+    ? `Motif pour ${animalName}` 
+    : title;
 
   return (
     <div className={`space-y-2 sm:space-y-4 ${containerClassName}`}>
@@ -75,7 +81,7 @@ const AnimalConsultationForm: React.FC<AnimalConsultationFormProps> = ({
         <div className="space-y-3 sm:space-y-4">
           <div className="border-t border-gray-200 pt-4">
             <h4 className="text-base sm:text-lg font-semibold text-vet-navy mb-3">
-              Quels symptômes vous amènent à consulter ? *
+              Quels symptômes vous amènent à consulter ? <span className="text-vet-navy ml-1">*</span>
             </h4>
             <SymptomSelector
               selectedSymptoms={selectedSymptoms}

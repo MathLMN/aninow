@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -33,7 +34,7 @@ const AnimalInfoSelector: React.FC<AnimalInfoSelectorProps> = ({
             <div className="space-y-2">
               <Label className="text-sm sm:text-base font-medium text-vet-navy">
                 Quelle est la race ?
-                <span className="text-red-500 ml-1">*</span>
+                <span className="text-vet-navy ml-1">*</span>
               </Label>
               <Select value={selectedBreed} onValueChange={onBreedChange}>
                 <SelectTrigger className="h-12 text-sm sm:text-base bg-white border-2 border-gray-200 rounded-lg hover:border-vet-sage/50 focus:border-vet-sage transition-colors">
@@ -51,7 +52,7 @@ const AnimalInfoSelector: React.FC<AnimalInfoSelectorProps> = ({
             <div className="space-y-2">
               <Label className="text-sm sm:text-base font-medium text-vet-navy">
                 Quel est son âge ?
-                <span className="text-red-500 ml-1">*</span>
+                <span className="text-vet-navy ml-1">*</span>
               </Label>
               <Select value={selectedAge} onValueChange={onAgeChange}>
                 <SelectTrigger className="h-12 text-sm sm:text-base bg-white border-2 border-gray-200 rounded-lg hover:border-vet-sage/50 focus:border-vet-sage transition-colors">
@@ -77,7 +78,7 @@ const AnimalInfoSelector: React.FC<AnimalInfoSelectorProps> = ({
             <div className="space-y-2">
               <Label className="text-sm sm:text-base font-medium text-vet-navy">
                 Quelle est la race ?
-                <span className="text-red-500 ml-1">*</span>
+                <span className="text-vet-navy ml-1">*</span>
               </Label>
               <Select value={selectedBreed} onValueChange={onBreedChange}>
                 <SelectTrigger className="h-12 text-sm sm:text-base bg-white border-2 border-gray-200 rounded-lg hover:border-vet-sage/50 focus:border-vet-sage transition-colors">
@@ -95,7 +96,7 @@ const AnimalInfoSelector: React.FC<AnimalInfoSelectorProps> = ({
             <div className="space-y-2">
               <Label className="text-sm sm:text-base font-medium text-vet-navy">
                 Quel est son âge ?
-                <span className="text-red-500 ml-1">*</span>
+                <span className="text-vet-navy ml-1">*</span>
               </Label>
               <Select value={selectedAge} onValueChange={onAgeChange}>
                 <SelectTrigger className="h-12 text-sm sm:text-base bg-white border-2 border-gray-200 rounded-lg hover:border-vet-sage/50 focus:border-vet-sage transition-colors">

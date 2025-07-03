@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import ConsultationReasonSelect from "@/components/ConsultationReasonSelect";
 import ConvenienceConsultationSelect from "@/components/ConvenienceConsultationSelect";
 import SymptomSelector from "@/components/SymptomSelector";
@@ -14,6 +15,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const ConsultationReason = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const [bookingData, setBookingData] = useState<any>(null);
+  
   const {
     consultationReason,
     setConsultationReason,
@@ -43,9 +46,20 @@ const ConsultationReason = () => {
     shouldForceConvenienceForAnimal2
   } = useConsultationReason();
 
+  useEffect(() => {
+    // Récupérer les données du formulaire pour obtenir les prénoms des animaux
+    const storedData = localStorage.getItem('bookingFormData');
+    if (storedData) {
+      setBookingData(JSON.parse(storedData));
+    }
+  }, []);
+
   const handleBack = () => {
     navigate('/');
   };
+
+  const firstAnimalName = bookingData?.animalName || 'votre animal';
+  const secondAnimalName = bookingData?.secondAnimalName || 'le deuxième animal';
 
   return (
     <div className="min-h-screen relative" style={{ background: 'linear-gradient(135deg, #EDE3DA 0%, #ffffff 100%)' }}>
@@ -99,7 +113,7 @@ const ConsultationReason = () => {
                       <div className="space-y-3 sm:space-y-4">
                         <div className="border-t border-gray-200 pt-4">
                           <h3 className="text-base sm:text-lg font-semibold text-vet-navy mb-3">
-                            Quels symptômes vous amènent à consulter ? *
+                            Quels symptômes vous amènent à consulter ? <span className="text-vet-navy ml-1">*</span>
                           </h3>
                           <SymptomSelector
                             selectedSymptoms={selectedSymptoms}
@@ -138,6 +152,8 @@ const ConsultationReason = () => {
                   onSecondAnimalSymptomsChange={setSecondAnimalSelectedSymptoms}
                   secondAnimalCustomSymptom={secondAnimalCustomSymptom}
                   onSecondAnimalCustomSymptomChange={setSecondAnimalCustomSymptom}
+                  firstAnimalName={firstAnimalName}
+                  secondAnimalName={secondAnimalName}
                 />
               </div>
 
