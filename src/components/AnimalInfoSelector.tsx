@@ -51,14 +51,14 @@ const AnimalInfoSelector: React.FC<AnimalInfoSelectorProps> = ({
     <div className="space-y-4 sm:space-y-6">
       {animalNumber && (
         <div className="bg-vet-beige/20 rounded-lg p-3 sm:p-4 border border-vet-beige/40">
-          <h3 className="text-base sm:text-lg font-semibold text-vet-navy mb-4">
+          <h3 className="text-base sm:text-lg font-semibold text-vet-blue mb-4">
             {title}
           </h3>
         </div>
       )}
       
       {!animalNumber && (
-        <h3 className="text-base sm:text-lg font-semibold text-vet-navy mb-4">
+        <h3 className="text-base sm:text-lg font-semibold text-vet-blue mb-4">
           Informations sur {animalName}
         </h3>
       )}
