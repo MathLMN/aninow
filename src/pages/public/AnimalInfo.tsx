@@ -79,9 +79,12 @@ const AnimalInfo = () => {
   const firstAnimalName = bookingData.animalName || 'votre animal';
   const secondAnimalName = bookingData.secondAnimalName || 'le deuxième animal';
 
-  // Mise à jour de la logique de validation pour prendre en compte la checkbox "sans race"
-  const canProceed = (firstAnimalBreed !== '' || firstAnimalBreed === 'no-breed') && firstAnimalAge !== '' && 
-    (!hasTwoAnimals || ((secondAnimalBreed !== '' || secondAnimalBreed === 'no-breed') && secondAnimalAge !== ''));
+  // Correction de la logique de validation pour gérer correctement le cas "no-breed"
+  const isFirstAnimalValid = (firstAnimalBreed !== '' && firstAnimalBreed !== 'no-breed') || firstAnimalBreed === 'no-breed';
+  const isSecondAnimalValid = !hasTwoAnimals || ((secondAnimalBreed !== '' && secondAnimalBreed !== 'no-breed') || secondAnimalBreed === 'no-breed');
+  
+  const canProceed = isFirstAnimalValid && firstAnimalAge !== '' && isSecondAnimalValid && 
+    (!hasTwoAnimals || secondAnimalAge !== '');
 
   return (
     <div className="min-h-screen relative" style={{
