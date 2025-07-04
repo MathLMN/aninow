@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -78,8 +79,9 @@ const AnimalInfo = () => {
   const firstAnimalName = bookingData.animalName || 'votre animal';
   const secondAnimalName = bookingData.secondAnimalName || 'le deuxième animal';
 
-  const canProceed = firstAnimalBreed !== '' && firstAnimalAge !== '' && 
-    (!hasTwoAnimals || (secondAnimalBreed !== '' && secondAnimalAge !== ''));
+  // Mise à jour de la logique de validation pour prendre en compte la checkbox "sans race"
+  const canProceed = (firstAnimalBreed !== '' || firstAnimalBreed === 'no-breed') && firstAnimalAge !== '' && 
+    (!hasTwoAnimals || ((secondAnimalBreed !== '' || secondAnimalBreed === 'no-breed') && secondAnimalAge !== ''));
 
   return (
     <div className="min-h-screen relative" style={{
