@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -346,15 +345,17 @@ const BreedSelector: React.FC<BreedSelectorProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [customBreed, setCustomBreed] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
+  const [isInputFocused, setIsInputFocused] = useState(false);
 
   const baseBreeds = animalSpecies === 'chat' ? CAT_BREEDS : DOG_BREEDS;
   const noBreedLabel = animalSpecies === 'chat' ? 'Sans race/ type européen' : 'Sans race/ croisement';
 
   // Filtrer les races selon le terme de recherche
-  const filteredBreeds = baseBreeds.filter(breed => 
-    breed.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredBreeds = searchTerm 
+    ? baseBreeds.filter(breed => 
+        breed.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : baseBreeds;
 
   // Ajouter l'option "Autre" à la fin
   const breedsWithOther = [...filteredBreeds, 'Autre'];
@@ -367,6 +368,7 @@ const BreedSelector: React.FC<BreedSelectorProps> = ({
     if (checked) {
       onBreedChange('no-breed');
       setCustomBreed('');
+      setSearchTerm('');
     } else {
       onBreedChange('');
     }
@@ -380,7 +382,7 @@ const BreedSelector: React.FC<BreedSelectorProps> = ({
       onBreedChange(breed);
       setCustomBreed('');
     }
-    setIsOpen(false);
+    setSearchTerm('');
   };
 
   const handleCustomBreedChange = (value: string) => {
@@ -390,17 +392,23 @@ const BreedSelector: React.FC<BreedSelectorProps> = ({
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
-    if (value && !isNoBreed) {
-      // Si l'utilisateur tape, on cherche dans les races existantes
-      const matchingBreed = baseBreeds.find(breed => 
-        breed.toLowerCase().startsWith(value.toLowerCase())
-      );
-      if (matchingBreed) {
-        onBreedChange(matchingBreed);
-      } else {
-        onBreedChange(value);
-      }
-    }
+    // Ne pas changer automatiquement la sélection, juste filtrer
+  };
+
+  const handleInputFocus = () => {
+    setIsInputFocused(true);
+  };
+
+  const handleInputBlur = () => {
+    // Délai pour permettre le clic sur les options
+    setTimeout(() => {
+      setIsInputFocused(false);
+    }, 200);
+  };
+
+  const handleBreedClick = (breed: string) => {
+    handleBreedSelectChange(breed);
+    setIsInputFocused(false);
   };
 
   return (
@@ -414,20 +422,21 @@ const BreedSelector: React.FC<BreedSelectorProps> = ({
         <div className="relative">
           <Input
             type="text"
-            placeholder="Écrivez pour trouver la race"
-            value={isOtherBreed && selectedBreed !== 'Autre' ? selectedBreed : searchTerm}
+            placeholder="Écrivez pour affiner la recherche ou cliquez pour voir toutes les races"
+            value={searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
-            onFocus={() => setIsOpen(true)}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
             className="h-12 text-sm sm:text-base bg-white border-2 border-gray-200 rounded-lg hover:border-vet-sage/50 focus:border-vet-sage transition-colors"
           />
           
-          {isOpen && searchTerm && (
+          {isInputFocused && (
             <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
               {breedsWithOther.map(breed => (
                 <button
                   key={breed}
                   type="button"
-                  onClick={() => handleBreedSelectChange(breed)}
+                  onClick={() => handleBreedClick(breed)}
                   className="w-full px-3 py-2 text-left hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg text-sm"
                 >
                   {breed}
@@ -443,23 +452,11 @@ const BreedSelector: React.FC<BreedSelectorProps> = ({
         </div>
       )}
 
-      {!isNoBreed && !isOpen && !searchTerm && (
-        <Select 
-          value={isOtherBreed ? 'Autre' : selectedBreed} 
-          onValueChange={handleBreedSelectChange}
-          onOpenChange={setIsOpen}
-        >
-          <SelectTrigger className="h-12 text-sm sm:text-base bg-white border-2 border-gray-200 rounded-lg hover:border-vet-sage/50 focus:border-vet-sage transition-colors">
-            <SelectValue placeholder="Sélectionnez ou écrivez pour chercher" />
-          </SelectTrigger>
-          <SelectContent>
-            {breedsWithOther.map(breed => (
-              <SelectItem key={breed} value={breed}>
-                {breed}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* Affichage de la race sélectionnée */}
+      {!isNoBreed && selectedBreed && selectedBreed !== 'Autre' && !isOtherBreed && (
+        <div className="mt-2 p-2 bg-vet-beige/20 rounded border text-sm text-vet-navy">
+          Race sélectionnée: <strong>{selectedBreed}</strong>
+        </div>
       )}
       
       {/* Champ personnalisé pour "Autre" */}
