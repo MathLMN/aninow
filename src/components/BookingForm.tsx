@@ -34,7 +34,17 @@ const BookingForm = ({
 
   const handleSubmit = () => {
     if (canProceed) {
-      onNext(formData);
+      // Si c'est une portée, préparer les données avec le motif de consultation prédéfini
+      if (isLitter) {
+        const litterData = {
+          ...formData,
+          consultationReason: 'consultation-convenance',
+          convenienceOptions: [formData.vaccinationType === 'vaccinations-identifications' ? 'vaccination-identification' : 'vaccination']
+        };
+        onNext(litterData);
+      } else {
+        onNext(formData);
+      }
     }
   };
 

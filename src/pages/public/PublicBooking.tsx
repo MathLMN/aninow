@@ -8,9 +8,16 @@ const PublicBooking = () => {
   const navigate = useNavigate();
   const handleFormNext = (formData: any) => {
     console.log('Form data:', formData);
-    // Stocker les données du formulaire et naviguer vers la sélection du motif
+    // Stocker les données du formulaire
     localStorage.setItem('bookingFormData', JSON.stringify(formData));
-    navigate('/booking/reason');
+    
+    // Si c'est une portée, aller directement vers les informations animal
+    if (formData.multipleAnimals?.includes('une-portee')) {
+      navigate('/booking/animal-info');
+    } else {
+      // Sinon, suivre le flux normal vers la sélection du motif
+      navigate('/booking/reason');
+    }
   };
   
   return (

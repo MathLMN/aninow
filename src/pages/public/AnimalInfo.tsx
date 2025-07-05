@@ -34,15 +34,23 @@ const AnimalInfo = () => {
     setBookingData(parsedData);
 
     // Déterminer d'où vient l'utilisateur pour le bouton retour
-    const hasSymptomConsultation = parsedData.consultationReason === 'symptomes-anomalie' || 
-      parsedData.secondAnimalConsultationReason === 'symptomes-anomalie';
+    const isLitter = parsedData.multipleAnimals?.includes('une-portee');
     
-    if (hasSymptomConsultation && parsedData.hasAdditionalConsultationPoints !== undefined) {
-      // Vient de la page des points supplémentaires
-      setPreviousRoute('/booking/additional-points');
+    if (isLitter) {
+      // Pour une portée, retour vers la première page
+      setPreviousRoute('/');
     } else {
-      // Vient de la page motif de consultation (consultation de convenance)
-      setPreviousRoute('/booking/reason');
+      // Déterminer la route précédente selon le flux normal
+      const hasSymptomConsultation = parsedData.consultationReason === 'symptomes-anomalie' || 
+        parsedData.secondAnimalConsultationReason === 'symptomes-anomalie';
+      
+      if (hasSymptomConsultation && parsedData.hasAdditionalConsultationPoints !== undefined) {
+        // Vient de la page des points supplémentaires
+        setPreviousRoute('/booking/additional-points');
+      } else {
+        // Vient de la page motif de consultation (consultation de convenance)
+        setPreviousRoute('/booking/reason');
+      }
     }
   }, [navigate]);
 
