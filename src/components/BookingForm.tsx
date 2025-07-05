@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
@@ -40,6 +39,9 @@ const BookingForm = ({
   const [showSecondAnimal, setShowSecondAnimal] = useState(false);
   const [showSecondNameInput, setShowSecondNameInput] = useState(false);
   const [showLitterOptions, setShowLitterOptions] = useState(false);
+
+  // Vérifier si c'est une portée
+  const isLitter = formData.multipleAnimals.includes('une-portee');
 
   const handleSpeciesChange = (value: string, selected: boolean) => {
     if (selected) {
@@ -85,6 +87,11 @@ const BookingForm = ({
         newMultipleAnimals = ['2-animaux'];
       } else if (option === 'une-portee') {
         newMultipleAnimals = ['une-portee'];
+        // Pour une portée, on vide le nom de l'animal car il n'est pas nécessaire
+        setFormData(prev => ({
+          ...prev,
+          animalName: ''
+        }));
       }
     } else {
       newMultipleAnimals = [];
@@ -148,7 +155,9 @@ const BookingForm = ({
   const canProceed = () => {
     if (!formData.animalSpecies) return false;
     if (formData.animalSpecies === 'autre' && !formData.customSpecies) return false;
-    if (!formData.animalName) return false;
+    
+    // Pour une portée, le nom n'est pas obligatoire
+    if (!isLitter && !formData.animalName) return false;
 
     if (showSecondAnimal) {
       if (!formData.secondAnimalSpecies) return false;
@@ -178,8 +187,8 @@ const BookingForm = ({
           title="Sélectionnez l'espèce votre animal *"
         />
 
-        {/* Champ nom de l'animal */}
-        {showNameInput && (
+        {/* Champ nom de l'animal - masqué pour une portée */}
+        {showNameInput && !isLitter && (
           <div className="animate-fade-in">
             <AnimalNameInput
               name={formData.animalName}

@@ -76,15 +76,19 @@ const AnimalInfo = () => {
   }
 
   const hasTwoAnimals = bookingData.multipleAnimals?.includes('2-animaux');
+  const isLitter = bookingData.multipleAnimals?.includes('une-portee');
   const firstAnimalName = bookingData.animalName || 'votre animal';
   const secondAnimalName = bookingData.secondAnimalName || 'le deuxième animal';
 
-  // Correction de la logique de validation pour gérer correctement le cas "no-breed"
+  // Logique de validation adaptée pour les portées
   const isFirstAnimalValid = (firstAnimalBreed !== '' && firstAnimalBreed !== 'no-breed') || firstAnimalBreed === 'no-breed';
   const isSecondAnimalValid = !hasTwoAnimals || ((secondAnimalBreed !== '' && secondAnimalBreed !== 'no-breed') || secondAnimalBreed === 'no-breed');
   
-  const canProceed = isFirstAnimalValid && firstAnimalAge !== '' && isSecondAnimalValid && 
-    (!hasTwoAnimals || secondAnimalAge !== '');
+  // Pour une portée, l'âge n'est pas requis
+  const canProceed = isFirstAnimalValid && 
+    (isLitter || firstAnimalAge !== '') && 
+    isSecondAnimalValid && 
+    (!hasTwoAnimals || isLitter || secondAnimalAge !== '');
 
   return (
     <div className="min-h-screen relative" style={{
@@ -109,7 +113,8 @@ const AnimalInfo = () => {
           {/* Titre */}
           <div className="text-center mb-4 sm:mb-8 animate-fade-in">
             <h1 className="text-xl sm:text-3xl font-bold text-vet-navy mb-2 px-2">
-              Informations sur {hasTwoAnimals ? 'vos animaux' : 'votre animal'}
+              {isLitter ? 'Informations sur la portée' : 
+               hasTwoAnimals ? 'Informations sur vos animaux' : 'Informations sur votre animal'}
             </h1>
           </div>
 
@@ -125,6 +130,7 @@ const AnimalInfo = () => {
                   onBreedChange={setFirstAnimalBreed}
                   selectedAge={firstAnimalAge}
                   onAgeChange={setFirstAnimalAge}
+                  isLitter={isLitter}
                 />
 
                 {/* Informations Animal 2 si applicable */}
@@ -137,6 +143,7 @@ const AnimalInfo = () => {
                       onBreedChange={setSecondAnimalBreed}
                       selectedAge={secondAnimalAge}
                       onAgeChange={setSecondAnimalAge}
+                      isLitter={false}
                     />
                   </div>
                 )}

@@ -11,6 +11,7 @@ interface AnimalInfoSelectorProps {
   onBreedChange: (breed: string) => void;
   selectedAge: string;
   onAgeChange: (age: string) => void;
+  isLitter?: boolean;
 }
 
 const AnimalInfoSelector: React.FC<AnimalInfoSelectorProps> = ({
@@ -19,7 +20,8 @@ const AnimalInfoSelector: React.FC<AnimalInfoSelectorProps> = ({
   selectedBreed,
   onBreedChange,
   selectedAge,
-  onAgeChange
+  onAgeChange,
+  isLitter = false
 }) => {
   const title = animalNumber ? `Animal ${animalNumber} - ${animalName}` : animalName;
   const animalSpecies = getAnimalSpecies(animalNumber);
@@ -41,11 +43,13 @@ const AnimalInfoSelector: React.FC<AnimalInfoSelectorProps> = ({
               animalNumber={animalNumber}
             />
 
-            {/* Sélection de l'âge */}
-            <AgeSelector
-              selectedAge={selectedAge}
-              onAgeChange={onAgeChange}
-            />
+            {/* Sélection de l'âge - masquée pour une portée */}
+            {!isLitter && (
+              <AgeSelector
+                selectedAge={selectedAge}
+                onAgeChange={onAgeChange}
+              />
+            )}
           </div>
         </div>
       )}
@@ -53,7 +57,7 @@ const AnimalInfoSelector: React.FC<AnimalInfoSelectorProps> = ({
       {!animalNumber && (
         <>
           <h3 className="text-base sm:text-lg font-semibold text-vet-blue mb-4">
-            Informations sur {animalName}
+            {isLitter ? 'Informations sur la portée' : `Informations sur ${animalName}`}
           </h3>
 
           <div className="space-y-4">
@@ -64,11 +68,13 @@ const AnimalInfoSelector: React.FC<AnimalInfoSelectorProps> = ({
               onBreedChange={onBreedChange}
             />
 
-            {/* Sélection de l'âge */}
-            <AgeSelector
-              selectedAge={selectedAge}
-              onAgeChange={onAgeChange}
-            />
+            {/* Sélection de l'âge - masquée pour une portée */}
+            {!isLitter && (
+              <AgeSelector
+                selectedAge={selectedAge}
+                onAgeChange={onAgeChange}
+              />
+            )}
           </div>
         </>
       )}
