@@ -1,0 +1,34 @@
+
+import React from 'react';
+import { Input } from "@/components/ui/input";
+
+interface BreedSearchInputProps {
+  searchTerm: string;
+  onSearchChange: (value: string) => void;
+  onFocus: () => void;
+  onBlur: () => void;
+  disabled?: boolean;
+}
+
+const BreedSearchInput: React.FC<BreedSearchInputProps> = ({
+  searchTerm,
+  onSearchChange,
+  onFocus,
+  onBlur,
+  disabled = false
+}) => {
+  return (
+    <Input
+      type="text"
+      placeholder="Écrivez pour affiner la recherche ou cliquez pour voir toutes les races"
+      value={searchTerm}
+      onChange={(e) => onSearchChange(e.target.value)}
+      onFocus={onFocus}
+      onBlur={onBlur}
+      disabled={disabled}
+      className="h-12 text-sm sm:text-base bg-white border-2 border-gray-200 rounded-lg hover:border-vet-sage/50 focus:border-vet-sage transition-colors"
+    />
+  );
+};
+
+export default BreedSearchInput;
