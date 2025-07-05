@@ -63,9 +63,9 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
       requiredQuestions.push(`${prefix}eating`, `${prefix}drinking`);
     }
     
-    // Ajouter les questions sur le sang dans les selles si nécessaire
+    // Ajouter la question sur la consistance des selles si nécessaire
     if (detection.hasBloodInStool) {
-      requiredQuestions.push(`${prefix}stool_consistency`, `${prefix}blood_quantity`, `${prefix}stool_frequency`);
+      requiredQuestions.push(`${prefix}stool_consistency`);
     }
 
     // Ajouter les questions spécifiques aux problèmes urinaires si nécessaire
