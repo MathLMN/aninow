@@ -21,8 +21,8 @@ const AgeSelector: React.FC<AgeSelectorProps> = ({
         <span className="text-vet-navy ml-1">*</span>
       </Label>
       <Select value={selectedAge} onValueChange={onAgeChange}>
-        <SelectTrigger className="h-12 text-sm sm:text-base bg-white border-2 border-gray-200 rounded-lg hover:border-vet-sage/50 focus:border-vet-sage transition-colors">
-          <SelectValue placeholder="Écrivez ou sélectionnez parmi la liste" />
+        <SelectTrigger className="h-12 text-sm sm:text-base bg-white border-2 border-gray-200 rounded-lg hover:border-vet-sage/50 focus:border-vet-sage transition-colors [&>span]:text-gray-400">
+          <SelectValue placeholder="Cliquez et sélectionnez parmi la liste" />
         </SelectTrigger>
         <SelectContent>
           {AGES.map(age => (
