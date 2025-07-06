@@ -1,6 +1,7 @@
+
 export const useSymptomDetection = (selectedSymptoms: string[], customSymptom: string) => {
   // Vérifier si des symptômes nécessitent les questions générales
-  const symptomsRequiringQuestions = ['vomissements', 'diarrhée', 'toux', 'cris-gemissements'];
+  const symptomsRequiringQuestions = ['vomissements', 'diarrhée', 'diarrhee', 'toux', 'cris-gemissements'];
   const needsQuestions = selectedSymptoms.some(symptom => 
     symptomsRequiringQuestions.includes(symptom.toLowerCase())
   ) || symptomsRequiringQuestions.some(symptom => 
