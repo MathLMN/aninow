@@ -1,9 +1,7 @@
 
-import React, { useState, useMemo } from 'react';
-import { Input } from "@/components/ui/input";
+import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Search } from "lucide-react";
 
 interface AdditionalPointsSelectorProps {
   selectedPoints: string[];
@@ -62,16 +60,6 @@ const AdditionalPointsSelector: React.FC<AdditionalPointsSelectorProps> = ({
   customPoint,
   onCustomPointChange,
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const filteredPoints = useMemo(() => {
-    if (!searchTerm.trim()) return ADDITIONAL_POINTS;
-    
-    return ADDITIONAL_POINTS.filter(point =>
-      point.label.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [searchTerm]);
-
   const handlePointToggle = (pointId: string, selected: boolean) => {
     if (selected) {
       onPointsChange([...selectedPoints, pointId]);
@@ -84,21 +72,9 @@ const AdditionalPointsSelector: React.FC<AdditionalPointsSelectorProps> = ({
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Barre de recherche */}
-      <div className="relative">
-        <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-        <Input
-          type="text"
-          placeholder="Rechercher une option"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 h-10 text-sm sm:text-base bg-white border-2 border-gray-200 rounded-lg hover:border-vet-sage/50 focus:border-vet-sage transition-colors"
-        />
-      </div>
-
       {/* Tags des points supplémentaires */}
       <div className="flex flex-wrap gap-2">
-        {filteredPoints.map((point) => {
+        {ADDITIONAL_POINTS.map((point) => {
           const isSelected = selectedPoints.includes(point.id);
           return (
             <button
