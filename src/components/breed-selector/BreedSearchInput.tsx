@@ -20,7 +20,7 @@ const BreedSearchInput: React.FC<BreedSearchInputProps> = ({
   return (
     <Input
       type="text"
-      placeholder="Écrivez pour affiner la recherche ou cliquez pour voir toutes les races"
+      placeholder="Écrivez pour affiner la recherche"
       value={searchTerm}
       onChange={(e) => onSearchChange(e.target.value)}
       onFocus={onFocus}
