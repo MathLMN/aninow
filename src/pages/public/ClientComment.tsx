@@ -91,9 +91,9 @@ const ClientComment = () => {
                 <div className="flex justify-end mt-6 pt-4 border-t border-gray-100">
                   <Button 
                     onClick={handleNext} 
-                    className="bg-vet-sage hover:bg-vet-sage/90 text-white px-6 py-2 text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
                   >
-                    Suivant
+                    Continuer
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
@@ -108,9 +108,9 @@ const ClientComment = () => {
         <div className="fixed bottom-6 right-6 z-50">
           <Button 
             onClick={handleNext} 
-            className="bg-vet-sage hover:bg-vet-sage/90 text-white px-4 py-2 text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+            className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
           >
-            Suivant
+            Continuer
             <ArrowRight className="ml-1 h-4 w-4" />
           </Button>
         </div>

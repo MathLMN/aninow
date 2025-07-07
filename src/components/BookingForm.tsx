@@ -115,14 +115,14 @@ const BookingForm = ({
         </div>
       )}
 
-      {/* Bouton Suivant - Mobile first */}
+      {/* Bouton Continuer - Mobile first */}
       <div className="pt-3 sm:pt-4">
         <Button 
           onClick={handleSubmit} 
           disabled={!canProceed} 
           className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white w-full h-12 sm:h-11 text-base sm:text-lg font-medium rounded-lg shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-200"
         >
-          continuer
+          Continuer
           <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
       </div>
