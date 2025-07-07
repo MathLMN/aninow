@@ -13,30 +13,36 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
   // Validation pour l'animal 1
   const animal1Detection = useSymptomDetection(bookingData?.selectedSymptoms || [], bookingData?.customSymptom || '');
   
-  // Validation pour l'animal 2 - seulement si 2 animaux sélectionnés
-  const animal2Detection = hasTwoAnimals ? useSymptomDetection(bookingData?.secondAnimalSelectedSymptoms || [], bookingData?.secondAnimalCustomSymptom || '') : {
-    needsQuestions: false,
-    hasLossOfAppetite: false,
-    hasExcessiveThirst: false,
-    hasListlessness: false,
-    hasBloodInStool: false,
-    hasUrinaryProblems: false,
-    hasSkinItching: false,
-    hasWound: false,
-    hasEarProblems: false,
-    hasEyeDischarge: false,
-    hasLameness: false,
-    hasBreathingDifficulties: false,
-    hasLump: false,
-    hasAggression: false
-  };
+  // Déterminer si les animaux ont des motifs différents
+  const hasSecondAnimalDifferentReason = bookingData?.secondAnimalDifferentReason === true;
+  
+  // Validation pour l'animal 2 - seulement si 2 animaux sélectionnés ET motifs différents
+  const animal2Detection = hasTwoAnimals && hasSecondAnimalDifferentReason ? 
+    useSymptomDetection(bookingData?.secondAnimalSelectedSymptoms || [], bookingData?.secondAnimalCustomSymptom || '') : 
+    {
+      needsQuestions: false,
+      hasLossOfAppetite: false,
+      hasExcessiveThirst: false,
+      hasListlessness: false,
+      hasBloodInStool: false,
+      hasUrinaryProblems: false,
+      hasSkinItching: false,
+      hasWound: false,
+      hasEarProblems: false,
+      hasEyeDischarge: false,
+      hasLameness: false,
+      hasBreathingDifficulties: false,
+      hasLump: false,
+      hasAggression: false
+    };
 
   const hasFirstAnimalSymptoms = (bookingData?.selectedSymptoms?.length > 0 || bookingData?.customSymptom?.trim() !== '') && 
     bookingData?.consultationReason === 'symptomes-anomalie';
   
-  // Pour le deuxième animal, vérifier d'abord qu'il y a bien 2 animaux sélectionnés
-  const hasSecondAnimalSymptoms = hasTwoAnimals &&
-    (bookingData?.secondAnimalSelectedSymptoms?.length > 0 || bookingData?.secondAnimalCustomSymptom?.trim() !== '') && 
+  // Pour le deuxième animal, vérifier les conditions appropriées
+  const hasSecondAnimalSymptoms = hasTwoAnimals && hasSecondAnimalDifferentReason &&
+    (Array.isArray(bookingData?.secondAnimalSelectedSymptoms) && bookingData?.secondAnimalSelectedSymptoms?.length > 0 || 
+     bookingData?.secondAnimalCustomSymptom?.trim() !== '') && 
     bookingData?.secondAnimalConsultationReason === 'symptomes-anomalie';
 
   // Fonction pour générer les questions requises pour un animal
@@ -120,10 +126,25 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
   const animal1RequiredQuestions = hasFirstAnimalSymptoms ? getRequiredQuestions(animal1Detection, 'animal1_') : [];
   const animal2RequiredQuestions = hasSecondAnimalSymptoms ? getRequiredQuestions(animal2Detection, 'animal2_') : [];
   
-  const allRequiredQuestions = [...animal1RequiredQuestions, ...animal2RequiredQuestions];
+  // Si les deux animaux partagent le même motif, utiliser seulement les questions de l'animal 1
+  const allRequiredQuestions = hasSecondAnimalDifferentReason ? 
+    [...animal1RequiredQuestions, ...animal2RequiredQuestions] : 
+    animal1RequiredQuestions;
 
   const hasAnyConditions = hasFirstAnimalSymptoms || hasSecondAnimalSymptoms;
   const allQuestionsAnswered = hasAnyConditions ? allRequiredQuestions.every(key => answers[key]) : true;
+
+  console.log('Validation debug:', {
+    hasTwoAnimals,
+    hasSecondAnimalDifferentReason,
+    hasFirstAnimalSymptoms,
+    hasSecondAnimalSymptoms,
+    animal1RequiredQuestions,
+    animal2RequiredQuestions,
+    allRequiredQuestions,
+    answers,
+    allQuestionsAnswered
+  });
 
   return {
     canProceed: allQuestionsAnswered,
