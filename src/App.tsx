@@ -6,8 +6,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import NotFound from "./pages/NotFound";
 
+// Page d'accueil
+import LandingPage from "./pages/public/LandingPage";
+
 // Pages publiques (formulaire de RDV)
-import PublicBooking from "./pages/public/PublicBooking";
+import BookingStart from "./pages/public/BookingStart";
 import ConsultationReason from "./pages/public/ConsultationReason";
 import ConditionalQuestions from "./pages/public/ConditionalQuestions";
 import SymptomDuration from "./pages/public/SymptomDuration";
@@ -34,8 +37,11 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* Page d'accueil - Formulaire de RDV */}
-          <Route path="/" element={<PublicBooking />} />
+          {/* Page d'accueil */}
+          <Route path="/" element={<LandingPage />} />
+          
+          {/* Formulaire de RDV */}
+          <Route path="/booking" element={<BookingStart />} />
           <Route path="/booking/reason" element={<ConsultationReason />} />
           <Route path="/booking/questions" element={<ConditionalQuestions />} />
           <Route path="/booking/duration" element={<SymptomDuration />} />

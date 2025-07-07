@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import BookingForm from "@/components/BookingForm";
 import Header from "@/components/Header";
 
-const PublicBooking = () => {
+const BookingStart = () => {
   const navigate = useNavigate();
   const handleFormNext = (formData: any) => {
     console.log('Form data:', formData);
@@ -50,4 +50,4 @@ const PublicBooking = () => {
   );
 };
 
-export default PublicBooking;
+export default BookingStart;
