@@ -42,18 +42,19 @@ const AnimalSpeciesSelection: React.FC<AnimalSpeciesSelectionProps> = ({
       </Label>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="space-y-3">
+        <div>
           <SelectionButton 
             id={`${prefix}chat`} 
             value="chat" 
             isSelected={species === 'chat'} 
             onSelect={onSpeciesChange}
+            className="w-full h-full"
           >
             Chat
           </SelectionButton>
           {/* Input nom mobile - sous Chat */}
           {isMobile && showNameInput && species === 'chat' && onAnimalNameChange && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in mt-3">
               <AnimalNameInput
                 name={animalName}
                 onNameChange={onAnimalNameChange}
@@ -64,18 +65,19 @@ const AnimalSpeciesSelection: React.FC<AnimalSpeciesSelectionProps> = ({
           )}
         </div>
         
-        <div className="space-y-3">
+        <div>
           <SelectionButton 
             id={`${prefix}chien`} 
             value="chien" 
             isSelected={species === 'chien'} 
             onSelect={onSpeciesChange}
+            className="w-full h-full"
           >
             Chien
           </SelectionButton>
           {/* Input nom mobile - sous Chien */}
           {isMobile && showNameInput && species === 'chien' && onAnimalNameChange && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in mt-3">
               <AnimalNameInput
                 name={animalName}
                 onNameChange={onAnimalNameChange}
@@ -86,12 +88,13 @@ const AnimalSpeciesSelection: React.FC<AnimalSpeciesSelectionProps> = ({
           )}
         </div>
         
-        <div className="space-y-3">
+        <div>
           <SelectionButton 
             id={`${prefix}autre`} 
             value="autre" 
             isSelected={species === 'autre'} 
             onSelect={onSpeciesChange}
+            className="w-full h-full"
           >
             Autre (précisez)
           </SelectionButton>
