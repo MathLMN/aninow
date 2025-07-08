@@ -42,61 +42,45 @@ const AnimalSpeciesSelection: React.FC<AnimalSpeciesSelectionProps> = ({
       </Label>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="space-y-3">
-          <SelectionButton 
-            id={`${prefix}chat`} 
-            value="chat" 
-            isSelected={species === 'chat'} 
-            onSelect={onSpeciesChange}
-          >
-            Chat
-          </SelectionButton>
-          {/* Input nom mobile - sous Chat */}
-          {isMobile && showNameInput && species === 'chat' && onAnimalNameChange && (
-            <div className="animate-fade-in">
-              <AnimalNameInput
-                name={animalName}
-                onNameChange={onAnimalNameChange}
-                placeholder={nameInputPlaceholder}
-                id={nameInputId}
-              />
-            </div>
-          )}
-        </div>
+        <SelectionButton 
+          id={`${prefix}chat`} 
+          value="chat" 
+          isSelected={species === 'chat'} 
+          onSelect={onSpeciesChange}
+        >
+          Chat
+        </SelectionButton>
         
-        <div className="space-y-3">
-          <SelectionButton 
-            id={`${prefix}chien`} 
-            value="chien" 
-            isSelected={species === 'chien'} 
-            onSelect={onSpeciesChange}
-          >
-            Chien
-          </SelectionButton>
-          {/* Input nom mobile - sous Chien */}
-          {isMobile && showNameInput && species === 'chien' && onAnimalNameChange && (
-            <div className="animate-fade-in">
-              <AnimalNameInput
-                name={animalName}
-                onNameChange={onAnimalNameChange}
-                placeholder={nameInputPlaceholder}
-                id={nameInputId}
-              />
-            </div>
-          )}
-        </div>
+        <SelectionButton 
+          id={`${prefix}chien`} 
+          value="chien" 
+          isSelected={species === 'chien'} 
+          onSelect={onSpeciesChange}
+        >
+          Chien
+        </SelectionButton>
         
-        <div className="space-y-3">
-          <SelectionButton 
-            id={`${prefix}autre`} 
-            value="autre" 
-            isSelected={species === 'autre'} 
-            onSelect={onSpeciesChange}
-          >
-            Autre (précisez)
-          </SelectionButton>
-        </div>
+        <SelectionButton 
+          id={`${prefix}autre`} 
+          value="autre" 
+          isSelected={species === 'autre'} 
+          onSelect={onSpeciesChange}
+        >
+          Autre (précisez)
+        </SelectionButton>
       </div>
+
+      {/* Input nom mobile - directement sous les boutons pour Chat et Chien */}
+      {isMobile && showNameInput && (species === 'chat' || species === 'chien') && onAnimalNameChange && (
+        <div className="animate-fade-in">
+          <AnimalNameInput
+            name={animalName}
+            onNameChange={onAnimalNameChange}
+            placeholder={nameInputPlaceholder}
+            id={nameInputId}
+          />
+        </div>
+      )}
 
       {species === 'autre' && (
         <div className="mt-4 space-y-3">
