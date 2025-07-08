@@ -58,19 +58,12 @@ const BookingForm = ({
           onSpeciesChange={handleSpeciesChange}
           onCustomSpeciesChange={handleCustomSpeciesChange}
           title="Sélectionnez l'espèce votre animal *"
+          animalName={formData.animalName}
+          onAnimalNameChange={handleNameChange}
+          showNameInput={formState.showNameInput && !isLitter}
+          nameInputId="animal-name"
+          nameInputPlaceholder="Nom de l'animal"
         />
-
-        {/* Champ nom de l'animal - masqué pour une portée */}
-        {formState.showNameInput && !isLitter && (
-          <div className="animate-fade-in">
-            <AnimalNameInput
-              name={formData.animalName}
-              onNameChange={handleNameChange}
-              placeholder="Nom de l'animal"
-              id="animal-name"
-            />
-          </div>
-        )}
       </div>
 
       {/* Options multiples animaux */}

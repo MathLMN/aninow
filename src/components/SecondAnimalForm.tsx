@@ -33,16 +33,12 @@ const SecondAnimalForm: React.FC<SecondAnimalFormProps> = ({
         onCustomSpeciesChange={onSecondCustomSpeciesChange}
         title="Sélectionnez l'espèce de votre 2ème animal *"
         prefix="second-"
+        animalName={formData.secondAnimalName || ''}
+        onAnimalNameChange={onSecondAnimalNameChange}
+        showNameInput={showSecondNameInput}
+        nameInputId="second-animal-name"
+        nameInputPlaceholder="Nom du 2e animal"
       />
-
-      {showSecondNameInput && (
-        <AnimalNameInput
-          name={formData.secondAnimalName || ''}
-          onNameChange={onSecondAnimalNameChange}
-          placeholder="Nom du 2e animal"
-          id="second-animal-name"
-        />
-      )}
     </div>
   );
 };
