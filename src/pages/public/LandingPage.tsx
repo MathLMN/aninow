@@ -70,32 +70,47 @@ const LandingPage = () => {
 
       <main>
         {/* Hero Section */}
-        <section className="container mx-auto px-3 sm:px-6 py-8 sm:py-12 text-center">
-          <div className="max-w-4xl mx-auto">
-            <div className="animate-fade-in">
-              <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-vet-navy mb-4 sm:mb-6 leading-tight">
-                Prenez rendez-vous chez votre vétérinaire
-                <span className="block text-vet-sage">en quelques clics</span>
-              </h1>
-              <p className="text-base sm:text-lg lg:text-xl text-vet-brown mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed">
-                Notre système de prise de rendez-vous en ligne simplifie vos démarches 
-                et améliore le suivi de la santé de vos animaux.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
-                <Link to="/booking">
-                  <Button 
-                    size="lg"
-                    className="bg-vet-sage hover:bg-vet-sage/90 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto"
-                  >
-                    <Calendar className="mr-2 h-5 w-5" />
-                    Prendre rendez-vous
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-                <div className="flex items-center text-vet-brown text-sm sm:text-base">
-                  <Smartphone className="h-4 w-4 mr-2" />
-                  <span>Gratuit et sans inscription</span>
+        <section className="container mx-auto px-3 sm:px-6 py-8 sm:py-12">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+              {/* Text Content */}
+              <div className="animate-fade-in text-center lg:text-left">
+                <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-vet-navy mb-4 sm:mb-6 leading-tight">
+                  Prenez rendez-vous chez votre vétérinaire
+                  <span className="block text-vet-sage">en quelques clics</span>
+                </h1>
+                <p className="text-base sm:text-lg lg:text-xl text-vet-brown mb-6 sm:mb-8 leading-relaxed">
+                  Notre système de prise de rendez-vous en ligne simplifie vos démarches 
+                  et améliore le suivi de la santé de vos animaux.
+                </p>
+                
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start items-center">
+                  <Link to="/booking">
+                    <Button 
+                      size="lg"
+                      className="bg-vet-sage hover:bg-vet-sage/90 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto"
+                    >
+                      <Calendar className="mr-2 h-5 w-5" />
+                      Prendre rendez-vous
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
+                  <div className="flex items-center text-vet-brown text-sm sm:text-base">
+                    <Smartphone className="h-4 w-4 mr-2" />
+                    <span>Gratuit et sans inscription</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Image Content */}
+              <div className="animate-fade-in flex justify-center lg:justify-end">
+                <div className="relative">
+                  <img 
+                    src="/lovable-uploads/7e29ac48-920b-4324-b6a4-2c37572a1ef1.png"
+                    alt="Chien et chat - Nos compagnons fidèles"
+                    className="w-full max-w-md lg:max-w-lg xl:max-w-xl rounded-2xl shadow-2xl"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-vet-sage/10 to-transparent rounded-2xl"></div>
                 </div>
               </div>
             </div>
