@@ -30,7 +30,7 @@ const Header = () => {
               <Link to="/vet/login">
                 <Button variant="ghost" className="bg-vet-blue text-white hover:bg-vet-blue/90 text-xs px-2 py-1 sm:text-sm sm:px-3 sm:py-2">
                   <Stethoscope className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                  <span className="hidden xs:inline">Espace équipes </span>vétérinaires
+                  Espace vétérinaire
                 </Button>
               </Link>
             )}
