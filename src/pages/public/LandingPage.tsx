@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Clock, Calendar, Heart, CheckCircle, Users, Shield, Smartphone } from "lucide-react";
@@ -9,7 +8,7 @@ const LandingPage = () => {
   const benefits = [
     {
       icon: Clock,
-      title: "Gain de temps",
+      title: "Gain de temps", 
       description: "Prenez rendez-vous 24h/24, 7j/7 sans attendre au téléphone"
     },
     {
@@ -46,7 +45,7 @@ const LandingPage = () => {
       description: "Renseignez l'espèce, le nom et les détails de votre compagnon"
     },
     {
-      number: "2",
+      number: "2", 
       title: "Motif de consultation",
       description: "Décrivez les symptômes ou le type de consultation souhaité"
     },
@@ -70,11 +69,11 @@ const LandingPage = () => {
 
       <main>
         {/* Hero Section */}
-        <section className="container mx-auto px-3 sm:px-6 py-8 sm:py-12">
+        <section className="container mx-auto px-3 sm:px-6 py-8 sm:py-12 relative overflow-hidden">
           <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-end min-h-[500px] lg:min-h-[600px]">
               {/* Text Content */}
-              <div className="animate-fade-in text-center lg:text-left">
+              <div className="animate-fade-in text-center lg:text-left z-10 pb-8 lg:pb-16">
                 <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-vet-navy mb-4 sm:mb-6 leading-tight">
                   Prenez rendez-vous chez votre vétérinaire
                   <span className="block text-vet-sage">en quelques clics</span>
@@ -102,16 +101,13 @@ const LandingPage = () => {
                 </div>
               </div>
 
-              {/* Image Content */}
-              <div className="animate-fade-in flex justify-center lg:justify-end">
-                <div className="relative">
-                  <img 
-                    src="/lovable-uploads/7e29ac48-920b-4324-b6a4-2c37572a1ef1.png"
-                    alt="Chien et chat - Nos compagnons fidèles"
-                    className="w-full max-w-md lg:max-w-lg xl:max-w-xl rounded-2xl shadow-2xl"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-vet-sage/10 to-transparent rounded-2xl"></div>
-                </div>
+              {/* Image Content - Large, no border, aligned to bottom */}
+              <div className="animate-fade-in relative lg:absolute lg:right-0 lg:bottom-0 lg:w-1/2 lg:h-full flex items-end">
+                <img 
+                  src="/lovable-uploads/7e29ac48-920b-4324-b6a4-2c37572a1ef1.png"
+                  alt="Chien et chat - Nos compagnons fidèles"
+                  className="w-full h-auto max-h-full object-cover object-bottom"
+                />
               </div>
             </div>
           </div>
