@@ -13,7 +13,7 @@ const Header = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
-              <img src="/lovable-uploads/44fb068f-1799-4a6c-9ad1-1308c67a7645.png" alt="AniNow" className="h-6 w-auto sm:h-8" />
+              <img src="/lovable-uploads/44fb068f-1799-4a6c-9ad1-1308c67a7645.png" alt="AniNow" className="h-8 w-auto sm:h-10 md:h-12" />
             </Link>
           </div>
           
