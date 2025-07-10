@@ -5,11 +5,11 @@ import { Link } from "react-router-dom";
 
 const HeroSection = () => {
   return (
-    <section className="container mx-auto px-3 sm:px-6 py-8 sm:py-12 relative overflow-hidden">
+    <section className="container mx-auto px-3 sm:px-6 py-4 sm:py-6 relative overflow-hidden">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-end min-h-[500px] lg:min-h-[600px]">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[500px] lg:min-h-[600px]">
           {/* Text Content */}
-          <div className="animate-fade-in text-center lg:text-left z-10 pb-8 lg:pb-16">
+          <div className="animate-fade-in text-center lg:text-left z-20 relative">
             <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-vet-navy mb-4 sm:mb-6 leading-tight">
               Prenez rendez-vous chez votre vétérinaire
               <span className="block text-vet-sage">en quelques clics</span>
@@ -37,8 +37,8 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Image Content - Large, no border, aligned to bottom */}
-          <div className="animate-fade-in relative lg:absolute lg:right-0 lg:bottom-0 lg:w-1/2 lg:h-full flex items-end">
+          {/* Image Content - Positioned behind text on large screens */}
+          <div className="animate-fade-in relative lg:absolute lg:right-0 lg:top-0 lg:w-1/2 lg:h-full flex items-end z-10">
             <img 
               src="/lovable-uploads/7e29ac48-920b-4324-b6a4-2c37572a1ef1.png"
               alt="Chien et chat - Nos compagnons fidèles"
