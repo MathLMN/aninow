@@ -1,24 +1,35 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Users, Clock, Settings, Heart, Bell, TrendingUp } from "lucide-react";
+import { Calendar, Users, Clock, Settings, Heart, Bell, TrendingUp, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 import VetLayout from "@/components/layout/VetLayout";
+import { useVetBookings } from "@/hooks/useVetBookings";
 
 const VetDashboard = () => {
-  // Données temporaires pour le dashboard
-  const stats = {
-    appointmentsToday: 12,
-    appointmentsWeek: 45,
-    totalPatients: 248,
-    avgWaitTime: 15
-  };
+  const { bookings, isLoading, stats } = useVetBookings();
 
-  const upcomingAppointments = [
-    { id: 1, time: "09:00", pet: "Max", owner: "M. Dupont", type: "Consultation" },
-    { id: 2, time: "09:30", pet: "Luna", owner: "Mme Martin", type: "Vaccination" },
-    { id: 3, time: "10:00", pet: "Rex", owner: "M. Bernard", type: "Urgence" },
-  ];
+  // Filtrer les rendez-vous d'aujourd'hui
+  const todayBookings = bookings.filter(booking => {
+    const today = new Date().toISOString().split('T')[0];
+    return booking.appointment_date === today || booking.created_at.split('T')[0] === today;
+  }).slice(0, 3); // Prendre les 3 premiers
+
+  // Calculer le temps d'attente moyen (simulation)
+  const avgWaitTime = Math.round(15 + Math.random() * 10);
+
+  if (isLoading) {
+    return (
+      <VetLayout>
+        <div className="space-y-6">
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-vet-sage mx-auto"></div>
+            <p className="text-vet-brown mt-4">Chargement des données...</p>
+          </div>
+        </div>
+      </VetLayout>
+    );
+  }
 
   return (
     <VetLayout>
@@ -51,41 +62,41 @@ const VetDashboard = () => {
               <Calendar className="h-4 w-4 text-vet-sage" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-vet-navy">{stats.appointmentsToday}</div>
-              <p className="text-xs text-vet-brown">+2 par rapport à hier</p>
+              <div className="text-2xl font-bold text-vet-navy">{stats.todayBookings}</div>
+              <p className="text-xs text-vet-brown">Rendez-vous programmés</p>
             </CardContent>
           </Card>
 
           <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-vet-brown">RDV cette semaine</CardTitle>
+              <CardTitle className="text-sm font-medium text-vet-brown">Total réservations</CardTitle>
               <TrendingUp className="h-4 w-4 text-vet-sage" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-vet-navy">{stats.appointmentsWeek}</div>
-              <p className="text-xs text-vet-brown">+12% par rapport à la semaine dernière</p>
+              <div className="text-2xl font-bold text-vet-navy">{stats.total}</div>
+              <p className="text-xs text-vet-brown">Toutes les réservations</p>
             </CardContent>
           </Card>
 
           <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-vet-brown">Patients total</CardTitle>
+              <CardTitle className="text-sm font-medium text-vet-brown">En attente</CardTitle>
               <Users className="h-4 w-4 text-vet-sage" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-vet-navy">{stats.totalPatients}</div>
-              <p className="text-xs text-vet-brown">Animaux suivis régulièrement</p>
+              <div className="text-2xl font-bold text-vet-navy">{stats.pending}</div>
+              <p className="text-xs text-vet-brown">À confirmer</p>
             </CardContent>
           </Card>
 
           <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-vet-brown">Temps d'attente moyen</CardTitle>
-              <Clock className="h-4 w-4 text-vet-sage" />
+              <CardTitle className="text-sm font-medium text-vet-brown">Urgences</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-vet-sage" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-vet-navy">{stats.avgWaitTime} min</div>
-              <p className="text-xs text-vet-brown">Dans les normes acceptables</p>
+              <div className="text-2xl font-bold text-vet-navy">{stats.highUrgency}</div>
+              <p className="text-xs text-vet-brown">Score ≥ 7/10</p>
             </CardContent>
           </Card>
         </div>
@@ -96,36 +107,50 @@ const VetDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center text-vet-navy">
                 <Clock className="h-5 w-5 mr-2 text-vet-sage" />
-                Prochains rendez-vous
+                Réservations récentes
               </CardTitle>
               <CardDescription className="text-vet-brown">
-                Planning d'aujourd'hui
+                Dernières demandes de rendez-vous
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {upcomingAppointments.map((appointment) => (
-                  <div key={appointment.id} className="flex items-center justify-between p-3 bg-vet-beige/30 rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className="bg-vet-sage text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-semibold">
-                        {appointment.time.split(':')[0]}
+                {todayBookings.length > 0 ? (
+                  todayBookings.map((booking) => (
+                    <div key={booking.id} className="flex items-center justify-between p-3 bg-vet-beige/30 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className={`rounded-full w-8 h-8 flex items-center justify-center text-sm font-semibold ${
+                          booking.urgency_score && booking.urgency_score >= 7 
+                            ? 'bg-red-500 text-white' 
+                            : 'bg-vet-sage text-white'
+                        }`}>
+                          {booking.urgency_score || '?'}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-vet-navy">{booking.animal_name}</p>
+                          <p className="text-sm text-vet-brown">{booking.client_name}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-semibold text-vet-navy">{appointment.pet}</p>
-                        <p className="text-sm text-vet-brown">{appointment.owner}</p>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-vet-navy capitalize">{booking.status}</p>
+                        <p className="text-xs text-vet-brown">
+                          {booking.consultation_reason === 'consultation-convenance' ? 'Convenance' :
+                           booking.consultation_reason === 'symptomes-anomalie' ? 'Symptômes' :
+                           booking.consultation_reason === 'urgence' ? 'Urgence' : 'Consultation'}
+                        </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-vet-navy">{appointment.time}</p>
-                      <p className="text-xs text-vet-brown">{appointment.type}</p>
-                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-6 text-vet-brown">
+                    <p>Aucune réservation récente</p>
                   </div>
-                ))}
+                )}
               </div>
               <div className="mt-4">
                 <Link to="/vet/appointments">
                   <Button variant="outline" className="w-full border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white">
-                    Voir tous les rendez-vous
+                    Voir toutes les réservations
                   </Button>
                 </Link>
               </div>
@@ -154,7 +179,7 @@ const VetDashboard = () => {
                 <Link to="/vet/appointments">
                   <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center border-vet-blue text-vet-blue hover:bg-vet-blue hover:text-white">
                     <Users className="h-6 w-6 mb-2" />
-                    Patients
+                    Réservations
                   </Button>
                 </Link>
                 <Link to="/vet/settings">
