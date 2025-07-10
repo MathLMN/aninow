@@ -87,18 +87,6 @@ const ContactInfo = () => {
 
       <main className="container mx-auto px-3 sm:px-6 py-4 sm:py-6 pb-20">
         <div className="max-w-2xl mx-auto">
-          {/* Bouton retour */}
-          <div className="mb-3 sm:mb-6">
-            <Button 
-              variant="ghost" 
-              onClick={handleBack}
-              className="text-vet-navy hover:bg-vet-beige/20 p-1 text-sm sm:p-2 sm:text-base -ml-2"
-            >
-              <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-              Retour
-            </Button>
-          </div>
-
           {/* Titre */}
           <div className="text-center mb-4 sm:mb-8 animate-fade-in">
             <h1 className="text-xl sm:text-3xl font-bold text-vet-navy mb-2 px-2">
@@ -109,6 +97,14 @@ const ContactInfo = () => {
           {/* Formulaire */}
           <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/20 shadow-lg relative">
             <CardContent className="p-3 sm:p-6">
+              {/* Bouton retour - À l'intérieur de la carte, en haut */}
+              <div className="mb-4 sm:mb-6">
+                <Button variant="ghost" onClick={handleBack} className="text-vet-navy hover:bg-vet-beige/20 p-2 text-sm sm:text-base -ml-2">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Retour
+                </Button>
+              </div>
+
               <div className="space-y-6">
                 {/* Statut client */}
                 <div className="space-y-2">
