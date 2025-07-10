@@ -51,6 +51,11 @@ const VetAppointments = () => {
     updateBookingStatus(bookingId, newStatus);
   };
 
+  // Type guard to check if ai_analysis has the expected structure
+  const isValidAiAnalysis = (analysis: any): analysis is { analysis_summary: string } => {
+    return analysis && typeof analysis === 'object' && typeof analysis.analysis_summary === 'string';
+  };
+
   if (isLoading) {
     return (
       <VetLayout>
@@ -167,8 +172,8 @@ const VetAppointments = () => {
                           <Clock className="h-3 w-3 inline mr-1" />
                           {new Date(booking.created_at).toLocaleDateString('fr-FR')}
                         </p>
-                        <span className={`inline-block px-2 py-1 text-xs rounded-full border ${getStatusColor(booking.status)}`}>
-                          {getStatusText(booking.status)}
+                        <span className={`inline-block px-2 py-1 text-xs rounded-full border ${getStatusColor(booking.status || 'pending')}`}>
+                          {getStatusText(booking.status || 'pending')}
                         </span>
                       </div>
                       
@@ -210,7 +215,7 @@ const VetAppointments = () => {
                   </div>
                   
                   {/* Analyse IA si disponible */}
-                  {booking.ai_analysis && (
+                  {booking.ai_analysis && isValidAiAnalysis(booking.ai_analysis) && (
                     <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
                       <h4 className="text-sm font-semibold text-blue-900 mb-2">🤖 Analyse IA</h4>
                       <p className="text-sm text-blue-800 mb-2">
