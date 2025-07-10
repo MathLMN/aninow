@@ -140,7 +140,7 @@ const ConsultationReason = () => {
                   onCustomTextChange={setCustomText}
                   selectedSymptoms={selectedSymptoms}
                   onSymptomsChange={setSelectedSymptoms}
-                  customSymptom={customSymptome}
+                  customSymptom={customSymptom}
                   onCustomSymptomChange={setCustomSymptom}
                   secondAnimalConsultationReason={secondAnimalConsultationReason}
                   onSecondAnimalConsultationReasonChange={setSecondAnimalConsultationReason}
