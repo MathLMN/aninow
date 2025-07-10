@@ -56,7 +56,7 @@ const ConsultationReason = () => {
   }, []);
 
   const handleBack = () => {
-    navigate('/');
+    navigate('/booking');
   };
 
   const firstAnimalName = bookingData?.animalName || 'votre animal';
