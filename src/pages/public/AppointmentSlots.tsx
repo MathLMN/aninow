@@ -32,27 +32,33 @@ const AppointmentSlots = () => {
     }
   };
 
+  const handleBack = () => {
+    navigate('/booking/contact-info');
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20">
+    <div className="min-h-screen" style={{
+      background: 'linear-gradient(135deg, #EDE3DA 0%, #ffffff 100%)'
+    }}>
       <Header />
 
-      <main className="container mx-auto px-6 py-8">
+      <main className="container mx-auto px-3 sm:px-6 py-4 sm:py-6 pb-20">
         <div className="max-w-6xl mx-auto">
           <ProgressBar value={100} />
           
-          {/* Titre */}
-          <div className="text-center mb-8 animate-fade-in">
-            <h1 className="text-3xl font-bold text-vet-navy mb-2">
+          {/* Titre - Cohérence avec les autres pages */}
+          <div className="text-center mb-4 sm:mb-8 animate-fade-in">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-vet-navy mb-2 leading-tight">
               Choisissez votre créneau
             </h1>
-            <p className="text-vet-brown text-lg">
+            <p className="text-sm sm:text-base text-vet-brown/80 px-2">
               Sélectionnez la date et l'heure qui vous conviennent le mieux
             </p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Sélection de date */}
-            <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
+            <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/20 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center text-vet-navy">
                   <Calendar className="h-5 w-5 mr-2 text-vet-sage" />
@@ -63,6 +69,14 @@ const AppointmentSlots = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                {/* Bouton retour ajouté pour cohérence */}
+                <div className="mb-4">
+                  <Button variant="ghost" onClick={handleBack} className="text-vet-navy hover:bg-vet-beige/20 p-2 text-sm -ml-2">
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Retour
+                  </Button>
+                </div>
+                
                 <div className="grid gap-3">
                   {availableDates.map((date) => (
                     <Button
@@ -94,7 +108,7 @@ const AppointmentSlots = () => {
             </Card>
 
             {/* Sélection d'heure */}
-            <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
+            <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/20 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center text-vet-navy">
                   <Clock className="h-5 w-5 mr-2 text-vet-sage" />

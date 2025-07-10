@@ -70,6 +70,12 @@ const ConditionalQuestions = () => {
         <div className="max-w-2xl mx-auto">
           <ConditionalQuestionsHeader />
 
+          {/* Titre - Maintenant à l'extérieur de la carte pour cohérence */}
+          <div className="text-center mb-4 sm:mb-8 animate-fade-in">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-vet-navy mb-2 leading-tight">Questions complémentaires</h1>
+            <p className="text-sm sm:text-base text-vet-brown/80 px-2">Aidez-nous à mieux détecter l'urgence</p>
+          </div>
+
           <ConditionalQuestionsContent
             bookingData={bookingData}
             answers={answers}
