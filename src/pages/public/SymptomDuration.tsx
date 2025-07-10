@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -82,6 +81,7 @@ const SymptomDuration = () => {
             <h1 className="text-xl sm:text-3xl font-bold text-vet-navy mb-2 px-2">
               Durée des symptômes
             </h1>
+            <p className="text-sm sm:text-base text-vet-brown/80 px-2">Aidez-nous à mieux détecter l'urgence</p>
           </div>
 
           {/* Formulaire */}
