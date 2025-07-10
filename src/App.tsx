@@ -6,7 +6,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import NotFound from "./pages/NotFound";
 
-// Page d'accueil - utiliser Index au lieu de LandingPage
+// Page d'accueil - restaurer LandingPage comme page principale
+import LandingPage from "./pages/public/LandingPage";
+
+// Page Index déplacée vers route administrative
 import Index from "./pages/Index";
 
 // Pages publiques (formulaire de RDV)
@@ -37,8 +40,11 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* Page d'accueil - corrigé pour utiliser Index */}
-          <Route path="/" element={<Index />} />
+          {/* Page d'accueil - restaurer LandingPage */}
+          <Route path="/" element={<LandingPage />} />
+          
+          {/* Page administrative - déplacer Index ici */}
+          <Route path="/admin" element={<Index />} />
           
           {/* Formulaire de RDV */}
           <Route path="/booking" element={<BookingStart />} />

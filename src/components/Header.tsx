@@ -1,11 +1,12 @@
 
 import { Button } from "@/components/ui/button";
-import { Stethoscope, Home } from "lucide-react";
+import { Stethoscope, Home, Settings } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const Header = () => {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+  const isAdminPage = location.pathname === '/admin';
 
   return (
     <header className="bg-white text-vet-navy shadow-lg sticky top-0 z-40">
@@ -27,6 +28,22 @@ const Header = () => {
               </Link>
             )}
             {isHomePage && (
+              <>
+                <Link to="/vet/login">
+                  <Button variant="ghost" className="bg-vet-blue text-white hover:bg-vet-blue/90 text-xs px-2 py-1 sm:text-sm sm:px-3 sm:py-2">
+                    <Stethoscope className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                    Espace vétérinaire
+                  </Button>
+                </Link>
+                <Link to="/admin">
+                  <Button variant="ghost" className="text-vet-navy hover:bg-vet-beige/20 text-xs px-2 py-1 sm:text-sm sm:px-3 sm:py-2">
+                    <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                    <span className="hidden xs:inline">Admin</span>
+                  </Button>
+                </Link>
+              </>
+            )}
+            {isAdminPage && (
               <Link to="/vet/login">
                 <Button variant="ghost" className="bg-vet-blue text-white hover:bg-vet-blue/90 text-xs px-2 py-1 sm:text-sm sm:px-3 sm:py-2">
                   <Stethoscope className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
