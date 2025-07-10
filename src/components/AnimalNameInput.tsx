@@ -47,13 +47,6 @@ const AnimalNameInput: React.FC<AnimalNameInputProps> = ({
             : 'border-green-400 bg-green-50/50 focus:border-green-500'
         }`}
       />
-      
-      {isEmpty && (
-        <p className="text-sm text-vet-brown/80 flex items-center gap-1">
-          <span className="w-1 h-1 bg-vet-sage rounded-full"></span>
-          Donnez un nom à votre compagnon pour personnaliser sa consultation
-        </p>
-      )}
     </div>
   );
 };
