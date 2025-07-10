@@ -25,9 +25,7 @@ const MultipleAnimalsOptions: React.FC<MultipleAnimalsOptionsProps> = ({
         
         <div className="flex items-center space-x-3">
           <Checkbox id="une-portee" checked={multipleAnimals.includes('une-portee')} onCheckedChange={checked => onMultipleAnimalsChange('une-portee', checked as boolean)} />
-          <Label htmlFor="une-portee" className="text-vet-navy cursor-pointer">
-            Une portée
-          </Label>
+          <Label htmlFor="une-portee" className="text-vet-navy cursor-pointer">Venir avec une portée</Label>
         </div>
       </div>
     </div>;
