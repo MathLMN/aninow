@@ -32,7 +32,7 @@ const SkinItchingSection = ({ answers, onAnswerChange, keyPrefix = '' }: SkinItc
         <div key={question.key} className="space-y-4 sm:space-y-6">
           <h3 className="text-base sm:text-lg text-vet-navy text-left mb-4 sm:mb-6">
             {question.title}
-            <span className="text-red-500 ml-1">*</span>
+            <span className="text-vet-navy ml-1">*</span>
           </h3>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
