@@ -1,7 +1,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
 import ConditionalQuestionsForm from "@/components/ConditionalQuestionsForm";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -12,6 +12,7 @@ interface ConditionalQuestionsContentProps {
   };
   onAnswersChange: (answers: any) => void;
   onNext: () => void;
+  onBack: () => void;
   canProceed: boolean;
   hasAnyConditions: boolean;
 }
@@ -21,6 +22,7 @@ const ConditionalQuestionsContent = ({
   answers,
   onAnswersChange,
   onNext,
+  onBack,
   canProceed,
   hasAnyConditions
 }: ConditionalQuestionsContentProps) => {
@@ -45,6 +47,22 @@ const ConditionalQuestionsContent = ({
       {/* Formulaire */}
       <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/20 shadow-lg relative">
         <CardContent className="p-3 sm:p-6">
+          {/* Bouton retour - À l'intérieur de la carte, en haut */}
+          <div className="mb-4 sm:mb-6">
+            <Button variant="ghost" onClick={onBack} className="text-vet-navy hover:bg-vet-beige/20 p-2 text-sm sm:text-base -ml-2">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Retour
+            </Button>
+          </div>
+
+          {/* Titre */}
+          <div className="text-center mb-4 sm:mb-6 animate-fade-in">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-vet-navy mb-1 sm:mb-2 leading-tight">
+              Quelques questions complémentaires
+            </h1>
+            <p className="text-sm sm:text-base text-vet-brown/80 px-2">Aidez-nous à mieux détecter l'urgence</p>
+          </div>
+
           <div className="space-y-4 sm:space-y-6">
             
             {/* Questions pour l'animal 1 OU questions communes si motif partagé */}

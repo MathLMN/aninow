@@ -68,13 +68,14 @@ const ConditionalQuestions = () => {
 
       <main className="container mx-auto px-3 sm:px-6 py-4 sm:py-6 pb-20">
         <div className="max-w-2xl mx-auto">
-          <ConditionalQuestionsHeader onBack={handleBack} />
+          <ConditionalQuestionsHeader />
 
           <ConditionalQuestionsContent
             bookingData={bookingData}
             answers={answers}
             onAnswersChange={handleAnswersChange}
             onNext={handleNext}
+            onBack={handleBack}
             canProceed={validation.canProceed}
             hasAnyConditions={validation.hasAnyConditions}
           />
