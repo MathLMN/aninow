@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { getBreedsByAnimalSpecies, getNoBreedLabel } from '../data/breedData';
 import { useBreedSearch } from '../hooks/useBreedSearch';
 import BreedSearchInput from './breed-selector/BreedSearchInput';
@@ -37,6 +38,9 @@ const BreedSelector: React.FC<BreedSelectorProps> = ({
     clearSearch
   } = useBreedSearch(baseBreeds);
 
+  // Vérifier si l'espèce est "autre" - dans ce cas, afficher un champ libre
+  const isOtherSpecies = animalSpecies === 'autre';
+
   // Gérer la checkbox "sans race"
   const isNoBreed = selectedBreed === 'no-breed';
   const isOtherBreed = selectedBreed === 'Autre' || (selectedBreed && !baseBreeds.includes(selectedBreed) && selectedBreed !== 'no-breed');
@@ -72,6 +76,11 @@ const BreedSelector: React.FC<BreedSelectorProps> = ({
     handleInputBlur();
   };
 
+  // Gérer la saisie libre pour les espèces "autres"
+  const handleFreeTextBreedChange = (value: string) => {
+    onBreedChange(value);
+  };
+
   return (
     <div className="space-y-2">
       <Label className="text-sm sm:text-base font-medium text-vet-navy">
@@ -79,33 +88,51 @@ const BreedSelector: React.FC<BreedSelectorProps> = ({
         <span className="text-vet-navy ml-1">*</span>
       </Label>
       
-      {!isNoBreed && (
-        <div className="relative">
-          <BreedSearchInput
-            searchTerm={searchTerm}
-            onSearchChange={handleSearchChange}
-            onFocus={handleInputFocus}
-            onBlur={handleInputBlur}
+      {isOtherSpecies ? (
+        // Affichage pour les espèces "autres" : champ de saisie libre
+        !isNoBreed && (
+          <Input
+            type="text"
+            placeholder="Précisez la race de votre animal"
+            value={selectedBreed === 'no-breed' ? '' : selectedBreed}
+            onChange={(e) => handleFreeTextBreedChange(e.target.value)}
+            className="h-12 text-sm sm:text-base bg-white border-2 border-gray-200 rounded-lg hover:border-vet-sage/50 focus:border-vet-sage transition-colors"
           />
-          
-          <BreedDropdown
-            breeds={breedsWithOther}
-            isVisible={isInputFocused}
-            onBreedClick={handleBreedClick}
-          />
-        </div>
+        )
+      ) : (
+        // Affichage normal pour les espèces connues (chat, chien)
+        !isNoBreed && (
+          <div className="relative">
+            <BreedSearchInput
+              searchTerm={searchTerm}
+              onSearchChange={handleSearchChange}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+            />
+            
+            <BreedDropdown
+              breeds={breedsWithOther}
+              isVisible={isInputFocused}
+              onBreedClick={handleBreedClick}
+            />
+          </div>
+        )
       )}
 
-      <SelectedBreedDisplay
-        selectedBreed={selectedBreed}
-        isVisible={!isNoBreed && selectedBreed && selectedBreed !== 'Autre' && !isOtherBreed}
-      />
-      
-      <CustomBreedInput
-        customBreed={customBreed}
-        onCustomBreedChange={handleCustomBreedChange}
-        isVisible={(selectedBreed === 'Autre' || isOtherBreed) && !isNoBreed}
-      />
+      {!isOtherSpecies && (
+        <>
+          <SelectedBreedDisplay
+            selectedBreed={selectedBreed}
+            isVisible={!isNoBreed && selectedBreed && selectedBreed !== 'Autre' && !isOtherBreed}
+          />
+          
+          <CustomBreedInput
+            customBreed={customBreed}
+            onCustomBreedChange={handleCustomBreedChange}
+            isVisible={(selectedBreed === 'Autre' || isOtherBreed) && !isNoBreed}
+          />
+        </>
+      )}
       
       <NoBreedCheckbox
         isChecked={isNoBreed}
