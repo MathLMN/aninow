@@ -99,15 +99,6 @@ const BookingForm = ({
         </div>
       )}
 
-      {/* Message informatif - Mobile optimized */}
-      {(formState.showNameInput || formState.showMultipleOptions) && (
-        <div className="bg-vet-blue/10 p-3 rounded-md border border-vet-blue/20">
-          <p className="text-xs sm:text-sm text-vet-navy text-center leading-relaxed">
-            📋 Complétez les informations puis cliquez sur <span className="font-semibold text-vet-sage">continuer</span>
-          </p>
-        </div>
-      )}
-
       {/* Bouton Continuer - Mobile first */}
       <div className="pt-3 sm:pt-4">
         <Button 
