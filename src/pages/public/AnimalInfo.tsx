@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Header from "@/components/Header";
+import ProgressBar from "@/components/ProgressBar";
 import AnimalInfoSelector from "@/components/AnimalInfoSelector";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -106,6 +107,8 @@ const AnimalInfo = () => {
 
       <main className="container mx-auto px-3 sm:px-6 py-4 sm:py-6 pb-20">
         <div className="max-w-2xl mx-auto">
+          <ProgressBar value={85.7} />
+          
           {/* Titre */}
           <div className="text-center mb-4 sm:mb-8 animate-fade-in">
             <h1 className="text-xl sm:text-3xl font-bold text-vet-navy mb-2 px-2">

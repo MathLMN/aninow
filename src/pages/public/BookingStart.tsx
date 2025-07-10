@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import BookingForm from "@/components/BookingForm";
 import Header from "@/components/Header";
+import ProgressBar from "@/components/ProgressBar";
 
 const BookingStart = () => {
   const navigate = useNavigate();
@@ -28,6 +29,8 @@ const BookingStart = () => {
 
       <main className="container mx-auto px-3 sm:px-6 py-4 sm:py-6 pb-6">
         <div className="max-w-2xl mx-auto">
+          <ProgressBar value={14.3} />
+          
           {/* Titre - Mobile optimized */}
           <div className="text-center mb-4 sm:mb-6 animate-fade-in">
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-vet-navy mb-1 sm:mb-2 leading-tight">

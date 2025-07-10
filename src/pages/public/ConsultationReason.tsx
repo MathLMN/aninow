@@ -9,6 +9,7 @@ import ConvenienceConsultationSelect from "@/components/ConvenienceConsultationS
 import SymptomSelector from "@/components/SymptomSelector";
 import SecondAnimalSection from "@/components/SecondAnimalSection";
 import Header from "@/components/Header";
+import ProgressBar from "@/components/ProgressBar";
 import { useConsultationReason } from "@/hooks/useConsultationReason";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -67,6 +68,8 @@ const ConsultationReason = () => {
 
       <main className="container mx-auto px-3 sm:px-6 py-3 sm:py-8 pb-20">
         <div className="max-w-4xl mx-auto">
+          <ProgressBar value={28.6} />
+          
           {/* Titre - Mobile optimized */}
           <div className="text-center mb-4 sm:mb-8 animate-fade-in">
             <h1 className="text-xl sm:text-3xl font-bold text-vet-navy mb-2 px-2">

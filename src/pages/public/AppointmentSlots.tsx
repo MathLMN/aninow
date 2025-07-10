@@ -1,9 +1,11 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
+import ProgressBar from "@/components/ProgressBar";
 
 const AppointmentSlots = () => {
   const navigate = useNavigate();
@@ -36,6 +38,8 @@ const AppointmentSlots = () => {
 
       <main className="container mx-auto px-6 py-8">
         <div className="max-w-6xl mx-auto">
+          <ProgressBar value={100} />
+          
           {/* Titre */}
           <div className="text-center mb-8 animate-fade-in">
             <h1 className="text-3xl font-bold text-vet-navy mb-2">
