@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 
-// Interface temporaire pour les bookings
+// Updated interface to match the database schema
 interface BookingRow {
   id: string
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed'
@@ -13,11 +12,14 @@ interface BookingRow {
   animal_species: string
   animal_name?: string
   consultation_reason: string
+  selected_symptoms?: string[]
   appointment_date?: string
   appointment_time?: string
   created_at: string
   updated_at: string
   urgency_score?: number
+  ai_analysis?: Record<string, any>
+  recommended_actions?: string[]
 }
 
 export const useVetBookings = () => {
@@ -41,11 +43,17 @@ export const useVetBookings = () => {
           animal_species: 'chien',
           animal_name: 'Max',
           consultation_reason: 'vaccination',
+          selected_symptoms: ['boiterie', 'perte d\'appétit'],
           appointment_date: new Date().toISOString().split('T')[0],
           appointment_time: '10:00',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          urgency_score: 5
+          urgency_score: 5,
+          ai_analysis: {
+            analysis_summary: 'Cas de routine, vaccination annuelle recommandée',
+            confidence_score: 0.8
+          },
+          recommended_actions: ['Vérifier les vaccins', 'Examen général']
         }
       ]
 

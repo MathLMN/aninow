@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,20 +15,36 @@ const BookingConfirmation = () => {
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
   useEffect(() => {
-    // Vérifier si on a les données nécessaires
+    // Vérifier si on a les données nécessaires et si elles sont complètes
     if (!bookingData.animalSpecies || !bookingData.clientName || hasSubmitted) {
       return;
     }
 
-    // Soumettre la réservation
+    // Soumettre la réservation seulement si les données sont complètes
     const submitData = async () => {
       setHasSubmitted(true);
-      const result = await submitBooking(bookingData);
-      setSubmissionResult(result);
       
-      if (result.booking) {
-        // Réinitialiser les données du formulaire après succès
-        resetBookingData();
+      // Type guard pour s'assurer que les données requises sont présentes
+      if (bookingData.animalSpecies && bookingData.clientName && bookingData.clientEmail && 
+          bookingData.clientPhone && bookingData.consultationReason && bookingData.preferredContactMethod) {
+        
+        const completeBookingData = {
+          ...bookingData,
+          animalSpecies: bookingData.animalSpecies,
+          clientName: bookingData.clientName,
+          clientEmail: bookingData.clientEmail,
+          clientPhone: bookingData.clientPhone,
+          consultationReason: bookingData.consultationReason,
+          preferredContactMethod: bookingData.preferredContactMethod
+        };
+
+        const result = await submitBooking(completeBookingData);
+        setSubmissionResult(result);
+        
+        if (result.booking) {
+          // Réinitialiser les données du formulaire après succès
+          resetBookingData();
+        }
       }
     };
 
