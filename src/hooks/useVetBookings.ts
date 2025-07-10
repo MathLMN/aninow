@@ -1,26 +1,10 @@
+
 import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
+import type { Database } from '@/integrations/supabase/types'
 
-// Updated interface to match the database schema
-interface BookingRow {
-  id: string
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed'
-  client_name: string
-  client_email: string
-  client_phone: string
-  animal_species: string
-  animal_name?: string
-  consultation_reason: string
-  selected_symptoms?: string[]
-  appointment_date?: string
-  appointment_time?: string
-  created_at: string
-  updated_at: string
-  urgency_score?: number
-  ai_analysis?: Record<string, any>
-  recommended_actions?: string[]
-}
+type BookingRow = Database['public']['Tables']['bookings']['Row']
 
 export const useVetBookings = () => {
   const [bookings, setBookings] = useState<BookingRow[]>([])
@@ -32,38 +16,27 @@ export const useVetBookings = () => {
     try {
       setIsLoading(true)
       
-      // Pour l'instant, utiliser des données simulées car nous n'avons pas encore de table bookings
-      const mockBookings: BookingRow[] = [
-        {
-          id: '1',
-          status: 'pending',
-          client_name: 'Marie Dupont',
-          client_email: 'marie@example.com',
-          client_phone: '0123456789',
-          animal_species: 'chien',
-          animal_name: 'Max',
-          consultation_reason: 'vaccination',
-          selected_symptoms: ['boiterie', 'perte d\'appétit'],
-          appointment_date: new Date().toISOString().split('T')[0],
-          appointment_time: '10:00',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          urgency_score: 5,
-          ai_analysis: {
-            analysis_summary: 'Cas de routine, vaccination annuelle recommandée',
-            confidence_score: 0.8
-          },
-          recommended_actions: ['Vérifier les vaccins', 'Examen général']
-        }
-      ]
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .order('created_at', { ascending: false })
 
-      await new Promise(resolve => setTimeout(resolve, 500)) // Simuler un délai
-      setBookings(mockBookings)
+      if (error) {
+        throw error
+      }
+
+      setBookings(data || [])
       setError(null)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erreur lors du chargement'
       setError(errorMessage)
       console.error('Erreur lors du chargement des réservations:', err)
+      
+      toast({
+        title: "Erreur",
+        description: errorMessage,
+        variant: "destructive"
+      })
     } finally {
       setIsLoading(false)
     }
@@ -71,7 +44,16 @@ export const useVetBookings = () => {
 
   const updateBookingStatus = async (bookingId: string, status: 'pending' | 'confirmed' | 'cancelled' | 'completed') => {
     try {
-      // Simuler la mise à jour
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status })
+        .eq('id', bookingId)
+
+      if (error) {
+        throw error
+      }
+
+      // Mettre à jour l'état local
       setBookings(prev => prev.map(booking => 
         booking.id === bookingId 
           ? { ...booking, status, updated_at: new Date().toISOString() }
@@ -97,7 +79,16 @@ export const useVetBookings = () => {
 
   const deleteBooking = async (bookingId: string) => {
     try {
-      // Simuler la suppression
+      const { error } = await supabase
+        .from('bookings')
+        .delete()
+        .eq('id', bookingId)
+
+      if (error) {
+        throw error
+      }
+
+      // Mettre à jour l'état local
       setBookings(prev => prev.filter(booking => booking.id !== bookingId))
 
       toast({

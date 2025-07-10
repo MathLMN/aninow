@@ -14,7 +14,200 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ai_analysis_logs: {
+        Row: {
+          analysis_type: string
+          booking_id: string | null
+          confidence_score: number
+          created_at: string
+          id: string
+          input_data: Json
+          output_data: Json
+          processing_time_ms: number
+        }
+        Insert: {
+          analysis_type: string
+          booking_id?: string | null
+          confidence_score: number
+          created_at?: string
+          id?: string
+          input_data: Json
+          output_data: Json
+          processing_time_ms: number
+        }
+        Update: {
+          analysis_type?: string
+          booking_id?: string | null
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          input_data?: Json
+          output_data?: Json
+          processing_time_ms?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_analysis_logs_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bookings: {
+        Row: {
+          additional_points: string[] | null
+          ai_analysis: Json | null
+          animal_age: string | null
+          animal_breed: string | null
+          animal_name: string
+          animal_sex: string | null
+          animal_species: string
+          animal_sterilized: boolean | null
+          animal_vaccines_up_to_date: boolean | null
+          animal_weight: number | null
+          appointment_date: string | null
+          appointment_time: string | null
+          client_comment: string | null
+          client_email: string
+          client_name: string
+          client_phone: string
+          conditional_answers: Json | null
+          consultation_reason: string
+          convenience_options: string[] | null
+          created_at: string
+          custom_species: string | null
+          custom_symptom: string | null
+          custom_text: string | null
+          id: string
+          multiple_animals: string[] | null
+          preferred_contact_method: string
+          recommended_actions: string[] | null
+          second_animal_age: string | null
+          second_animal_breed: string | null
+          second_animal_consultation_reason: string | null
+          second_animal_convenience_options: string[] | null
+          second_animal_custom_symptom: string | null
+          second_animal_custom_text: string | null
+          second_animal_different_reason: boolean | null
+          second_animal_name: string | null
+          second_animal_selected_symptoms: string[] | null
+          second_animal_sex: string | null
+          second_animal_species: string | null
+          second_animal_sterilized: boolean | null
+          second_animal_vaccines_up_to_date: boolean | null
+          second_animal_weight: number | null
+          second_custom_species: string | null
+          selected_symptoms: string[] | null
+          status: string | null
+          symptom_duration: string | null
+          updated_at: string
+          urgency_score: number | null
+          vaccination_type: string | null
+        }
+        Insert: {
+          additional_points?: string[] | null
+          ai_analysis?: Json | null
+          animal_age?: string | null
+          animal_breed?: string | null
+          animal_name: string
+          animal_sex?: string | null
+          animal_species: string
+          animal_sterilized?: boolean | null
+          animal_vaccines_up_to_date?: boolean | null
+          animal_weight?: number | null
+          appointment_date?: string | null
+          appointment_time?: string | null
+          client_comment?: string | null
+          client_email: string
+          client_name: string
+          client_phone: string
+          conditional_answers?: Json | null
+          consultation_reason: string
+          convenience_options?: string[] | null
+          created_at?: string
+          custom_species?: string | null
+          custom_symptom?: string | null
+          custom_text?: string | null
+          id?: string
+          multiple_animals?: string[] | null
+          preferred_contact_method: string
+          recommended_actions?: string[] | null
+          second_animal_age?: string | null
+          second_animal_breed?: string | null
+          second_animal_consultation_reason?: string | null
+          second_animal_convenience_options?: string[] | null
+          second_animal_custom_symptom?: string | null
+          second_animal_custom_text?: string | null
+          second_animal_different_reason?: boolean | null
+          second_animal_name?: string | null
+          second_animal_selected_symptoms?: string[] | null
+          second_animal_sex?: string | null
+          second_animal_species?: string | null
+          second_animal_sterilized?: boolean | null
+          second_animal_vaccines_up_to_date?: boolean | null
+          second_animal_weight?: number | null
+          second_custom_species?: string | null
+          selected_symptoms?: string[] | null
+          status?: string | null
+          symptom_duration?: string | null
+          updated_at?: string
+          urgency_score?: number | null
+          vaccination_type?: string | null
+        }
+        Update: {
+          additional_points?: string[] | null
+          ai_analysis?: Json | null
+          animal_age?: string | null
+          animal_breed?: string | null
+          animal_name?: string
+          animal_sex?: string | null
+          animal_species?: string
+          animal_sterilized?: boolean | null
+          animal_vaccines_up_to_date?: boolean | null
+          animal_weight?: number | null
+          appointment_date?: string | null
+          appointment_time?: string | null
+          client_comment?: string | null
+          client_email?: string
+          client_name?: string
+          client_phone?: string
+          conditional_answers?: Json | null
+          consultation_reason?: string
+          convenience_options?: string[] | null
+          created_at?: string
+          custom_species?: string | null
+          custom_symptom?: string | null
+          custom_text?: string | null
+          id?: string
+          multiple_animals?: string[] | null
+          preferred_contact_method?: string
+          recommended_actions?: string[] | null
+          second_animal_age?: string | null
+          second_animal_breed?: string | null
+          second_animal_consultation_reason?: string | null
+          second_animal_convenience_options?: string[] | null
+          second_animal_custom_symptom?: string | null
+          second_animal_custom_text?: string | null
+          second_animal_different_reason?: boolean | null
+          second_animal_name?: string | null
+          second_animal_selected_symptoms?: string[] | null
+          second_animal_sex?: string | null
+          second_animal_species?: string | null
+          second_animal_sterilized?: boolean | null
+          second_animal_vaccines_up_to_date?: boolean | null
+          second_animal_weight?: number | null
+          second_custom_species?: string | null
+          selected_symptoms?: string[] | null
+          status?: string | null
+          symptom_duration?: string | null
+          updated_at?: string
+          urgency_score?: number | null
+          vaccination_type?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

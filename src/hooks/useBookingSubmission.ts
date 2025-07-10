@@ -2,51 +2,9 @@
 import { useState } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
+import type { Database } from '@/integrations/supabase/types'
 
-// Interface temporaire pour les données de booking jusqu'à ce que nous ayons la vraie table
-interface BookingData {
-  animalSpecies: string
-  animalName?: string
-  customSpecies?: string
-  multipleAnimals?: string[]
-  secondAnimalSpecies?: string
-  secondAnimalName?: string
-  secondCustomSpecies?: string
-  vaccinationType?: string
-  consultationReason: string
-  convenienceOptions?: string[]
-  customText?: string
-  selectedSymptoms?: string[]
-  customSymptom?: string
-  secondAnimalDifferentReason?: boolean
-  secondAnimalConsultationReason?: string
-  secondAnimalConvenienceOptions?: string[]
-  secondAnimalCustomText?: string
-  secondAnimalSelectedSymptoms?: string[]
-  secondAnimalCustomSymptom?: string
-  conditionalAnswers?: Record<string, any>
-  symptomDuration?: string
-  additionalPoints?: string[]
-  animalAge?: string
-  animalBreed?: string
-  animalWeight?: number
-  animalSex?: string
-  animalSterilized?: boolean
-  animalVaccinesUpToDate?: boolean
-  secondAnimalAge?: string
-  secondAnimalBreed?: string
-  secondAnimalWeight?: number
-  secondAnimalSex?: string
-  secondAnimalSterilized?: boolean
-  secondAnimalVaccinesUpToDate?: boolean
-  clientComment?: string
-  clientName: string
-  clientEmail: string
-  clientPhone: string
-  preferredContactMethod: string
-  appointmentDate?: string
-  appointmentTime?: string
-}
+type BookingInsert = Database['public']['Tables']['bookings']['Insert']
 
 interface BookingSubmissionResult {
   booking: any | null
@@ -58,15 +16,97 @@ export const useBookingSubmission = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
 
-  const submitBooking = async (bookingData: BookingData): Promise<BookingSubmissionResult> => {
+  const submitBooking = async (bookingData: any): Promise<BookingSubmissionResult> => {
     setIsSubmitting(true)
     
     try {
-      // Pour l'instant, simuler la soumission car nous n'avons pas encore de table bookings
-      console.log('Booking data submitted:', bookingData)
+      console.log('Submitting booking data:', bookingData)
       
-      // Simuler un délai
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Préparer les données pour l'insertion
+      const bookingInsert: BookingInsert = {
+        animal_species: bookingData.animalSpecies,
+        animal_name: bookingData.animalName || '',
+        custom_species: bookingData.customSpecies,
+        multiple_animals: bookingData.multipleAnimals || [],
+        second_animal_species: bookingData.secondAnimalSpecies,
+        second_animal_name: bookingData.secondAnimalName,
+        second_custom_species: bookingData.secondCustomSpecies,
+        vaccination_type: bookingData.vaccinationType,
+        consultation_reason: bookingData.consultationReason,
+        convenience_options: bookingData.convenienceOptions || [],
+        custom_text: bookingData.customText,
+        selected_symptoms: bookingData.selectedSymptoms || [],
+        custom_symptom: bookingData.customSymptom,
+        second_animal_different_reason: bookingData.secondAnimalDifferentReason || false,
+        second_animal_consultation_reason: bookingData.secondAnimalConsultationReason,
+        second_animal_convenience_options: bookingData.secondAnimalConvenienceOptions || [],
+        second_animal_custom_text: bookingData.secondAnimalCustomText,
+        second_animal_selected_symptoms: bookingData.secondAnimalSelectedSymptoms || [],
+        second_animal_custom_symptom: bookingData.secondAnimalCustomSymptom,
+        conditional_answers: bookingData.conditionalAnswers,
+        symptom_duration: bookingData.symptomDuration,
+        additional_points: bookingData.additionalPoints || [],
+        animal_age: bookingData.animalAge,
+        animal_breed: bookingData.animalBreed,
+        animal_weight: bookingData.animalWeight,
+        animal_sex: bookingData.animalSex,
+        animal_sterilized: bookingData.animalSterilized,
+        animal_vaccines_up_to_date: bookingData.animalVaccinesUpToDate,
+        second_animal_age: bookingData.secondAnimalAge,
+        second_animal_breed: bookingData.secondAnimalBreed,
+        second_animal_weight: bookingData.secondAnimalWeight,
+        second_animal_sex: bookingData.secondAnimalSex,
+        second_animal_sterilized: bookingData.secondAnimalSterilized,
+        second_animal_vaccines_up_to_date: bookingData.secondAnimalVaccinesUpToDate,
+        client_comment: bookingData.clientComment,
+        client_name: bookingData.clientName,
+        client_email: bookingData.clientEmail,
+        client_phone: bookingData.clientPhone,
+        preferred_contact_method: bookingData.preferredContactMethod,
+        appointment_date: bookingData.appointmentDate,
+        appointment_time: bookingData.appointmentTime
+      }
+
+      // Insérer la réservation dans la base de données
+      const { data: booking, error: bookingError } = await supabase
+        .from('bookings')
+        .insert(bookingInsert)
+        .select()
+        .single()
+
+      if (bookingError) {
+        throw new Error(`Erreur lors de la création de la réservation: ${bookingError.message}`)
+      }
+
+      console.log('Booking created successfully:', booking)
+
+      // Appeler l'Edge Function pour l'analyse IA (optionnel)
+      let aiAnalysis = null
+      try {
+        const { data: analysisData, error: analysisError } = await supabase.functions.invoke('analyze-booking', {
+          body: { booking_data: booking }
+        })
+
+        if (!analysisError && analysisData) {
+          aiAnalysis = analysisData
+          
+          // Mettre à jour la réservation avec les résultats de l'analyse IA
+          const { error: updateError } = await supabase
+            .from('bookings')
+            .update({
+              ai_analysis: analysisData,
+              urgency_score: analysisData.urgency_score,
+              recommended_actions: analysisData.recommended_actions
+            })
+            .eq('id', booking.id)
+
+          if (updateError) {
+            console.error('Erreur lors de la mise à jour avec l\'analyse IA:', updateError)
+          }
+        }
+      } catch (aiError) {
+        console.error('Erreur lors de l\'analyse IA (non bloquante):', aiError)
+      }
 
       toast({
         title: "Réservation créée avec succès",
@@ -74,8 +114,8 @@ export const useBookingSubmission = () => {
       })
 
       return {
-        booking: { id: 'temp-' + Date.now(), ...bookingData },
-        aiAnalysis: null,
+        booking,
+        aiAnalysis,
         error: null
       }
 
