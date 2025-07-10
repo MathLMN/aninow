@@ -231,7 +231,7 @@ const ContactInfo = () => {
                     disabled={!canProceed}
                     className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
                   >
-                    Envoyer
+                    Choisir mon créneau
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
@@ -249,7 +249,7 @@ const ContactInfo = () => {
             disabled={!canProceed}
             className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
           >
-            Envoyer
+            Choisir mon créneau
             <ArrowRight className="ml-1 h-4 w-4" />
           </Button>
         </div>
