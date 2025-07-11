@@ -56,16 +56,27 @@ export const DailyCalendarGrid = ({
                   <div 
                     key={time} 
                     className={cn(
-                      `grid border-b min-h-[40px]`,
-                      isHourMark ? 'border-vet-blue/30' : 'border-vet-blue/10',
+                      `grid min-h-[40px]`,
+                      // Bordures conditionnelles selon l'état ouvert/fermé
+                      isOpen 
+                        ? cn(
+                            "border-b",
+                            isHourMark ? 'border-vet-blue/30' : 'border-vet-blue/10'
+                          )
+                        : cn(
+                            "border-b",
+                            isHourMark ? 'border-gray-300/50' : 'border-gray-200/30'
+                          ),
                       !isOpen && 'bg-gray-50/80' // Griser les périodes fermées
                     )} 
                     style={{gridTemplateColumns: `120px repeat(${columns.length}, 1fr)`}}
                   >
                     {/* Colonne horaire */}
                     <div className={cn(
-                      "p-2 text-sm text-center font-medium border-r border-vet-blue/20 flex items-center justify-center",
-                      isOpen ? "bg-vet-beige/10 text-vet-brown" : "bg-gray-100 text-gray-400",
+                      "p-2 text-sm text-center font-medium border-r flex items-center justify-center",
+                      isOpen 
+                        ? "bg-vet-beige/10 text-vet-brown border-vet-blue/20" 
+                        : "bg-gray-100 text-gray-400 border-gray-200/30",
                       isHourMark && "font-semibold"
                     )}>
                       <span>{time}</span>
