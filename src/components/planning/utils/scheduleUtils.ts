@@ -1,8 +1,8 @@
 
 export const generateAllTimeSlots = () => {
   const slots = [];
-  // Générer les créneaux de 7h à 20h uniquement
-  for (let hour = 7; hour <= 20; hour++) {
+  // Générer les créneaux de 8h à 19h par quarts d'heure comme dans l'image
+  for (let hour = 8; hour <= 19; hour++) {
     for (let minute = 0; minute < 60; minute += 15) {
       const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
       slots.push(time);
@@ -105,4 +105,9 @@ export const generateColumns = (veterinarians: any[], settings: any) => {
   }
 
   return columns;
+};
+
+// Nouvelle fonction pour déterminer si c'est une heure pleine
+export const isFullHour = (time: string) => {
+  return time.endsWith(':00');
 };

@@ -2,7 +2,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { TimeSlotCell } from "./TimeSlotCell";
-import { generateAllTimeSlots, isTimeSlotOpen, getBookingsForSlot } from "./utils/scheduleUtils";
+import { generateAllTimeSlots, isTimeSlotOpen, getBookingsForSlot, isFullHour } from "./utils/scheduleUtils";
 
 interface DailyCalendarGridProps {
   selectedDate: Date;
@@ -29,13 +29,13 @@ export const DailyCalendarGrid = ({
         <div className="overflow-x-auto">
           <div className="min-w-full">
             {/* En-tête des colonnes */}
-            <div className={`grid border-b border-vet-blue/20 bg-vet-beige/30`} style={{gridTemplateColumns: `120px repeat(${columns.length}, 1fr)`}}>
-              <div className="p-4 font-semibold text-vet-navy text-center border-r border-vet-blue/20">
+            <div className={`grid border-b border-vet-blue/20 bg-vet-beige/30`} style={{gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`}}>
+              <div className="p-2 font-semibold text-vet-navy text-center border-r border-vet-blue/20 text-sm">
                 Horaires
               </div>
               {columns.map((column) => (
-                <div key={column.id} className="p-4 text-center border-l border-vet-blue/20">
-                  <div className={`font-semibold ${column.type === 'asv' ? 'text-vet-sage' : 'text-vet-navy'}`}>
+                <div key={column.id} className="p-2 text-center border-l border-vet-blue/20">
+                  <div className={`font-semibold text-sm ${column.type === 'asv' ? 'text-vet-sage' : 'text-vet-navy'}`}>
                     {column.title}
                   </div>
                   <div className="text-xs text-vet-brown mt-1">
@@ -45,42 +45,41 @@ export const DailyCalendarGrid = ({
               ))}
             </div>
 
-            {/* Grille horaire 7h-20h */}
+            {/* Grille horaire 8h-19h */}
             <div className="relative">
               {timeSlots.map((time, timeIndex) => {
                 const isOpen = isTimeSlotOpen(time, daySchedule);
-                const [hours] = time.split(':').map(Number);
-                const isHourMark = timeIndex % 4 === 0; // Toutes les heures
+                const isHourMark = isFullHour(time);
                 
                 return (
                   <div 
                     key={time} 
                     className={cn(
-                      `grid min-h-[40px] border-b`,
+                      `grid`,
+                      // Hauteur plus petite pour reproduire l'affichage de l'image
+                      "min-h-[25px]",
+                      // Bordure plus marquée pour les heures pleines
+                      isHourMark 
+                        ? "border-b border-gray-400/60" 
+                        : "border-b border-gray-200/40",
                       // Style différent pour les heures ouvertes/fermées
-                      isOpen 
-                        ? cn(
-                            isHourMark ? 'border-vet-blue/30' : 'border-vet-blue/10'
-                          )
-                        : cn(
-                            'bg-gray-50/50',
-                            isHourMark ? 'border-gray-300/50' : 'border-gray-200/30'
-                          )
+                      !isOpen && "bg-gray-50/30"
                     )} 
-                    style={{gridTemplateColumns: `120px repeat(${columns.length}, 1fr)`}}
+                    style={{gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`}}
                   >
-                    {/* Colonne horaire */}
+                    {/* Colonne horaire avec style identique à l'image */}
                     <div className={cn(
-                      "p-2 text-sm text-center font-medium border-r flex items-center justify-center",
+                      "text-xs text-center font-medium border-r flex items-center justify-center px-1",
                       isOpen 
-                        ? "bg-vet-beige/10 text-vet-brown border-vet-blue/20" 
+                        ? "bg-white text-gray-700 border-gray-300" 
                         : "bg-gray-100/80 text-gray-500 border-gray-200/30",
-                      isHourMark && "font-semibold"
+                      // Police plus petite et espacement réduit comme dans l'image
+                      "text-[11px]"
                     )}>
                       <span>{time}</span>
                     </div>
                     
-                    {/* Colonnes par vétérinaire/ASV - Toutes cliquables */}
+                    {/* Colonnes par vétérinaire/ASV */}
                     {columns.map((column) => {
                       const slotBookings = getBookingsForSlot(time, column.id, bookings, selectedDate);
                       
@@ -91,7 +90,7 @@ export const DailyCalendarGrid = ({
                           columnId={column.id}
                           bookings={slotBookings}
                           isOpen={isOpen}
-                          canBook={true} // Toujours cliquable
+                          canBook={true}
                           onCreateAppointment={onCreateAppointment}
                           onAppointmentClick={onAppointmentClick}
                           selectedDate={selectedDate}

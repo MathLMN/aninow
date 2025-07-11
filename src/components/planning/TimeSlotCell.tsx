@@ -36,8 +36,10 @@ export const TimeSlotCell = ({
   return (
     <div
       className={cn(
-        "p-1 border-l border-vet-blue/10 relative transition-colors cursor-pointer",
-        "group hover:bg-vet-sage/5",
+        "border-l border-gray-200/40 relative transition-colors cursor-pointer",
+        "group hover:bg-blue-50/30",
+        // Hauteur réduite pour correspondre à l'image
+        "h-[25px]",
         !isOpen && "bg-gray-50/30"
       )}
       onClick={() => {
@@ -55,21 +57,24 @@ export const TimeSlotCell = ({
             e.stopPropagation();
             onAppointmentClick(booking);
           }}
-          className={`mb-1 p-2 rounded-md border cursor-pointer hover:shadow-md transition-shadow text-xs ${getStatusColor(booking.status)}`}
+          className={`absolute inset-x-0 top-0 p-1 rounded-sm border cursor-pointer hover:shadow-sm transition-shadow text-[10px] leading-tight ${getStatusColor(booking.status)}`}
+          style={{ height: '23px' }}
         >
-          <div className="font-medium truncate">
+          <div className="font-medium truncate text-[10px]">
             {booking.client_name}
           </div>
-          <div className="truncate">
+          <div className="truncate text-[9px] opacity-80">
             {booking.animal_name}
           </div>
         </div>
       ))}
       
-      {/* Bouton d'ajout au survol - toujours visible */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center bg-vet-sage/10 hover:bg-vet-sage/20">
-        <Plus className="h-4 w-4 text-vet-sage" />
-      </div>
+      {/* Bouton d'ajout au survol - plus discret */}
+      {bookings.length === 0 && (
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center bg-blue-50/20 hover:bg-blue-50/40">
+          <Plus className="h-3 w-3 text-blue-600/70" />
+        </div>
+      )}
     </div>
   );
 };
