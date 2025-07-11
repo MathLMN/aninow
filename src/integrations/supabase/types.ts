@@ -55,6 +55,67 @@ export type Database = {
           },
         ]
       }
+      available_slots: {
+        Row: {
+          booking_id: string | null
+          consultation_type_id: string
+          created_at: string
+          date: string
+          end_time: string
+          id: string
+          is_booked: boolean | null
+          start_time: string
+          updated_at: string
+          veterinarian_id: string
+        }
+        Insert: {
+          booking_id?: string | null
+          consultation_type_id: string
+          created_at?: string
+          date: string
+          end_time: string
+          id?: string
+          is_booked?: boolean | null
+          start_time: string
+          updated_at?: string
+          veterinarian_id: string
+        }
+        Update: {
+          booking_id?: string | null
+          consultation_type_id?: string
+          created_at?: string
+          date?: string
+          end_time?: string
+          id?: string
+          is_booked?: boolean | null
+          start_time?: string
+          updated_at?: string
+          veterinarian_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "available_slots_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "available_slots_consultation_type_id_fkey"
+            columns: ["consultation_type_id"]
+            isOneToOne: false
+            referencedRelation: "consultation_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "available_slots_veterinarian_id_fkey"
+            columns: ["veterinarian_id"]
+            isOneToOne: false
+            referencedRelation: "veterinarians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           additional_points: string[] | null
@@ -205,6 +266,63 @@ export type Database = {
           updated_at?: string
           urgency_score?: number | null
           vaccination_type?: string | null
+        }
+        Relationships: []
+      }
+      consultation_types: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          duration_minutes: number
+          id: string
+          name: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          duration_minutes: number
+          id?: string
+          name: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      veterinarians: {
+        Row: {
+          clinic_name: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          specialty: string | null
+          updated_at: string
+        }
+        Insert: {
+          clinic_name: string
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          specialty?: string | null
+          updated_at?: string
+        }
+        Update: {
+          clinic_name?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          specialty?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
