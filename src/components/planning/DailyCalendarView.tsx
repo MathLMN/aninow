@@ -43,15 +43,16 @@ export const DailyCalendarView = ({
   // Créer les colonnes dynamiquement basées sur le nombre de vétérinaires
   const columns = [];
   
-  // Ajouter les colonnes vétérinaires
-  for (let i = 0; i < settings.veterinarian_count; i++) {
-    const vet = veterinarians[i];
-    columns.push({
-      id: vet?.id || `vet-${i}`,
-      title: vet?.name || `Vétérinaire ${i + 1}`,
-      type: 'veterinarian'
-    });
-  }
+  // Ajouter les colonnes vétérinaires basées sur les vétérinaires disponibles
+  veterinarians.forEach((vet) => {
+    if (vet.is_active) {
+      columns.push({
+        id: vet.id,
+        title: vet.name,
+        type: 'veterinarian'
+      });
+    }
+  });
   
   // Ajouter la colonne ASV si activée
   if (settings.asv_enabled) {
