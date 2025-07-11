@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,9 +16,9 @@ const VetPlanning = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [filters, setFilters] = useState({
-    veterinarian: '',
-    status: '',
-    consultationType: ''
+    veterinarian: 'all',
+    status: 'all',
+    consultationType: 'all'
   });
 
   const { bookings, isLoading: bookingsLoading, updateBookingStatus } = useVetBookings();

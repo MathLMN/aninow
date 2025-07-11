@@ -30,13 +30,13 @@ export const PlanningFilters = ({
 
   const clearFilters = () => {
     onFiltersChange({
-      veterinarian: '',
-      status: '',
-      consultationType: ''
+      veterinarian: 'all',
+      status: 'all',
+      consultationType: 'all'
     });
   };
 
-  const hasActiveFilters = Object.values(filters).some(value => value !== '');
+  const hasActiveFilters = Object.values(filters).some(value => value !== '' && value !== 'all');
 
   return (
     <div className="flex items-center space-x-3 flex-wrap gap-2">
@@ -45,12 +45,12 @@ export const PlanningFilters = ({
         <span className="text-sm font-medium">Filtres:</span>
       </div>
 
-      <Select value={filters.veterinarian} onValueChange={(value) => updateFilter('veterinarian', value)}>
+      <Select value={filters.veterinarian || 'all'} onValueChange={(value) => updateFilter('veterinarian', value)}>
         <SelectTrigger className="w-40">
           <SelectValue placeholder="Vétérinaire" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">Tous les vétérinaires</SelectItem>
+          <SelectItem value="all">Tous les vétérinaires</SelectItem>
           {veterinarians.map((vet) => (
             <SelectItem key={vet.id} value={vet.id}>
               {vet.name}
@@ -59,12 +59,12 @@ export const PlanningFilters = ({
         </SelectContent>
       </Select>
 
-      <Select value={filters.status} onValueChange={(value) => updateFilter('status', value)}>
+      <Select value={filters.status || 'all'} onValueChange={(value) => updateFilter('status', value)}>
         <SelectTrigger className="w-32">
           <SelectValue placeholder="Statut" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">Tous les statuts</SelectItem>
+          <SelectItem value="all">Tous les statuts</SelectItem>
           <SelectItem value="pending">En attente</SelectItem>
           <SelectItem value="confirmed">Confirmé</SelectItem>
           <SelectItem value="cancelled">Annulé</SelectItem>
@@ -72,12 +72,12 @@ export const PlanningFilters = ({
         </SelectContent>
       </Select>
 
-      <Select value={filters.consultationType} onValueChange={(value) => updateFilter('consultationType', value)}>
+      <Select value={filters.consultationType || 'all'} onValueChange={(value) => updateFilter('consultationType', value)}>
         <SelectTrigger className="w-40">
           <SelectValue placeholder="Type consultation" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">Tous les types</SelectItem>
+          <SelectItem value="all">Tous les types</SelectItem>
           {consultationTypes.map((type) => (
             <SelectItem key={type.id} value={type.id}>
               {type.name}

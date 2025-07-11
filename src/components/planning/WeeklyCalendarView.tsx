@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,8 +37,8 @@ export const WeeklyCalendarView = ({
       const matchesDate = booking.appointment_date === dateStr;
       const matchesVet = !veterinarianId || booking.veterinarian_id === veterinarianId;
       const matchesFilters = 
-        (!filters.veterinarian || booking.veterinarian_id === filters.veterinarian) &&
-        (!filters.status || booking.status === filters.status);
+        (filters.veterinarian === 'all' || booking.veterinarian_id === filters.veterinarian) &&
+        (filters.status === 'all' || booking.status === filters.status);
       return matchesDate && matchesVet && matchesFilters;
     });
   };
