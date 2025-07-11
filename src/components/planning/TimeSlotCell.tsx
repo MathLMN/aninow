@@ -36,10 +36,10 @@ export const TimeSlotCell = ({
   return (
     <div
       className={cn(
-        "border-l border-gray-200/40 relative transition-colors cursor-pointer",
+        "border-l border-gray-200/30 relative transition-colors cursor-pointer",
         "group hover:bg-blue-50/30",
-        // Hauteur réduite pour correspondre à l'image
-        "h-[25px]",
+        // Hauteur ajustée pour correspondre à la grille
+        "h-[30px]",
         !isOpen && "bg-gray-50/30"
       )}
       onClick={() => {
@@ -58,7 +58,7 @@ export const TimeSlotCell = ({
             onAppointmentClick(booking);
           }}
           className={`absolute inset-x-0 top-0 p-1 rounded-sm border cursor-pointer hover:shadow-sm transition-shadow text-[10px] leading-tight ${getStatusColor(booking.status)}`}
-          style={{ height: '23px' }}
+          style={{ height: '28px' }}
         >
           <div className="font-medium truncate text-[10px]">
             {booking.client_name}
@@ -69,7 +69,7 @@ export const TimeSlotCell = ({
         </div>
       ))}
       
-      {/* Bouton d'ajout au survol - plus discret */}
+      {/* Bouton d'ajout au survol */}
       {bookings.length === 0 && (
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center bg-blue-50/20 hover:bg-blue-50/40">
           <Plus className="h-3 w-3 text-blue-600/70" />

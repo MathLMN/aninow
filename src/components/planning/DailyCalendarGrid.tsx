@@ -45,7 +45,7 @@ export const DailyCalendarGrid = ({
               ))}
             </div>
 
-            {/* Grille horaire 8h-19h */}
+            {/* Grille horaire 8h-19h avec lignes de découpage aux heures pleines */}
             <div className="relative">
               {timeSlots.map((time, timeIndex) => {
                 const isOpen = isTimeSlotOpen(time, daySchedule);
@@ -55,28 +55,27 @@ export const DailyCalendarGrid = ({
                   <div 
                     key={time} 
                     className={cn(
-                      `grid`,
-                      // Hauteur plus petite pour reproduire l'affichage de l'image
-                      "min-h-[25px]",
-                      // Bordure plus marquée pour les heures pleines
-                      isHourMark 
-                        ? "border-b border-gray-400/60" 
-                        : "border-b border-gray-200/40",
-                      // Style différent pour les heures ouvertes/fermées
+                      `grid relative`,
+                      // Hauteur identique à la capture d'écran
+                      "h-[30px]",
+                      // Ligne de découpage uniquement sur les heures pleines comme dans la capture
+                      isHourMark && "border-b-2 border-gray-400",
+                      // Fond gris pour les heures fermées
                       !isOpen && "bg-gray-50/30"
                     )} 
                     style={{gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`}}
                   >
-                    {/* Colonne horaire avec style identique à l'image */}
+                    {/* Colonne horaire - affichage uniquement pour les heures pleines */}
                     <div className={cn(
                       "text-xs text-center font-medium border-r flex items-center justify-center px-1",
                       isOpen 
                         ? "bg-white text-gray-700 border-gray-300" 
                         : "bg-gray-100/80 text-gray-500 border-gray-200/30",
-                      // Police plus petite et espacement réduit comme dans l'image
-                      "text-[11px]"
+                      // Police et style identiques à la capture
+                      "text-[12px] font-medium"
                     )}>
-                      <span>{time}</span>
+                      {/* Afficher l'heure uniquement pour les heures pleines comme dans la capture */}
+                      {isHourMark && <span>{time}</span>}
                     </div>
                     
                     {/* Colonnes par vétérinaire/ASV */}
