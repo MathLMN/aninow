@@ -33,12 +33,19 @@ export const TimeSlotCell = ({
     }
   };
 
+  // Calculer la hauteur du rendez-vous en fonction de sa durée
+  const getAppointmentHeight = (booking: any) => {
+    const duration = booking.duration_minutes || 15;
+    // Chaque tranche de 15 minutes = 30px de hauteur
+    const slotsNeeded = Math.ceil(duration / 15);
+    return slotsNeeded * 30;
+  };
+
   return (
     <div
       className={cn(
         "border-l border-gray-200/30 relative transition-colors cursor-pointer",
         "group hover:bg-blue-50/30",
-        // Hauteur ajustée pour correspondre à la grille
         "h-[30px]",
         !isOpen && "bg-gray-50/30"
       )}
@@ -58,7 +65,10 @@ export const TimeSlotCell = ({
             onAppointmentClick(booking);
           }}
           className={`absolute inset-x-0 top-0 p-1 rounded-sm border cursor-pointer hover:shadow-sm transition-shadow text-[10px] leading-tight ${getStatusColor(booking.status)}`}
-          style={{ height: '28px' }}
+          style={{ 
+            height: `${getAppointmentHeight(booking)}px`,
+            zIndex: 10
+          }}
         >
           <div className="font-medium truncate text-[10px]">
             {booking.client_name}
@@ -66,6 +76,11 @@ export const TimeSlotCell = ({
           <div className="truncate text-[9px] opacity-80">
             {booking.animal_name}
           </div>
+          {booking.duration_minutes && booking.duration_minutes > 15 && (
+            <div className="text-[8px] opacity-70 mt-1">
+              {booking.duration_minutes} min
+            </div>
+          )}
         </div>
       ))}
       

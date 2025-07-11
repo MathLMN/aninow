@@ -34,6 +34,7 @@ export const CreateAppointmentModal = ({
     appointment_time: defaultData?.time || '',
     veterinarian_id: defaultData?.veterinarian || '',
     consultation_type_id: '',
+    duration_minutes: 15, // Durée par défaut
     
     // Informations client
     client_name: '',
@@ -57,16 +58,33 @@ export const CreateAppointmentModal = ({
     booking_source: 'phone' // 'phone', 'walk-in', 'online'
   });
 
+  // Calculer l'heure de fin automatiquement
+  const calculateEndTime = (startTime: string, duration: number) => {
+    if (!startTime || !duration) return '';
+    
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const startInMinutes = hours * 60 + minutes;
+    const endInMinutes = startInMinutes + duration;
+    
+    const endHours = Math.floor(endInMinutes / 60);
+    const endMins = endInMinutes % 60;
+    
+    return `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
+      const appointmentEndTime = calculateEndTime(formData.appointment_time, formData.duration_minutes);
+      
       const { data, error } = await supabase
         .from('bookings')
         .insert([{
           ...formData,
           animal_weight: formData.animal_weight ? parseFloat(formData.animal_weight) : null,
+          appointment_end_time: appointmentEndTime,
           status: 'confirmed', // RDV créés manuellement sont confirmés par défaut
           selected_symptoms: [],
           convenience_options: [],
@@ -87,6 +105,7 @@ export const CreateAppointmentModal = ({
         appointment_time: '',
         veterinarian_id: '',
         consultation_type_id: '',
+        duration_minutes: 15,
         client_name: '',
         client_phone: '',
         client_email: '',
@@ -114,8 +133,20 @@ export const CreateAppointmentModal = ({
     }
   };
 
-  const updateField = (field: string, value: string) => {
+  const updateField = (field: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Mettre à jour la durée quand un type de consultation est sélectionné
+  const handleConsultationTypeChange = (consultationTypeId: string) => {
+    const selectedType = consultationTypes.find(type => type.id === consultationTypeId);
+    if (selectedType) {
+      setFormData(prev => ({
+        ...prev,
+        consultation_type_id: consultationTypeId,
+        duration_minutes: selectedType.duration_minutes
+      }));
+    }
   };
 
   return (
@@ -170,6 +201,39 @@ export const CreateAppointmentModal = ({
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div>
+                <Label htmlFor="consultation_type_id">Type de consultation</Label>
+                <Select value={formData.consultation_type_id} onValueChange={handleConsultationTypeChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionnez un type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {consultationTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {type.name} ({type.duration_minutes} min)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="duration_minutes">Durée (minutes)</Label>
+                <Input
+                  id="duration_minutes"
+                  type="number"
+                  min="5"
+                  step="5"
+                  value={formData.duration_minutes}
+                  onChange={(e) => updateField('duration_minutes', parseInt(e.target.value) || 15)}
+                />
+              </div>
+              <div>
+                <Label>Heure de fin</Label>
+                <div className="flex items-center text-sm text-vet-brown bg-gray-50 p-2 rounded">
+                  <Clock className="h-4 w-4 mr-1" />
+                  {calculateEndTime(formData.appointment_time, formData.duration_minutes) || '--:--'}
+                </div>
               </div>
               <div>
                 <Label htmlFor="booking_source">Source du RDV</Label>

@@ -67,7 +67,9 @@ export const getScheduleInfo = (daySchedule: any) => {
 
 export const getBookingsForSlot = (time: string, columnId: string, bookings: any[], selectedDate: Date) => {
   const dateStr = selectedDate.toISOString().split('T')[0];
-  return bookings.filter(booking => {
+  
+  // Filtrer les rendez-vous qui commencent à cette heure exacte
+  const appointmentsAtThisTime = bookings.filter(booking => {
     const matchesDate = booking.appointment_date === dateStr;
     const matchesTime = booking.appointment_time === time;
     
@@ -77,6 +79,41 @@ export const getBookingsForSlot = (time: string, columnId: string, bookings: any
       return matchesDate && matchesTime && booking.veterinarian_id === columnId;
     }
   });
+
+  // Vérifier aussi les rendez-vous qui se chevauchent avec ce créneau
+  const overlappingAppointments = bookings.filter(booking => {
+    if (!booking.appointment_time || !booking.duration_minutes || booking.appointment_time === time) {
+      return false; // Déjà traité au-dessus ou pas de données de durée
+    }
+
+    const matchesDate = booking.appointment_date === dateStr;
+    if (!matchesDate) return false;
+
+    const matchesColumn = columnId === 'asv' 
+      ? booking.requires_asv 
+      : booking.veterinarian_id === columnId;
+    if (!matchesColumn) return false;
+
+    // Calculer si ce créneau chevauche avec le rendez-vous
+    const [startHour, startMin] = booking.appointment_time.split(':').map(Number);
+    const startTimeInMinutes = startHour * 60 + startMin;
+    const endTimeInMinutes = startTimeInMinutes + booking.duration_minutes;
+
+    const [currentHour, currentMin] = time.split(':').map(Number);
+    const currentTimeInMinutes = currentHour * 60 + currentMin;
+    const currentEndTimeInMinutes = currentTimeInMinutes + 15; // Chaque slot fait 15 min
+
+    // Vérifier le chevauchement
+    return (currentTimeInMinutes < endTimeInMinutes && currentEndTimeInMinutes > startTimeInMinutes);
+  });
+
+  // Combiner les deux listes et supprimer les doublons
+  const allRelevantAppointments = [...appointmentsAtThisTime, ...overlappingAppointments];
+  const uniqueAppointments = allRelevantAppointments.filter((appointment, index, array) => 
+    array.findIndex(a => a.id === appointment.id) === index
+  );
+
+  return uniqueAppointments;
 };
 
 export const generateColumns = (veterinarians: any[], settings: any) => {

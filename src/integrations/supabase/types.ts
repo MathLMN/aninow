@@ -129,6 +129,7 @@ export type Database = {
           animal_vaccines_up_to_date: boolean | null
           animal_weight: number | null
           appointment_date: string | null
+          appointment_end_time: string | null
           appointment_time: string | null
           client_comment: string | null
           client_email: string
@@ -136,11 +137,13 @@ export type Database = {
           client_phone: string
           conditional_answers: Json | null
           consultation_reason: string
+          consultation_type_id: string | null
           convenience_options: string[] | null
           created_at: string
           custom_species: string | null
           custom_symptom: string | null
           custom_text: string | null
+          duration_minutes: number | null
           id: string
           multiple_animals: string[] | null
           preferred_contact_method: string
@@ -179,6 +182,7 @@ export type Database = {
           animal_vaccines_up_to_date?: boolean | null
           animal_weight?: number | null
           appointment_date?: string | null
+          appointment_end_time?: string | null
           appointment_time?: string | null
           client_comment?: string | null
           client_email: string
@@ -186,11 +190,13 @@ export type Database = {
           client_phone: string
           conditional_answers?: Json | null
           consultation_reason: string
+          consultation_type_id?: string | null
           convenience_options?: string[] | null
           created_at?: string
           custom_species?: string | null
           custom_symptom?: string | null
           custom_text?: string | null
+          duration_minutes?: number | null
           id?: string
           multiple_animals?: string[] | null
           preferred_contact_method: string
@@ -229,6 +235,7 @@ export type Database = {
           animal_vaccines_up_to_date?: boolean | null
           animal_weight?: number | null
           appointment_date?: string | null
+          appointment_end_time?: string | null
           appointment_time?: string | null
           client_comment?: string | null
           client_email?: string
@@ -236,11 +243,13 @@ export type Database = {
           client_phone?: string
           conditional_answers?: Json | null
           consultation_reason?: string
+          consultation_type_id?: string | null
           convenience_options?: string[] | null
           created_at?: string
           custom_species?: string | null
           custom_symptom?: string | null
           custom_text?: string | null
+          duration_minutes?: number | null
           id?: string
           multiple_animals?: string[] | null
           preferred_contact_method?: string
@@ -267,7 +276,15 @@ export type Database = {
           urgency_score?: number | null
           vaccination_type?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bookings_consultation_type_id_fkey"
+            columns: ["consultation_type_id"]
+            isOneToOne: false
+            referencedRelation: "consultation_types"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       clinic_settings: {
         Row: {
