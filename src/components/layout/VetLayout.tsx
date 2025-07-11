@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Heart, Menu, X, Calendar, Users, Settings, BarChart3, LogOut } from "lucide-react";
+import { Heart, Menu, X, Calendar, Users, Settings, BarChart3, LogOut, CalendarDays } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 interface VetLayoutProps {
@@ -15,7 +14,8 @@ const VetLayout = ({ children }: VetLayoutProps) => {
 
   const menuItems = [
     { icon: BarChart3, label: "Dashboard", path: "/vet/dashboard" },
-    { icon: Calendar, label: "Planning", path: "/vet/schedule" },
+    { icon: CalendarDays, label: "Planning", path: "/vet/planning" },
+    { icon: Calendar, label: "Créneaux", path: "/vet/schedule" },
     { icon: Users, label: "Rendez-vous", path: "/vet/appointments" },
     { icon: Settings, label: "Paramètres", path: "/vet/settings" },
   ];

@@ -29,6 +29,7 @@ import BookingConfirmation from "./pages/public/BookingConfirmation";
 import VetLogin from "./pages/vet/VetLogin";
 import VetDashboard from "./pages/vet/VetDashboard";
 import VetSchedule from "./pages/vet/VetSchedule";
+import VetPlanning from "./pages/vet/VetPlanning";
 import VetAppointments from "./pages/vet/VetAppointments";
 import VetSettings from "./pages/vet/VetSettings";
 
@@ -71,6 +72,7 @@ const App = () => {
             {/* Interface privée - Dashboard vétérinaires */}
             <Route path="/vet/login" element={<VetLogin />} />
             <Route path="/vet/dashboard" element={<VetDashboard />} />
+            <Route path="/vet/planning" element={<VetPlanning />} />
             <Route path="/vet/schedule" element={<VetSchedule />} />
             <Route path="/vet/appointments" element={<VetAppointments />} />
             <Route path="/vet/settings" element={<VetSettings />} />
