@@ -45,7 +45,7 @@ export const DailyCalendarGrid = ({
               ))}
             </div>
 
-            {/* Grille horaire 8h-19h avec lignes de découpage aux heures pleines */}
+            {/* Grille horaire 8h-19h avec lignes épaisses aux heures pleines et fines aux 15 min */}
             <div className="relative">
               {timeSlots.map((time, timeIndex) => {
                 const isOpen = isTimeSlotOpen(time, daySchedule);
@@ -58,8 +58,10 @@ export const DailyCalendarGrid = ({
                       `grid relative`,
                       // Hauteur identique à la capture d'écran
                       "h-[30px]",
-                      // Ligne de découpage uniquement sur les heures pleines comme dans la capture
-                      isHourMark && "border-b-2 border-gray-400",
+                      // Lignes épaisses sur les heures pleines, fines sur les 15 min intermédiaires
+                      isHourMark 
+                        ? "border-b-2 border-gray-400" 
+                        : "border-b border-gray-200/50",
                       // Fond gris pour les heures fermées
                       !isOpen && "bg-gray-50/30"
                     )} 
