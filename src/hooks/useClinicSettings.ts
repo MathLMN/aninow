@@ -64,7 +64,12 @@ export const useClinicSettings = () => {
       }
 
       if (data) {
-        setSettings(data)
+        // Convertir les données avec le bon typage
+        const settingsData: ClinicSettings = {
+          ...data,
+          daily_schedules: data.daily_schedules as DailySchedules
+        }
+        setSettings(settingsData)
       }
     } catch (err) {
       console.error('Erreur lors du chargement des paramètres:', err)
@@ -82,15 +87,27 @@ export const useClinicSettings = () => {
     try {
       const updatedSettings = { ...settings, ...newSettings }
       
+      // Préparer les données pour Supabase avec le bon format
+      const dataToUpdate = {
+        clinic_name: updatedSettings.clinic_name,
+        asv_enabled: updatedSettings.asv_enabled,
+        daily_schedules: updatedSettings.daily_schedules as any
+      }
+      
       const { data, error } = await supabase
         .from('clinic_settings')
-        .upsert([updatedSettings])
+        .upsert([dataToUpdate])
         .select()
         .single()
 
       if (error) throw error
 
-      setSettings(data)
+      const settingsData: ClinicSettings = {
+        ...data,
+        daily_schedules: data.daily_schedules as DailySchedules
+      }
+      setSettings(settingsData)
+      
       toast({
         title: "Paramètres mis à jour",
         description: "Les paramètres de la clinique ont été sauvegardés",

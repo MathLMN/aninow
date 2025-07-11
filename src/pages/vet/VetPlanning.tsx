@@ -6,6 +6,7 @@ import { CalendarDays, List, ChevronLeft, ChevronRight } from "lucide-react";
 import VetLayout from "@/components/layout/VetLayout";
 import { useVetBookings } from "@/hooks/useVetBookings";
 import { useSlotManagement } from "@/hooks/useSlotManagement";
+import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { WeeklyCalendarView } from "@/components/planning/WeeklyCalendarView";
 import { DailyCalendarView } from "@/components/planning/DailyCalendarView";
 import { AppointmentDetailsModal } from "@/components/planning/AppointmentDetailsModal";
@@ -27,9 +28,10 @@ const VetPlanning = () => {
   });
 
   const { bookings, isLoading: bookingsLoading, updateBookingStatus } = useVetBookings();
-  const { veterinarians, consultationTypes, isLoading: slotsLoading } = useSlotManagement();
+  const { consultationTypes, isLoading: slotsLoading } = useSlotManagement();
+  const { veterinarians, isLoading: vetsLoading } = useClinicVeterinarians();
 
-  const isLoading = bookingsLoading || slotsLoading;
+  const isLoading = bookingsLoading || slotsLoading || vetsLoading;
 
   const handleAppointmentClick = (appointment: any) => {
     setSelectedAppointment(appointment);

@@ -31,6 +31,9 @@ export const DailyCalendarView = ({
   const { settings } = useClinicSettings();
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
+  console.log('DailyCalendarView - Veterinarians received:', veterinarians);
+  console.log('DailyCalendarView - Settings:', settings);
+
   // Générer les créneaux horaires (8h à 19h par 15min)
   const timeSlots = [];
   for (let hour = 8; hour < 19; hour++) {
@@ -43,16 +46,18 @@ export const DailyCalendarView = ({
   // Créer les colonnes dynamiquement basées sur le nombre de vétérinaires
   const columns = [];
   
-  // Ajouter les colonnes vétérinaires basées sur les vétérinaires disponibles
-  veterinarians.forEach((vet) => {
-    if (vet.is_active) {
-      columns.push({
-        id: vet.id,
-        title: vet.name,
-        type: 'veterinarian'
-      });
-    }
-  });
+  // Ajouter les colonnes vétérinaires basées sur les vétérinaires actifs
+  if (veterinarians && veterinarians.length > 0) {
+    veterinarians.forEach((vet) => {
+      if (vet.is_active) {
+        columns.push({
+          id: vet.id,
+          title: vet.name,
+          type: 'veterinarian'
+        });
+      }
+    });
+  }
   
   // Ajouter la colonne ASV si activée
   if (settings.asv_enabled) {
@@ -62,6 +67,8 @@ export const DailyCalendarView = ({
       type: 'asv'
     });
   }
+
+  console.log('DailyCalendarView - Columns generated:', columns);
 
   const getBookingsForSlot = (time: string, columnId: string) => {
     const dateStr = selectedDate.toISOString().split('T')[0];
@@ -93,6 +100,20 @@ export const DailyCalendarView = ({
     newDate.setDate(selectedDate.getDate() + (direction === 'next' ? 1 : -1));
     onDateChange(newDate);
   };
+
+  // Si aucune colonne n'est disponible, afficher un message
+  if (columns.length === 0) {
+    return (
+      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
+        <CardContent className="p-8 text-center">
+          <div className="text-vet-brown">
+            <p className="text-lg font-medium mb-2">Aucun vétérinaire actif configuré</p>
+            <p>Veuillez ajouter et activer des vétérinaires dans les paramètres pour afficher le planning.</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-4">
