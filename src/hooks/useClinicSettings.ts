@@ -5,18 +5,22 @@ import { useToast } from '@/hooks/use-toast'
 
 interface ClinicSettings {
   id?: string
-  veterinarian_count: number
   clinic_name: string
   asv_enabled: boolean
+  opening_time: string
+  closing_time: string
+  opening_days: string[]
   created_at?: string
   updated_at?: string
 }
 
 export const useClinicSettings = () => {
   const [settings, setSettings] = useState<ClinicSettings>({
-    veterinarian_count: 3,
     clinic_name: 'Clinique Vétérinaire',
-    asv_enabled: true
+    asv_enabled: true,
+    opening_time: '08:00:00',
+    closing_time: '18:00:00',
+    opening_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
   })
   const [isLoading, setIsLoading] = useState(true)
   const { toast } = useToast()
@@ -24,13 +28,25 @@ export const useClinicSettings = () => {
   const fetchSettings = async () => {
     try {
       setIsLoading(true)
-      // Since clinic_settings table doesn't exist in the database, we'll use localStorage as fallback
-      const savedSettings = localStorage.getItem('clinic_settings')
-      if (savedSettings) {
-        setSettings(JSON.parse(savedSettings))
+      const { data, error } = await supabase
+        .from('clinic_settings')
+        .select('*')
+        .single()
+
+      if (error && error.code !== 'PGRST116') {
+        throw error
+      }
+
+      if (data) {
+        setSettings(data)
       }
     } catch (err) {
       console.error('Erreur lors du chargement des paramètres:', err)
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les paramètres",
+        variant: "destructive"
+      })
     } finally {
       setIsLoading(false)
     }
@@ -40,10 +56,15 @@ export const useClinicSettings = () => {
     try {
       const updatedSettings = { ...settings, ...newSettings }
       
-      // Save to localStorage since we don't have the database table yet
-      localStorage.setItem('clinic_settings', JSON.stringify(updatedSettings))
-      
-      setSettings(updatedSettings)
+      const { data, error } = await supabase
+        .from('clinic_settings')
+        .upsert([updatedSettings])
+        .select()
+        .single()
+
+      if (error) throw error
+
+      setSettings(data)
       toast({
         title: "Paramètres mis à jour",
         description: "Les paramètres de la clinique ont été sauvegardés",

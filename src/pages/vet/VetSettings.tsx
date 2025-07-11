@@ -1,6 +1,7 @@
 
 import VetLayout from "@/components/layout/VetLayout";
 import { ClinicSettingsForm } from "@/components/settings/ClinicSettingsForm";
+import { VeterinarianManagement } from "@/components/settings/VeterinarianManagement";
 
 const VetSettings = () => {
   return (
@@ -12,6 +13,7 @@ const VetSettings = () => {
         </div>
 
         <ClinicSettingsForm />
+        <VeterinarianManagement />
       </div>
     </VetLayout>
   );

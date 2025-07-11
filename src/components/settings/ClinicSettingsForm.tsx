@@ -5,25 +5,58 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useClinicSettings } from "@/hooks/useClinicSettings";
-import { Building2, Users, Shield } from "lucide-react";
+import { Building2, Clock, Shield } from "lucide-react";
+
+const DAYS_OF_WEEK = [
+  { value: 'monday', label: 'Lundi' },
+  { value: 'tuesday', label: 'Mardi' },
+  { value: 'wednesday', label: 'Mercredi' },
+  { value: 'thursday', label: 'Jeudi' },
+  { value: 'friday', label: 'Vendredi' },
+  { value: 'saturday', label: 'Samedi' },
+  { value: 'sunday', label: 'Dimanche' }
+];
 
 export const ClinicSettingsForm = () => {
   const { settings, isLoading, updateSettings } = useClinicSettings();
   const [formData, setFormData] = useState({
     clinic_name: settings.clinic_name,
-    veterinarian_count: settings.veterinarian_count,
-    asv_enabled: settings.asv_enabled
+    asv_enabled: settings.asv_enabled,
+    opening_time: settings.opening_time,
+    closing_time: settings.closing_time,
+    opening_days: settings.opening_days
   });
 
   const handleSave = async () => {
     await updateSettings(formData);
   };
 
-  const handleVetCountChange = (value: string) => {
-    const count = Math.max(1, Math.min(10, parseInt(value) || 1));
-    setFormData(prev => ({ ...prev, veterinarian_count: count }));
+  const handleDayChange = (day: string, checked: boolean) => {
+    if (checked) {
+      setFormData(prev => ({
+        ...prev,
+        opening_days: [...prev.opening_days, day]
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        opening_days: prev.opening_days.filter(d => d !== day)
+      }));
+    }
   };
+
+  // Update formData when settings change
+  React.useEffect(() => {
+    setFormData({
+      clinic_name: settings.clinic_name,
+      asv_enabled: settings.asv_enabled,
+      opening_time: settings.opening_time,
+      closing_time: settings.closing_time,
+      opening_days: settings.opening_days
+    });
+  }, [settings]);
 
   if (isLoading) {
     return (
@@ -63,7 +96,59 @@ export const ClinicSettingsForm = () => {
       <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
         <CardHeader>
           <CardTitle className="text-vet-navy flex items-center">
-            <Users className="h-5 w-5 mr-2" />
+            <Clock className="h-5 w-5 mr-2" />
+            Horaires d'ouverture
+          </CardTitle>
+          <CardDescription>
+            Configurez les heures et jours d'ouverture de votre clinique
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="opening_time">Heure d'ouverture</Label>
+              <Input
+                id="opening_time"
+                type="time"
+                value={formData.opening_time}
+                onChange={(e) => setFormData(prev => ({ ...prev, opening_time: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label htmlFor="closing_time">Heure de fermeture</Label>
+              <Input
+                id="closing_time"
+                type="time"
+                value={formData.closing_time}
+                onChange={(e) => setFormData(prev => ({ ...prev, closing_time: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label>Jours d'ouverture</Label>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              {DAYS_OF_WEEK.map((day) => (
+                <div key={day.value} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={day.value}
+                    checked={formData.opening_days.includes(day.value)}
+                    onCheckedChange={(checked) => handleDayChange(day.value, checked as boolean)}
+                  />
+                  <Label htmlFor={day.value} className="text-sm font-normal">
+                    {day.label}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
+        <CardHeader>
+          <CardTitle className="text-vet-navy flex items-center">
+            <Shield className="h-5 w-5 mr-2" />
             Configuration du planning
           </CardTitle>
           <CardDescription>
@@ -71,22 +156,6 @@ export const ClinicSettingsForm = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="veterinarian_count">Nombre de vétérinaires</Label>
-            <Input
-              id="veterinarian_count"
-              type="number"
-              min="1"
-              max="10"
-              value={formData.veterinarian_count}
-              onChange={(e) => handleVetCountChange(e.target.value)}
-              className="w-32"
-            />
-            <p className="text-sm text-vet-brown mt-1">
-              Entre 1 et 10 vétérinaires (affecte le nombre de colonnes dans le planning)
-            </p>
-          </div>
-
           <div className="flex items-center space-x-2">
             <Switch
               id="asv_enabled"

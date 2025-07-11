@@ -269,6 +269,69 @@ export type Database = {
         }
         Relationships: []
       }
+      clinic_settings: {
+        Row: {
+          asv_enabled: boolean
+          clinic_name: string
+          closing_time: string
+          created_at: string
+          id: string
+          opening_days: string[]
+          opening_time: string
+          updated_at: string
+        }
+        Insert: {
+          asv_enabled?: boolean
+          clinic_name?: string
+          closing_time?: string
+          created_at?: string
+          id?: string
+          opening_days?: string[]
+          opening_time?: string
+          updated_at?: string
+        }
+        Update: {
+          asv_enabled?: boolean
+          clinic_name?: string
+          closing_time?: string
+          created_at?: string
+          id?: string
+          opening_days?: string[]
+          opening_time?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      clinic_veterinarians: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          is_active: boolean
+          name: string
+          specialty: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          specialty?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          specialty?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       consultation_types: {
         Row: {
           color: string | null
