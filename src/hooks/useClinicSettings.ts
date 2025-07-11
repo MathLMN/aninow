@@ -3,13 +3,33 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 
+interface DaySchedule {
+  isOpen: boolean
+  morning: {
+    start: string
+    end: string
+  }
+  afternoon: {
+    start: string
+    end: string
+  }
+}
+
+interface DailySchedules {
+  monday: DaySchedule
+  tuesday: DaySchedule
+  wednesday: DaySchedule
+  thursday: DaySchedule
+  friday: DaySchedule
+  saturday: DaySchedule
+  sunday: DaySchedule
+}
+
 interface ClinicSettings {
   id?: string
   clinic_name: string
   asv_enabled: boolean
-  opening_time: string
-  closing_time: string
-  opening_days: string[]
+  daily_schedules: DailySchedules
   created_at?: string
   updated_at?: string
 }
@@ -18,9 +38,15 @@ export const useClinicSettings = () => {
   const [settings, setSettings] = useState<ClinicSettings>({
     clinic_name: 'Clinique Vétérinaire',
     asv_enabled: true,
-    opening_time: '08:00:00',
-    closing_time: '18:00:00',
-    opening_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+    daily_schedules: {
+      monday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+      tuesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+      wednesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+      thursday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+      friday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+      saturday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } },
+      sunday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } }
+    }
   })
   const [isLoading, setIsLoading] = useState(true)
   const { toast } = useToast()

@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useClinicSettings } from "@/hooks/useClinicSettings";
@@ -13,13 +12,13 @@ import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { Building2, Clock, Shield, UserPlus, Edit, Trash2, Stethoscope } from "lucide-react";
 
 const DAYS_OF_WEEK = [
-  { value: 'monday', label: 'Lundi' },
-  { value: 'tuesday', label: 'Mardi' },
-  { value: 'wednesday', label: 'Mercredi' },
-  { value: 'thursday', label: 'Jeudi' },
-  { value: 'friday', label: 'Vendredi' },
-  { value: 'saturday', label: 'Samedi' },
-  { value: 'sunday', label: 'Dimanche' }
+  { key: 'monday', label: 'Lundi' },
+  { key: 'tuesday', label: 'Mardi' },
+  { key: 'wednesday', label: 'Mercredi' },
+  { key: 'thursday', label: 'Jeudi' },
+  { key: 'friday', label: 'Vendredi' },
+  { key: 'saturday', label: 'Samedi' },
+  { key: 'sunday', label: 'Dimanche' }
 ];
 
 export const ClinicSettingsForm = () => {
@@ -29,9 +28,7 @@ export const ClinicSettingsForm = () => {
   const [formData, setFormData] = useState({
     clinic_name: settings.clinic_name,
     asv_enabled: settings.asv_enabled,
-    opening_time: settings.opening_time,
-    closing_time: settings.closing_time,
-    opening_days: settings.opening_days
+    daily_schedules: settings.daily_schedules
   });
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -47,18 +44,33 @@ export const ClinicSettingsForm = () => {
     await updateSettings(formData);
   };
 
-  const handleDayChange = (day: string, checked: boolean) => {
-    if (checked) {
-      setFormData(prev => ({
-        ...prev,
-        opening_days: [...prev.opening_days, day]
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        opening_days: prev.opening_days.filter(d => d !== day)
-      }));
-    }
+  const handleDayToggle = (day: string, isOpen: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      daily_schedules: {
+        ...prev.daily_schedules,
+        [day]: {
+          ...prev.daily_schedules[day as keyof typeof prev.daily_schedules],
+          isOpen
+        }
+      }
+    }));
+  };
+
+  const handleTimeChange = (day: string, period: 'morning' | 'afternoon', type: 'start' | 'end', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      daily_schedules: {
+        ...prev.daily_schedules,
+        [day]: {
+          ...prev.daily_schedules[day as keyof typeof prev.daily_schedules],
+          [period]: {
+            ...prev.daily_schedules[day as keyof typeof prev.daily_schedules][period],
+            [type]: value
+          }
+        }
+      }
+    }));
   };
 
   const handleVetSubmit = async (e: React.FormEvent) => {
@@ -105,9 +117,7 @@ export const ClinicSettingsForm = () => {
     setFormData({
       clinic_name: settings.clinic_name,
       asv_enabled: settings.asv_enabled,
-      opening_time: settings.opening_time,
-      closing_time: settings.closing_time,
-      opening_days: settings.opening_days
+      daily_schedules: settings.daily_schedules
     });
   }, [settings]);
 
@@ -150,50 +160,70 @@ export const ClinicSettingsForm = () => {
         <CardHeader>
           <CardTitle className="text-vet-navy flex items-center">
             <Clock className="h-5 w-5 mr-2" />
-            Horaires d'ouverture
+            Horaires d'ouverture par jour
           </CardTitle>
           <CardDescription>
-            Configurez les heures et jours d'ouverture de votre clinique
+            Configurez les horaires d'ouverture pour chaque jour de la semaine
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="opening_time">Heure d'ouverture</Label>
-              <Input
-                id="opening_time"
-                type="time"
-                value={formData.opening_time}
-                onChange={(e) => setFormData(prev => ({ ...prev, opening_time: e.target.value }))}
-              />
-            </div>
-            <div>
-              <Label htmlFor="closing_time">Heure de fermeture</Label>
-              <Input
-                id="closing_time"
-                type="time"
-                value={formData.closing_time}
-                onChange={(e) => setFormData(prev => ({ ...prev, closing_time: e.target.value }))}
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label>Jours d'ouverture</Label>
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              {DAYS_OF_WEEK.map((day) => (
-                <div key={day.value} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={day.value}
-                    checked={formData.opening_days.includes(day.value)}
-                    onCheckedChange={(checked) => handleDayChange(day.value, checked as boolean)}
-                  />
-                  <Label htmlFor={day.value} className="text-sm font-normal">
-                    {day.label}
-                  </Label>
+        <CardContent>
+          <div className="space-y-6">
+            {DAYS_OF_WEEK.map((day) => {
+              const daySchedule = formData.daily_schedules[day.key as keyof typeof formData.daily_schedules];
+              return (
+                <div key={day.key} className="border rounded-lg p-4 space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <Switch
+                      checked={daySchedule.isOpen}
+                      onCheckedChange={(checked) => handleDayToggle(day.key, checked)}
+                    />
+                    <Label className="font-semibold">{day.label}</Label>
+                  </div>
+                  
+                  {daySchedule.isOpen && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-6">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Matin</Label>
+                        <div className="flex space-x-2">
+                          <Input
+                            type="time"
+                            value={daySchedule.morning.start}
+                            onChange={(e) => handleTimeChange(day.key, 'morning', 'start', e.target.value)}
+                            className="flex-1"
+                          />
+                          <span className="flex items-center px-2">à</span>
+                          <Input
+                            type="time"
+                            value={daySchedule.morning.end}
+                            onChange={(e) => handleTimeChange(day.key, 'morning', 'end', e.target.value)}
+                            className="flex-1"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Après-midi</Label>
+                        <div className="flex space-x-2">
+                          <Input
+                            type="time"
+                            value={daySchedule.afternoon.start}
+                            onChange={(e) => handleTimeChange(day.key, 'afternoon', 'start', e.target.value)}
+                            className="flex-1"
+                          />
+                          <span className="flex items-center px-2">à</span>
+                          <Input
+                            type="time"
+                            value={daySchedule.afternoon.end}
+                            onChange={(e) => handleTimeChange(day.key, 'afternoon', 'end', e.target.value)}
+                            className="flex-1"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </CardContent>
       </Card>

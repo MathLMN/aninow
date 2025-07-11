@@ -273,31 +273,25 @@ export type Database = {
         Row: {
           asv_enabled: boolean
           clinic_name: string
-          closing_time: string
           created_at: string
+          daily_schedules: Json | null
           id: string
-          opening_days: string[]
-          opening_time: string
           updated_at: string
         }
         Insert: {
           asv_enabled?: boolean
           clinic_name?: string
-          closing_time?: string
           created_at?: string
+          daily_schedules?: Json | null
           id?: string
-          opening_days?: string[]
-          opening_time?: string
           updated_at?: string
         }
         Update: {
           asv_enabled?: boolean
           clinic_name?: string
-          closing_time?: string
           created_at?: string
+          daily_schedules?: Json | null
           id?: string
-          opening_days?: string[]
-          opening_time?: string
           updated_at?: string
         }
         Relationships: []
