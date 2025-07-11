@@ -1,18 +1,14 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, Smartphone } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
-
 const HeroSection = () => {
   const isMobile = useIsMobile();
-  
-  return (
-    <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36% py-6 sm:py-10 lg:py-20 px-4 sm:px-6 lg:px-8">
+  return <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36% py-6 sm:py-10 lg:py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 animate-fade-in">
           <div>
-            <div className={`${isMobile ? "h-12" : "h-10"} ${isMobile ? "mt-4" : "mt-24"}`}></div>
+            
             
             <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-[#1B1B3A] leading-tight text-left">
               Prenez rendez-vous chez votre vétérinaire{" "}
@@ -44,10 +40,7 @@ const HeroSection = () => {
             <div className="space-y-6 sm:space-y-8">
               <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-4 justify-start">
                 <Link to="/booking">
-                  <Button 
-                    size="lg"
-                    className="bg-[#1B1B3A] hover:bg-[#1B1B3A]/90 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg transition-all duration-200 transform hover:scale-105 text-sm sm:text-base"
-                  >
+                  <Button size="lg" className="bg-[#1B1B3A] hover:bg-[#1B1B3A]/90 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg transition-all duration-200 transform hover:scale-105 text-sm sm:text-base">
                     <Calendar className="mr-2 h-5 w-5" />
                     Prendre rendez-vous
                     <ArrowRight className="ml-2 h-5 w-5" />
@@ -62,16 +55,10 @@ const HeroSection = () => {
           </div>
 
           <div className="hidden lg:flex items-end justify-center pt-15">
-            <img 
-              src="/lovable-uploads/7e29ac48-920b-4324-b6a4-2c37572a1ef1.png"
-              alt="Chien et chat - Nos compagnons fidèles"
-              className="w-full h-auto object-contain mt-12 animate-fade-in"
-            />
+            <img src="/lovable-uploads/7e29ac48-920b-4324-b6a4-2c37572a1ef1.png" alt="Chien et chat - Nos compagnons fidèles" className="w-full h-auto object-contain mt-12 animate-fade-in" />
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default HeroSection;
