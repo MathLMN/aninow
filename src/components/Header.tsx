@@ -9,7 +9,7 @@ const Header = () => {
   const isAdminPage = location.pathname === '/admin';
 
   return (
-    <header className="bg-white text-vet-navy shadow-lg sticky top-0 z-40">
+    <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-sm z-50 border-b shadow-lg">
       <div className="container mx-auto px-3 sm:px-6 py-2 sm:py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">

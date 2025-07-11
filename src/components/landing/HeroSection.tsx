@@ -1,15 +1,14 @@
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, Smartphone } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useIsMobile } from "@/hooks/use-mobile";
+
 const HeroSection = () => {
-  const isMobile = useIsMobile();
-  return <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36% py-6 sm:py-10 lg:py-20 px-4 sm:px-6 lg:px-8">
+  return (
+    <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36% pt-16 md:pt-24 py-6 sm:py-10 lg:py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 animate-fade-in">
           <div>
-            
-            
             <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-[#1B1B3A] leading-tight text-left">
               Prenez rendez-vous chez votre vétérinaire{" "}
               <span className="text-[#96C3CE]">en quelques clics</span>
@@ -59,6 +58,8 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export default HeroSection;
