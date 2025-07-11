@@ -68,12 +68,7 @@ export const DailyCalendarGrid = ({
                       isOpen ? "bg-vet-beige/10 text-vet-brown" : "bg-gray-100 text-gray-400",
                       isHourMark && "font-semibold"
                     )}>
-                      <div className="flex flex-col items-center">
-                        <span>{time}</span>
-                        {!isOpen && timeIndex % 4 === 0 && (
-                          <span className="text-xs text-gray-400">Fermé</span>
-                        )}
-                      </div>
+                      <span>{time}</span>
                     </div>
                     
                     {/* Colonnes par vétérinaire/ASV */}
