@@ -34,6 +34,51 @@ interface ClinicSettings {
   updated_at?: string
 }
 
+// Helper function to convert Json to DailySchedules with proper fallback
+const convertToDailySchedules = (jsonData: any): DailySchedules => {
+  const defaultDaySchedule: DaySchedule = {
+    isOpen: false,
+    morning: { start: '', end: '' },
+    afternoon: { start: '', end: '' }
+  }
+
+  const defaultSchedules: DailySchedules = {
+    monday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+    tuesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+    wednesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+    thursday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+    friday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+    saturday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } },
+    sunday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } }
+  }
+
+  if (!jsonData || typeof jsonData !== 'object') {
+    return defaultSchedules
+  }
+
+  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const
+  const result = { ...defaultSchedules }
+
+  days.forEach(day => {
+    if (jsonData[day] && typeof jsonData[day] === 'object') {
+      const dayData = jsonData[day]
+      result[day] = {
+        isOpen: typeof dayData.isOpen === 'boolean' ? dayData.isOpen : defaultDaySchedule.isOpen,
+        morning: {
+          start: typeof dayData.morning?.start === 'string' ? dayData.morning.start : defaultDaySchedule.morning.start,
+          end: typeof dayData.morning?.end === 'string' ? dayData.morning.end : defaultDaySchedule.morning.end
+        },
+        afternoon: {
+          start: typeof dayData.afternoon?.start === 'string' ? dayData.afternoon.start : defaultDaySchedule.afternoon.start,
+          end: typeof dayData.afternoon?.end === 'string' ? dayData.afternoon.end : defaultDaySchedule.afternoon.end
+        }
+      }
+    }
+  })
+
+  return result
+}
+
 export const useClinicSettings = () => {
   const [settings, setSettings] = useState<ClinicSettings>({
     clinic_name: 'Clinique Vétérinaire',
@@ -64,10 +109,10 @@ export const useClinicSettings = () => {
       }
 
       if (data) {
-        // Convertir les données avec le bon typage
+        // Convertir les données avec le bon typage et validation
         const settingsData: ClinicSettings = {
           ...data,
-          daily_schedules: data.daily_schedules as DailySchedules
+          daily_schedules: convertToDailySchedules(data.daily_schedules)
         }
         setSettings(settingsData)
       }
@@ -91,7 +136,7 @@ export const useClinicSettings = () => {
       const dataToUpdate = {
         clinic_name: updatedSettings.clinic_name,
         asv_enabled: updatedSettings.asv_enabled,
-        daily_schedules: updatedSettings.daily_schedules as any
+        daily_schedules: updatedSettings.daily_schedules
       }
       
       const { data, error } = await supabase
@@ -104,7 +149,7 @@ export const useClinicSettings = () => {
 
       const settingsData: ClinicSettings = {
         ...data,
-        daily_schedules: data.daily_schedules as DailySchedules
+        daily_schedules: convertToDailySchedules(data.daily_schedules)
       }
       setSettings(settingsData)
       
