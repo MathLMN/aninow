@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
@@ -136,7 +135,7 @@ export const useClinicSettings = () => {
       const dataToUpdate = {
         clinic_name: updatedSettings.clinic_name,
         asv_enabled: updatedSettings.asv_enabled,
-        daily_schedules: updatedSettings.daily_schedules
+        daily_schedules: JSON.parse(JSON.stringify(updatedSettings.daily_schedules))
       }
       
       const { data, error } = await supabase
