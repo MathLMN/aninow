@@ -24,17 +24,10 @@ export const useClinicSettings = () => {
   const fetchSettings = async () => {
     try {
       setIsLoading(true)
-      const { data, error } = await supabase
-        .from('clinic_settings')
-        .select('*')
-        .single()
-
-      if (error && error.code !== 'PGRST116') {
-        throw error
-      }
-
-      if (data) {
-        setSettings(data)
+      // Since clinic_settings table doesn't exist in the database, we'll use localStorage as fallback
+      const savedSettings = localStorage.getItem('clinic_settings')
+      if (savedSettings) {
+        setSettings(JSON.parse(savedSettings))
       }
     } catch (err) {
       console.error('Erreur lors du chargement des paramètres:', err)
@@ -47,15 +40,10 @@ export const useClinicSettings = () => {
     try {
       const updatedSettings = { ...settings, ...newSettings }
       
-      const { data, error } = await supabase
-        .from('clinic_settings')
-        .upsert([updatedSettings])
-        .select()
-        .single()
-
-      if (error) throw error
-
-      setSettings(data)
+      // Save to localStorage since we don't have the database table yet
+      localStorage.setItem('clinic_settings', JSON.stringify(updatedSettings))
+      
+      setSettings(updatedSettings)
       toast({
         title: "Paramètres mis à jour",
         description: "Les paramètres de la clinique ont été sauvegardés",

@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, List } from "lucide-react";
+import { CalendarDays, List, ChevronLeft, ChevronRight } from "lucide-react";
 import VetLayout from "@/components/layout/VetLayout";
 import { useVetBookings } from "@/hooks/useVetBookings";
 import { useSlotManagement } from "@/hooks/useSlotManagement";
