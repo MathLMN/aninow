@@ -6,8 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useClinicSettings } from "@/hooks/useClinicSettings";
-import { Building2, Clock, Shield } from "lucide-react";
+import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
+import { Building2, Clock, Shield, UserPlus, Edit, Trash2, Stethoscope } from "lucide-react";
 
 const DAYS_OF_WEEK = [
   { value: 'monday', label: 'Lundi' },
@@ -21,12 +24,23 @@ const DAYS_OF_WEEK = [
 
 export const ClinicSettingsForm = () => {
   const { settings, isLoading, updateSettings } = useClinicSettings();
+  const { veterinarians, isLoading: isLoadingVets, addVeterinarian, updateVeterinarian, deleteVeterinarian } = useClinicVeterinarians();
+  
   const [formData, setFormData] = useState({
     clinic_name: settings.clinic_name,
     asv_enabled: settings.asv_enabled,
     opening_time: settings.opening_time,
     closing_time: settings.closing_time,
     opening_days: settings.opening_days
+  });
+
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingVet, setEditingVet] = useState<any>(null);
+  const [vetFormData, setVetFormData] = useState({
+    name: '',
+    email: '',
+    specialty: '',
+    is_active: true
   });
 
   const handleSave = async () => {
@@ -47,6 +61,45 @@ export const ClinicSettingsForm = () => {
     }
   };
 
+  const handleVetSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (editingVet) {
+      const success = await updateVeterinarian(editingVet.id, vetFormData);
+      if (success) {
+        setEditingVet(null);
+        setVetFormData({ name: '', email: '', specialty: '', is_active: true });
+      }
+    } else {
+      const success = await addVeterinarian(vetFormData);
+      if (success) {
+        setIsAddModalOpen(false);
+        setVetFormData({ name: '', email: '', specialty: '', is_active: true });
+      }
+    }
+  };
+
+  const handleEditVet = (vet: any) => {
+    setEditingVet(vet);
+    setVetFormData({
+      name: vet.name,
+      email: vet.email || '',
+      specialty: vet.specialty || '',
+      is_active: vet.is_active
+    });
+  };
+
+  const handleDeleteVet = async (id: string) => {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce vétérinaire ?')) {
+      await deleteVeterinarian(id);
+    }
+  };
+
+  const resetVetForm = () => {
+    setVetFormData({ name: '', email: '', specialty: '', is_active: true });
+    setEditingVet(null);
+  };
+
   // Update formData when settings change
   React.useEffect(() => {
     setFormData({
@@ -58,7 +111,7 @@ export const ClinicSettingsForm = () => {
     });
   }, [settings]);
 
-  if (isLoading) {
+  if (isLoading || isLoadingVets) {
     return (
       <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
         <CardContent className="p-8">
@@ -152,10 +205,10 @@ export const ClinicSettingsForm = () => {
             Configuration du planning
           </CardTitle>
           <CardDescription>
-            Paramètres pour l'affichage du planning journalier
+            Paramètres pour l'affichage du planning journalier et gestion de l'équipe
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <div className="flex items-center space-x-2">
             <Switch
               id="asv_enabled"
@@ -166,6 +219,192 @@ export const ClinicSettingsForm = () => {
               <Shield className="h-4 w-4 mr-2" />
               Afficher la colonne ASV
             </Label>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-semibold text-vet-navy flex items-center">
+                  <Stethoscope className="h-4 w-4 mr-2" />
+                  Équipe vétérinaire
+                </h4>
+                <p className="text-sm text-vet-brown">
+                  {veterinarians.filter(v => v.is_active).length} vétérinaire(s) actif(s)
+                </p>
+              </div>
+              <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-vet-sage hover:bg-vet-sage/90 text-white">
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Ajouter un vétérinaire
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Ajouter un vétérinaire</DialogTitle>
+                    <DialogDescription>
+                      Ajoutez un nouveau vétérinaire à votre équipe.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handleVetSubmit} className="space-y-4">
+                    <div>
+                      <Label htmlFor="name">Nom complet *</Label>
+                      <Input
+                        id="name"
+                        value={vetFormData.name}
+                        onChange={(e) => setVetFormData(prev => ({ ...prev, name: e.target.value }))}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={vetFormData.email}
+                        onChange={(e) => setVetFormData(prev => ({ ...prev, email: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="specialty">Spécialité</Label>
+                      <Input
+                        id="specialty"
+                        value={vetFormData.specialty}
+                        onChange={(e) => setVetFormData(prev => ({ ...prev, specialty: e.target.value }))}
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="is_active"
+                        checked={vetFormData.is_active}
+                        onCheckedChange={(checked) => setVetFormData(prev => ({ ...prev, is_active: checked }))}
+                      />
+                      <Label htmlFor="is_active">Actif</Label>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button type="submit" className="bg-vet-sage hover:bg-vet-sage/90 text-white">
+                        Ajouter
+                      </Button>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => setIsAddModalOpen(false)}
+                      >
+                        Annuler
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="border rounded-lg">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nom</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Spécialité</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {veterinarians.map((vet) => (
+                    <TableRow key={vet.id}>
+                      <TableCell>
+                        {editingVet?.id === vet.id ? (
+                          <Input
+                            value={vetFormData.name}
+                            onChange={(e) => setVetFormData(prev => ({ ...prev, name: e.target.value }))}
+                            className="w-full"
+                          />
+                        ) : (
+                          vet.name
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {editingVet?.id === vet.id ? (
+                          <Input
+                            value={vetFormData.email}
+                            onChange={(e) => setVetFormData(prev => ({ ...prev, email: e.target.value }))}
+                            className="w-full"
+                          />
+                        ) : (
+                          vet.email || '-'
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {editingVet?.id === vet.id ? (
+                          <Input
+                            value={vetFormData.specialty}
+                            onChange={(e) => setVetFormData(prev => ({ ...prev, specialty: e.target.value }))}
+                            className="w-full"
+                          />
+                        ) : (
+                          vet.specialty || '-'
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {editingVet?.id === vet.id ? (
+                          <Switch
+                            checked={vetFormData.is_active}
+                            onCheckedChange={(checked) => setVetFormData(prev => ({ ...prev, is_active: checked }))}
+                          />
+                        ) : (
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            vet.is_active 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {vet.is_active ? 'Actif' : 'Inactif'}
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          {editingVet?.id === vet.id ? (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={handleVetSubmit}
+                                className="bg-vet-sage hover:bg-vet-sage/90 text-white"
+                              >
+                                Sauvegarder
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={resetVetForm}
+                              >
+                                Annuler
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleEditVet(vet)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleDeleteVet(vet.id!)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </CardContent>
       </Card>
