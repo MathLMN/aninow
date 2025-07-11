@@ -36,18 +36,16 @@ export const TimeSlotCell = ({
   return (
     <div
       className={cn(
-        "p-1 border-l border-vet-blue/10 relative transition-colors",
-        canBook ? "group hover:bg-vet-sage/5 cursor-pointer" : "cursor-not-allowed",
-        !isOpen && "bg-gray-50/50"
+        "p-1 border-l border-vet-blue/10 relative transition-colors cursor-pointer",
+        "group hover:bg-vet-sage/5",
+        !isOpen && "bg-gray-50/30"
       )}
       onClick={() => {
-        if (canBook) {
-          onCreateAppointment({
-            date: selectedDate.toISOString().split('T')[0],
-            time: time,
-            veterinarian: columnId !== 'asv' ? columnId : undefined
-          });
-        }
+        onCreateAppointment({
+          date: selectedDate.toISOString().split('T')[0],
+          time: time,
+          veterinarian: columnId !== 'asv' ? columnId : undefined
+        });
       }}
     >
       {bookings.map((booking) => (
@@ -68,19 +66,10 @@ export const TimeSlotCell = ({
         </div>
       ))}
       
-      {/* Bouton d'ajout au survol - seulement si ouvert */}
-      {canBook && (
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center bg-vet-sage/10 hover:bg-vet-sage/20">
-          <Plus className="h-4 w-4 text-vet-sage" />
-        </div>
-      )}
-      
-      {/* Overlay pour les périodes fermées */}
-      {!isOpen && (
-        <div className="absolute inset-0 bg-gray-200/30 flex items-center justify-center">
-          <div className="w-full h-px bg-gray-300/50"></div>
-        </div>
-      )}
+      {/* Bouton d'ajout au survol - toujours visible */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center bg-vet-sage/10 hover:bg-vet-sage/20">
+        <Plus className="h-4 w-4 text-vet-sage" />
+      </div>
     </div>
   );
 };

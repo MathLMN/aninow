@@ -31,7 +31,7 @@ export const DailyCalendarGrid = ({
             {/* En-tête des colonnes */}
             <div className={`grid border-b border-vet-blue/20 bg-vet-beige/30`} style={{gridTemplateColumns: `120px repeat(${columns.length}, 1fr)`}}>
               <div className="p-4 font-semibold text-vet-navy text-center border-r border-vet-blue/20">
-                Horaires (24h)
+                Horaires
               </div>
               {columns.map((column) => (
                 <div key={column.id} className="p-4 text-center border-l border-vet-blue/20">
@@ -45,7 +45,7 @@ export const DailyCalendarGrid = ({
               ))}
             </div>
 
-            {/* Grille horaire 24h */}
+            {/* Grille horaire 7h-20h */}
             <div className="relative">
               {timeSlots.map((time, timeIndex) => {
                 const isOpen = isTimeSlotOpen(time, daySchedule);
@@ -56,18 +56,16 @@ export const DailyCalendarGrid = ({
                   <div 
                     key={time} 
                     className={cn(
-                      `grid min-h-[40px]`,
-                      // Bordures conditionnelles selon l'état ouvert/fermé
+                      `grid min-h-[40px] border-b`,
+                      // Style différent pour les heures ouvertes/fermées
                       isOpen 
                         ? cn(
-                            "border-b",
                             isHourMark ? 'border-vet-blue/30' : 'border-vet-blue/10'
                           )
                         : cn(
-                            "border-b",
+                            'bg-gray-50/50',
                             isHourMark ? 'border-gray-300/50' : 'border-gray-200/30'
-                          ),
-                      !isOpen && 'bg-gray-50/80' // Griser les périodes fermées
+                          )
                     )} 
                     style={{gridTemplateColumns: `120px repeat(${columns.length}, 1fr)`}}
                   >
@@ -76,16 +74,15 @@ export const DailyCalendarGrid = ({
                       "p-2 text-sm text-center font-medium border-r flex items-center justify-center",
                       isOpen 
                         ? "bg-vet-beige/10 text-vet-brown border-vet-blue/20" 
-                        : "bg-gray-100 text-gray-400 border-gray-200/30",
+                        : "bg-gray-100/80 text-gray-500 border-gray-200/30",
                       isHourMark && "font-semibold"
                     )}>
                       <span>{time}</span>
                     </div>
                     
-                    {/* Colonnes par vétérinaire/ASV */}
+                    {/* Colonnes par vétérinaire/ASV - Toutes cliquables */}
                     {columns.map((column) => {
                       const slotBookings = getBookingsForSlot(time, column.id, bookings, selectedDate);
-                      const canBook = isOpen && daySchedule.isOpen;
                       
                       return (
                         <TimeSlotCell
@@ -94,7 +91,7 @@ export const DailyCalendarGrid = ({
                           columnId={column.id}
                           bookings={slotBookings}
                           isOpen={isOpen}
-                          canBook={canBook}
+                          canBook={true} // Toujours cliquable
                           onCreateAppointment={onCreateAppointment}
                           onAppointmentClick={onAppointmentClick}
                           selectedDate={selectedDate}
