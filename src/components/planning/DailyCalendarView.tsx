@@ -52,7 +52,7 @@ export const DailyCalendarView = ({
       <DailyCalendarHeader
         selectedDate={selectedDate}
         onDateChange={onDateChange}
-        scheduleInfo={scheduleInfo}
+        scheduleInfo={scheduleInfo.message}
       />
 
       <DailyCalendarGrid
