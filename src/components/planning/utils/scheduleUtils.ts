@@ -1,3 +1,4 @@
+
 import { isWithinInterval } from 'date-fns';
 
 export const generateAllTimeSlots = () => {
@@ -73,13 +74,12 @@ export const getScheduleInfo = (daySchedule: any) => {
 export const generateColumns = (veterinarians: any[], settings: any) => {
   const columns = [];
 
-  if (settings?.display_asv_planning) {
-    columns.push({
-      id: 'asv',
-      title: 'ASV',
-      type: 'asv'
-    });
-  }
+  // Toujours afficher la colonne ASV en premier
+  columns.push({
+    id: 'asv',
+    title: 'ASV',
+    type: 'asv'
+  });
 
   veterinarians.filter(vet => vet.is_active).forEach(vet => {
     columns.push({
@@ -112,7 +112,6 @@ export const getBookingsForSlot = (time: string, columnId: string, bookings: any
     }
     
     // Pour les colonnes vétérinaires, afficher les rendez-vous assignés à ce vétérinaire
-    // ou ceux sans vétérinaire assigné (qui pourraient être assignés plus tard)
-    return booking.veterinarian_id === columnId || !booking.veterinarian_id;
+    return booking.veterinarian_id === columnId;
   });
 };

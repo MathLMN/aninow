@@ -31,7 +31,7 @@ export const DailyCalendarGrid = ({
         <div className="overflow-x-auto">
           <div className="min-w-full">
             {/* En-tête des colonnes */}
-            <div className={`grid border-b border-vet-blue/20 bg-vet-beige/30`} style={{gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`}}>
+            <div className={`grid border-b border-vet-blue/20 bg-vet-beige/30`} style={{gridTemplateColumns: `100px repeat(${columns.length}, 1fr)`}}>
               <div className="p-2 font-semibold text-vet-navy text-center border-r border-vet-blue/20 text-sm">
                 Horaires
               </div>
@@ -47,7 +47,7 @@ export const DailyCalendarGrid = ({
               ))}
             </div>
 
-            {/* Grille horaire 8h-19h avec lignes épaisses aux heures pleines et fines aux 15 min */}
+            {/* Grille horaire 8h-19h avec affichage de toutes les heures */}
             <div className="relative">
               {timeSlots.map((time, timeIndex) => {
                 const isOpen = isTimeSlotOpen(time, daySchedule);
@@ -58,7 +58,7 @@ export const DailyCalendarGrid = ({
                     key={time} 
                     className={cn(
                       `grid relative`,
-                      // Hauteur identique à la capture d'écran
+                      // Hauteur identique pour tous les créneaux
                       "h-[30px]",
                       // Lignes épaisses sur les heures pleines, fines sur les 15 min intermédiaires
                       isHourMark 
@@ -67,19 +67,19 @@ export const DailyCalendarGrid = ({
                       // Fond gris pour les heures fermées
                       !isOpen && "bg-gray-50/30"
                     )} 
-                    style={{gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`}}
+                    style={{gridTemplateColumns: `100px repeat(${columns.length}, 1fr)`}}
                   >
-                    {/* Colonne horaire - affichage uniquement pour les heures pleines */}
+                    {/* Colonne horaire - affichage de toutes les heures avec alignement parfait */}
                     <div className={cn(
                       "text-xs text-center font-medium border-r flex items-center justify-center px-1",
                       isOpen 
                         ? "bg-white text-gray-700 border-gray-300" 
                         : "bg-gray-100/80 text-gray-500 border-gray-200/30",
-                      // Police et style identiques à la capture
-                      "text-[12px] font-medium"
+                      // Police et style pour une meilleure lisibilité
+                      "text-[11px] font-medium leading-none"
                     )}>
-                      {/* Afficher l'heure uniquement pour les heures pleines comme dans la capture */}
-                      {isHourMark && <span>{time}</span>}
+                      {/* Afficher toutes les heures pour un alignement parfait */}
+                      <span className="block">{time}</span>
                     </div>
                     
                     {/* Colonnes par vétérinaire/ASV */}
