@@ -1,22 +1,30 @@
 
 import { ViewModeSelector } from "./ViewModeSelector";
-
-type ViewMode = 'daily' | 'weekly';
+import { PendingBookingsNotification } from "./PendingBookingsNotification";
 
 interface PlanningHeaderProps {
-  viewMode: ViewMode;
-  onViewModeChange: (mode: ViewMode) => void;
+  viewMode: 'daily' | 'weekly';
+  onViewModeChange: (mode: 'daily' | 'weekly') => void;
 }
 
 export const PlanningHeader = ({ viewMode, onViewModeChange }: PlanningHeaderProps) => {
   return (
     <div className="flex items-center justify-between">
       <div>
-        <h1 className="text-3xl font-bold text-vet-navy">Planning des Rendez-vous</h1>
-        <p className="text-vet-brown">Gestion centralisée de tous les rendez-vous</p>
+        <h1 className="text-2xl font-bold text-vet-navy mb-2">
+          Planning des consultations
+        </h1>
+        <p className="text-vet-brown/80">
+          Gérez vos rendez-vous et créneaux de consultation
+        </p>
       </div>
-      <div className="flex items-center space-x-3">
-        <ViewModeSelector viewMode={viewMode} onViewModeChange={onViewModeChange} />
+      
+      <div className="flex items-center gap-4">
+        <PendingBookingsNotification />
+        <ViewModeSelector 
+          viewMode={viewMode}
+          onViewModeChange={onViewModeChange}
+        />
       </div>
     </div>
   );

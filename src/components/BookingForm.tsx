@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
@@ -34,17 +33,15 @@ const BookingForm = ({
 
   const handleSubmit = () => {
     if (canProceed) {
-      // Si c'est une portée, préparer les données avec le motif de consultation prédéfini
-      if (isLitter) {
-        const litterData = {
-          ...formData,
-          consultationReason: 'consultation-convenance',
-          convenienceOptions: [formData.vaccinationType === 'vaccinations-identifications' ? 'vaccination-identification' : 'vaccination']
-        };
-        onNext(litterData);
-      } else {
-        onNext(formData);
-      }
+      // Sauvegarder les données dans localStorage pour la suite du processus
+      const dataToSave = isLitter ? {
+        ...formData,
+        consultationReason: 'consultation-convenance',
+        convenienceOptions: [formData.vaccinationType === 'vaccinations-identifications' ? 'vaccination-identification' : 'vaccination']
+      } : formData;
+      
+      localStorage.setItem('bookingFormData', JSON.stringify(dataToSave));
+      onNext(dataToSave);
     }
   };
 

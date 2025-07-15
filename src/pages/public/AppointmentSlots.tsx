@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import Header from "@/components/Header";
 import ProgressBar from "@/components/ProgressBar";
+import { VeterinarianPreference } from "@/components/slots/VeterinarianPreference";
+import { useVeterinarianPreference } from "@/hooks/useVeterinarianPreference";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface TimeSlotGroup {
   period: string;
@@ -22,9 +26,18 @@ interface DateSlot {
 
 const AppointmentSlots = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [openDate, setOpenDate] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const {
+    veterinarians,
+    selectedVeterinarian,
+    setSelectedVeterinarian,
+    isLoading: vetsLoading
+  } = useVeterinarianPreference();
 
   // Enhanced data structure with grouped time slots
   const availableDates: DateSlot[] = [
@@ -70,9 +83,45 @@ const AppointmentSlots = () => {
     }
   ];
 
-  const handleBooking = () => {
+  const handleBooking = async () => {
     if (selectedDate && selectedTime) {
-      navigate('/booking/confirmation');
+      setIsSubmitting(true);
+      
+      try {
+        // Récupérer les données du formulaire depuis le localStorage
+        const formData = JSON.parse(localStorage.getItem('bookingFormData') || '{}');
+        
+        // Créer la réservation avec le vétérinaire sélectionné
+        const bookingData = {
+          ...formData,
+          appointment_date: selectedDate,
+          appointment_time: selectedTime,
+          veterinarian_id: selectedVeterinarian,
+          status: 'pending'
+        };
+
+        const { error } = await supabase
+          .from('bookings')
+          .insert([bookingData]);
+
+        if (error) throw error;
+
+        toast({
+          title: "Rendez-vous demandé",
+          description: "Votre demande de rendez-vous a été envoyée. Vous recevrez une confirmation prochainement.",
+        });
+
+        navigate('/booking/confirmation');
+      } catch (err) {
+        console.error('Erreur lors de la création du RDV:', err);
+        toast({
+          title: "Erreur",
+          description: "Impossible de créer le rendez-vous. Veuillez réessayer.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -115,14 +164,14 @@ const AppointmentSlots = () => {
 
       <main className="container mx-auto px-3 sm:px-6 py-4 sm:py-6 pb-20">
         <div className="max-w-4xl mx-auto">
-          <ProgressBar value={100} />
+          <ProgressBar value={90} />
           
           <div className="text-center mb-6 sm:mb-8 animate-fade-in">
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-vet-navy mb-2 leading-tight">
               Choisissez votre créneau
             </h1>
             <p className="text-sm sm:text-base text-vet-brown/80 px-2">
-              Sélectionnez la date et l'heure qui vous conviennent le mieux
+              Sélectionnez votre vétérinaire préféré puis la date et l'heure qui vous conviennent
             </p>
           </div>
 
@@ -134,15 +183,32 @@ const AppointmentSlots = () => {
             </Button>
           </div>
 
+          {/* Veterinarian preference selection */}
+          <div className="mb-6">
+            <VeterinarianPreference
+              veterinarians={veterinarians}
+              selectedVeterinarian={selectedVeterinarian}
+              onVeterinarianSelect={setSelectedVeterinarian}
+            />
+          </div>
+
           {/* Date selection with accordion */}
           <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/20 shadow-lg mb-6">
             <CardHeader>
               <CardTitle className="flex items-center text-vet-navy">
                 <Calendar className="h-5 w-5 mr-2 text-vet-sage" />
                 Dates disponibles
+                {selectedVeterinarian && (
+                  <Badge className="ml-2 bg-vet-sage/10 text-vet-sage">
+                    {veterinarians.find(v => v.id === selectedVeterinarian)?.name}
+                  </Badge>
+                )}
               </CardTitle>
               <CardDescription className="text-vet-brown">
-                Cliquez sur une date pour voir les créneaux disponibles
+                {selectedVeterinarian 
+                  ? "Créneaux disponibles pour le vétérinaire sélectionné"
+                  : "Cliquez sur une date pour voir les créneaux disponibles"
+                }
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -229,15 +295,24 @@ const AppointmentSlots = () => {
                     <p className="text-vet-brown">
                       {(() => {
                         const { dayName, dayNumber, month } = formatDate(selectedDate);
+                        const vetName = selectedVeterinarian 
+                          ? veterinarians.find(v => v.id === selectedVeterinarian)?.name
+                          : "Pas de préférence";
                         return `${dayName} ${dayNumber} ${month} ${new Date(selectedDate).getFullYear()} à ${selectedTime}`;
                       })()}
                     </p>
+                    {selectedVeterinarian && (
+                      <p className="text-sm text-vet-brown/80 mt-1">
+                        Vétérinaire : {veterinarians.find(v => v.id === selectedVeterinarian)?.name}
+                      </p>
+                    )}
                   </div>
                   <Button 
                     onClick={handleBooking}
+                    disabled={isSubmitting}
                     className="bg-vet-sage hover:bg-vet-sage/90 text-white px-8 rounded-full"
                   >
-                    Confirmer le rendez-vous
+                    {isSubmitting ? 'Envoi en cours...' : 'Demander le rendez-vous'}
                   </Button>
                 </div>
               </CardContent>
