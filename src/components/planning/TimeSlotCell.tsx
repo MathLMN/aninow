@@ -2,6 +2,8 @@
 import { Plus, Ban } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { useAvailableSlots } from "@/hooks/useAvailableSlots";
+import { useToast } from "@/hooks/use-toast";
 
 interface TimeSlotCellProps {
   time: string;
@@ -23,14 +25,16 @@ export const TimeSlotCell = ({
   canBook,
   onCreateAppointment,
   onAppointmentClick,
-  onBlockSlot,
   selectedDate
 }: TimeSlotCellProps) => {
   const [showActions, setShowActions] = useState(false);
+  const [isBlocking, setIsBlocking] = useState(false);
+  const { blockTimeSlot } = useAvailableSlots();
+  const { toast } = useToast();
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-300 border-dashed';
       case 'confirmed': return 'bg-green-100 text-green-800 border-green-300';
       case 'cancelled': return 'bg-red-100 text-red-800 border-red-300';
       case 'completed': return 'bg-blue-100 text-blue-800 border-blue-300';
@@ -56,14 +60,37 @@ export const TimeSlotCell = ({
     }
   };
 
-  const handleBlockClick = (e: React.MouseEvent) => {
+  const handleQuickBlock = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onBlockSlot && columnId !== 'asv') {
-      onBlockSlot({
-        date: selectedDate.toISOString().split('T')[0],
-        time: time,
-        veterinarian: columnId
+    if (columnId === 'asv' || isBlocking) return;
+
+    setIsBlocking(true);
+    
+    try {
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      // Calculer l'heure de fin (30 minutes plus tard par défaut)
+      const [hours, minutes] = time.split(':').map(Number);
+      const endTime = new Date();
+      endTime.setHours(hours, minutes + 30);
+      const endTimeStr = endTime.toTimeString().slice(0, 5);
+
+      const success = await blockTimeSlot(dateStr, time, endTimeStr, columnId);
+      
+      if (success) {
+        toast({
+          title: "Créneau bloqué",
+          description: `Créneau de ${time} à ${endTimeStr} bloqué avec succès`,
+        });
+      }
+    } catch (error) {
+      console.error('Erreur lors du blocage rapide:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de bloquer le créneau",
+        variant: "destructive"
       });
+    } finally {
+      setIsBlocking(false);
     }
   };
 
@@ -86,7 +113,10 @@ export const TimeSlotCell = ({
             e.stopPropagation();
             onAppointmentClick(booking);
           }}
-          className={`absolute inset-x-0 top-0 p-1 rounded-sm border cursor-pointer hover:shadow-sm transition-shadow text-[10px] leading-tight ${getStatusColor(booking.status)}`}
+          className={cn(
+            "absolute inset-x-0 top-0 p-1 rounded-sm border cursor-pointer hover:shadow-sm transition-shadow text-[10px] leading-tight",
+            getStatusColor(booking.status)
+          )}
           style={{ 
             height: `${getAppointmentHeight(booking)}px`,
             zIndex: 10
@@ -103,10 +133,15 @@ export const TimeSlotCell = ({
               {booking.duration_minutes} min
             </div>
           )}
+          {booking.status === 'pending' && (
+            <div className="text-[8px] opacity-70 font-medium">
+              En attente
+            </div>
+          )}
         </div>
       ))}
       
-      {/* Actions au survol */}
+      {/* Actions au survol - version simplifiée */}
       {bookings.length === 0 && isOpen && showActions && (
         <div className="absolute inset-0 flex items-center justify-center bg-blue-50/40 transition-opacity z-20">
           <div className="flex items-center space-x-1">
@@ -117,11 +152,17 @@ export const TimeSlotCell = ({
             >
               <Plus className="h-3 w-3" />
             </button>
-            {onBlockSlot && columnId !== 'asv' && (
+            {columnId !== 'asv' && (
               <button
-                onClick={handleBlockClick}
-                className="p-1 rounded-full bg-red-600 text-white hover:bg-red-700 transition-colors"
-                title="Bloquer ce créneau"
+                onClick={handleQuickBlock}
+                disabled={isBlocking}
+                className={cn(
+                  "p-1 rounded-full text-white transition-colors",
+                  isBlocking 
+                    ? "bg-gray-400 cursor-not-allowed" 
+                    : "bg-red-600 hover:bg-red-700"
+                )}
+                title="Bloquer ce créneau (30 min)"
               >
                 <Ban className="h-3 w-3" />
               </button>
