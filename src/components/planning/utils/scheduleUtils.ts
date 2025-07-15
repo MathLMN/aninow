@@ -1,3 +1,4 @@
+
 import { isWithinInterval } from 'date-fns';
 import { processBookingWithoutPreference } from './appointmentAssignment';
 
@@ -74,9 +75,16 @@ export const getScheduleInfo = (daySchedule: any) => {
 export const generateColumns = (veterinarians: any[], settings: any) => {
   const columns = [];
 
-  // Ne plus afficher la colonne ASV par défaut
-  // Les créneaux sans préférence seront maintenant assignés automatiquement
+  // Ajouter la colonne ASV en premier si elle est activée
+  if (settings && settings.asv_enabled) {
+    columns.push({
+      id: 'asv',
+      title: 'ASV',
+      type: 'asv'
+    });
+  }
 
+  // Ajouter les colonnes des vétérinaires actifs
   veterinarians.filter(vet => vet.is_active).forEach(vet => {
     columns.push({
       id: vet.id,
@@ -102,9 +110,9 @@ export const getBookingsForSlot = (
 ) => {
   const dateStr = selectedDate.toISOString().split('T')[0];
   
-  // Traiter les bookings sans préférence de vétérinaire
+  // Traiter les bookings sans préférence de vétérinaire SEULEMENT pour les colonnes vétérinaires
   const processedBookings = bookings.map(booking => {
-    if (!booking.veterinarian_id && booking.appointment_date === dateStr) {
+    if (!booking.veterinarian_id && booking.appointment_date === dateStr && columnId !== 'asv') {
       return processBookingWithoutPreference(booking, veterinarians, bookings, settings);
     }
     return booking;
@@ -117,7 +125,12 @@ export const getBookingsForSlot = (
     // Vérifier l'heure
     if (booking.appointment_time !== time) return false;
     
-    // Afficher les rendez-vous assignés à ce vétérinaire
+    // Pour la colonne ASV : ne jamais afficher les rendez-vous clients
+    if (columnId === 'asv') {
+      return false; // Les créneaux clients ne doivent jamais apparaître dans la colonne ASV
+    }
+    
+    // Pour les colonnes vétérinaires : afficher les rendez-vous assignés à ce vétérinaire
     return booking.veterinarian_id === columnId;
   });
 };

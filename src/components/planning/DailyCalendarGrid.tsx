@@ -82,7 +82,7 @@ export const DailyCalendarGrid = ({
                       <span className="block">{time}</span>
                     </div>
                     
-                    {/* Colonnes par vétérinaire */}
+                    {/* Colonnes par vétérinaire et ASV */}
                     {columns.map((column) => {
                       const slotBookings = getBookingsForSlot(time, column.id, bookings, selectedDate, veterinarians);
                       

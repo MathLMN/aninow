@@ -141,7 +141,7 @@ export const TimeSlotCell = ({
         </div>
       ))}
       
-      {/* Actions au survol - version simplifiée */}
+      {/* Actions au survol - visibles uniquement au survol */}
       {bookings.length === 0 && isOpen && showActions && (
         <div className="absolute inset-0 flex items-center justify-center bg-blue-50/40 transition-opacity z-20">
           <div className="flex items-center space-x-1">
@@ -168,13 +168,6 @@ export const TimeSlotCell = ({
               </button>
             )}
           </div>
-        </div>
-      )}
-
-      {/* Bouton d'ajout simple si pas d'actions avancées */}
-      {bookings.length === 0 && !showActions && (
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center bg-blue-50/20 hover:bg-blue-50/40">
-          <Plus className="h-3 w-3 text-blue-600/70" />
         </div>
       )}
     </div>
