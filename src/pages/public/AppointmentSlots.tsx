@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,11 +46,26 @@ const AppointmentSlots = () => {
     if (!availableSlots.length) return [];
 
     return availableSlots.map(daySlots => {
-      const availableForVet = selectedVeterinarian 
-        ? daySlots.slots.filter(slot => 
-            slot.veterinarian_id === selectedVeterinarian && slot.available
-          )
-        : daySlots.slots.filter(slot => slot.available);
+      let availableForVet;
+      
+      if (selectedVeterinarian) {
+        // Si un vétérinaire spécifique est sélectionné, filtrer pour ce vétérinaire
+        availableForVet = daySlots.slots.filter(slot => 
+          slot.veterinarian_id === selectedVeterinarian && slot.available
+        );
+      } else {
+        // Si aucune préférence, fusionner tous les créneaux disponibles et déduplicater par heure
+        const allAvailableSlots = daySlots.slots.filter(slot => slot.available);
+        const uniqueTimeSlots = new Map<string, any>();
+        
+        allAvailableSlots.forEach(slot => {
+          if (!uniqueTimeSlots.has(slot.time)) {
+            uniqueTimeSlots.set(slot.time, slot);
+          }
+        });
+        
+        availableForVet = Array.from(uniqueTimeSlots.values());
+      }
 
       // Grouper par période (matin/après-midi)
       const morningSlots = availableForVet
@@ -59,14 +73,16 @@ const AppointmentSlots = () => {
           const hour = parseInt(slot.time.split(':')[0]);
           return hour < 14;
         })
-        .map(slot => slot.time);
+        .map(slot => slot.time)
+        .sort(); // Trier les créneaux par ordre chronologique
 
       const afternoonSlots = availableForVet
         .filter(slot => {
           const hour = parseInt(slot.time.split(':')[0]);
           return hour >= 14;
         })
-        .map(slot => slot.time);
+        .map(slot => slot.time)
+        .sort(); // Trier les créneaux par ordre chronologique
 
       const timeGroups: TimeSlotGroup[] = [];
       if (morningSlots.length > 0) {
@@ -78,7 +94,7 @@ const AppointmentSlots = () => {
 
       return {
         date: daySlots.date,
-        availability: availableForVet.length,
+        availability: morningSlots.length + afternoonSlots.length,
         timeGroups
       };
     }).filter(day => day.availability > 0); // Filtrer les jours sans créneaux
@@ -92,12 +108,12 @@ const AppointmentSlots = () => {
         // Récupérer les données du formulaire depuis le localStorage
         const formData = JSON.parse(localStorage.getItem('bookingFormData') || '{}');
         
-        // Créer la réservation avec le vétérinaire sélectionné
+        // Si aucune préférence de vétérinaire, laisser le système assigner automatiquement
         const bookingData = {
           ...formData,
           appointment_date: selectedDate,
           appointment_time: selectedTime,
-          veterinarian_id: selectedVeterinarian,
+          veterinarian_id: selectedVeterinarian || null, // null pour assignation automatique
           status: 'pending'
         };
 
@@ -230,7 +246,7 @@ const AppointmentSlots = () => {
                 <CardDescription className="text-vet-brown">
                   {selectedVeterinarian 
                     ? "Créneaux disponibles pour le vétérinaire sélectionné"
-                    : "Cliquez sur une date pour voir les créneaux disponibles"
+                    : "Créneaux combinés de tous les vétérinaires disponibles"
                   }
                 </CardDescription>
               </CardHeader>
@@ -325,6 +341,11 @@ const AppointmentSlots = () => {
                     {selectedVeterinarian && (
                       <p className="text-sm text-vet-brown/80 mt-1">
                         Vétérinaire : {veterinarians.find(v => v.id === selectedVeterinarian)?.name}
+                      </p>
+                    )}
+                    {!selectedVeterinarian && (
+                      <p className="text-sm text-vet-brown/80 mt-1">
+                        Vétérinaire : Assigné automatiquement
                       </p>
                     )}
                   </div>
