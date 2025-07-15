@@ -37,11 +37,11 @@ export const DailyCalendarGrid = ({
               </div>
               {columns.map((column) => (
                 <div key={column.id} className="p-2 text-center border-l border-vet-blue/20">
-                  <div className={`font-semibold text-sm ${column.type === 'asv' ? 'text-vet-sage' : 'text-vet-navy'}`}>
+                  <div className="font-semibold text-sm text-vet-navy">
                     {column.title}
                   </div>
                   <div className="text-xs text-vet-brown mt-1">
-                    {getBookingsForSlot('', column.id, bookings, selectedDate).length} RDV
+                    {getBookingsForSlot('', column.id, bookings, selectedDate, veterinarians).length} RDV
                   </div>
                 </div>
               ))}
@@ -82,9 +82,9 @@ export const DailyCalendarGrid = ({
                       <span className="block">{time}</span>
                     </div>
                     
-                    {/* Colonnes par vétérinaire/ASV */}
+                    {/* Colonnes par vétérinaire */}
                     {columns.map((column) => {
-                      const slotBookings = getBookingsForSlot(time, column.id, bookings, selectedDate);
+                      const slotBookings = getBookingsForSlot(time, column.id, bookings, selectedDate, veterinarians);
                       
                       return (
                         <TimeSlotCell

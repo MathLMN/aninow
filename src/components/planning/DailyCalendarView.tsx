@@ -33,6 +33,28 @@ export const DailyCalendarView = ({
 
   console.log('DailyCalendarView - Columns generated:', columns);
 
+  // Si aucun vétérinaire actif, afficher un message
+  if (columns.length === 0) {
+    return (
+      <div className="space-y-4">
+        <DailyCalendarHeader
+          selectedDate={selectedDate}
+          onDateChange={onDateChange}
+          scheduleInfo="Aucun vétérinaire actif"
+        />
+        
+        <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
+          <CardContent className="p-8 text-center">
+            <div className="text-vet-brown">
+              <p className="text-lg font-medium mb-2">Aucun vétérinaire actif configuré</p>
+              <p>Veuillez ajouter et activer des vétérinaires dans les paramètres pour afficher le planning.</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <DailyCalendarHeader

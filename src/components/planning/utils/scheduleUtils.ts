@@ -1,5 +1,5 @@
-
 import { isWithinInterval } from 'date-fns';
+import { processBookingWithoutPreference } from './appointmentAssignment';
 
 export const generateAllTimeSlots = () => {
   const timeSlots = [];
@@ -74,12 +74,8 @@ export const getScheduleInfo = (daySchedule: any) => {
 export const generateColumns = (veterinarians: any[], settings: any) => {
   const columns = [];
 
-  // Toujours afficher la colonne ASV en premier
-  columns.push({
-    id: 'asv',
-    title: 'ASV',
-    type: 'asv'
-  });
+  // Ne plus afficher la colonne ASV par défaut
+  // Les créneaux sans préférence seront maintenant assignés automatiquement
 
   veterinarians.filter(vet => vet.is_active).forEach(vet => {
     columns.push({
@@ -96,22 +92,32 @@ export const isFullHour = (time: string) => {
   return time.endsWith('00');
 };
 
-export const getBookingsForSlot = (time: string, columnId: string, bookings: any[], selectedDate: Date) => {
+export const getBookingsForSlot = (
+  time: string, 
+  columnId: string, 
+  bookings: any[], 
+  selectedDate: Date,
+  veterinarians: any[] = [],
+  settings: any = null
+) => {
   const dateStr = selectedDate.toISOString().split('T')[0];
   
-  return bookings.filter(booking => {
+  // Traiter les bookings sans préférence de vétérinaire
+  const processedBookings = bookings.map(booking => {
+    if (!booking.veterinarian_id && booking.appointment_date === dateStr) {
+      return processBookingWithoutPreference(booking, veterinarians, bookings, settings);
+    }
+    return booking;
+  });
+
+  return processedBookings.filter(booking => {
     // Vérifier la date
     if (booking.appointment_date !== dateStr) return false;
     
     // Vérifier l'heure
     if (booking.appointment_time !== time) return false;
     
-    // Pour la colonne ASV, afficher tous les rendez-vous qui n'ont pas de vétérinaire assigné
-    if (columnId === 'asv') {
-      return !booking.veterinarian_id;
-    }
-    
-    // Pour les colonnes vétérinaires, afficher les rendez-vous assignés à ce vétérinaire
+    // Afficher les rendez-vous assignés à ce vétérinaire
     return booking.veterinarian_id === columnId;
   });
 };
