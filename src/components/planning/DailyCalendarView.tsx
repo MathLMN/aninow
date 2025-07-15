@@ -62,6 +62,7 @@ export const DailyCalendarView = ({
         daySchedule={daySchedule}
         onCreateAppointment={onCreateAppointment}
         onAppointmentClick={onAppointmentClick}
+        veterinarians={veterinarians}
       />
     </div>
   );

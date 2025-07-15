@@ -1,6 +1,7 @@
 
-import { Plus } from "lucide-react";
+import { Plus, Ban } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 interface TimeSlotCellProps {
   time: string;
@@ -10,6 +11,7 @@ interface TimeSlotCellProps {
   canBook: boolean;
   onCreateAppointment: (timeSlot: { date: string; time: string; veterinarian?: string }) => void;
   onAppointmentClick: (appointment: any) => void;
+  onBlockSlot?: (timeSlot: { date: string; time: string; veterinarian: string }) => void;
   selectedDate: Date;
 }
 
@@ -21,8 +23,11 @@ export const TimeSlotCell = ({
   canBook,
   onCreateAppointment,
   onAppointmentClick,
+  onBlockSlot,
   selectedDate
 }: TimeSlotCellProps) => {
+  const [showActions, setShowActions] = useState(false);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
@@ -41,6 +46,27 @@ export const TimeSlotCell = ({
     return slotsNeeded * 30;
   };
 
+  const handleCellClick = () => {
+    if (bookings.length === 0) {
+      onCreateAppointment({
+        date: selectedDate.toISOString().split('T')[0],
+        time: time,
+        veterinarian: columnId !== 'asv' ? columnId : undefined
+      });
+    }
+  };
+
+  const handleBlockClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onBlockSlot && columnId !== 'asv') {
+      onBlockSlot({
+        date: selectedDate.toISOString().split('T')[0],
+        time: time,
+        veterinarian: columnId
+      });
+    }
+  };
+
   return (
     <div
       className={cn(
@@ -49,13 +75,9 @@ export const TimeSlotCell = ({
         "h-[30px]",
         !isOpen && "bg-gray-50/30"
       )}
-      onClick={() => {
-        onCreateAppointment({
-          date: selectedDate.toISOString().split('T')[0],
-          time: time,
-          veterinarian: columnId !== 'asv' ? columnId : undefined
-        });
-      }}
+      onClick={handleCellClick}
+      onMouseEnter={() => setShowActions(true)}
+      onMouseLeave={() => setShowActions(false)}
     >
       {bookings.map((booking) => (
         <div
@@ -84,8 +106,32 @@ export const TimeSlotCell = ({
         </div>
       ))}
       
-      {/* Bouton d'ajout au survol */}
-      {bookings.length === 0 && (
+      {/* Actions au survol */}
+      {bookings.length === 0 && isOpen && showActions && (
+        <div className="absolute inset-0 flex items-center justify-center bg-blue-50/40 transition-opacity z-20">
+          <div className="flex items-center space-x-1">
+            <button
+              onClick={handleCellClick}
+              className="p-1 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+              title="Ajouter un rendez-vous"
+            >
+              <Plus className="h-3 w-3" />
+            </button>
+            {onBlockSlot && columnId !== 'asv' && (
+              <button
+                onClick={handleBlockClick}
+                className="p-1 rounded-full bg-red-600 text-white hover:bg-red-700 transition-colors"
+                title="Bloquer ce créneau"
+              >
+                <Ban className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Bouton d'ajout simple si pas d'actions avancées */}
+      {bookings.length === 0 && !showActions && (
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center bg-blue-50/20 hover:bg-blue-50/40">
           <Plus className="h-3 w-3 text-blue-600/70" />
         </div>

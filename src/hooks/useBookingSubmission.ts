@@ -22,17 +22,17 @@ export const useBookingSubmission = () => {
     try {
       console.log('Submitting booking data:', bookingData)
       
-      // Préparer les données pour l'insertion
+      // Préparer les données avec le bon mapping des colonnes
       const bookingInsert: BookingInsert = {
-        animal_species: bookingData.animalSpecies,
-        animal_name: bookingData.animalName || '',
-        custom_species: bookingData.customSpecies,
+        animal_species: bookingData.animalSpecies || bookingData.animal_species,
+        animal_name: bookingData.animalName || bookingData.animal_name || '',
+        custom_species: bookingData.customSpecies || bookingData.custom_species,
         multiple_animals: bookingData.multipleAnimals || [],
         second_animal_species: bookingData.secondAnimalSpecies,
         second_animal_name: bookingData.secondAnimalName,
         second_custom_species: bookingData.secondCustomSpecies,
         vaccination_type: bookingData.vaccinationType,
-        consultation_reason: bookingData.consultationReason,
+        consultation_reason: bookingData.consultationReason || bookingData.consultation_reason,
         convenience_options: bookingData.convenienceOptions || [],
         custom_text: bookingData.customText,
         selected_symptoms: bookingData.selectedSymptoms || [],
@@ -46,25 +46,27 @@ export const useBookingSubmission = () => {
         conditional_answers: bookingData.conditionalAnswers,
         symptom_duration: bookingData.symptomDuration,
         additional_points: bookingData.additionalPoints || [],
-        animal_age: bookingData.animalAge,
-        animal_breed: bookingData.animalBreed,
-        animal_weight: bookingData.animalWeight,
+        animal_age: bookingData.animalAge || bookingData.firstAnimalAge,
+        animal_breed: bookingData.animalBreed || bookingData.firstAnimalBreed,
+        animal_weight: bookingData.animalWeight ? parseFloat(bookingData.animalWeight) : null,
         animal_sex: bookingData.animalSex,
         animal_sterilized: bookingData.animalSterilized,
         animal_vaccines_up_to_date: bookingData.animalVaccinesUpToDate,
         second_animal_age: bookingData.secondAnimalAge,
         second_animal_breed: bookingData.secondAnimalBreed,
-        second_animal_weight: bookingData.secondAnimalWeight,
+        second_animal_weight: bookingData.secondAnimalWeight ? parseFloat(bookingData.secondAnimalWeight) : null,
         second_animal_sex: bookingData.secondAnimalSex,
         second_animal_sterilized: bookingData.secondAnimalSterilized,
         second_animal_vaccines_up_to_date: bookingData.secondAnimalVaccinesUpToDate,
         client_comment: bookingData.clientComment,
-        client_name: bookingData.clientName,
-        client_email: bookingData.clientEmail,
-        client_phone: bookingData.clientPhone,
-        preferred_contact_method: bookingData.preferredContactMethod,
-        appointment_date: bookingData.appointmentDate,
-        appointment_time: bookingData.appointmentTime
+        client_name: bookingData.clientName || `${bookingData.firstName} ${bookingData.lastName}`,
+        client_email: bookingData.clientEmail || bookingData.email,
+        client_phone: `${bookingData.phonePrefix || '+33'}${bookingData.phoneNumber || bookingData.client_phone}`,
+        preferred_contact_method: bookingData.preferredContactMethod || 'phone',
+        appointment_date: bookingData.appointmentDate || bookingData.appointment_date,
+        appointment_time: bookingData.appointmentTime || bookingData.appointment_time,
+        duration_minutes: 20, // Durée par défaut
+        status: 'pending'
       }
 
       // Insérer la réservation dans la base de données
