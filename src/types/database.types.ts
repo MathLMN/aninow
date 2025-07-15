@@ -52,6 +52,7 @@ export interface Database {
           ai_analysis?: Record<string, any>
           urgency_score?: number
           recommended_actions?: string[]
+          veterinarian_id?: string
         }
         Insert: {
           id?: string
@@ -102,6 +103,7 @@ export interface Database {
           ai_analysis?: Record<string, any>
           urgency_score?: number
           recommended_actions?: string[]
+          veterinarian_id?: string
         }
         Update: {
           id?: string
@@ -152,6 +154,7 @@ export interface Database {
           ai_analysis?: Record<string, any>
           urgency_score?: number
           recommended_actions?: string[]
+          veterinarian_id?: string
         }
       }
       ai_analysis_logs: {

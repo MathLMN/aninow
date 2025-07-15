@@ -169,6 +169,7 @@ export type Database = {
           updated_at: string
           urgency_score: number | null
           vaccination_type: string | null
+          veterinarian_id: string | null
         }
         Insert: {
           additional_points?: string[] | null
@@ -222,6 +223,7 @@ export type Database = {
           updated_at?: string
           urgency_score?: number | null
           vaccination_type?: string | null
+          veterinarian_id?: string | null
         }
         Update: {
           additional_points?: string[] | null
@@ -275,6 +277,7 @@ export type Database = {
           updated_at?: string
           urgency_score?: number | null
           vaccination_type?: string | null
+          veterinarian_id?: string | null
         }
         Relationships: [
           {
@@ -282,6 +285,13 @@ export type Database = {
             columns: ["consultation_type_id"]
             isOneToOne: false
             referencedRelation: "consultation_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_veterinarian_id_fkey"
+            columns: ["veterinarian_id"]
+            isOneToOne: false
+            referencedRelation: "clinic_veterinarians"
             referencedColumns: ["id"]
           },
         ]
