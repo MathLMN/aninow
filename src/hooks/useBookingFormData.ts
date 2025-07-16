@@ -93,23 +93,46 @@ export const useBookingFormData = () => {
     localStorage.removeItem('bookingFormData')
   }
 
-  // Vérifier si les données sont complètes pour la soumission
-  const isDataComplete = () => {
+  // Vérifier si les données de base sont présentes
+  const hasBasicData = () => {
+    return !!(bookingData.animalSpecies && bookingData.animalName)
+  }
+
+  // Vérifier si le motif de consultation est complété
+  const hasConsultationReason = () => {
+    return !!(bookingData.consultationReason)
+  }
+
+  // Vérifier si les informations animaux sont complètes
+  const hasAnimalInfo = () => {
+    return !!(bookingData.animalAge && bookingData.animalBreed && bookingData.animalWeight && bookingData.animalSex)
+  }
+
+  // Vérifier si les coordonnées sont complètes
+  const hasContactInfo = () => {
     return !!(
-      bookingData.animalSpecies &&
-      bookingData.animalName &&
-      bookingData.consultationReason &&
-      bookingData.clientName &&
+      bookingData.clientStatus &&
+      bookingData.firstName &&
+      bookingData.lastName &&
       bookingData.clientEmail &&
       bookingData.clientPhone &&
-      bookingData.preferredContactMethod
+      bookingData.dataConsent
     )
+  }
+
+  // Vérifier si les données sont complètes pour la soumission
+  const isDataComplete = () => {
+    return hasBasicData() && hasConsultationReason() && hasAnimalInfo() && hasContactInfo()
   }
 
   return {
     bookingData,
     updateBookingData,
     resetBookingData,
-    isDataComplete
+    isDataComplete,
+    hasBasicData,
+    hasConsultationReason,
+    hasAnimalInfo,
+    hasContactInfo
   }
 }

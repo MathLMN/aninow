@@ -15,7 +15,7 @@ import { useBookingFormData } from "@/hooks/useBookingFormData";
 const ContactInfo = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { bookingData, updateBookingData } = useBookingFormData();
+  const { bookingData, updateBookingData, hasBasicData, hasConsultationReason, hasAnimalInfo } = useBookingFormData();
   
   // États pour le statut client et les informations
   const [clientStatus, setClientStatus] = useState('');
@@ -27,8 +27,12 @@ const ContactInfo = () => {
   const [dataConsent, setDataConsent] = useState(false);
 
   useEffect(() => {
-    // Vérifier que les données du formulaire existent
-    if (!bookingData.animalSpecies || !bookingData.clientName) {
+    // Vérifier que les étapes précédentes sont complètes
+    if (!hasBasicData() || !hasConsultationReason() || !hasAnimalInfo()) {
+      console.log('Données manquantes, redirection vers /booking');
+      console.log('hasBasicData:', hasBasicData());
+      console.log('hasConsultationReason:', hasConsultationReason());
+      console.log('hasAnimalInfo:', hasAnimalInfo());
       navigate('/booking');
       return;
     }
@@ -37,11 +41,23 @@ const ContactInfo = () => {
     if (bookingData.clientStatus) setClientStatus(bookingData.clientStatus);
     if (bookingData.firstName) setFirstName(bookingData.firstName);
     if (bookingData.lastName) setLastName(bookingData.lastName);
-    if (bookingData.clientPhone) setPhoneNumber(bookingData.clientPhone);
+    if (bookingData.clientPhone) {
+      // Extraire le numéro sans le préfixe
+      const phone = bookingData.clientPhone;
+      if (phone.startsWith('+33')) {
+        setPhoneNumber(phone.substring(3));
+        setPhonePrefix('+33');
+      } else if (phone.startsWith('+32')) {
+        setPhoneNumber(phone.substring(3));
+        setPhonePrefix('+32');
+      } else {
+        setPhoneNumber(phone);
+      }
+    }
     if (bookingData.clientEmail) setEmail(bookingData.clientEmail);
     if (bookingData.phonePrefix) setPhonePrefix(bookingData.phonePrefix);
     if (bookingData.dataConsent) setDataConsent(bookingData.dataConsent);
-  }, [bookingData, navigate]);
+  }, [bookingData, navigate, hasBasicData, hasConsultationReason, hasAnimalInfo]);
 
   const handleBack = () => {
     navigate('/booking/client-comment');

@@ -12,11 +12,12 @@ import Header from "@/components/Header";
 import ProgressBar from "@/components/ProgressBar";
 import { useConsultationReason } from "@/hooks/useConsultationReason";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useBookingFormData } from "@/hooks/useBookingFormData";
 
 const ConsultationReason = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const [bookingData, setBookingData] = useState<any>(null);
+  const { bookingData, hasBasicData } = useBookingFormData();
   
   const {
     consultationReason,
@@ -48,12 +49,13 @@ const ConsultationReason = () => {
   } = useConsultationReason();
 
   useEffect(() => {
-    // Récupérer les données du formulaire pour obtenir les prénoms des animaux
-    const storedData = localStorage.getItem('bookingFormData');
-    if (storedData) {
-      setBookingData(JSON.parse(storedData));
+    // Vérifier que les données de base sont présentes
+    if (!hasBasicData()) {
+      console.log('Données de base manquantes, redirection vers /booking');
+      navigate('/booking');
+      return;
     }
-  }, []);
+  }, [hasBasicData, navigate]);
 
   const handleBack = () => {
     navigate('/booking');

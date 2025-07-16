@@ -10,12 +10,15 @@ import LitterOptions from './LitterOptions';
 import { useBookingFormLogic } from '../hooks/useBookingFormLogic';
 import { validateBookingForm } from '../utils/formValidation';
 import { FormData } from '../types/FormDataTypes';
+import { useBookingFormData } from '../hooks/useBookingFormData';
 
 const BookingForm = ({
   onNext
 }: {
   onNext: (data: FormData) => void;
 }) => {
+  const { updateBookingData } = useBookingFormData();
+  
   const {
     formData,
     formState,
@@ -34,14 +37,14 @@ const BookingForm = ({
 
   const handleSubmit = () => {
     if (canProceed) {
-      // Sauvegarder les données dans localStorage pour la suite du processus
+      // Sauvegarder les données dans le hook pour la suite du processus
       const dataToSave = isLitter ? {
         ...formData,
         consultationReason: 'consultation-convenance',
         convenienceOptions: [formData.vaccinationType === 'vaccinations-identifications' ? 'vaccination-identification' : 'vaccination']
       } : formData;
       
-      localStorage.setItem('bookingFormData', JSON.stringify(dataToSave));
+      updateBookingData(dataToSave);
       onNext(dataToSave);
     }
   };

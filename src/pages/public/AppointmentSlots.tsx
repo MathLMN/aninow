@@ -12,15 +12,17 @@ import { useBookingFormData } from "@/hooks/useBookingFormData";
 const AppointmentSlots = () => {
   const navigate = useNavigate();
   const { availableSlots, isLoading } = useAvailableSlots();
-  const { bookingData, updateBookingData } = useBookingFormData();
+  const { bookingData, updateBookingData, hasContactInfo } = useBookingFormData();
   const [selectedSlot, setSelectedSlot] = useState<{date: string, time: string, veterinarianId: string} | null>(null);
 
-  // Rediriger si pas de données
+  // Rediriger si pas de données complètes
   useEffect(() => {
-    if (!bookingData.animalSpecies || !bookingData.clientName) {
-      navigate('/booking');
+    if (!hasContactInfo()) {
+      console.log('Données de contact manquantes, redirection vers /booking/contact-info');
+      navigate('/booking/contact-info');
+      return;
     }
-  }, [bookingData, navigate]);
+  }, [hasContactInfo, navigate]);
 
   const handleBack = () => {
     navigate('/booking/contact-info');
@@ -34,7 +36,6 @@ const AppointmentSlots = () => {
     if (selectedSlot) {
       // Mettre à jour les données avec le créneau sélectionné
       const updatedData = {
-        ...bookingData,
         appointmentDate: selectedSlot.date,
         appointmentTime: selectedSlot.time,
         veterinarianId: selectedSlot.veterinarianId
