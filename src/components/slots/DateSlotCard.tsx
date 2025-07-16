@@ -105,7 +105,7 @@ export const DateSlotCard = ({
 
         {expanded && (
           <div className="px-4 sm:px-6 pb-4 sm:pb-6">
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
               {availableSlots.map((slot) => {
                 const isSelected = selectedSlot?.date === date && 
                                  selectedSlot?.time === slot.time;
@@ -118,20 +118,20 @@ export const DateSlotCard = ({
                     key={`${date}-${slot.time}-${slot.veterinarian_id}`}
                     variant="outline"
                     className={cn(
-                      "h-auto p-3 flex flex-col items-center text-center transition-all duration-200 border-2",
+                      "h-auto p-2 flex flex-col items-center text-center transition-all duration-200 border-2",
                       isSelected
                         ? "bg-vet-sage hover:bg-vet-sage/90 text-white border-vet-sage shadow-md" 
                         : "bg-vet-blue/10 border-vet-blue/30 text-vet-navy hover:bg-vet-sage/20 hover:border-vet-sage/50"
                     )}
                     onClick={() => handleSlotClick(slot)}
                   >
-                    <div className="flex items-center mb-1">
-                      <Clock className="h-3 w-3 mr-1" />
-                      <span className="font-semibold text-sm">{slot.time}</span>
+                    <div className="flex items-center mb-0.5">
+                      <Clock className="h-2.5 w-2.5 mr-1" />
+                      <span className="font-semibold text-xs">{slot.time}</span>
                     </div>
                     <div className="flex items-center">
-                      <IconComponent className="h-3 w-3 mr-1" />
-                      <span className="text-xs opacity-80 truncate max-w-full leading-tight">
+                      <IconComponent className="h-2 w-2 mr-0.5" />
+                      <span className="text-[10px] opacity-80 truncate max-w-full leading-tight">
                         {slotInfo.displayText}
                       </span>
                     </div>
