@@ -4,47 +4,45 @@ import { useNavigate } from "react-router-dom";
 import BookingForm from "@/components/BookingForm";
 import Header from "@/components/Header";
 import ProgressBar from "@/components/ProgressBar";
+import { FormData } from "@/types/FormDataTypes";
 
 const BookingStart = () => {
   const navigate = useNavigate();
-  const handleFormNext = (formData: any) => {
-    console.log('Form data:', formData);
-    // Stocker les données du formulaire
-    localStorage.setItem('bookingFormData', JSON.stringify(formData));
+
+  const handleNext = (data: FormData) => {
+    console.log('Form data:', data);
     
-    // Si c'est une portée, aller directement vers les informations animal
-    if (formData.multipleAnimals?.includes('une-portee')) {
+    // Si c'est une portée avec type de vaccination sélectionné, aller directement aux infos animal
+    if (data.multipleAnimals.includes('une-portee') && data.vaccinationType) {
       navigate('/booking/animal-info');
     } else {
-      // Sinon, suivre le flux normal vers la sélection du motif
-      navigate('/booking/reason');
+      // Sinon, aller vers le motif de consultation
+      navigate('/booking/consultation-reason');
     }
   };
-  
+
   return (
-    <div className="min-h-screen" style={{
-      background: 'linear-gradient(135deg, #EDE3DA 0%, #ffffff 100%)'
-    }}>
+    <div className="min-h-screen relative" style={{ background: 'linear-gradient(135deg, #EDE3DA 0%, #ffffff 100%)' }}>
       <Header />
 
-      <main className="container mx-auto px-3 sm:px-6 py-4 sm:py-6 pb-6">
-        <div className="max-w-2xl mx-auto">
+      <main className="container mx-auto px-3 sm:px-6 py-3 sm:py-8">
+        <div className="max-w-4xl mx-auto">
           <ProgressBar value={14.3} />
           
           {/* Titre - Mobile optimized */}
-          <div className="text-center mb-4 sm:mb-6 animate-fade-in">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-vet-navy mb-1 sm:mb-2 leading-tight">
-              Prendre un rendez-vous
+          <div className="text-center mb-4 sm:mb-8 animate-fade-in">
+            <h1 className="text-xl sm:text-3xl font-bold text-vet-navy mb-2 px-2">
+              Demande de rendez-vous
             </h1>
-            <p className="text-sm sm:text-base text-vet-brown/80 px-2">
-              Remplissez les informations de votre animal
+            <p className="text-sm sm:text-lg text-vet-navy/70 leading-relaxed px-2">
+              Commençons par quelques informations sur votre compagnon
             </p>
           </div>
 
-          {/* Formulaire - Mobile first card */}
-          <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/20 shadow-lg">
-            <CardContent className="p-3 sm:p-6">
-              <BookingForm onNext={handleFormNext} />
+          {/* Formulaire - Mobile optimized */}
+          <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
+            <CardContent className="p-3 sm:p-8">
+              <BookingForm onNext={handleNext} />
             </CardContent>
           </Card>
         </div>
