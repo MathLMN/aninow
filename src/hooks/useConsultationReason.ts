@@ -1,9 +1,12 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useBookingFormData } from './useBookingFormData';
 
 export const useConsultationReason = () => {
   const navigate = useNavigate();
+  const { bookingData, updateBookingData } = useBookingFormData();
+  
   const [consultationReason, setConsultationReason] = useState('');
   const [convenienceOptions, setConvenienceOptions] = useState<string[]>([]);
   const [customText, setCustomText] = useState('');
@@ -22,18 +25,23 @@ export const useConsultationReason = () => {
   const [secondAnimalCustomSymptom, setSecondAnimalCustomSymptom] = useState('');
 
   useEffect(() => {
-    // Vérifier que les données du formulaire précédent existent
-    const bookingData = localStorage.getItem('bookingFormData');
-    if (!bookingData) {
-      navigate('/');
-      return;
-    }
+    // Charger les données existantes
+    if (bookingData.consultationReason) setConsultationReason(bookingData.consultationReason);
+    if (bookingData.convenienceOptions) setConvenienceOptions(bookingData.convenienceOptions);
+    if (bookingData.customText) setCustomText(bookingData.customText);
+    if (bookingData.selectedSymptoms) setSelectedSymptoms(bookingData.selectedSymptoms);
+    if (bookingData.customSymptom) setCustomSymptom(bookingData.customSymptom);
+    if (bookingData.secondAnimalDifferentReason) setSecondAnimalDifferentReason(bookingData.secondAnimalDifferentReason);
+    if (bookingData.secondAnimalConsultationReason) setSecondAnimalConsultationReason(bookingData.secondAnimalConsultationReason);
+    if (bookingData.secondAnimalConvenienceOptions) setSecondAnimalConvenienceOptions(bookingData.secondAnimalConvenienceOptions);
+    if (bookingData.secondAnimalCustomText) setSecondAnimalCustomText(bookingData.secondAnimalCustomText);
+    if (bookingData.secondAnimalSelectedSymptoms) setSecondAnimalSelectedSymptoms(bookingData.secondAnimalSelectedSymptoms);
+    if (bookingData.secondAnimalCustomSymptom) setSecondAnimalCustomSymptom(bookingData.secondAnimalCustomSymptom);
 
-    const parsedData = JSON.parse(bookingData);
     // Vérifier si l'utilisateur a sélectionné "2 animaux"
-    const hasSecondAnimal = parsedData.multipleAnimals?.includes('2-animaux');
+    const hasSecondAnimal = bookingData.multipleAnimals?.includes('2-animaux');
     setHasTwoAnimals(hasSecondAnimal);
-  }, [navigate]);
+  }, [bookingData]);
 
   // Effet pour gérer la logique conditionnelle du deuxième animal
   useEffect(() => {
@@ -63,10 +71,7 @@ export const useConsultationReason = () => {
         secondAnimalSelectedSymptoms.length > 0 || secondAnimalCustomSymptom.trim() !== ''));
 
     if (isFirstAnimalValid && isSecondAnimalValid) {
-      // Récupérer les données existantes et ajouter le motif de consultation
-      const existingData = JSON.parse(localStorage.getItem('bookingFormData') || '{}');
       const updatedData = {
-        ...existingData,
         consultationReason,
         convenienceOptions,
         customText,
@@ -80,7 +85,7 @@ export const useConsultationReason = () => {
         secondAnimalCustomSymptom: secondAnimalDifferentReason ? secondAnimalCustomSymptom.trim() : customSymptom.trim()
       };
       
-      localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
+      updateBookingData(updatedData);
       console.log('Updated booking data:', updatedData);
       
       // Si le motif principal est "symptomes-anomalie", aller vers les questions conditionnelles (route corrigée)
@@ -137,6 +142,7 @@ export const useConsultationReason = () => {
     hasTwoAnimals,
     handleNext,
     canProceed,
-    shouldForceConvenienceForAnimal2
+    shouldForceConvenienceForAnimal2,
+    bookingData
   };
 };
