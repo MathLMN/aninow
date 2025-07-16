@@ -10,10 +10,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Header from "@/components/Header";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useBookingFormData } from "@/hooks/useBookingFormData";
 
 const ContactInfo = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { bookingData, updateBookingData } = useBookingFormData();
   
   // États pour le statut client et les informations
   const [clientStatus, setClientStatus] = useState('');
@@ -26,22 +28,20 @@ const ContactInfo = () => {
 
   useEffect(() => {
     // Vérifier que les données du formulaire existent
-    const storedData = localStorage.getItem('bookingFormData');
-    if (!storedData) {
-      navigate('/');
+    if (!bookingData.animalSpecies || !bookingData.clientName) {
+      navigate('/booking');
       return;
     }
     
     // Récupérer les données existantes s'il y en a
-    const parsedData = JSON.parse(storedData);
-    if (parsedData.clientStatus) setClientStatus(parsedData.clientStatus);
-    if (parsedData.firstName) setFirstName(parsedData.firstName);
-    if (parsedData.lastName) setLastName(parsedData.lastName);
-    if (parsedData.phoneNumber) setPhoneNumber(parsedData.phoneNumber);
-    if (parsedData.email) setEmail(parsedData.email);
-    if (parsedData.phonePrefix) setPhonePrefix(parsedData.phonePrefix);
-    if (parsedData.dataConsent) setDataConsent(parsedData.dataConsent);
-  }, [navigate]);
+    if (bookingData.clientStatus) setClientStatus(bookingData.clientStatus);
+    if (bookingData.firstName) setFirstName(bookingData.firstName);
+    if (bookingData.lastName) setLastName(bookingData.lastName);
+    if (bookingData.clientPhone) setPhoneNumber(bookingData.clientPhone);
+    if (bookingData.clientEmail) setEmail(bookingData.clientEmail);
+    if (bookingData.phonePrefix) setPhonePrefix(bookingData.phonePrefix);
+    if (bookingData.dataConsent) setDataConsent(bookingData.dataConsent);
+  }, [bookingData, navigate]);
 
   const handleBack = () => {
     navigate('/booking/client-comment');
@@ -50,23 +50,23 @@ const ContactInfo = () => {
   const handleNext = () => {
     if (!canProceed) return;
 
-    // Sauvegarder les informations de contact
-    const existingData = JSON.parse(localStorage.getItem('bookingFormData') || '{}');
+    // Mettre à jour les données avec les noms de champs corrects
     const updatedData = {
-      ...existingData,
       clientStatus,
       firstName: firstName.trim(),
       lastName: lastName.trim(),
-      phoneNumber: phoneNumber.trim(),
+      clientName: `${firstName.trim()} ${lastName.trim()}`, // Nom complet pour compatibilité
+      clientPhone: `${phonePrefix}${phoneNumber.trim()}`,
+      clientEmail: email.trim(),
       phonePrefix,
-      email: email.trim(),
+      preferredContactMethod: 'phone', // Valeur par défaut
       dataConsent
     };
     
-    localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
+    updateBookingData(updatedData);
     console.log('Updated booking data with contact info:', updatedData);
 
-    // Naviguer vers la page des créneaux (route corrigée)
+    // Naviguer vers la page des créneaux
     navigate('/booking/appointment-slots');
   };
 

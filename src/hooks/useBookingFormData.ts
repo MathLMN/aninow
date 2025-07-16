@@ -51,9 +51,17 @@ export interface CompleteBookingData {
   clientPhone: string
   preferredContactMethod: string
   
+  // Nouveaux champs pour les coordonnées détaillées
+  clientStatus?: string
+  firstName?: string
+  lastName?: string
+  phonePrefix?: string
+  dataConsent?: boolean
+  
   // Rendez-vous
   appointmentDate?: string
   appointmentTime?: string
+  veterinarianId?: string
 }
 
 export const useBookingFormData = () => {
