@@ -4,19 +4,65 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Heart, Mail, Lock } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ArrowLeft, Heart, Mail, Lock, Loader2, AlertCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const VetLogin = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulation de connexion - à remplacer par la vraie authentification
-    if (email && password) {
-      navigate('/vet/dashboard');
+    setError("");
+    setIsLoading(true);
+
+    try {
+      // Appeler la fonction d'authentification
+      const { data, error } = await supabase.functions.invoke('vet-auth', {
+        body: {
+          action: 'login',
+          email,
+          password
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data.success) {
+        // Sauvegarder les informations de session
+        localStorage.setItem('vet_session_token', data.session_token);
+        localStorage.setItem('vet_user', JSON.stringify(data.veterinarian));
+        localStorage.setItem('vet_session_expires', data.expires_at);
+
+        toast({
+          title: "Connexion réussie",
+          description: `Bienvenue, ${data.veterinarian.name}!`,
+        });
+
+        navigate('/vet/dashboard');
+      } else {
+        throw new Error('Échec de la connexion');
+      }
+    } catch (error) {
+      console.error('Erreur de connexion:', error);
+      setError(error instanceof Error ? error.message : 'Erreur de connexion');
+      
+      toast({
+        title: "Erreur de connexion",
+        description: "Veuillez vérifier vos identifiants",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -41,6 +87,23 @@ const VetLogin = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Infos de démo */}
+            <Alert className="mb-6 border-vet-blue/30 bg-vet-blue/10">
+              <AlertCircle className="h-4 w-4 text-vet-blue" />
+              <AlertDescription className="text-vet-navy text-sm">
+                <strong>Démo:</strong> Utilisez n'importe quel email de vétérinaire et le mot de passe "vet123"
+              </AlertDescription>
+            </Alert>
+
+            {error && (
+              <Alert className="mb-6 border-red-300 bg-red-50">
+                <AlertCircle className="h-4 w-4 text-red-600" />
+                <AlertDescription className="text-red-800">
+                  {error}
+                </AlertDescription>
+              </Alert>
+            )}
+
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-vet-navy">Email</Label>
@@ -54,6 +117,7 @@ const VetLogin = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage"
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -65,20 +129,29 @@ const VetLogin = () => {
                   <Input
                     id="password"
                     type="password"
-                    placeholder="••••••••"
+                    placeholder="vet123"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage"
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
 
               <Button 
                 type="submit" 
-                className="w-full bg-vet-sage hover:bg-vet-sage/90 text-white"
+                className="w-full bg-vet-sage hover:bg-vet-sage/90 text-white disabled:opacity-50"
+                disabled={isLoading}
               >
-                Se connecter
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Connexion en cours...
+                  </>
+                ) : (
+                  'Se connecter'
+                )}
               </Button>
             </form>
 

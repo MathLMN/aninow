@@ -1,7 +1,9 @@
+
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Calendar, Clock, Mail, Phone, Heart, AlertTriangle, Loader2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle, Calendar, Clock, Mail, Phone, Heart, AlertTriangle, Loader2, Brain, TrendingUp } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { useBookingSubmission } from "@/hooks/useBookingSubmission";
@@ -58,6 +60,26 @@ const BookingConfirmation = () => {
     }
   }, [bookingData, navigate, isSubmitting, submissionResult]);
 
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'critical': return 'bg-red-500'
+      case 'high': return 'bg-orange-500'
+      case 'medium': return 'bg-yellow-500'
+      case 'low': return 'bg-green-500'
+      default: return 'bg-blue-500'
+    }
+  }
+
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case 'critical': return 'Critique'
+      case 'high': return 'Élevée'
+      case 'medium': return 'Modérée'
+      case 'low': return 'Faible'
+      default: return 'Standard'
+    }
+  }
+
   // Affichage pendant le chargement
   if (isSubmitting) {
     return (
@@ -65,12 +87,18 @@ const BookingConfirmation = () => {
         <Header />
         <main className="container mx-auto px-6 py-12">
           <div className="max-w-2xl mx-auto text-center">
-            <Loader2 className="h-16 w-16 text-vet-sage mx-auto mb-6 animate-spin" />
+            <div className="relative">
+              <Loader2 className="h-16 w-16 text-vet-sage mx-auto mb-6 animate-spin" />
+              <Brain className="h-6 w-6 text-vet-blue absolute top-2 right-2 animate-pulse" />
+            </div>
             <h1 className="text-2xl font-bold text-vet-navy mb-4">
-              Traitement de votre demande...
+              Analyse en cours...
             </h1>
-            <p className="text-vet-brown">
-              Nous analysons votre demande avec notre IA pour vous offrir le meilleur service possible.
+            <p className="text-vet-brown mb-2">
+              Nous analysons votre demande avec notre IA vétérinaire pour vous offrir le meilleur service possible.
+            </p>
+            <p className="text-sm text-vet-brown/70">
+              Cette analyse nous aide à prioriser votre rendez-vous selon l'urgence de la situation.
             </p>
           </div>
         </main>
@@ -165,30 +193,66 @@ const BookingConfirmation = () => {
             </CardContent>
           </Card>
 
-          {/* Analyse IA si disponible */}
+          {/* Analyse IA améliorée */}
           {aiAnalysis && (
             <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl mb-8">
               <CardHeader>
-                <CardTitle className="text-vet-navy">Analyse automatique</CardTitle>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Brain className="h-5 w-5 text-vet-blue" />
+                    <CardTitle className="text-vet-navy">Analyse IA vétérinaire</CardTitle>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Badge className={`${getPriorityColor(aiAnalysis.priority_level)} text-white`}>
+                      Priorité {getPriorityLabel(aiAnalysis.priority_level)}
+                    </Badge>
+                    <Badge variant="outline" className="text-vet-brown">
+                      <TrendingUp className="h-3 w-3 mr-1" />
+                      {aiAnalysis.urgency_score}/10
+                    </Badge>
+                  </div>
+                </div>
                 <CardDescription className="text-vet-brown">
-                  Score d'urgence: {aiAnalysis.urgency_score}/10
+                  Analyse automatique basée sur les symptômes et informations fournies
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <p className="text-vet-brown">
-                    {aiAnalysis.analysis_summary}
-                  </p>
+                  <div className="bg-vet-beige/20 p-4 rounded-lg">
+                    <h4 className="font-semibold text-vet-navy mb-2">Résumé de l'analyse</h4>
+                    <p className="text-vet-brown text-sm">
+                      {aiAnalysis.analysis_summary}
+                    </p>
+                  </div>
+                  
+                  {aiAnalysis.ai_insights && (
+                    <div className="bg-vet-blue/10 p-4 rounded-lg">
+                      <h4 className="font-semibold text-vet-navy mb-2">Insights IA</h4>
+                      <p className="text-vet-brown text-sm">
+                        {aiAnalysis.ai_insights}
+                      </p>
+                    </div>
+                  )}
+
                   {aiAnalysis.recommended_actions && aiAnalysis.recommended_actions.length > 0 && (
                     <div>
-                      <p className="font-semibold text-vet-navy mb-2">Actions recommandées:</p>
+                      <h4 className="font-semibold text-vet-navy mb-2">Actions recommandées</h4>
                       <ul className="list-disc list-inside text-vet-brown space-y-1">
                         {aiAnalysis.recommended_actions.map((action: string, index: number) => (
-                          <li key={index}>{action}</li>
+                          <li key={index} className="text-sm">{action}</li>
                         ))}
                       </ul>
                     </div>
                   )}
+                  
+                  <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                    <span className="text-xs text-vet-brown/70">
+                      Confiance de l'analyse: {Math.round((aiAnalysis.confidence_score || 0.7) * 100)}%
+                    </span>
+                    <span className="text-xs text-vet-brown/70">
+                      Analysé par IA vétérinaire
+                    </span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
