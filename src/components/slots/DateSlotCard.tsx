@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Clock } from "lucide-react";
+import { ChevronDown, ChevronUp, Clock, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface TimeSlot {
@@ -10,6 +10,7 @@ interface TimeSlot {
   veterinarian_id: string;
   available: boolean;
   blocked: boolean;
+  availableVeterinarians?: string[]; // Nouveau : liste des vétérinaires disponibles pour ce créneau
 }
 
 interface DateSlotCardProps {
@@ -23,6 +24,7 @@ interface DateSlotCardProps {
   selectedSlot: {date: string, time: string, veterinarianId: string} | null;
   onSlotSelect: (date: string, time: string, veterinarianId: string) => void;
   isExpanded?: boolean;
+  noVeterinarianPreference?: boolean; // Nouveau : indique si aucune préférence de vétérinaire
 }
 
 export const DateSlotCard = ({
@@ -31,7 +33,8 @@ export const DateSlotCard = ({
   veterinarians,
   selectedSlot,
   onSlotSelect,
-  isExpanded = false
+  isExpanded = false,
+  noVeterinarianPreference = false
 }: DateSlotCardProps) => {
   const [expanded, setExpanded] = useState(isExpanded);
 
@@ -50,6 +53,32 @@ export const DateSlotCard = ({
   };
 
   const availableSlots = slots.filter(slot => slot.available);
+
+  const handleSlotClick = (slot: TimeSlot) => {
+    if (noVeterinarianPreference && slot.availableVeterinarians && slot.availableVeterinarians.length > 0) {
+      // Si pas de préférence, prendre le premier vétérinaire disponible
+      onSlotSelect(date, slot.time, slot.availableVeterinarians[0]);
+    } else {
+      // Si préférence spécifique, utiliser le vétérinaire du créneau
+      onSlotSelect(date, slot.time, slot.veterinarian_id);
+    }
+  };
+
+  const getSlotDisplayInfo = (slot: TimeSlot) => {
+    if (noVeterinarianPreference && slot.availableVeterinarians) {
+      const availableCount = slot.availableVeterinarians.length;
+      return {
+        displayText: availableCount > 1 ? `${availableCount} vétérinaires` : "1 vétérinaire",
+        icon: availableCount > 1 ? Users : Clock
+      };
+    } else {
+      const veterinarian = veterinarians.find(v => v.id === slot.veterinarian_id);
+      return {
+        displayText: veterinarian?.name || "Vétérinaire",
+        icon: Clock
+      };
+    }
+  };
 
   return (
     <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/20 shadow-sm">
@@ -79,10 +108,10 @@ export const DateSlotCard = ({
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
               {availableSlots.map((slot) => {
                 const isSelected = selectedSlot?.date === date && 
-                                 selectedSlot?.time === slot.time && 
-                                 selectedSlot?.veterinarianId === slot.veterinarian_id;
+                                 selectedSlot?.time === slot.time;
                 
-                const veterinarian = veterinarians.find(v => v.id === slot.veterinarian_id);
+                const slotInfo = getSlotDisplayInfo(slot);
+                const IconComponent = slotInfo.icon;
                 
                 return (
                   <Button
@@ -94,17 +123,18 @@ export const DateSlotCard = ({
                         ? "bg-vet-sage hover:bg-vet-sage/90 text-white border-vet-sage shadow-md" 
                         : "bg-vet-blue/10 border-vet-blue/30 text-vet-navy hover:bg-vet-sage/20 hover:border-vet-sage/50"
                     )}
-                    onClick={() => onSlotSelect(date, slot.time, slot.veterinarian_id)}
+                    onClick={() => handleSlotClick(slot)}
                   >
                     <div className="flex items-center mb-1">
                       <Clock className="h-3 w-3 mr-1" />
                       <span className="font-semibold text-sm">{slot.time}</span>
                     </div>
-                    {veterinarian && (
+                    <div className="flex items-center">
+                      <IconComponent className="h-3 w-3 mr-1" />
                       <span className="text-xs opacity-80 truncate max-w-full leading-tight">
-                        {veterinarian.name}
+                        {slotInfo.displayText}
                       </span>
-                    )}
+                    </div>
                   </Button>
                 );
               })}

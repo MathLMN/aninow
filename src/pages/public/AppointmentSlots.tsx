@@ -52,19 +52,50 @@ const AppointmentSlots = () => {
     });
   };
 
+  // Fonction pour regrouper les créneaux par heure quand pas de préférence
+  const groupSlotsByTime = (slots: any[]) => {
+    const groupedSlots = new Map();
+    
+    slots.forEach(slot => {
+      if (!slot.available) return;
+      
+      const timeKey = slot.time;
+      if (!groupedSlots.has(timeKey)) {
+        // Prendre le premier vétérinaire disponible pour ce créneau
+        groupedSlots.set(timeKey, {
+          ...slot,
+          availableVeterinarians: [slot.veterinarian_id]
+        });
+      } else {
+        // Ajouter le vétérinaire à la liste des disponibles pour ce créneau
+        const existingSlot = groupedSlots.get(timeKey);
+        existingSlot.availableVeterinarians.push(slot.veterinarian_id);
+      }
+    });
+    
+    return Array.from(groupedSlots.values());
+  };
+
   // Filtrer les créneaux selon la préférence de vétérinaire
-  const filteredSlots = availableSlots.map(daySlots => ({
-    ...daySlots,
-    slots: daySlots.slots.filter(slot => {
-      if (!slot.available) return false;
-      
-      // Si aucune préférence de vétérinaire, afficher tous les créneaux
-      if (!selectedVeterinarian) return true;
-      
-      // Si préférence spécifique, ne montrer que les créneaux de ce vétérinaire
-      return slot.veterinarian_id === selectedVeterinarian;
-    })
-  })).filter(daySlots => daySlots.slots.length > 0);
+  const filteredSlots = availableSlots.map(daySlots => {
+    let processedSlots;
+    
+    if (!selectedVeterinarian) {
+      // Pas de préférence : regrouper les créneaux par heure
+      processedSlots = groupSlotsByTime(daySlots.slots);
+    } else {
+      // Préférence spécifique : filtrer par vétérinaire
+      processedSlots = daySlots.slots.filter(slot => {
+        if (!slot.available) return false;
+        return slot.veterinarian_id === selectedVeterinarian;
+      });
+    }
+    
+    return {
+      ...daySlots,
+      slots: processedSlots
+    };
+  }).filter(daySlots => daySlots.slots.length > 0);
 
   if (isLoading || vetsLoading) {
     return (
@@ -119,6 +150,7 @@ const AppointmentSlots = () => {
                     selectedSlot={selectedSlot}
                     onSlotSelect={handleSlotSelect}
                     isExpanded={true}
+                    noVeterinarianPreference={!selectedVeterinarian}
                   />
                 )}
                 
@@ -132,6 +164,7 @@ const AppointmentSlots = () => {
                     selectedSlot={selectedSlot}
                     onSlotSelect={handleSlotSelect}
                     isExpanded={false}
+                    noVeterinarianPreference={!selectedVeterinarian}
                   />
                 ))}
 
