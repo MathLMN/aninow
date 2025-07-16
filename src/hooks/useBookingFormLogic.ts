@@ -25,6 +25,22 @@ export const useBookingFormLogic = () => {
   // Vérifier si c'est une portée
   const isLitter = formData.multipleAnimals.includes('une-portee');
 
+  // Function to update form data from localStorage
+  const updateFormDataFromStorage = (data: FormData) => {
+    setFormData(data);
+    
+    // Update form state based on the loaded data
+    const newFormState: FormState = {
+      showNameInput: !!data.animalSpecies,
+      showMultipleOptions: !!data.animalSpecies,
+      showSecondAnimal: data.multipleAnimals.includes('2-animaux'),
+      showSecondNameInput: !!data.secondAnimalSpecies,
+      showLitterOptions: data.multipleAnimals.includes('une-portee')
+    };
+    
+    setFormState(newFormState);
+  };
+
   const handleSpeciesChange = (value: string, selected: boolean) => {
     if (selected) {
       setFormData(prev => ({
@@ -152,6 +168,7 @@ export const useBookingFormLogic = () => {
     formData,
     formState,
     isLitter,
+    setFormData: updateFormDataFromStorage,
     handleSpeciesChange,
     handleCustomSpeciesChange,
     handleNameChange,
