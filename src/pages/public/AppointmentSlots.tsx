@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, ArrowLeft, ArrowRight, CheckCircle } from "lucide-react";
@@ -12,23 +12,8 @@ import { useBookingFormData } from "@/hooks/useBookingFormData";
 const AppointmentSlots = () => {
   const navigate = useNavigate();
   const { availableSlots, isLoading } = useAvailableSlots();
-  const { bookingData, updateBookingData, hasContactInfo } = useBookingFormData();
+  const { updateBookingData } = useBookingFormData();
   const [selectedSlot, setSelectedSlot] = useState<{date: string, time: string, veterinarianId: string} | null>(null);
-
-  // Supprimer la redirection automatique qui cause la boucle
-  // useEffect(() => {
-  //   if (!hasContactInfo()) {
-  //     console.log('Données de contact manquantes, redirection vers /booking/contact-info');
-  //     navigate('/booking/contact-info');
-  //     return;
-  //   }
-  // }, [hasContactInfo, navigate]);
-
-  // Ajouter un log pour vérifier les données de contact
-  useEffect(() => {
-    console.log('AppointmentSlots - Données de contact complètes:', hasContactInfo());
-    console.log('AppointmentSlots - Données de réservation:', bookingData);
-  }, [hasContactInfo, bookingData]);
 
   const handleBack = () => {
     navigate('/booking/contact-info');
@@ -48,7 +33,7 @@ const AppointmentSlots = () => {
       };
       
       updateBookingData(updatedData);
-      console.log('Navigating to confirmation with slot:', selectedSlot);
+      console.log('Créneau sélectionné:', selectedSlot);
       
       // Navigation vers la page de confirmation
       navigate('/booking/confirmation');
