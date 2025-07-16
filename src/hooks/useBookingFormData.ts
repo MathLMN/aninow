@@ -95,6 +95,15 @@ export const useBookingFormData = () => {
 
   // Vérifier si les données de base sont présentes
   const hasBasicData = () => {
+    // Vérifier si c'est une portée
+    const isLitter = bookingData.multipleAnimals?.includes('une-portee')
+    
+    // Pour une portée, seule l'espèce est obligatoire (pas le nom)
+    if (isLitter) {
+      return !!(bookingData.animalSpecies)
+    }
+    
+    // Pour un animal normal, espèce ET nom sont obligatoires
     return !!(bookingData.animalSpecies && bookingData.animalName)
   }
 
