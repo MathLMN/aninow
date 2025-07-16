@@ -1,9 +1,8 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import AnimalSpeciesSelection from './AnimalSpeciesSelection';
-import AnimalNameInput from './AnimalNameInput';
 import MultipleAnimalsOptions from './MultipleAnimalsOptions';
 import SecondAnimalForm from './SecondAnimalForm';
 import LitterOptions from './LitterOptions';
@@ -34,13 +33,13 @@ const BookingForm = ({
     handleVaccinationTypeChange
   } = useBookingFormLogic();
 
-  // Initialize form with localStorage data on mount - only once
-  useEffect(() => {
-    if (bookingData && Object.keys(bookingData).length > 0) {
-      console.log('Initializing form with localStorage data:', bookingData);
+  // Initialisation simple une seule fois au montage
+  React.useEffect(() => {
+    if (bookingData && Object.keys(bookingData).length > 0 && !formData.animalSpecies) {
+      console.log('Initializing form with saved data:', bookingData);
       initializeFormData(bookingData);
     }
-  }, []); // Pas de dépendances pour éviter les re-initialisations
+  }, [bookingData, formData.animalSpecies, initializeFormData]);
 
   const canProceed = validateBookingForm(formData, formState, isLitter);
 
@@ -48,7 +47,6 @@ const BookingForm = ({
     if (canProceed) {
       console.log('Form submission with data:', formData);
       
-      // Sauvegarder les données dans le hook pour la suite du processus
       const dataToSave = isLitter ? {
         ...formData,
         consultationReason: 'consultation-convenance',

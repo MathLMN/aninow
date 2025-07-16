@@ -1,7 +1,6 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useRef } from "react";
 import BookingForm from "@/components/BookingForm";
 import Header from "@/components/Header";
 import ProgressBar from "@/components/ProgressBar";
@@ -10,19 +9,10 @@ import { useBookingFormData } from "@/hooks/useBookingFormData";
 
 const BookingStart = () => {
   const navigate = useNavigate();
-  const { bookingData, updateBookingData } = useBookingFormData();
-  const hasNavigated = useRef(false);
-
-  // Réinitialiser le flag de navigation quand on arrive sur la page
-  useEffect(() => {
-    hasNavigated.current = false;
-  }, []);
+  const { updateBookingData } = useBookingFormData();
 
   const handleNext = (data: FormData) => {
     console.log('BookingStart: Form data submitted:', data);
-    
-    // Marquer qu'on va naviguer pour éviter les redirections automatiques
-    hasNavigated.current = true;
     
     // Sauvegarder les données
     const dataToSave = {
