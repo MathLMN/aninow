@@ -50,7 +50,7 @@ const AnimalInfo = () => {
         setPreviousRoute('/booking/additional-points');
       } else {
         // Vient de la page motif de consultation (consultation de convenance)
-        setPreviousRoute('/booking/reason');
+        setPreviousRoute('/booking/consultation-reason');
       }
     }
   }, [navigate]);
@@ -76,8 +76,8 @@ const AnimalInfo = () => {
     localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
     console.log('Updated booking data with animal info:', updatedData);
 
-    // Naviguer vers la page de commentaire au lieu des créneaux
-    navigate('/booking/comment');
+    // Naviguer vers la page de commentaire client (route corrigée)
+    navigate('/booking/client-comment');
   };
 
   if (!bookingData) {

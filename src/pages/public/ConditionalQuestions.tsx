@@ -28,13 +28,13 @@ const ConditionalQuestions = () => {
     const hasSecondAnimalSymptoms = parsedData.secondAnimalSelectedSymptoms?.length > 0 || parsedData.secondAnimalCustomSymptom?.trim() !== '';
     
     if (!hasFirstAnimalSymptoms && !hasSecondAnimalSymptoms) {
-      navigate('/booking/reason');
+      navigate('/booking/consultation-reason');
       return;
     }
   }, [navigate]);
 
   const handleBack = () => {
-    navigate('/booking/reason');
+    navigate('/booking/consultation-reason');
   };
 
   const handleNext = () => {
@@ -46,8 +46,8 @@ const ConditionalQuestions = () => {
     localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
     console.log('Updated booking data with conditional answers:', updatedData);
 
-    // Naviguer vers la page de durée des symptômes
-    navigate('/booking/duration');
+    // Naviguer vers la page de durée des symptômes (route corrigée)
+    navigate('/booking/symptom-duration');
   };
 
   const handleAnswersChange = (newAnswers: any) => {
