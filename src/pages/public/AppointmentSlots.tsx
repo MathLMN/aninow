@@ -15,14 +15,20 @@ const AppointmentSlots = () => {
   const { bookingData, updateBookingData, hasContactInfo } = useBookingFormData();
   const [selectedSlot, setSelectedSlot] = useState<{date: string, time: string, veterinarianId: string} | null>(null);
 
-  // Rediriger si pas de données complètes
+  // Supprimer la redirection automatique qui cause la boucle
+  // useEffect(() => {
+  //   if (!hasContactInfo()) {
+  //     console.log('Données de contact manquantes, redirection vers /booking/contact-info');
+  //     navigate('/booking/contact-info');
+  //     return;
+  //   }
+  // }, [hasContactInfo, navigate]);
+
+  // Ajouter un log pour vérifier les données de contact
   useEffect(() => {
-    if (!hasContactInfo()) {
-      console.log('Données de contact manquantes, redirection vers /booking/contact-info');
-      navigate('/booking/contact-info');
-      return;
-    }
-  }, [hasContactInfo, navigate]);
+    console.log('AppointmentSlots - Données de contact complètes:', hasContactInfo());
+    console.log('AppointmentSlots - Données de réservation:', bookingData);
+  }, [hasContactInfo, bookingData]);
 
   const handleBack = () => {
     navigate('/booking/contact-info');

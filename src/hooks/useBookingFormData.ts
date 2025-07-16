@@ -127,13 +127,22 @@ export const useBookingFormData = () => {
 
   // Vérifier si les coordonnées sont complètes
   const hasContactInfo = () => {
+    console.log('Vérification des coordonnées:', {
+      clientStatus: bookingData.clientStatus,
+      firstName: bookingData.firstName,
+      lastName: bookingData.lastName,
+      clientEmail: bookingData.clientEmail,
+      clientPhone: bookingData.clientPhone,
+      dataConsent: bookingData.dataConsent
+    })
+    
     return !!(
       bookingData.clientStatus &&
-      bookingData.firstName &&
-      bookingData.lastName &&
-      bookingData.clientEmail &&
-      bookingData.clientPhone &&
-      bookingData.dataConsent
+      bookingData.firstName?.trim() &&
+      bookingData.lastName?.trim() &&
+      bookingData.clientEmail?.trim() &&
+      bookingData.clientPhone?.trim() &&
+      bookingData.dataConsent === true
     )
   }
 
