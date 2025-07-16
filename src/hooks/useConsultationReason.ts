@@ -83,11 +83,11 @@ export const useConsultationReason = () => {
       localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
       console.log('Updated booking data:', updatedData);
       
-      // Si le motif principal est "symptomes-anomalie", aller vers les questions conditionnelles
+      // Si le motif principal est "symptomes-anomalie", aller vers les questions conditionnelles (route corrigée)
       // Sinon, aller directement vers les informations animal
       if (consultationReason === 'symptomes-anomalie' || 
           (secondAnimalDifferentReason && secondAnimalConsultationReason === 'symptomes-anomalie')) {
-        navigate('/booking/questions');
+        navigate('/booking/conditional-questions');
       } else {
         navigate('/booking/animal-info');
       }
