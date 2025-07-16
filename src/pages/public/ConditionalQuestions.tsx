@@ -15,16 +15,9 @@ const ConditionalQuestions = () => {
   }>({});
   
   const { bookingData, updateBookingData } = useBookingFormData();
-  const { shouldRedirect, navigateBack, navigateNext } = useBookingNavigation();
+  const { navigateBack, navigateNext } = useBookingNavigation();
 
   useEffect(() => {
-    const redirectRoute = shouldRedirect('/booking/conditional-questions');
-    if (redirectRoute) {
-      console.log('ConditionalQuestions: Redirecting to', redirectRoute);
-      navigate(redirectRoute, { replace: true });
-      return;
-    }
-
     // Vérifier que au moins un animal a des symptômes sélectionnés
     const hasFirstAnimalSymptoms = bookingData?.selectedSymptoms?.length > 0 || bookingData?.customSymptom?.trim() !== '';
     const hasSecondAnimalSymptoms = bookingData?.secondAnimalSelectedSymptoms?.length > 0 || bookingData?.secondAnimalCustomSymptom?.trim() !== '';
@@ -38,7 +31,7 @@ const ConditionalQuestions = () => {
     if (bookingData?.conditionalAnswers) {
       setAnswers(bookingData.conditionalAnswers);
     }
-  }, [navigate, shouldRedirect, bookingData]);
+  }, [navigate, bookingData]);
 
   const handleBack = () => {
     navigateBack('/booking/conditional-questions');

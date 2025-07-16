@@ -17,7 +17,7 @@ import { useBookingNavigation } from "@/hooks/useBookingNavigation";
 const ConsultationReason = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { shouldRedirect, navigateBack, navigateNext } = useBookingNavigation();
+  const { navigateBack, navigateNext } = useBookingNavigation();
   
   const {
     consultationReason,
@@ -48,14 +48,6 @@ const ConsultationReason = () => {
     shouldForceConvenienceForAnimal2,
     bookingData
   } = useConsultationReason();
-
-  useEffect(() => {
-    const redirectRoute = shouldRedirect('/booking/consultation-reason');
-    if (redirectRoute) {
-      console.log('ConsultationReason: Redirecting to', redirectRoute);
-      navigate(redirectRoute, { replace: true });
-    }
-  }, [navigate, shouldRedirect]);
 
   const handleBackClick = () => {
     navigateBack('/booking/consultation-reason');

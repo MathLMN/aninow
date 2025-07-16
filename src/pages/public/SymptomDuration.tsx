@@ -17,7 +17,7 @@ const SymptomDuration = () => {
   const [selectedDuration, setSelectedDuration] = useState('');
   
   const { bookingData, updateBookingData } = useBookingFormData();
-  const { shouldRedirect, navigateBack, navigateNext } = useBookingNavigation();
+  const { navigateBack, navigateNext } = useBookingNavigation();
 
   const durationOptions = [
     '1 à 2 jours',
@@ -27,13 +27,6 @@ const SymptomDuration = () => {
   ];
 
   useEffect(() => {
-    const redirectRoute = shouldRedirect('/booking/symptom-duration');
-    if (redirectRoute) {
-      console.log('SymptomDuration: Redirecting to', redirectRoute);
-      navigate(redirectRoute, { replace: true });
-      return;
-    }
-
     // Vérifier que le motif est bien "symptomes-anomalie"
     const hasSymptomConsultation = bookingData?.consultationReason === 'symptomes-anomalie' || 
       bookingData?.secondAnimalConsultationReason === 'symptomes-anomalie';
@@ -47,7 +40,7 @@ const SymptomDuration = () => {
     if (bookingData?.symptomDuration) {
       setSelectedDuration(bookingData.symptomDuration);
     }
-  }, [navigate, shouldRedirect, bookingData]);
+  }, [navigate, bookingData]);
 
   const handleBack = () => {
     navigateBack('/booking/symptom-duration');

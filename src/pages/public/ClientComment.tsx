@@ -16,21 +16,14 @@ const ClientComment = () => {
   const [comment, setComment] = useState('');
   
   const { bookingData, updateBookingData } = useBookingFormData();
-  const { shouldRedirect, navigateBack, navigateNext } = useBookingNavigation();
+  const { navigateBack, navigateNext } = useBookingNavigation();
 
   useEffect(() => {
-    const redirectRoute = shouldRedirect('/booking/client-comment');
-    if (redirectRoute) {
-      console.log('ClientComment: Redirecting to', redirectRoute);
-      navigate(redirectRoute, { replace: true });
-      return;
-    }
-    
     // Récupérer le commentaire existant s'il y en a un
     if (bookingData?.clientComment) {
       setComment(bookingData.clientComment);
     }
-  }, [navigate, shouldRedirect, bookingData]);
+  }, [bookingData]);
 
   const handleBack = () => {
     navigateBack('/booking/client-comment');

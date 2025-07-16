@@ -15,7 +15,7 @@ const AnimalInfo = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { bookingData, updateBookingData } = useBookingFormData();
-  const { shouldRedirect, navigateBack, navigateNext } = useBookingNavigation();
+  const { navigateBack, navigateNext } = useBookingNavigation();
   
   // États pour l'animal 1
   const [firstAnimalBreed, setFirstAnimalBreed] = useState('');
@@ -30,13 +30,6 @@ const AnimalInfo = () => {
   const [secondAnimalSex, setSecondAnimalSex] = useState('');
 
   useEffect(() => {
-    const redirectRoute = shouldRedirect('/booking/animal-info');
-    if (redirectRoute) {
-      console.log('AnimalInfo: Redirecting to', redirectRoute);
-      navigate(redirectRoute, { replace: true });
-      return;
-    }
-
     // Charger les données existantes
     if (bookingData.animalBreed) setFirstAnimalBreed(bookingData.animalBreed);
     if (bookingData.animalAge) setFirstAnimalAge(bookingData.animalAge);
@@ -46,7 +39,7 @@ const AnimalInfo = () => {
     if (bookingData.secondAnimalAge) setSecondAnimalAge(bookingData.secondAnimalAge);
     if (bookingData.secondAnimalWeight) setSecondAnimalWeight(bookingData.secondAnimalWeight.toString());
     if (bookingData.secondAnimalSex) setSecondAnimalSex(bookingData.secondAnimalSex);
-  }, [navigate, shouldRedirect, bookingData]);
+  }, [bookingData]);
 
   const handleBack = () => {
     navigateBack('/booking/animal-info');

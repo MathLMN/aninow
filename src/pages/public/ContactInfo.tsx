@@ -18,7 +18,7 @@ const ContactInfo = () => {
   const isMobile = useIsMobile();
   
   const { bookingData, updateBookingData } = useBookingFormData();
-  const { shouldRedirect, navigateBack, navigateNext } = useBookingNavigation();
+  const { navigateBack, navigateNext } = useBookingNavigation();
   
   // États pour le statut client et les informations
   const [clientStatus, setClientStatus] = useState('');
@@ -30,13 +30,6 @@ const ContactInfo = () => {
   const [dataConsent, setDataConsent] = useState(false);
 
   useEffect(() => {
-    const redirectRoute = shouldRedirect('/booking/contact-info');
-    if (redirectRoute) {
-      console.log('ContactInfo: Redirecting to', redirectRoute);
-      navigate(redirectRoute, { replace: true });
-      return;
-    }
-    
     // Récupérer les données existantes s'il y en a
     if (bookingData?.clientStatus) setClientStatus(bookingData.clientStatus);
     if (bookingData?.firstName) setFirstName(bookingData.firstName);
@@ -57,7 +50,7 @@ const ContactInfo = () => {
     if (bookingData?.clientEmail) setEmail(bookingData.clientEmail);
     if (bookingData?.phonePrefix) setPhonePrefix(bookingData.phonePrefix);
     if (bookingData?.dataConsent) setDataConsent(bookingData.dataConsent);
-  }, [navigate, shouldRedirect, bookingData]);
+  }, [bookingData]);
 
   const handleBack = () => {
     navigateBack('/booking/contact-info');
