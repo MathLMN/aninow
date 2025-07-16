@@ -1,13 +1,12 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Calendar, Clock, Mail, Phone, Heart, AlertTriangle, Loader2, Brain, TrendingUp } from "lucide-react";
+import { CheckCircle, Calendar, Clock, Mail, Phone, Heart, AlertTriangle, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { useBookingSubmission } from "@/hooks/useBookingSubmission";
 import { useBookingFormData } from "@/hooks/useBookingFormData";
+import { AnalysisDisplay } from "@/components/booking/AnalysisDisplay";
 
 const BookingConfirmation = () => {
   const navigate = useNavigate();
@@ -17,16 +16,13 @@ const BookingConfirmation = () => {
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
   useEffect(() => {
-    // Vérifier si on a les données nécessaires et si elles sont complètes
     if (!bookingData.animalSpecies || !bookingData.clientName || hasSubmitted) {
       return;
     }
 
-    // Soumettre la réservation seulement si les données sont complètes
     const submitData = async () => {
       setHasSubmitted(true);
       
-      // Type guard pour s'assurer que les données requises sont présentes
       if (bookingData.animalSpecies && bookingData.clientName && bookingData.clientEmail && 
           bookingData.clientPhone && bookingData.consultationReason && bookingData.preferredContactMethod) {
         
@@ -44,7 +40,6 @@ const BookingConfirmation = () => {
         setSubmissionResult(result);
         
         if (result.booking) {
-          // Réinitialiser les données du formulaire après succès
           resetBookingData();
         }
       }
@@ -60,46 +55,33 @@ const BookingConfirmation = () => {
     }
   }, [bookingData, navigate, isSubmitting, submissionResult]);
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'critical': return 'bg-red-500'
-      case 'high': return 'bg-orange-500'
-      case 'medium': return 'bg-yellow-500'
-      case 'low': return 'bg-green-500'
-      default: return 'bg-blue-500'
-    }
-  }
-
-  const getPriorityLabel = (priority: string) => {
-    switch (priority) {
-      case 'critical': return 'Critique'
-      case 'high': return 'Élevée'
-      case 'medium': return 'Modérée'
-      case 'low': return 'Faible'
-      default: return 'Standard'
-    }
-  }
-
   // Affichage pendant le chargement
   if (isSubmitting) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20">
         <Header />
         <main className="container mx-auto px-6 py-12">
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="relative">
-              <Loader2 className="h-16 w-16 text-vet-sage mx-auto mb-6 animate-spin" />
-              <Brain className="h-6 w-6 text-vet-blue absolute top-2 right-2 animate-pulse" />
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="relative mb-8">
+              <Loader2 className="h-20 w-20 text-vet-sage mx-auto mb-6 animate-spin" />
             </div>
-            <h1 className="text-2xl font-bold text-vet-navy mb-4">
+            <h1 className="text-3xl font-bold text-vet-navy mb-4">
               Analyse en cours...
             </h1>
-            <p className="text-vet-brown mb-2">
-              Nous analysons votre demande avec notre IA vétérinaire pour vous offrir le meilleur service possible.
+            <p className="text-vet-brown mb-4 text-lg">
+              Notre système d'intelligence artificielle analyse votre demande pour vous offrir le meilleur service possible.
             </p>
-            <p className="text-sm text-vet-brown/70">
-              Cette analyse nous aide à prioriser votre rendez-vous selon l'urgence de la situation.
-            </p>
+            <div className="bg-white/80 p-6 rounded-lg shadow-lg max-w-md mx-auto">
+              <p className="text-sm text-vet-brown/70 mb-2">
+                Cette analyse nous permet de :
+              </p>
+              <ul className="text-sm text-vet-brown/70 space-y-1 text-left">
+                <li>• Évaluer l'urgence de la situation</li>
+                <li>• Prioriser votre rendez-vous</li>
+                <li>• Préparer la consultation</li>
+                <li>• Vous donner des conseils personnalisés</li>
+              </ul>
+            </div>
           </div>
         </main>
       </div>
@@ -140,168 +122,120 @@ const BookingConfirmation = () => {
       <Header />
 
       <main className="container mx-auto px-6 py-12">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           {/* Confirmation */}
           <div className="text-center mb-8 animate-fade-in">
-            <CheckCircle className="h-20 w-20 text-vet-sage mx-auto mb-6" />
-            <h1 className="text-3xl font-bold text-vet-navy mb-2">
+            <CheckCircle className="h-24 w-24 text-vet-sage mx-auto mb-6" />
+            <h1 className="text-4xl font-bold text-vet-navy mb-4">
               Rendez-vous confirmé !
             </h1>
-            <p className="text-vet-brown text-lg">
-              Votre demande de rendez-vous a été enregistrée avec succès
+            <p className="text-vet-brown text-xl">
+              Votre demande de rendez-vous a été enregistrée et analysée avec succès
             </p>
           </div>
 
-          {/* Détails du rendez-vous */}
-          <Card className="bg-white/90 backdrop-blur-sm border-vet-sage/30 shadow-xl mb-8">
-            <CardHeader className="bg-vet-sage/10">
-              <CardTitle className="text-vet-navy">Détails de votre rendez-vous</CardTitle>
-              <CardDescription className="text-vet-brown">
-                Numéro de confirmation: #{booking?.id?.slice(-8) || 'RDV-2024-001'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <Heart className="h-5 w-5 text-vet-sage" />
-                  <div>
-                    <p className="font-semibold text-vet-navy">Animal</p>
-                    <p className="text-vet-brown">
-                      {bookingData.animalName} ({bookingData.animalSpecies})
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Calendar className="h-5 w-5 text-vet-sage" />
-                  <div>
-                    <p className="font-semibold text-vet-navy">Statut</p>
-                    <p className="text-vet-brown">En attente de confirmation</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Clock className="h-5 w-5 text-vet-sage" />
-                  <div>
-                    <p className="font-semibold text-vet-navy">Motif</p>
-                    <p className="text-vet-brown">
-                      {bookingData.consultationReason === 'consultation-convenance' ? 'Consultation de convenance' :
-                       bookingData.consultationReason === 'symptomes-anomalie' ? 'Symptômes/Anomalie' :
-                       bookingData.consultationReason === 'urgence' ? 'Urgence' : 'Consultation'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Analyse IA améliorée */}
-          {aiAnalysis && (
-            <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl mb-8">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Brain className="h-5 w-5 text-vet-blue" />
-                    <CardTitle className="text-vet-navy">Analyse IA vétérinaire</CardTitle>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge className={`${getPriorityColor(aiAnalysis.priority_level)} text-white`}>
-                      Priorité {getPriorityLabel(aiAnalysis.priority_level)}
-                    </Badge>
-                    <Badge variant="outline" className="text-vet-brown">
-                      <TrendingUp className="h-3 w-3 mr-1" />
-                      {aiAnalysis.urgency_score}/10
-                    </Badge>
-                  </div>
-                </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            {/* Détails du rendez-vous */}
+            <Card className="bg-white/90 backdrop-blur-sm border-vet-sage/30 shadow-xl">
+              <CardHeader className="bg-gradient-to-r from-vet-sage/10 to-vet-blue/10">
+                <CardTitle className="text-vet-navy">Détails de votre rendez-vous</CardTitle>
                 <CardDescription className="text-vet-brown">
-                  Analyse automatique basée sur les symptômes et informations fournies
+                  Numéro de confirmation: <span className="font-mono">#{booking?.id?.slice(-8) || 'RDV-2024-001'}</span>
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6">
                 <div className="space-y-4">
-                  <div className="bg-vet-beige/20 p-4 rounded-lg">
-                    <h4 className="font-semibold text-vet-navy mb-2">Résumé de l'analyse</h4>
-                    <p className="text-vet-brown text-sm">
-                      {aiAnalysis.analysis_summary}
-                    </p>
+                  <div className="flex items-start space-x-3">
+                    <Heart className="h-5 w-5 text-vet-sage mt-1" />
+                    <div>
+                      <p className="font-semibold text-vet-navy">Animal</p>
+                      <p className="text-vet-brown">
+                        {bookingData.animalName} ({bookingData.animalSpecies})
+                      </p>
+                      {bookingData.animalBreed && (
+                        <p className="text-sm text-vet-brown/70">Race: {bookingData.animalBreed}</p>
+                      )}
+                    </div>
                   </div>
-                  
-                  {aiAnalysis.ai_insights && (
-                    <div className="bg-vet-blue/10 p-4 rounded-lg">
-                      <h4 className="font-semibold text-vet-navy mb-2">Insights IA</h4>
-                      <p className="text-vet-brown text-sm">
-                        {aiAnalysis.ai_insights}
+                  <div className="flex items-start space-x-3">
+                    <Calendar className="h-5 w-5 text-vet-sage mt-1" />
+                    <div>
+                      <p className="font-semibold text-vet-navy">Statut</p>
+                      <p className="text-vet-brown">En attente de confirmation par notre équipe</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <Clock className="h-5 w-5 text-vet-sage mt-1" />
+                    <div>
+                      <p className="font-semibold text-vet-navy">Motif</p>
+                      <p className="text-vet-brown">
+                        {bookingData.consultationReason === 'consultation-convenance' ? 'Consultation de convenance' :
+                         bookingData.consultationReason === 'symptomes-anomalie' ? 'Symptômes/Anomalie' :
+                         bookingData.consultationReason === 'urgence' ? 'Urgence' : 'Consultation'}
                       </p>
                     </div>
-                  )}
-
-                  {aiAnalysis.recommended_actions && aiAnalysis.recommended_actions.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold text-vet-navy mb-2">Actions recommandées</h4>
-                      <ul className="list-disc list-inside text-vet-brown space-y-1">
-                        {aiAnalysis.recommended_actions.map((action: string, index: number) => (
-                          <li key={index} className="text-sm">{action}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  
-                  <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-                    <span className="text-xs text-vet-brown/70">
-                      Confiance de l'analyse: {Math.round((aiAnalysis.confidence_score || 0.7) * 100)}%
-                    </span>
-                    <span className="text-xs text-vet-brown/70">
-                      Analysé par IA vétérinaire
-                    </span>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          )}
 
-          {/* Instructions */}
-          <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl mb-8">
-            <CardHeader>
-              <CardTitle className="text-vet-navy">Prochaines étapes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4 text-vet-brown">
-                <div className="flex items-start space-x-3">
-                  <Mail className="h-5 w-5 text-vet-sage mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-vet-navy">Confirmation par email</p>
-                    <p>Vous recevrez un email de confirmation avec tous les détails dans quelques minutes.</p>
+            {/* Instructions */}
+            <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-vet-navy">Prochaines étapes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4 text-vet-brown">
+                  <div className="flex items-start space-x-3">
+                    <Mail className="h-5 w-5 text-vet-sage mt-1" />
+                    <div>
+                      <p className="font-semibold text-vet-navy">Confirmation par email</p>
+                      <p className="text-sm">Vous recevrez un email de confirmation avec tous les détails dans quelques minutes.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <Phone className="h-5 w-5 text-vet-sage mt-1" />
+                    <div>
+                      <p className="font-semibold text-vet-navy">Contact par notre équipe</p>
+                      <p className="text-sm">Nous vous contacterons pour fixer un créneau de rendez-vous adapté selon l'urgence évaluée.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <Calendar className="h-5 w-5 text-vet-sage mt-1" />
+                    <div>
+                      <p className="font-semibold text-vet-navy">Préparation</p>
+                      <p className="text-sm">Pensez à apporter le carnet de santé de votre animal et la liste de ses traitements actuels.</p>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-start space-x-3">
-                  <Phone className="h-5 w-5 text-vet-sage mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-vet-navy">Contact par téléphone</p>
-                    <p>Notre équipe vous contactera pour fixer un créneau de rendez-vous adapté.</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <Calendar className="h-5 w-5 text-vet-sage mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-vet-navy">Préparation</p>
-                    <p>Pensez à apporter le carnet de santé de votre animal et la liste de ses traitements actuels.</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Analyse IA */}
+          {aiAnalysis && (
+            <div className="mb-8">
+              <AnalysisDisplay aiAnalysis={aiAnalysis} />
+            </div>
+          )}
 
           {/* Actions */}
           <div className="text-center space-y-4">
-            <Link to="/booking">
-              <Button variant="outline" className="border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white mr-4">
-                Prendre un autre RDV
-              </Button>
-            </Link>
-            <Link to="/">
-              <Button className="bg-vet-sage hover:bg-vet-sage/90 text-white">
-                Retour à l'accueil
-              </Button>
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/booking">
+                <Button variant="outline" className="border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white">
+                  Prendre un autre RDV
+                </Button>
+              </Link>
+              <Link to="/">
+                <Button className="bg-vet-sage hover:bg-vet-sage/90 text-white">
+                  Retour à l'accueil
+                </Button>
+              </Link>
+            </div>
+            <p className="text-sm text-vet-brown/70 mt-4">
+              En cas d'urgence immédiate, contactez-nous directement au téléphone
+            </p>
           </div>
         </div>
       </main>

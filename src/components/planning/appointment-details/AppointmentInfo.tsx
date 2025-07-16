@@ -1,0 +1,77 @@
+
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Clock, User, Phone, Mail } from "lucide-react";
+
+interface AppointmentInfoProps {
+  appointment: any;
+}
+
+export const AppointmentInfo = ({ appointment }: AppointmentInfoProps) => {
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'confirmed': return 'bg-green-100 text-green-800';
+      case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'completed': return 'bg-blue-100 text-blue-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'pending': return 'En attente';
+      case 'confirmed': return 'Confirmé';
+      case 'cancelled': return 'Annulé';
+      case 'completed': return 'Terminé';
+      default: return status;
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* En-tête avec statut */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-vet-navy">Informations du rendez-vous</h3>
+        <Badge className={getStatusColor(appointment.status)}>
+          {getStatusLabel(appointment.status)}
+        </Badge>
+      </div>
+
+      {/* Informations de base */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="flex items-center space-x-2">
+          <Calendar className="h-4 w-4 text-vet-sage" />
+          <span className="text-sm">
+            <strong>Date:</strong> {new Date(appointment.appointment_date).toLocaleDateString('fr-FR')}
+          </span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Clock className="h-4 w-4 text-vet-sage" />
+          <span className="text-sm">
+            <strong>Heure:</strong> {appointment.appointment_time}
+          </span>
+        </div>
+      </div>
+
+      {/* Informations client */}
+      <div className="space-y-2">
+        <h4 className="font-medium text-vet-navy flex items-center">
+          <User className="h-4 w-4 mr-2" />
+          Client
+        </h4>
+        <div className="grid grid-cols-1 gap-2 text-sm pl-6">
+          <div><strong>Nom:</strong> {appointment.client_name}</div>
+          <div className="flex items-center">
+            <Phone className="h-3 w-3 mr-1" />
+            {appointment.client_phone}
+          </div>
+          <div className="flex items-center">
+            <Mail className="h-3 w-3 mr-1" />
+            {appointment.client_email}
+          </div>
+          <div><strong>Contact préféré:</strong> {appointment.preferred_contact_method}</div>
+        </div>
+      </div>
+    </div>
+  );
+};
