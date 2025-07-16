@@ -77,7 +77,7 @@ const AppointmentSlots = () => {
 
       <main className="container mx-auto px-6 py-12">
         <div className="max-w-4xl mx-auto">
-          <ProgressBar currentStep={9} totalSteps={10} />
+          <ProgressBar value={90} />
 
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-vet-navy mb-4">
