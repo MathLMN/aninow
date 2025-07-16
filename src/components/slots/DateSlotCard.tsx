@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Clock, Users } from "lucide-react";
+import { ChevronDown, ChevronUp, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface TimeSlot {
@@ -64,22 +64,6 @@ export const DateSlotCard = ({
     }
   };
 
-  const getSlotDisplayInfo = (slot: TimeSlot) => {
-    if (noVeterinarianPreference && slot.availableVeterinarians) {
-      const availableCount = slot.availableVeterinarians.length;
-      return {
-        displayText: availableCount > 1 ? `${availableCount} vétérinaires` : "1 vétérinaire",
-        icon: availableCount > 1 ? Users : Clock
-      };
-    } else {
-      const veterinarian = veterinarians.find(v => v.id === slot.veterinarian_id);
-      return {
-        displayText: veterinarian?.name || "Vétérinaire",
-        icon: Clock
-      };
-    }
-  };
-
   return (
     <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/20 shadow-sm">
       <CardContent className="p-0">
@@ -110,30 +94,21 @@ export const DateSlotCard = ({
                 const isSelected = selectedSlot?.date === date && 
                                  selectedSlot?.time === slot.time;
                 
-                const slotInfo = getSlotDisplayInfo(slot);
-                const IconComponent = slotInfo.icon;
-                
                 return (
                   <Button
                     key={`${date}-${slot.time}-${slot.veterinarian_id}`}
                     variant="outline"
                     className={cn(
-                      "h-auto p-2 flex flex-col items-center text-center transition-all duration-200 border-2",
+                      "h-auto p-3 flex items-center justify-center text-center transition-all duration-200 border-2",
                       isSelected
                         ? "bg-vet-sage hover:bg-vet-sage/90 text-white border-vet-sage shadow-md" 
                         : "bg-vet-blue/10 border-vet-blue/30 text-vet-navy hover:bg-vet-sage/20 hover:border-vet-sage/50"
                     )}
                     onClick={() => handleSlotClick(slot)}
                   >
-                    <div className="flex items-center mb-0.5">
-                      <Clock className="h-2.5 w-2.5 mr-1" />
-                      <span className="font-semibold text-xs">{slot.time}</span>
-                    </div>
                     <div className="flex items-center">
-                      <IconComponent className="h-2 w-2 mr-0.5" />
-                      <span className="text-[10px] opacity-80 truncate max-w-full leading-tight">
-                        {slotInfo.displayText}
-                      </span>
+                      <Clock className="h-3 w-3 mr-2" />
+                      <span className="font-semibold text-sm">{slot.time}</span>
                     </div>
                   </Button>
                 );
