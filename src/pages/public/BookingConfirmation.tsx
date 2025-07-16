@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,12 +16,21 @@ const BookingConfirmation = () => {
   const [submissionResult, setSubmissionResult] = useState<any>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
+  console.log('BookingConfirmation - bookingData:', bookingData);
+
   useEffect(() => {
+    // Vérifier si on a les données minimales requises
     if (!bookingData.animalSpecies || !bookingData.clientName || hasSubmitted) {
+      console.log('BookingConfirmation - Missing data or already submitted:', {
+        animalSpecies: bookingData.animalSpecies,
+        clientName: bookingData.clientName,
+        hasSubmitted
+      });
       return;
     }
 
     const submitData = async () => {
+      console.log('BookingConfirmation - Starting submission...');
       setHasSubmitted(true);
       
       if (bookingData.animalSpecies && bookingData.clientName && bookingData.clientEmail && 
@@ -36,7 +46,9 @@ const BookingConfirmation = () => {
           preferredContactMethod: bookingData.preferredContactMethod
         };
 
+        console.log('BookingConfirmation - Submitting data:', completeBookingData);
         const result = await submitBooking(completeBookingData);
+        console.log('BookingConfirmation - Submission result:', result);
         setSubmissionResult(result);
         
         if (result.booking) {
@@ -48,12 +60,13 @@ const BookingConfirmation = () => {
     submitData();
   }, [bookingData, submitBooking, hasSubmitted, resetBookingData]);
 
-  // Rediriger si pas de données
+  // Redirection seulement si vraiment aucune donnée ET pas en cours de soumission ET pas de résultat
   useEffect(() => {
-    if (!bookingData.animalSpecies && !isSubmitting && !submissionResult) {
+    if (!bookingData.animalSpecies && !isSubmitting && !submissionResult && !hasSubmitted) {
+      console.log('BookingConfirmation - Redirecting to booking start');
       navigate('/booking');
     }
-  }, [bookingData, navigate, isSubmitting, submissionResult]);
+  }, [bookingData, navigate, isSubmitting, submissionResult, hasSubmitted]);
 
   // Affichage pendant le chargement
   if (isSubmitting) {
@@ -157,13 +170,22 @@ const BookingConfirmation = () => {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-start space-x-3">
-                    <Calendar className="h-5 w-5 text-vet-sage mt-1" />
-                    <div>
-                      <p className="font-semibold text-vet-navy">Statut</p>
-                      <p className="text-vet-brown">En attente de confirmation par notre équipe</p>
+                  {bookingData.appointmentDate && bookingData.appointmentTime && (
+                    <div className="flex items-start space-x-3">
+                      <Calendar className="h-5 w-5 text-vet-sage mt-1" />
+                      <div>
+                        <p className="font-semibold text-vet-navy">Rendez-vous</p>
+                        <p className="text-vet-brown">
+                          Le {new Date(bookingData.appointmentDate).toLocaleDateString('fr-FR', {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })} à {bookingData.appointmentTime}
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                   <div className="flex items-start space-x-3">
                     <Clock className="h-5 w-5 text-vet-sage mt-1" />
                     <div>
@@ -197,7 +219,7 @@ const BookingConfirmation = () => {
                     <Phone className="h-5 w-5 text-vet-sage mt-1" />
                     <div>
                       <p className="font-semibold text-vet-navy">Contact par notre équipe</p>
-                      <p className="text-sm">Nous vous contacterons pour fixer un créneau de rendez-vous adapté selon l'urgence évaluée.</p>
+                      <p className="text-sm">Nous vous contacterons pour confirmer le créneau de rendez-vous.</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-3">
