@@ -44,7 +44,7 @@ const ContactInfo = () => {
   }, [navigate]);
 
   const handleBack = () => {
-    navigate('/booking/comment');
+    navigate('/booking/client-comment');
   };
 
   const handleNext = () => {
@@ -66,8 +66,8 @@ const ContactInfo = () => {
     localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
     console.log('Updated booking data with contact info:', updatedData);
 
-    // Naviguer vers la page des créneaux
-    navigate('/booking/slots');
+    // Naviguer vers la page des créneaux (route corrigée)
+    navigate('/booking/appointment-slots');
   };
 
   // Validation : statut client requis, et si statut sélectionné, tous les champs requis
