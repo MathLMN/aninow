@@ -380,6 +380,131 @@ export type Database = {
         }
         Relationships: []
       }
+      prompt_performance_logs: {
+        Row: {
+          booking_id: string | null
+          cost_cents: number | null
+          created_at: string
+          id: string
+          processing_time_ms: number
+          prompt_used: string
+          response_quality_score: number | null
+          template_id: string | null
+          tokens_used: number | null
+        }
+        Insert: {
+          booking_id?: string | null
+          cost_cents?: number | null
+          created_at?: string
+          id?: string
+          processing_time_ms: number
+          prompt_used: string
+          response_quality_score?: number | null
+          template_id?: string | null
+          tokens_used?: number | null
+        }
+        Update: {
+          booking_id?: string | null
+          cost_cents?: number | null
+          created_at?: string
+          id?: string
+          processing_time_ms?: number
+          prompt_used?: string
+          response_quality_score?: number | null
+          template_id?: string | null
+          tokens_used?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prompt_performance_logs_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prompt_performance_logs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "prompt_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prompt_rules: {
+        Row: {
+          conditions: Json
+          created_at: string
+          id: string
+          is_active: boolean | null
+          name: string
+          priority: number | null
+          template_id: string | null
+        }
+        Insert: {
+          conditions: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          priority?: number | null
+          template_id?: string | null
+        }
+        Update: {
+          conditions?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          priority?: number | null
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prompt_rules_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "prompt_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prompt_templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          system_prompt: string
+          updated_at: string
+          user_prompt_template: string
+          variables: Json | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          system_prompt: string
+          updated_at?: string
+          user_prompt_template: string
+          variables?: Json | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          system_prompt?: string
+          updated_at?: string
+          user_prompt_template?: string
+          variables?: Json | null
+        }
+        Relationships: []
+      }
       veterinarians: {
         Row: {
           clinic_name: string

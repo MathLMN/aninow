@@ -35,6 +35,14 @@ interface AnalysisResult {
   priority_level: string
 }
 
+interface PromptTemplate {
+  id: string
+  name: string
+  system_prompt: string
+  user_prompt_template: string
+  variables: Record<string, any>
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -49,16 +57,16 @@ serve(async (req) => {
 
     const startTime = Date.now()
     
-    // Analyser la réservation avec IA
-    const analysis = await analyzeBookingWithAI(booking_data)
-    
-    const processingTime = Date.now() - startTime
-
-    // Créer le client Supabase pour logger l'analyse
+    // Créer le client Supabase
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
+    
+    // Analyser la réservation avec IA en utilisant les templates de prompts
+    const analysis = await analyzeBookingWithAI(booking_data, supabaseClient)
+    
+    const processingTime = Date.now() - startTime
 
     // Logger l'analyse
     await supabaseClient
@@ -105,7 +113,7 @@ serve(async (req) => {
   }
 })
 
-async function analyzeBookingWithAI(booking: BookingData): Promise<AnalysisResult> {
+async function analyzeBookingWithAI(booking: BookingData, supabaseClient: any): Promise<AnalysisResult> {
   const openAIApiKey = Deno.env.get('OPENAI_API_KEY')
   
   if (!openAIApiKey) {
@@ -114,10 +122,13 @@ async function analyzeBookingWithAI(booking: BookingData): Promise<AnalysisResul
   }
 
   try {
-    // Préparer le prompt pour l'IA
-    const prompt = buildAnalysisPrompt(booking)
+    // Récupérer le template de prompt approprié
+    const template = await getPromptTemplate(booking, supabaseClient)
     
-    console.log('Sending request to OpenAI for booking analysis')
+    // Préparer le prompt avec le template
+    const { systemPrompt, userPrompt } = buildPromptsFromTemplate(template, booking)
+    
+    console.log('Sending request to OpenAI for booking analysis with template:', template.name)
     
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -126,25 +137,15 @@ async function analyzeBookingWithAI(booking: BookingData): Promise<AnalysisResul
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4.1-2025-04-14',
         messages: [
           {
             role: 'system',
-            content: `Tu es un assistant vétérinaire expert qui analyse les demandes de consultation.
-            Tu dois évaluer l'urgence d'une consultation vétérinaire sur une échelle de 1 à 10.
-            Réponds UNIQUEMENT en JSON avec cette structure exacte:
-            {
-              "urgency_score": number (1-10),
-              "recommended_actions": ["action1", "action2"],
-              "analysis_summary": "résumé de l'analyse",
-              "confidence_score": number (0-1),
-              "ai_insights": "insights détaillés sur le cas",
-              "priority_level": "low|medium|high|critical"
-            }`
+            content: systemPrompt
           },
           {
             role: 'user',
-            content: prompt
+            content: userPrompt
           }
         ],
         temperature: 0.1,
@@ -164,6 +165,17 @@ async function analyzeBookingWithAI(booking: BookingData): Promise<AnalysisResul
     // Parser la réponse JSON de l'IA
     const aiAnalysis = JSON.parse(aiResponse)
     
+    // Logger les performances du prompt
+    await logPromptPerformance(
+      template,
+      booking,
+      userPrompt,
+      aiAnalysis,
+      Date.now() - Date.now(),
+      data.usage?.total_tokens || 0,
+      supabaseClient
+    )
+    
     // Valider et compléter l'analyse
     return validateAndCompleteAnalysis(aiAnalysis, booking)
     
@@ -174,40 +186,195 @@ async function analyzeBookingWithAI(booking: BookingData): Promise<AnalysisResul
   }
 }
 
-function buildAnalysisPrompt(booking: BookingData): string {
-  const symptoms = [
-    ...(booking.selected_symptoms || []),
-    ...(booking.second_animal_selected_symptoms || [])
-  ]
-  
-  return `
-Analyse cette demande de consultation vétérinaire:
+async function getPromptTemplate(booking: BookingData, supabaseClient: any): Promise<PromptTemplate> {
+  try {
+    // Récupérer les règles actives triées par priorité
+    const { data: rules, error: rulesError } = await supabaseClient
+      .from('prompt_rules')
+      .select(`
+        *,
+        prompt_templates:template_id (
+          id,
+          name,
+          system_prompt,
+          user_prompt_template,
+          variables
+        )
+      `)
+      .eq('is_active', true)
+      .order('priority', { ascending: false })
 
-ANIMAL(S):
-- Espèce: ${booking.animal_species}${booking.second_animal_species ? ` et ${booking.second_animal_species}` : ''}
-- Nom: ${booking.animal_name}${booking.second_animal_name ? ` et ${booking.second_animal_name}` : ''}
-- Âge: ${booking.animal_age || 'Non spécifié'}
-- Race: ${booking.animal_breed || 'Non spécifié'}
-- Poids: ${booking.animal_weight || 'Non spécifié'}
+    if (rulesError) {
+      throw new Error(`Erreur lors de la récupération des règles: ${rulesError.message}`)
+    }
 
-MOTIF DE CONSULTATION:
-${booking.consultation_reason}
+    // Évaluer les règles pour trouver le template approprié
+    for (const rule of rules || []) {
+      if (evaluateRuleConditions(rule.conditions, booking)) {
+        console.log('Template sélectionné:', rule.prompt_templates.name)
+        return rule.prompt_templates
+      }
+    }
 
-SYMPTÔMES OBSERVÉS:
-${symptoms.length > 0 ? symptoms.join(', ') : 'Aucun symptôme spécifique'}
-${booking.custom_symptom ? `Symptôme personnalisé: ${booking.custom_symptom}` : ''}
+    // Si aucune règle ne correspond, utiliser le template par défaut
+    const { data: defaultTemplate, error: templateError } = await supabaseClient
+      .from('prompt_templates')
+      .select('*')
+      .eq('name', 'default_veterinary_analysis')
+      .eq('is_active', true)
+      .single()
 
-DURÉE DES SYMPTÔMES:
-${booking.symptom_duration || 'Non spécifié'}
+    if (templateError || !defaultTemplate) {
+      throw new Error('Aucun template par défaut trouvé')
+    }
 
-RÉPONSES AUX QUESTIONS:
-${booking.conditional_answers ? JSON.stringify(booking.conditional_answers, null, 2) : 'Aucune réponse conditionnelle'}
+    console.log('Utilisation du template par défaut')
+    return defaultTemplate
 
-COMMENTAIRE CLIENT:
-${booking.client_comment || 'Aucun commentaire'}
+  } catch (error) {
+    console.error('Erreur lors de la récupération du template:', error)
+    // Retourner un template hardcodé en cas d'erreur
+    return {
+      id: 'fallback',
+      name: 'fallback_template',
+      system_prompt: 'Tu es un assistant vétérinaire expert qui analyse les demandes de consultation. Tu dois évaluer l\'urgence d\'une consultation vétérinaire sur une échelle de 1 à 10. Réponds UNIQUEMENT en JSON avec cette structure exacte: {"urgency_score": number (1-10), "recommended_actions": ["action1", "action2"], "analysis_summary": "résumé de l\'analyse", "confidence_score": number (0-1), "ai_insights": "insights détaillés sur le cas", "priority_level": "low|medium|high|critical"}',
+      user_prompt_template: 'Analyse cette demande de consultation vétérinaire pour {{animal_name}} ({{animal_species}}):\n\nMotif: {{consultation_reason}}\nSymptômes: {{symptoms}}\nDurée: {{symptom_duration}}\nCommentaire: {{client_comment}}',
+      variables: {}
+    }
+  }
+}
 
-Évalue l'urgence et fournis des recommandations appropriées.
-  `
+function evaluateRuleConditions(conditions: any, booking: BookingData): boolean {
+  try {
+    // Règle par défaut - s'applique à tous
+    if (conditions.type === 'default') {
+      return true
+    }
+
+    // Évaluer les conditions basées sur l'espèce
+    if (conditions.animal_species) {
+      if (Array.isArray(conditions.animal_species)) {
+        if (!conditions.animal_species.includes(booking.animal_species)) {
+          return false
+        }
+      } else if (conditions.animal_species !== booking.animal_species) {
+        return false
+      }
+    }
+
+    // Évaluer les conditions basées sur les symptômes
+    if (conditions.symptoms && booking.selected_symptoms) {
+      const requiredSymptoms = Array.isArray(conditions.symptoms) ? conditions.symptoms : [conditions.symptoms]
+      const hasRequiredSymptom = requiredSymptoms.some(symptom => 
+        booking.selected_symptoms.includes(symptom)
+      )
+      if (!hasRequiredSymptom) {
+        return false
+      }
+    }
+
+    // Évaluer les conditions basées sur l'urgence
+    if (conditions.consultation_reason && conditions.consultation_reason !== booking.consultation_reason) {
+      return false
+    }
+
+    return true
+  } catch (error) {
+    console.error('Erreur lors de l\'évaluation des conditions:', error)
+    return false
+  }
+}
+
+function buildPromptsFromTemplate(template: PromptTemplate, booking: BookingData): { systemPrompt: string, userPrompt: string } {
+  try {
+    // Préparer les variables pour le template
+    const variables = {
+      animal_species: booking.animal_species || 'Non spécifié',
+      second_animal_species: booking.second_animal_species || '',
+      animal_name: booking.animal_name || 'Non spécifié',
+      second_animal_name: booking.second_animal_name || '',
+      animal_age: booking.animal_age || 'Non spécifié',
+      animal_breed: booking.animal_breed || 'Non spécifié',
+      animal_weight: booking.animal_weight?.toString() || 'Non spécifié',
+      consultation_reason: booking.consultation_reason || 'Non spécifié',
+      symptoms: [
+        ...(booking.selected_symptoms || []),
+        ...(booking.second_animal_selected_symptoms || [])
+      ].join(', ') || 'Aucun symptôme spécifique',
+      custom_symptom: booking.custom_symptom || '',
+      symptom_duration: booking.symptom_duration || 'Non spécifié',
+      conditional_answers: booking.conditional_answers ? JSON.stringify(booking.conditional_answers, null, 2) : 'Aucune réponse conditionnelle',
+      client_comment: booking.client_comment || 'Aucun commentaire'
+    }
+
+    // Remplacer les variables dans le template utilisateur
+    let userPrompt = template.user_prompt_template
+    
+    // Remplacer les variables simples {{variable}}
+    Object.entries(variables).forEach(([key, value]) => {
+      const regex = new RegExp(`{{${key}}}`, 'g')
+      userPrompt = userPrompt.replace(regex, value.toString())
+    })
+
+    // Gérer les conditions {{#variable}} et {{/variable}}
+    userPrompt = userPrompt.replace(/{{#(\w+)}}(.*?){{\/\1}}/g, (match, varName, content) => {
+      const value = variables[varName as keyof typeof variables]
+      return value && value.toString().trim() ? content : ''
+    })
+
+    return {
+      systemPrompt: template.system_prompt,
+      userPrompt
+    }
+  } catch (error) {
+    console.error('Erreur lors de la construction du prompt:', error)
+    // Fallback vers un prompt simple
+    return {
+      systemPrompt: template.system_prompt,
+      userPrompt: `Analyse cette demande de consultation vétérinaire pour ${booking.animal_name} (${booking.animal_species})`
+    }
+  }
+}
+
+async function logPromptPerformance(
+  template: PromptTemplate,
+  booking: BookingData,
+  promptUsed: string,
+  response: any,
+  processingTime: number,
+  tokensUsed: number,
+  supabaseClient: any
+) {
+  try {
+    // Calculer un score de qualité basique basé sur la réponse
+    let qualityScore = 0.7 // Score par défaut
+    
+    if (response.urgency_score && response.urgency_score >= 1 && response.urgency_score <= 10) {
+      qualityScore += 0.1
+    }
+    if (response.recommended_actions && Array.isArray(response.recommended_actions) && response.recommended_actions.length > 0) {
+      qualityScore += 0.1
+    }
+    if (response.analysis_summary && response.analysis_summary.length > 10) {
+      qualityScore += 0.1
+    }
+    
+    qualityScore = Math.min(qualityScore, 1.0)
+
+    await supabaseClient
+      .from('prompt_performance_logs')
+      .insert({
+        template_id: template.id,
+        booking_id: booking.id,
+        prompt_used: promptUsed,
+        response_quality_score: qualityScore,
+        processing_time_ms: processingTime,
+        tokens_used: tokensUsed,
+        cost_cents: Math.round((tokensUsed / 1000) * 2) // Estimation basique du coût
+      })
+  } catch (error) {
+    console.error('Erreur lors du logging des performances:', error)
+  }
 }
 
 function validateAndCompleteAnalysis(aiAnalysis: any, booking: BookingData): AnalysisResult {
@@ -215,16 +382,13 @@ function validateAndCompleteAnalysis(aiAnalysis: any, booking: BookingData): Ana
   const urgencyScore = Math.max(1, Math.min(10, aiAnalysis.urgency_score || 3))
   const confidenceScore = Math.max(0, Math.min(1, aiAnalysis.confidence_score || 0.7))
   
-  // Déterminer le niveau de priorité
   let priorityLevel = 'medium'
   if (urgencyScore >= 8) priorityLevel = 'critical'
   else if (urgencyScore >= 6) priorityLevel = 'high'
   else if (urgencyScore <= 3) priorityLevel = 'low'
   
-  // Ajouter des actions recommandées par défaut si nécessaire
   const recommendedActions = aiAnalysis.recommended_actions || ['Consultation standard']
   
-  // Toujours ajouter des recommandations de base
   if (!recommendedActions.includes('Préparer le carnet de santé')) {
     recommendedActions.push('Préparer le carnet de santé')
   }
@@ -250,7 +414,6 @@ async function analyzeBookingFallback(booking: BookingData): Promise<AnalysisRes
   const recommendedActions: string[] = []
   let analysisSummary = ''
 
-  // Analyser les symptômes critiques
   const criticalSymptoms = [
     'difficulte-respirer',
     'saignement-abondant',
@@ -273,7 +436,6 @@ async function analyzeBookingFallback(booking: BookingData): Promise<AnalysisRes
     ...(booking.second_animal_selected_symptoms || [])
   ]
 
-  // Vérifier les symptômes critiques
   const hasCriticalSymptoms = allSymptoms.some(symptom => 
     criticalSymptoms.includes(symptom)
   )
@@ -285,7 +447,6 @@ async function analyzeBookingFallback(booking: BookingData): Promise<AnalysisRes
     analysisSummary = 'Symptômes critiques détectés - intervention d\'urgence requise'
     confidenceScore = 0.95
   } else {
-    // Vérifier les symptômes urgents
     const hasUrgentSymptoms = allSymptoms.some(symptom => 
       urgentSymptoms.includes(symptom)
     )
@@ -297,7 +458,6 @@ async function analyzeBookingFallback(booking: BookingData): Promise<AnalysisRes
       analysisSummary = 'Symptômes préoccupants - consultation rapide recommandée'
       confidenceScore = 0.85
     } else {
-      // Analyser la durée des symptômes
       if (booking.symptom_duration) {
         if (booking.symptom_duration.includes('plus-une-semaine')) {
           urgencyScore = Math.max(urgencyScore, 4)
@@ -311,37 +471,31 @@ async function analyzeBookingFallback(booking: BookingData): Promise<AnalysisRes
     }
   }
 
-  // Analyser l'âge de l'animal
   if (booking.animal_age === 'moins-1-an' || booking.animal_age === 'plus-10-ans') {
     urgencyScore = Math.min(urgencyScore + 1, 10)
     recommendedActions.push('Attention particulière due à l\'âge')
   }
 
-  // Analyser les réponses aux questions conditionnelles
   if (booking.conditional_answers) {
     const answers = booking.conditional_answers
     
-    // Vérifier les signes d'aggravation
     if (answers.symptoms_worsening === 'oui' || answers.general_worsening === 'oui') {
       urgencyScore = Math.min(urgencyScore + 2, 10)
       recommendedActions.push('Symptômes en aggravation - consultation prioritaire')
     }
 
-    // Vérifier les problèmes de comportement
     if (answers.behavioral_changes === 'oui' || answers.appetite_loss === 'oui') {
       urgencyScore = Math.min(urgencyScore + 1, 10)
       recommendedActions.push('Changements comportementaux détectés')
     }
   }
 
-  // Motif de consultation d'urgence
   if (booking.consultation_reason === 'urgence') {
     urgencyScore = Math.max(urgencyScore, 7)
     recommendedActions.push('Consultation d\'urgence demandée')
     analysisSummary = 'Consultation d\'urgence explicitement demandée'
   }
 
-  // Ajuster le score pour les consultations de convenance
   if (booking.consultation_reason === 'consultation-convenance') {
     urgencyScore = Math.min(urgencyScore, 3)
     if (!analysisSummary) {
@@ -349,12 +503,10 @@ async function analyzeBookingFallback(booking: BookingData): Promise<AnalysisRes
     }
   }
 
-  // Ajouter des actions par défaut
   if (recommendedActions.length === 0) {
     recommendedActions.push('Consultation standard')
   }
 
-  // Ajouter des recommandations générales
   recommendedActions.push('Préparer le carnet de santé')
   if (booking.animal_vaccines_up_to_date === false) {
     recommendedActions.push('Vérifier les vaccinations')
@@ -364,7 +516,6 @@ async function analyzeBookingFallback(booking: BookingData): Promise<AnalysisRes
     analysisSummary = `Consultation de routine - Score d'urgence: ${urgencyScore}/10`
   }
 
-  // Déterminer le niveau de priorité
   let priorityLevel = 'medium'
   if (urgencyScore >= 8) priorityLevel = 'critical'
   else if (urgencyScore >= 6) priorityLevel = 'high'
