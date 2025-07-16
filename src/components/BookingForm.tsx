@@ -23,7 +23,7 @@ const BookingForm = ({
     formData,
     formState,
     isLitter,
-    setFormData,
+    initializeFormData,
     handleSpeciesChange,
     handleCustomSpeciesChange,
     handleNameChange,
@@ -34,22 +34,13 @@ const BookingForm = ({
     handleVaccinationTypeChange
   } = useBookingFormLogic();
 
-  // Initialize form with localStorage data on mount
+  // Initialize form with localStorage data on mount - only once
   useEffect(() => {
     if (bookingData && Object.keys(bookingData).length > 0) {
       console.log('Initializing form with localStorage data:', bookingData);
-      setFormData({
-        animalSpecies: bookingData.animalSpecies || '',
-        customSpecies: bookingData.customSpecies || '',
-        animalName: bookingData.animalName || '',
-        multipleAnimals: bookingData.multipleAnimals || [],
-        secondAnimalSpecies: bookingData.secondAnimalSpecies || '',
-        secondAnimalName: bookingData.secondAnimalName || '',
-        secondCustomSpecies: bookingData.secondCustomSpecies || '',
-        vaccinationType: bookingData.vaccinationType || ''
-      });
+      initializeFormData(bookingData);
     }
-  }, [bookingData, setFormData]);
+  }, []); // Pas de dépendances pour éviter les re-initialisations
 
   const canProceed = validateBookingForm(formData, formState, isLitter);
 

@@ -122,14 +122,16 @@ export const useBookingNavigation = () => {
       bookingData
     })
 
-    // Pour la page /booking, on ne fait jamais de redirection automatique
+    // IMPORTANT: Ne JAMAIS rediriger depuis la page /booking
     // L'utilisateur doit pouvoir remplir le formulaire librement
     if (currentRoute === '/booking') {
+      console.log('On /booking page - no redirect allowed')
       return null
     }
 
     // Si on n'a pas les données de base, rediriger vers /booking
     if (!hasBasicData()) {
+      console.log('No basic data - redirecting to /booking')
       return '/booking'
     }
 
@@ -139,8 +141,10 @@ export const useBookingNavigation = () => {
       const isLitter = bookingData.multipleAnimals?.includes('une-portee')
       // Pour une portée, on peut aller directement aux infos animal
       if (isLitter && currentRoute === '/booking/animal-info') {
+        console.log('Litter can go to animal-info - no redirect')
         return null // Pas de redirection
       }
+      console.log('No consultation reason - redirecting to consultation-reason')
       return '/booking/consultation-reason'
     }
 
@@ -149,12 +153,13 @@ export const useBookingNavigation = () => {
                        bookingData.secondAnimalConsultationReason === 'symptomes-anomalie'
     
     if (hasSymptoms && !bookingData.conditionalAnswers && 
-        currentRoute !== '/booking' && 
         currentRoute !== '/booking/consultation-reason' && 
         currentRoute !== '/booking/conditional-questions') {
+      console.log('Has symptoms but no conditional answers - redirecting to conditional-questions')
       return '/booking/conditional-questions'
     }
 
+    console.log('No redirect needed')
     return null // Pas de redirection nécessaire
   }
 

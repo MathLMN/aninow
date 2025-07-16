@@ -7,25 +7,16 @@ import Header from "@/components/Header";
 import ProgressBar from "@/components/ProgressBar";
 import { FormData } from "@/types/FormDataTypes";
 import { useBookingFormData } from "@/hooks/useBookingFormData";
-import { useBookingNavigation } from "@/hooks/useBookingNavigation";
 
 const BookingStart = () => {
   const navigate = useNavigate();
   const { bookingData, updateBookingData } = useBookingFormData();
-  const { shouldRedirect, navigateNext } = useBookingNavigation();
   const hasNavigated = useRef(false);
 
-  // Vérifier s'il faut rediriger l'utilisateur - mais seulement si on n'a pas déjà navigué
+  // Réinitialiser le flag de navigation quand on arrive sur la page
   useEffect(() => {
-    // Ne pas rediriger si on vient juste de soumettre le formulaire
-    if (hasNavigated.current) return;
-    
-    const redirectRoute = shouldRedirect('/booking');
-    if (redirectRoute && redirectRoute !== '/booking') {
-      console.log('BookingStart: Redirecting to', redirectRoute);
-      navigate(redirectRoute, { replace: true });
-    }
-  }, [navigate, shouldRedirect]);
+    hasNavigated.current = false;
+  }, []);
 
   const handleNext = (data: FormData) => {
     console.log('BookingStart: Form data submitted:', data);
