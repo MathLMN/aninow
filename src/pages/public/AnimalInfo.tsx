@@ -8,76 +8,70 @@ import Header from "@/components/Header";
 import ProgressBar from "@/components/ProgressBar";
 import AnimalInfoSelector from "@/components/AnimalInfoSelector";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useBookingFormData } from "@/hooks/useBookingFormData";
+import { useBookingNavigation } from "@/hooks/useBookingNavigation";
 
 const AnimalInfo = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const [bookingData, setBookingData] = useState<any>(null);
-  const [previousRoute, setPreviousRoute] = useState<string>('');
+  const { bookingData, updateBookingData } = useBookingFormData();
+  const { shouldRedirect, navigateBack, navigateNext } = useBookingNavigation();
   
   // États pour l'animal 1
   const [firstAnimalBreed, setFirstAnimalBreed] = useState('');
   const [firstAnimalAge, setFirstAnimalAge] = useState('');
+  const [firstAnimalWeight, setFirstAnimalWeight] = useState('');
+  const [firstAnimalSex, setFirstAnimalSex] = useState('');
   
   // États pour l'animal 2 (si applicable)
   const [secondAnimalBreed, setSecondAnimalBreed] = useState('');
   const [secondAnimalAge, setSecondAnimalAge] = useState('');
+  const [secondAnimalWeight, setSecondAnimalWeight] = useState('');
+  const [secondAnimalSex, setSecondAnimalSex] = useState('');
 
   useEffect(() => {
-    // Vérifier que les données du formulaire existent
-    const storedData = localStorage.getItem('bookingFormData');
-    if (!storedData) {
-      navigate('/');
+    const redirectRoute = shouldRedirect('/booking/animal-info');
+    if (redirectRoute) {
+      console.log('AnimalInfo: Redirecting to', redirectRoute);
+      navigate(redirectRoute, { replace: true });
       return;
     }
-    
-    const parsedData = JSON.parse(storedData);
-    setBookingData(parsedData);
 
-    // Déterminer d'où vient l'utilisateur pour le bouton retour
-    const isLitter = parsedData.multipleAnimals?.includes('une-portee');
-    
-    if (isLitter) {
-      // Pour une portée, retour vers la première page
-      setPreviousRoute('/');
-    } else {
-      // Déterminer la route précédente selon le flux normal
-      const hasSymptomConsultation = parsedData.consultationReason === 'symptomes-anomalie' || 
-        parsedData.secondAnimalConsultationReason === 'symptomes-anomalie';
-      
-      if (hasSymptomConsultation && parsedData.hasAdditionalConsultationPoints !== undefined) {
-        // Vient de la page des points supplémentaires
-        setPreviousRoute('/booking/additional-points');
-      } else {
-        // Vient de la page motif de consultation (consultation de convenance)
-        setPreviousRoute('/booking/consultation-reason');
-      }
-    }
-  }, [navigate]);
+    // Charger les données existantes
+    if (bookingData.animalBreed) setFirstAnimalBreed(bookingData.animalBreed);
+    if (bookingData.animalAge) setFirstAnimalAge(bookingData.animalAge);
+    if (bookingData.animalWeight) setFirstAnimalWeight(bookingData.animalWeight.toString());
+    if (bookingData.animalSex) setFirstAnimalSex(bookingData.animalSex);
+    if (bookingData.secondAnimalBreed) setSecondAnimalBreed(bookingData.secondAnimalBreed);
+    if (bookingData.secondAnimalAge) setSecondAnimalAge(bookingData.secondAnimalAge);
+    if (bookingData.secondAnimalWeight) setSecondAnimalWeight(bookingData.secondAnimalWeight.toString());
+    if (bookingData.secondAnimalSex) setSecondAnimalSex(bookingData.secondAnimalSex);
+  }, [navigate, shouldRedirect, bookingData]);
 
   const handleBack = () => {
-    navigate(previousRoute);
+    navigateBack('/booking/animal-info');
   };
 
   const handleNext = () => {
     if (!canProceed) return;
 
-    const existingData = JSON.parse(localStorage.getItem('bookingFormData') || '{}');
     const updatedData = {
-      ...existingData,
-      firstAnimalBreed,
-      firstAnimalAge,
+      animalBreed: firstAnimalBreed,
+      animalAge: firstAnimalAge,
+      animalWeight: firstAnimalWeight ? parseFloat(firstAnimalWeight) : undefined,
+      animalSex: firstAnimalSex,
       ...(hasTwoAnimals && {
         secondAnimalBreed,
-        secondAnimalAge
+        secondAnimalAge,
+        secondAnimalWeight: secondAnimalWeight ? parseFloat(secondAnimalWeight) : undefined,
+        secondAnimalSex
       })
     };
     
-    localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
-    console.log('Updated booking data with animal info:', updatedData);
+    updateBookingData(updatedData);
+    console.log('AnimalInfo: Updated booking data:', updatedData);
 
-    // Naviguer vers la page de commentaire client (route corrigée)
-    navigate('/booking/client-comment');
+    navigateNext('/booking/animal-info');
   };
 
   if (!bookingData) {
@@ -95,9 +89,9 @@ const AnimalInfo = () => {
   
   // Pour une portée, l'âge n'est pas requis
   const canProceed = isFirstAnimalValid && 
-    (isLitter || firstAnimalAge !== '') && 
+    (isLitter || (firstAnimalAge !== '' && firstAnimalWeight !== '' && firstAnimalSex !== '')) && 
     isSecondAnimalValid && 
-    (!hasTwoAnimals || isLitter || secondAnimalAge !== '');
+    (!hasTwoAnimals || isLitter || (secondAnimalAge !== '' && secondAnimalWeight !== '' && secondAnimalSex !== ''));
 
   return (
     <div className="min-h-screen relative" style={{
@@ -137,6 +131,10 @@ const AnimalInfo = () => {
                   onBreedChange={setFirstAnimalBreed}
                   selectedAge={firstAnimalAge}
                   onAgeChange={setFirstAnimalAge}
+                  selectedWeight={firstAnimalWeight}
+                  onWeightChange={setFirstAnimalWeight}
+                  selectedSex={firstAnimalSex}
+                  onSexChange={setFirstAnimalSex}
                   isLitter={isLitter}
                 />
 
@@ -150,6 +148,10 @@ const AnimalInfo = () => {
                       onBreedChange={setSecondAnimalBreed}
                       selectedAge={secondAnimalAge}
                       onAgeChange={setSecondAnimalAge}
+                      selectedWeight={secondAnimalWeight}
+                      onWeightChange={setSecondAnimalWeight}
+                      selectedSex={secondAnimalSex}
+                      onSexChange={setSecondAnimalSex}
                       isLitter={false}
                     />
                   </div>

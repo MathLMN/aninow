@@ -98,9 +98,9 @@ export const useBookingFormData = () => {
     // Vérifier si c'est une portée
     const isLitter = bookingData.multipleAnimals?.includes('une-portee')
     
-    // Pour une portée, seule l'espèce est obligatoire (pas le nom)
+    // Pour une portée, seule l'espèce et le type de vaccination sont obligatoires
     if (isLitter) {
-      return !!(bookingData.animalSpecies)
+      return !!(bookingData.animalSpecies && bookingData.vaccinationType)
     }
     
     // Pour un animal normal, espèce ET nom sont obligatoires
@@ -114,6 +114,14 @@ export const useBookingFormData = () => {
 
   // Vérifier si les informations animaux sont complètes
   const hasAnimalInfo = () => {
+    const isLitter = bookingData.multipleAnimals?.includes('une-portee')
+    
+    // Pour une portée, seule la race est requise (pas l'âge)
+    if (isLitter) {
+      return !!(bookingData.animalBreed)
+    }
+    
+    // Pour un animal normal, toutes les infos sont requises
     return !!(bookingData.animalAge && bookingData.animalBreed && bookingData.animalWeight && bookingData.animalSex)
   }
 

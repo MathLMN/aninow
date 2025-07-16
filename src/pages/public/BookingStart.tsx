@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
@@ -6,48 +7,39 @@ import Header from "@/components/Header";
 import ProgressBar from "@/components/ProgressBar";
 import { FormData } from "@/types/FormDataTypes";
 import { useBookingFormData } from "@/hooks/useBookingFormData";
+import { useBookingNavigation } from "@/hooks/useBookingNavigation";
 
 const BookingStart = () => {
   const navigate = useNavigate();
-  const { bookingData } = useBookingFormData();
+  const { bookingData, updateBookingData } = useBookingFormData();
+  const { shouldRedirect, navigateNext } = useBookingNavigation();
 
-  // Check if user has already completed this step and should be redirected
+  // Vérifier s'il faut rediriger l'utilisateur
   useEffect(() => {
-    if (bookingData && bookingData.animalSpecies) {
-      const isLitter = bookingData.multipleAnimals?.includes('une-portee');
-      
-      // If it's a litter with vaccination type selected, or a regular animal with name
-      if ((isLitter && bookingData.vaccinationType) || (!isLitter && bookingData.animalName)) {
-        console.log('User has already completed basic data, checking next step...');
-        
-        // If user has consultation reason, redirect to animal info
-        if (bookingData.consultationReason) {
-          navigate('/booking/animal-info', { replace: true });
-          return;
-        }
-        
-        // Otherwise redirect to consultation reason unless it's a litter (which goes to animal info)
-        if (isLitter && bookingData.vaccinationType) {
-          navigate('/booking/animal-info', { replace: true });
-        } else if (!isLitter) {
-          navigate('/booking/consultation-reason', { replace: true });
-        }
-      }
+    const redirectRoute = shouldRedirect('/booking');
+    if (redirectRoute && redirectRoute !== '/booking') {
+      console.log('BookingStart: Redirecting to', redirectRoute);
+      navigate(redirectRoute, { replace: true });
     }
-  }, [bookingData, navigate]);
+  }, [navigate, shouldRedirect]);
 
   const handleNext = (data: FormData) => {
-    console.log('Form data submitted:', data);
+    console.log('BookingStart: Form data submitted:', data);
     
-    // Si c'est une portée avec type de vaccination sélectionné, aller directement aux infos animal
-    if (data.multipleAnimals.includes('une-portee') && data.vaccinationType) {
-      console.log('Litter with vaccination type, navigating to animal info');
-      navigate('/booking/animal-info');
-    } else {
-      // Sinon, aller vers le motif de consultation
-      console.log('Regular animal or no vaccination type, navigating to consultation reason');
-      navigate('/booking/consultation-reason');
-    }
+    // Sauvegarder les données
+    const dataToSave = {
+      ...data,
+      // Si c'est une portée, pré-remplir le motif de consultation
+      ...(data.multipleAnimals.includes('une-portee') && data.vaccinationType ? {
+        consultationReason: 'consultation-convenance',
+        convenienceOptions: [data.vaccinationType === 'vaccinations-identifications' ? 'vaccination-identification' : 'vaccination']
+      } : {})
+    };
+    
+    updateBookingData(dataToSave);
+    
+    // Naviguer vers la prochaine étape
+    navigateNext('/booking');
   };
 
   return (

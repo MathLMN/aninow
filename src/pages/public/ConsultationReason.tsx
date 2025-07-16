@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import ConsultationReasonSelect from "@/components/ConsultationReasonSelect";
 import ConvenienceConsultationSelect from "@/components/ConvenienceConsultationSelect";
 import SymptomSelector from "@/components/SymptomSelector";
@@ -12,12 +12,12 @@ import Header from "@/components/Header";
 import ProgressBar from "@/components/ProgressBar";
 import { useConsultationReason } from "@/hooks/useConsultationReason";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useBookingFormData } from "@/hooks/useBookingFormData";
+import { useBookingNavigation } from "@/hooks/useBookingNavigation";
 
 const ConsultationReason = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { bookingData, hasBasicData } = useBookingFormData();
+  const { shouldRedirect, navigateBack, navigateNext } = useBookingNavigation();
   
   const {
     consultationReason,
@@ -45,20 +45,24 @@ const ConsultationReason = () => {
     hasTwoAnimals,
     handleNext,
     canProceed,
-    shouldForceConvenienceForAnimal2
+    shouldForceConvenienceForAnimal2,
+    bookingData
   } = useConsultationReason();
 
   useEffect(() => {
-    // Vérifier que les données de base sont présentes
-    if (!hasBasicData()) {
-      console.log('Données de base manquantes, redirection vers /booking');
-      navigate('/booking');
-      return;
+    const redirectRoute = shouldRedirect('/booking/consultation-reason');
+    if (redirectRoute) {
+      console.log('ConsultationReason: Redirecting to', redirectRoute);
+      navigate(redirectRoute, { replace: true });
     }
-  }, [hasBasicData, navigate]);
+  }, [navigate, shouldRedirect]);
 
-  const handleBack = () => {
-    navigate('/booking');
+  const handleBackClick = () => {
+    navigateBack('/booking/consultation-reason');
+  };
+
+  const handleNextClick = () => {
+    handleNext(); // Utilise la logique existante du hook useConsultationReason
   };
 
   const firstAnimalName = bookingData?.animalName || 'votre animal';
@@ -86,7 +90,7 @@ const ConsultationReason = () => {
               <div className="mb-4 sm:mb-6">
                 <Button 
                   variant="ghost" 
-                  onClick={handleBack}
+                  onClick={handleBackClick}
                   className="text-vet-navy hover:bg-vet-beige/20 p-2 text-sm sm:text-base -ml-2"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
@@ -166,7 +170,7 @@ const ConsultationReason = () => {
               {!isMobile && (
                 <div className="flex justify-end mt-6 pt-4 border-t border-gray-100">
                   <Button 
-                    onClick={handleNext} 
+                    onClick={handleNextClick} 
                     disabled={!canProceed} 
                     className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
                   >
@@ -184,7 +188,7 @@ const ConsultationReason = () => {
       {isMobile && (
         <div className="fixed bottom-6 right-6 z-50">
           <Button 
-            onClick={handleNext} 
+            onClick={handleNextClick} 
             disabled={!canProceed} 
             className="bg-vet-sage hover:bg-vet-sage/90 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
           >

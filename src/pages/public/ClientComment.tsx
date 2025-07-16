@@ -7,44 +7,43 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Header from "@/components/Header";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useBookingFormData } from "@/hooks/useBookingFormData";
+import { useBookingNavigation } from "@/hooks/useBookingNavigation";
 
 const ClientComment = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [comment, setComment] = useState('');
+  
+  const { bookingData, updateBookingData } = useBookingFormData();
+  const { shouldRedirect, navigateBack, navigateNext } = useBookingNavigation();
 
   useEffect(() => {
-    // Vérifier que les données du formulaire existent
-    const storedData = localStorage.getItem('bookingFormData');
-    if (!storedData) {
-      navigate('/');
+    const redirectRoute = shouldRedirect('/booking/client-comment');
+    if (redirectRoute) {
+      console.log('ClientComment: Redirecting to', redirectRoute);
+      navigate(redirectRoute, { replace: true });
       return;
     }
     
     // Récupérer le commentaire existant s'il y en a un
-    const parsedData = JSON.parse(storedData);
-    if (parsedData.clientComment) {
-      setComment(parsedData.clientComment);
+    if (bookingData?.clientComment) {
+      setComment(bookingData.clientComment);
     }
-  }, [navigate]);
+  }, [navigate, shouldRedirect, bookingData]);
 
   const handleBack = () => {
-    navigate('/booking/animal-info');
+    navigateBack('/booking/client-comment');
   };
 
   const handleNext = () => {
     // Sauvegarder le commentaire (même s'il est vide car optionnel)
-    const existingData = JSON.parse(localStorage.getItem('bookingFormData') || '{}');
-    const updatedData = {
-      ...existingData,
+    updateBookingData({
       clientComment: comment.trim()
-    };
-    
-    localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
-    console.log('Updated booking data with comment:', updatedData);
+    });
+    console.log('ClientComment: Updated booking data with comment:', comment.trim());
 
-    // Naviguer vers la page des coordonnées client
-    navigate('/booking/contact-info');
+    navigateNext('/booking/client-comment');
   };
 
   return (

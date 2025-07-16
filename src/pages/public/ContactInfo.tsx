@@ -11,11 +11,14 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import Header from "@/components/Header";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useBookingFormData } from "@/hooks/useBookingFormData";
+import { useBookingNavigation } from "@/hooks/useBookingNavigation";
 
 const ContactInfo = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { bookingData, updateBookingData, hasBasicData, hasConsultationReason, hasAnimalInfo } = useBookingFormData();
+  
+  const { bookingData, updateBookingData } = useBookingFormData();
+  const { shouldRedirect, navigateBack, navigateNext } = useBookingNavigation();
   
   // États pour le statut client et les informations
   const [clientStatus, setClientStatus] = useState('');
@@ -27,21 +30,18 @@ const ContactInfo = () => {
   const [dataConsent, setDataConsent] = useState(false);
 
   useEffect(() => {
-    // Vérifier que les étapes précédentes sont complètes
-    if (!hasBasicData() || !hasConsultationReason() || !hasAnimalInfo()) {
-      console.log('Données manquantes, redirection vers /booking');
-      console.log('hasBasicData:', hasBasicData());
-      console.log('hasConsultationReason:', hasConsultationReason());
-      console.log('hasAnimalInfo:', hasAnimalInfo());
-      navigate('/booking');
+    const redirectRoute = shouldRedirect('/booking/contact-info');
+    if (redirectRoute) {
+      console.log('ContactInfo: Redirecting to', redirectRoute);
+      navigate(redirectRoute, { replace: true });
       return;
     }
     
     // Récupérer les données existantes s'il y en a
-    if (bookingData.clientStatus) setClientStatus(bookingData.clientStatus);
-    if (bookingData.firstName) setFirstName(bookingData.firstName);
-    if (bookingData.lastName) setLastName(bookingData.lastName);
-    if (bookingData.clientPhone) {
+    if (bookingData?.clientStatus) setClientStatus(bookingData.clientStatus);
+    if (bookingData?.firstName) setFirstName(bookingData.firstName);
+    if (bookingData?.lastName) setLastName(bookingData.lastName);
+    if (bookingData?.clientPhone) {
       // Extraire le numéro sans le préfixe
       const phone = bookingData.clientPhone;
       if (phone.startsWith('+33')) {
@@ -54,13 +54,13 @@ const ContactInfo = () => {
         setPhoneNumber(phone);
       }
     }
-    if (bookingData.clientEmail) setEmail(bookingData.clientEmail);
-    if (bookingData.phonePrefix) setPhonePrefix(bookingData.phonePrefix);
-    if (bookingData.dataConsent) setDataConsent(bookingData.dataConsent);
-  }, [bookingData, navigate, hasBasicData, hasConsultationReason, hasAnimalInfo]);
+    if (bookingData?.clientEmail) setEmail(bookingData.clientEmail);
+    if (bookingData?.phonePrefix) setPhonePrefix(bookingData.phonePrefix);
+    if (bookingData?.dataConsent) setDataConsent(bookingData.dataConsent);
+  }, [navigate, shouldRedirect, bookingData]);
 
   const handleBack = () => {
-    navigate('/booking/client-comment');
+    navigateBack('/booking/contact-info');
   };
 
   const handleNext = () => {
@@ -80,10 +80,9 @@ const ContactInfo = () => {
     };
     
     updateBookingData(updatedData);
-    console.log('Updated booking data with contact info:', updatedData);
+    console.log('ContactInfo: Updated booking data with contact info:', updatedData);
 
-    // Naviguer vers la page des créneaux
-    navigate('/booking/appointment-slots');
+    navigateNext('/booking/contact-info');
   };
 
   // Validation : statut client requis, et si statut sélectionné, tous les champs requis

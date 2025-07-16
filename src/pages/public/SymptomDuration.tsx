@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,12 +8,16 @@ import Header from "@/components/Header";
 import ProgressBar from "@/components/ProgressBar";
 import SelectionButton from "@/components/SelectionButton";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useBookingFormData } from "@/hooks/useBookingFormData";
+import { useBookingNavigation } from "@/hooks/useBookingNavigation";
 
 const SymptomDuration = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [selectedDuration, setSelectedDuration] = useState('');
-  const [bookingData, setBookingData] = useState<any>(null);
+  
+  const { bookingData, updateBookingData } = useBookingFormData();
+  const { shouldRedirect, navigateBack, navigateNext } = useBookingNavigation();
 
   const durationOptions = [
     '1 à 2 jours',
@@ -22,42 +27,41 @@ const SymptomDuration = () => {
   ];
 
   useEffect(() => {
-    // Vérifier que l'utilisateur vient bien des questions conditionnelles
-    const storedData = localStorage.getItem('bookingFormData');
-    if (!storedData) {
-      navigate('/');
+    const redirectRoute = shouldRedirect('/booking/symptom-duration');
+    if (redirectRoute) {
+      console.log('SymptomDuration: Redirecting to', redirectRoute);
+      navigate(redirectRoute, { replace: true });
       return;
     }
-    const parsedData = JSON.parse(storedData);
-    setBookingData(parsedData);
 
     // Vérifier que le motif est bien "symptomes-anomalie"
-    const hasSymptomConsultation = parsedData.consultationReason === 'symptomes-anomalie' || 
-      parsedData.secondAnimalConsultationReason === 'symptomes-anomalie';
+    const hasSymptomConsultation = bookingData?.consultationReason === 'symptomes-anomalie' || 
+      bookingData?.secondAnimalConsultationReason === 'symptomes-anomalie';
     
     if (!hasSymptomConsultation) {
-      navigate('/booking/slots');
+      navigate('/booking/animal-info');
       return;
     }
-  }, [navigate]);
+
+    // Charger la durée existante
+    if (bookingData?.symptomDuration) {
+      setSelectedDuration(bookingData.symptomDuration);
+    }
+  }, [navigate, shouldRedirect, bookingData]);
 
   const handleBack = () => {
-    navigate('/booking/questions');
+    navigateBack('/booking/symptom-duration');
   };
 
   const handleNext = () => {
     if (!selectedDuration) return;
 
-    const existingData = JSON.parse(localStorage.getItem('bookingFormData') || '{}');
-    const updatedData = {
-      ...existingData,
+    updateBookingData({
       symptomDuration: selectedDuration
-    };
-    localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
-    console.log('Updated booking data with symptom duration:', updatedData);
+    });
+    console.log('SymptomDuration: Updated booking data with symptom duration:', selectedDuration);
 
-    // Naviguer vers la page des points supplémentaires
-    navigate('/booking/additional-points');
+    navigateNext('/booking/symptom-duration');
   };
 
   const canProceed = selectedDuration !== '';

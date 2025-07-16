@@ -5,49 +5,52 @@ import Header from "@/components/Header";
 import ConditionalQuestionsHeader from "@/components/conditional-questions/ConditionalQuestionsHeader";
 import ConditionalQuestionsContent from "@/components/conditional-questions/ConditionalQuestionsContent";
 import { useConditionalQuestionsValidation } from "@/hooks/useConditionalQuestionsValidation";
+import { useBookingFormData } from "@/hooks/useBookingFormData";
+import { useBookingNavigation } from "@/hooks/useBookingNavigation";
 
 const ConditionalQuestions = () => {
   const navigate = useNavigate();
   const [answers, setAnswers] = useState<{
     [key: string]: any;
   }>({});
-  const [bookingData, setBookingData] = useState<any>(null);
+  
+  const { bookingData, updateBookingData } = useBookingFormData();
+  const { shouldRedirect, navigateBack, navigateNext } = useBookingNavigation();
 
   useEffect(() => {
-    // Vérifier que l'utilisateur vient bien de la page motif de consultation
-    const storedData = localStorage.getItem('bookingFormData');
-    if (!storedData) {
-      navigate('/');
+    const redirectRoute = shouldRedirect('/booking/conditional-questions');
+    if (redirectRoute) {
+      console.log('ConditionalQuestions: Redirecting to', redirectRoute);
+      navigate(redirectRoute, { replace: true });
       return;
     }
-    const parsedData = JSON.parse(storedData);
-    setBookingData(parsedData);
 
     // Vérifier que au moins un animal a des symptômes sélectionnés
-    const hasFirstAnimalSymptoms = parsedData.selectedSymptoms?.length > 0 || parsedData.customSymptom?.trim() !== '';
-    const hasSecondAnimalSymptoms = parsedData.secondAnimalSelectedSymptoms?.length > 0 || parsedData.secondAnimalCustomSymptom?.trim() !== '';
+    const hasFirstAnimalSymptoms = bookingData?.selectedSymptoms?.length > 0 || bookingData?.customSymptom?.trim() !== '';
+    const hasSecondAnimalSymptoms = bookingData?.secondAnimalSelectedSymptoms?.length > 0 || bookingData?.secondAnimalCustomSymptom?.trim() !== '';
     
     if (!hasFirstAnimalSymptoms && !hasSecondAnimalSymptoms) {
       navigate('/booking/consultation-reason');
       return;
     }
-  }, [navigate]);
+
+    // Charger les réponses existantes
+    if (bookingData?.conditionalAnswers) {
+      setAnswers(bookingData.conditionalAnswers);
+    }
+  }, [navigate, shouldRedirect, bookingData]);
 
   const handleBack = () => {
-    navigate('/booking/consultation-reason');
+    navigateBack('/booking/conditional-questions');
   };
 
   const handleNext = () => {
-    const existingData = JSON.parse(localStorage.getItem('bookingFormData') || '{}');
-    const updatedData = {
-      ...existingData,
+    updateBookingData({
       conditionalAnswers: answers
-    };
-    localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
-    console.log('Updated booking data with conditional answers:', updatedData);
+    });
+    console.log('ConditionalQuestions: Updated booking data with conditional answers:', answers);
 
-    // Naviguer vers la page de durée des symptômes (route corrigée)
-    navigate('/booking/symptom-duration');
+    navigateNext('/booking/conditional-questions');
   };
 
   const handleAnswersChange = (newAnswers: any) => {
