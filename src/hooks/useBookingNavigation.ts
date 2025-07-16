@@ -118,17 +118,24 @@ export const useBookingNavigation = () => {
       hasBasicData: hasBasicData(),
       hasConsultationReason: hasConsultationReason(),
       hasAnimalInfo: hasAnimalInfo(),
-      hasContactInfo: hasContactInfo()
+      hasContactInfo: hasContactInfo(),
+      bookingData
     })
 
+    // Pour la page /booking, on ne fait jamais de redirection automatique
+    // L'utilisateur doit pouvoir remplir le formulaire librement
+    if (currentRoute === '/booking') {
+      return null
+    }
+
     // Si on n'a pas les données de base, rediriger vers /booking
-    if (!hasBasicData() && currentRoute !== '/booking') {
+    if (!hasBasicData()) {
       return '/booking'
     }
 
     // Si on n'a pas le motif de consultation mais qu'on a les données de base
     if (hasBasicData() && !hasConsultationReason() && 
-        currentRoute !== '/booking' && currentRoute !== '/booking/consultation-reason') {
+        currentRoute !== '/booking/consultation-reason') {
       const isLitter = bookingData.multipleAnimals?.includes('une-portee')
       // Pour une portée, on peut aller directement aux infos animal
       if (isLitter && currentRoute === '/booking/animal-info') {

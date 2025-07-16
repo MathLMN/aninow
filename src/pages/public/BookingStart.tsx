@@ -1,7 +1,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import BookingForm from "@/components/BookingForm";
 import Header from "@/components/Header";
 import ProgressBar from "@/components/ProgressBar";
@@ -13,9 +13,13 @@ const BookingStart = () => {
   const navigate = useNavigate();
   const { bookingData, updateBookingData } = useBookingFormData();
   const { shouldRedirect, navigateNext } = useBookingNavigation();
+  const hasNavigated = useRef(false);
 
-  // Vérifier s'il faut rediriger l'utilisateur
+  // Vérifier s'il faut rediriger l'utilisateur - mais seulement si on n'a pas déjà navigué
   useEffect(() => {
+    // Ne pas rediriger si on vient juste de soumettre le formulaire
+    if (hasNavigated.current) return;
+    
     const redirectRoute = shouldRedirect('/booking');
     if (redirectRoute && redirectRoute !== '/booking') {
       console.log('BookingStart: Redirecting to', redirectRoute);
@@ -25,6 +29,9 @@ const BookingStart = () => {
 
   const handleNext = (data: FormData) => {
     console.log('BookingStart: Form data submitted:', data);
+    
+    // Marquer qu'on va naviguer pour éviter les redirections automatiques
+    hasNavigated.current = true;
     
     // Sauvegarder les données
     const dataToSave = {
@@ -38,8 +45,13 @@ const BookingStart = () => {
     
     updateBookingData(dataToSave);
     
-    // Naviguer vers la prochaine étape
-    navigateNext('/booking');
+    // Naviguer directement vers la prochaine étape
+    const isLitter = data.multipleAnimals.includes('une-portee');
+    if (isLitter && data.vaccinationType) {
+      navigate('/booking/animal-info');
+    } else {
+      navigate('/booking/consultation-reason');
+    }
   };
 
   return (
