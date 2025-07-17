@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Header from "@/components/Header";
+import ProgressBar from "@/components/ProgressBar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useBookingFormData } from "@/hooks/useBookingFormData";
 import { useBookingNavigation } from "@/hooks/useBookingNavigation";
@@ -95,6 +96,8 @@ const ContactInfo = () => {
 
       <main className="container mx-auto px-3 sm:px-6 pt-20 sm:pt-24 py-4 sm:py-6 pb-20">
         <div className="max-w-2xl mx-auto">
+          <ProgressBar value={100} />
+          
           {/* Titre */}
           <div className="text-center mb-4 sm:mb-8 animate-fade-in">
             <h1 className="text-xl sm:text-3xl font-bold text-vet-navy mb-2 px-2">
