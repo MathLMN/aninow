@@ -20,25 +20,17 @@ const AnimalInfo = () => {
   // États pour l'animal 1
   const [firstAnimalBreed, setFirstAnimalBreed] = useState('');
   const [firstAnimalAge, setFirstAnimalAge] = useState('');
-  const [firstAnimalWeight, setFirstAnimalWeight] = useState('');
-  const [firstAnimalSex, setFirstAnimalSex] = useState('');
   
   // États pour l'animal 2 (si applicable)
   const [secondAnimalBreed, setSecondAnimalBreed] = useState('');
   const [secondAnimalAge, setSecondAnimalAge] = useState('');
-  const [secondAnimalWeight, setSecondAnimalWeight] = useState('');
-  const [secondAnimalSex, setSecondAnimalSex] = useState('');
 
   useEffect(() => {
     // Charger les données existantes
     if (bookingData.animalBreed) setFirstAnimalBreed(bookingData.animalBreed);
     if (bookingData.animalAge) setFirstAnimalAge(bookingData.animalAge);
-    if (bookingData.animalWeight) setFirstAnimalWeight(bookingData.animalWeight.toString());
-    if (bookingData.animalSex) setFirstAnimalSex(bookingData.animalSex);
     if (bookingData.secondAnimalBreed) setSecondAnimalBreed(bookingData.secondAnimalBreed);
     if (bookingData.secondAnimalAge) setSecondAnimalAge(bookingData.secondAnimalAge);
-    if (bookingData.secondAnimalWeight) setSecondAnimalWeight(bookingData.secondAnimalWeight.toString());
-    if (bookingData.secondAnimalSex) setSecondAnimalSex(bookingData.secondAnimalSex);
   }, [bookingData]);
 
   const handleBack = () => {
@@ -51,13 +43,9 @@ const AnimalInfo = () => {
     const updatedData = {
       animalBreed: firstAnimalBreed,
       animalAge: firstAnimalAge,
-      animalWeight: firstAnimalWeight ? parseFloat(firstAnimalWeight) : undefined,
-      animalSex: firstAnimalSex,
       ...(hasTwoAnimals && {
         secondAnimalBreed,
-        secondAnimalAge,
-        secondAnimalWeight: secondAnimalWeight ? parseFloat(secondAnimalWeight) : undefined,
-        secondAnimalSex
+        secondAnimalAge
       })
     };
     
@@ -82,9 +70,9 @@ const AnimalInfo = () => {
   
   // Pour une portée, l'âge n'est pas requis
   const canProceed = isFirstAnimalValid && 
-    (isLitter || (firstAnimalAge !== '' && firstAnimalWeight !== '' && firstAnimalSex !== '')) && 
+    (isLitter || firstAnimalAge !== '') && 
     isSecondAnimalValid && 
-    (!hasTwoAnimals || isLitter || (secondAnimalAge !== '' && secondAnimalWeight !== '' && secondAnimalSex !== ''));
+    (!hasTwoAnimals || isLitter || secondAnimalAge !== '');
 
   return (
     <div className="min-h-screen relative" style={{
@@ -124,10 +112,10 @@ const AnimalInfo = () => {
                   onBreedChange={setFirstAnimalBreed}
                   selectedAge={firstAnimalAge}
                   onAgeChange={setFirstAnimalAge}
-                  selectedWeight={firstAnimalWeight}
-                  onWeightChange={setFirstAnimalWeight}
-                  selectedSex={firstAnimalSex}
-                  onSexChange={setFirstAnimalSex}
+                  selectedWeight=""
+                  onWeightChange={() => {}}
+                  selectedSex=""
+                  onSexChange={() => {}}
                   isLitter={isLitter}
                 />
 
@@ -141,10 +129,10 @@ const AnimalInfo = () => {
                       onBreedChange={setSecondAnimalBreed}
                       selectedAge={secondAnimalAge}
                       onAgeChange={setSecondAnimalAge}
-                      selectedWeight={secondAnimalWeight}
-                      onWeightChange={setSecondAnimalWeight}
-                      selectedSex={secondAnimalSex}
-                      onSexChange={setSecondAnimalSex}
+                      selectedWeight=""
+                      onWeightChange={() => {}}
+                      selectedSex=""
+                      onSexChange={() => {}}
                       isLitter={false}
                     />
                   </div>

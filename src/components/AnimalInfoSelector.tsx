@@ -2,8 +2,6 @@
 import React from 'react';
 import BreedSelector from './BreedSelector';
 import AgeSelector from './AgeSelector';
-import WeightSelector from './WeightSelector';
-import SexSelector from './SexSelector';
 import { getAnimalSpecies } from '../utils/animalSpeciesUtils';
 
 interface AnimalInfoSelectorProps {
@@ -27,10 +25,6 @@ const AnimalInfoSelector: React.FC<AnimalInfoSelectorProps> = ({
   onBreedChange,
   selectedAge,
   onAgeChange,
-  selectedWeight,
-  onWeightChange,
-  selectedSex,
-  onSexChange,
   isLitter = false
 }) => {
   const title = animalNumber ? `Animal ${animalNumber} - ${animalName}` : animalName;
@@ -60,22 +54,6 @@ const AnimalInfoSelector: React.FC<AnimalInfoSelectorProps> = ({
                 onAgeChange={onAgeChange}
               />
             )}
-
-            {/* Sélection du poids - masquée pour une portée */}
-            {!isLitter && (
-              <WeightSelector
-                selectedWeight={selectedWeight}
-                onWeightChange={onWeightChange}
-              />
-            )}
-
-            {/* Sélection du sexe - masquée pour une portée */}
-            {!isLitter && (
-              <SexSelector
-                selectedSex={selectedSex}
-                onSexChange={onSexChange}
-              />
-            )}
           </div>
         </div>
       )}
@@ -99,22 +77,6 @@ const AnimalInfoSelector: React.FC<AnimalInfoSelectorProps> = ({
               <AgeSelector
                 selectedAge={selectedAge}
                 onAgeChange={onAgeChange}
-              />
-            )}
-
-            {/* Sélection du poids - masquée pour une portée */}
-            {!isLitter && (
-              <WeightSelector
-                selectedWeight={selectedWeight}
-                onWeightChange={onWeightChange}
-              />
-            )}
-
-            {/* Sélection du sexe - masquée pour une portée */}
-            {!isLitter && (
-              <SexSelector
-                selectedSex={selectedSex}
-                onSexChange={onSexChange}
               />
             )}
           </div>
