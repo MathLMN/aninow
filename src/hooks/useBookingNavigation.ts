@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom'
 import { useBookingFormData } from './useBookingFormData'
 
@@ -27,12 +26,12 @@ export const useBookingNavigation = () => {
         return '/booking/animal-info'
 
       case '/booking/conditional-questions':
-        return '/booking/symptom-duration'
-
-      case '/booking/symptom-duration':
         return '/booking/additional-points'
 
       case '/booking/additional-points':
+        return '/booking/symptom-duration'
+
+      case '/booking/symptom-duration':
         return '/booking/animal-info'
 
       case '/booking/animal-info':
@@ -66,18 +65,18 @@ export const useBookingNavigation = () => {
       case '/booking/conditional-questions':
         return '/booking/consultation-reason'
 
-      case '/booking/symptom-duration':
+      case '/booking/additional-points':
         return '/booking/conditional-questions'
 
-      case '/booking/additional-points':
-        return '/booking/symptom-duration'
+      case '/booking/symptom-duration':
+        return '/booking/additional-points'
 
       case '/booking/animal-info':
         if (isLitter) {
           return '/booking'
         }
-        if (hasSymptoms && bookingData.additionalPoints !== undefined) {
-          return '/booking/additional-points'
+        if (hasSymptoms) {
+          return '/booking/symptom-duration'
         }
         return '/booking/consultation-reason'
 

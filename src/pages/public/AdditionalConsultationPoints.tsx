@@ -9,6 +9,8 @@ import ProgressBar from "@/components/ProgressBar";
 import SelectionButton from "@/components/SelectionButton";
 import AdditionalPointsSelector from "@/components/AdditionalPointsSelector";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useBookingFormData } from "@/hooks/useBookingFormData";
+import { useBookingNavigation } from "@/hooks/useBookingNavigation";
 
 const AdditionalConsultationPoints = () => {
   const navigate = useNavigate();
@@ -16,49 +18,57 @@ const AdditionalConsultationPoints = () => {
   const [hasAdditionalPoints, setHasAdditionalPoints] = useState('');
   const [selectedPoints, setSelectedPoints] = useState<string[]>([]);
   const [customPoint, setCustomPoint] = useState('');
-  const [bookingData, setBookingData] = useState<any>(null);
+  
+  const { bookingData, updateBookingData } = useBookingFormData();
+  const { navigateBack, navigateNext } = useBookingNavigation();
 
   useEffect(() => {
-    // Vérifier que l'utilisateur vient bien de la page de durée des symptômes
-    const storedData = localStorage.getItem('bookingFormData');
-    if (!storedData) {
+    // Vérifier que l'utilisateur vient bien des questions conditionnelles
+    if (!bookingData) {
       navigate('/');
       return;
     }
-    const parsedData = JSON.parse(storedData);
-    setBookingData(parsedData);
 
     // Vérifier que le motif est bien "symptomes-anomalie"
-    const hasSymptomConsultation = parsedData.consultationReason === 'symptomes-anomalie' || 
-      parsedData.secondAnimalConsultationReason === 'symptomes-anomalie';
+    const hasSymptomConsultation = bookingData.consultationReason === 'symptomes-anomalie' || 
+      bookingData.secondAnimalConsultationReason === 'symptomes-anomalie';
     
     if (!hasSymptomConsultation) {
       navigate('/booking/animal-info');
       return;
     }
-  }, [navigate]);
+
+    // Charger les données existantes
+    if (bookingData.hasAdditionalConsultationPoints) {
+      setHasAdditionalPoints(bookingData.hasAdditionalConsultationPoints);
+    }
+    if (bookingData.additionalPoints) {
+      setSelectedPoints(bookingData.additionalPoints);
+    }
+    if (bookingData.customAdditionalPoint) {
+      setCustomPoint(bookingData.customAdditionalPoint);
+    }
+  }, [navigate, bookingData]);
 
   const handleBack = () => {
-    navigate('/booking/duration');
+    navigateBack('/booking/additional-points');
   };
 
   const handleNext = () => {
     if (!hasAdditionalPoints) return;
 
-    const existingData = JSON.parse(localStorage.getItem('bookingFormData') || '{}');
     const updatedData = {
-      ...existingData,
       hasAdditionalConsultationPoints: hasAdditionalPoints,
       ...(hasAdditionalPoints === 'oui' && {
         additionalPoints: selectedPoints,
         customAdditionalPoint: customPoint
       })
     };
-    localStorage.setItem('bookingFormData', JSON.stringify(updatedData));
+    
+    updateBookingData(updatedData);
     console.log('Updated booking data with additional consultation points:', updatedData);
 
-    // Naviguer vers la page des informations animal
-    navigate('/booking/animal-info');
+    navigateNext('/booking/additional-points');
   };
 
   const canProceed = hasAdditionalPoints !== '' && 
