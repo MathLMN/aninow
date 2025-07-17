@@ -41,11 +41,7 @@ const AnimalNameInput: React.FC<AnimalNameInputProps> = ({
         value={name} 
         onChange={e => onNameChange(e.target.value)} 
         placeholder={placeholder}
-        className={`text-base h-12 transition-all duration-200 ${
-          isEmpty 
-            ? 'border-vet-sage border-2 bg-white shadow-sm focus:border-vet-sage focus:ring-2 focus:ring-vet-sage/20' 
-            : 'border-green-400 bg-green-50/50 focus:border-green-500'
-        }`}
+        className="text-base h-12 transition-all duration-200 border-vet-sage border-2 bg-white shadow-sm focus:border-vet-sage focus:ring-2 focus:ring-vet-sage/20"
       />
     </div>
   );
