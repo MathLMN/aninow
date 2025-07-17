@@ -106,8 +106,8 @@ const VetLayout = ({ children }: { children?: React.ReactNode }) => {
         </div>
       </nav>
 
-      {/* Contenu principal */}
-      <main className="container mx-auto px-6 py-8">
+      {/* Contenu principal avec espacement adapté */}
+      <main className="container mx-auto px-6 pt-6 pb-8">
         {children || <Outlet />}
       </main>
     </div>

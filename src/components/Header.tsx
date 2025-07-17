@@ -9,8 +9,8 @@ const Header = () => {
   const isAdminPage = location.pathname === '/admin';
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-sm z-50 border-b shadow-lg">
-      <div className="container mx-auto px-3 sm:px-6 py-2 sm:py-3">
+    <header className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm z-50 border-b shadow-lg">
+      <div className="container mx-auto px-3 sm:px-6 py-2.5 sm:py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
@@ -32,7 +32,8 @@ const Header = () => {
                 <Link to="/vet/login">
                   <Button variant="ghost" className="bg-vet-blue text-white hover:bg-vet-blue/90 text-xs px-2 py-1 sm:text-sm sm:px-3 sm:py-2">
                     <Stethoscope className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                    Espace vétérinaire
+                    <span className="hidden sm:inline">Espace vétérinaire</span>
+                    <span className="sm:hidden">Vétérinaire</span>
                   </Button>
                 </Link>
                 <Link to="/admin">
@@ -47,7 +48,8 @@ const Header = () => {
               <Link to="/vet/login">
                 <Button variant="ghost" className="bg-vet-blue text-white hover:bg-vet-blue/90 text-xs px-2 py-1 sm:text-sm sm:px-3 sm:py-2">
                   <Stethoscope className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                  Espace vétérinaire
+                  <span className="hidden sm:inline">Espace vétérinaire</span>
+                  <span className="sm:hidden">Vétérinaire</span>
                 </Button>
               </Link>
             )}

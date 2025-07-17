@@ -101,7 +101,7 @@ const AppointmentSlots = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20">
         <Header />
-        <main className="container mx-auto px-3 sm:px-6 py-6 sm:py-12">
+        <main className="container mx-auto px-3 sm:px-6 pt-20 sm:pt-24 pb-8">
           <div className="max-w-2xl mx-auto text-center">
             <p className="text-vet-brown">Chargement des créneaux disponibles...</p>
           </div>
@@ -114,7 +114,7 @@ const AppointmentSlots = () => {
     <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20">
       <Header />
 
-      <main className="container mx-auto px-3 sm:px-6 py-6 sm:py-12">
+      <main className="container mx-auto px-3 sm:px-6 pt-20 sm:pt-24 pb-8">
         <div className="max-w-4xl mx-auto">
           <ProgressBar value={90} />
 
