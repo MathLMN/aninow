@@ -15,12 +15,14 @@ export const useBookingNavigation = () => {
 
     switch (currentRoute) {
       case '/booking':
+        // Si c'est une portée avec type de vaccination, aller directement aux infos animal
         if (isLitter && bookingData.vaccinationType) {
           return '/booking/animal-info'
         }
         return '/booking/consultation-reason'
 
       case '/booking/consultation-reason':
+        // Si symptômes détectés, aller aux questions conditionnelles
         if (hasSymptoms) {
           return '/booking/conditional-questions'
         }
@@ -73,12 +75,15 @@ export const useBookingNavigation = () => {
         return '/booking/symptom-duration'
 
       case '/booking/animal-info':
+        // Si c'est une portée, retourner au début
         if (isLitter) {
           return '/booking'
         }
+        // Si on a des symptômes, on vient des points supplémentaires
         if (hasSymptoms) {
           return '/booking/additional-points'
         }
+        // Sinon, on vient directement du motif de consultation
         return '/booking/consultation-reason'
 
       case '/booking/client-comment':
@@ -98,12 +103,12 @@ export const useBookingNavigation = () => {
     }
   }
 
-  // Fonction simplifiée qui ne redirige JAMAIS automatiquement
+  // Fonction de validation sans redirection automatique
   const checkDataConsistency = (currentRoute: string) => {
     console.log('checkDataConsistency called with:', currentRoute)
     console.log('Current booking data:', bookingData)
     
-    // Retourner seulement les informations de validation sans redirection
+    // Validation basique sans redirection automatique
     return {
       hasBasicData: hasBasicData(),
       hasConsultationReason: hasConsultationReason(),
