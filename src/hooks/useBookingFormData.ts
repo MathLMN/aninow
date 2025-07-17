@@ -30,6 +30,10 @@ export interface CompleteBookingData {
   symptomDuration?: string
   additionalPoints: string[]
   
+  // Points supplémentaires de consultation
+  hasAdditionalConsultationPoints?: string
+  customAdditionalPoint?: string
+  
   // Informations animaux
   animalAge?: string
   animalBreed?: string
