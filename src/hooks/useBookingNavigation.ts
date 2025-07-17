@@ -1,3 +1,4 @@
+
 import { useNavigate } from 'react-router-dom'
 import { useBookingFormData } from './useBookingFormData'
 
@@ -26,12 +27,12 @@ export const useBookingNavigation = () => {
         return '/booking/animal-info'
 
       case '/booking/conditional-questions':
-        return '/booking/additional-points'
-
-      case '/booking/additional-points':
         return '/booking/symptom-duration'
 
       case '/booking/symptom-duration':
+        return '/booking/additional-points'
+
+      case '/booking/additional-points':
         return '/booking/animal-info'
 
       case '/booking/animal-info':
@@ -65,18 +66,18 @@ export const useBookingNavigation = () => {
       case '/booking/conditional-questions':
         return '/booking/consultation-reason'
 
-      case '/booking/additional-points':
+      case '/booking/symptom-duration':
         return '/booking/conditional-questions'
 
-      case '/booking/symptom-duration':
-        return '/booking/additional-points'
+      case '/booking/additional-points':
+        return '/booking/symptom-duration'
 
       case '/booking/animal-info':
         if (isLitter) {
           return '/booking'
         }
         if (hasSymptoms) {
-          return '/booking/symptom-duration'
+          return '/booking/additional-points'
         }
         return '/booking/consultation-reason'
 
@@ -127,7 +128,7 @@ export const useBookingNavigation = () => {
   return {
     getNextRoute,
     getPreviousRoute,
-    checkDataConsistency, // Remplace shouldRedirect
+    checkDataConsistency,
     navigateNext,
     navigateBack
   }
