@@ -64,7 +64,7 @@ const ConsultationReason = () => {
     <div className="min-h-screen relative" style={{ background: 'linear-gradient(135deg, #EDE3DA 0%, #ffffff 100%)' }}>
       <Header />
 
-      <main className="container mx-auto px-3 sm:px-6 py-3 sm:py-8 pb-20">
+      <main className="container mx-auto px-3 sm:px-6 pt-20 sm:pt-24 py-3 sm:py-8 pb-20">
         <div className="max-w-4xl mx-auto">
           <ProgressBar value={28.6} />
           
