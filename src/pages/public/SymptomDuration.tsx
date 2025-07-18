@@ -27,12 +27,12 @@ const SymptomDuration = () => {
   ];
 
   useEffect(() => {
-    // Vérifier que le motif est bien "symptomes-anomalie"
-    const hasSymptomConsultation = bookingData?.consultationReason === 'symptomes-anomalie' || 
-      bookingData?.secondAnimalConsultationReason === 'symptomes-anomalie';
+    // Vérifier que l'utilisateur a des symptômes et vient du bon flux
+    const hasFirstAnimalSymptoms = bookingData?.selectedSymptoms?.length > 0 || bookingData?.customSymptom?.trim() !== '';
+    const hasSecondAnimalSymptoms = bookingData?.secondAnimalSelectedSymptoms?.length > 0 || bookingData?.secondAnimalCustomSymptom?.trim() !== '';
     
-    if (!hasSymptomConsultation) {
-      navigate('/booking/animal-info');
+    if (!hasFirstAnimalSymptoms && !hasSecondAnimalSymptoms) {
+      navigate('/booking/consultation-reason');
       return;
     }
 
