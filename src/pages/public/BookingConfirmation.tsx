@@ -60,12 +60,17 @@ const BookingConfirmation = () => {
     submitData();
   }, [bookingData, submitBooking, hasSubmitted, resetBookingData]);
 
-  // Redirection seulement si aucune donnée de base n'est présente
+  // Redirection seulement si vraiment aucune donnée ET tentative de soumission échouée
   useEffect(() => {
-    if (!bookingData.animalSpecies && !bookingData.animalName && !isSubmitting && !submissionResult && !hasSubmitted) {
-      console.log('BookingConfirmation - Redirecting to booking start');
-      navigate('/booking');
-    }
+    // Délai pour permettre au localStorage de se charger
+    const timeoutId = setTimeout(() => {
+      if (!bookingData.animalSpecies && !bookingData.animalName && !isSubmitting && !submissionResult && !hasSubmitted) {
+        console.log('BookingConfirmation - Redirecting to booking start after timeout');
+        navigate('/booking');
+      }
+    }, 1000); // Attendre 1 seconde
+
+    return () => clearTimeout(timeoutId);
   }, [bookingData, navigate, isSubmitting, submissionResult, hasSubmitted]);
 
   // Affichage pendant le chargement
