@@ -19,7 +19,7 @@ const BookingConfirmation = () => {
   console.log('BookingConfirmation - bookingData:', bookingData);
 
   useEffect(() => {
-    // Vérifier si on a les données minimales requises
+    // Vérifier si on a les données minimales requises pour la soumission
     if (!bookingData.animalSpecies || !bookingData.clientName || hasSubmitted) {
       console.log('BookingConfirmation - Missing data or already submitted:', {
         animalSpecies: bookingData.animalSpecies,
@@ -60,9 +60,9 @@ const BookingConfirmation = () => {
     submitData();
   }, [bookingData, submitBooking, hasSubmitted, resetBookingData]);
 
-  // Redirection seulement si vraiment aucune donnée ET pas en cours de soumission ET pas de résultat
+  // Redirection seulement si aucune donnée de base n'est présente
   useEffect(() => {
-    if (!bookingData.animalSpecies && !isSubmitting && !submissionResult && !hasSubmitted) {
+    if (!bookingData.animalSpecies && !bookingData.animalName && !isSubmitting && !submissionResult && !hasSubmitted) {
       console.log('BookingConfirmation - Redirecting to booking start');
       navigate('/booking');
     }
