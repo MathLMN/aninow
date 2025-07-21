@@ -16,6 +16,7 @@ import ClientComment from "./pages/public/ClientComment";
 import AppointmentSlots from "./pages/public/AppointmentSlots";
 import BookingConfirmation from "./pages/public/BookingConfirmation";
 import LandingPage from "./pages/public/LandingPage";
+import ArticlesPage from "./pages/public/ArticlesPage";
 import VetLogin from "./pages/vet/VetLogin";
 import VetDashboard from "./pages/vet/VetDashboard";
 import VetPlanning from "./pages/vet/VetPlanning";
@@ -36,6 +37,9 @@ function App() {
           <Routes>
             {/* Page d'accueil principale */}
             <Route path="/" element={<LandingPage />} />
+            
+            {/* Page des articles */}
+            <Route path="/articles" element={<ArticlesPage />} />
             
             {/* Processus de réservation */}
             <Route path="/booking" element={<BookingStart />} />
