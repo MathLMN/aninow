@@ -19,7 +19,7 @@ export const getSlotAssignments = async (date: string): Promise<SlotAssignment[]
       .eq('date', date);
 
     if (error) throw error;
-    return data || [];
+    return (data || []) as SlotAssignment[];
   } catch (error) {
     console.error('Erreur lors de la récupération des attributions:', error);
     return [];
