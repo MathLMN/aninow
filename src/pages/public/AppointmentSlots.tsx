@@ -1,8 +1,9 @@
 
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, CheckCircle, Calendar } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft, ArrowRight, CheckCircle, Calendar, UserCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import ProgressBar from "@/components/ProgressBar";
@@ -127,13 +128,63 @@ const AppointmentSlots = () => {
             </p>
           </div>
 
-          {/* Section préférence de vétérinaire - en haut sur mobile */}
+          {/* Section préférence de vétérinaire avec bouton retour */}
           <div className="mb-6">
-            <VeterinarianPreference
-              veterinarians={veterinarians}
-              selectedVeterinarian={selectedVeterinarian}
-              onVeterinarianSelect={setSelectedVeterinarian}
-            />
+            <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/20 shadow-lg">
+              <CardHeader className="pb-3 sm:pb-4 px-3 sm:px-6 pt-3 sm:pt-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <UserCheck className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-vet-sage flex-shrink-0" />
+                    <div>
+                      <CardTitle className="text-vet-navy text-lg sm:text-xl text-sm sm:text-base">
+                        Préférence de vétérinaire
+                      </CardTitle>
+                      <CardDescription className="text-vet-brown text-xs sm:text-sm">
+                        Choisissez un vétérinaire spécifique ou laissez le choix à la clinique
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={handleBack}
+                    className="border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white transition-colors text-sm py-2 px-3 flex-shrink-0"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-1" />
+                    Retour
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+                <Select value={selectedVeterinarian || "no-preference"} onValueChange={(value) => {
+                  if (value === "no-preference") {
+                    setSelectedVeterinarian(null);
+                  } else {
+                    setSelectedVeterinarian(value);
+                  }
+                }}>
+                  <SelectTrigger className="w-full border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage/20">
+                    <SelectValue placeholder="Sélectionnez un vétérinaire..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-vet-blue/30 shadow-lg">
+                    <SelectItem 
+                      value="no-preference"
+                      className="focus:bg-vet-sage/10 focus:text-vet-navy"
+                    >
+                      Pas de préférence
+                    </SelectItem>
+                    {veterinarians.map((vet) => (
+                      <SelectItem 
+                        key={vet.id} 
+                        value={vet.id}
+                        className="focus:bg-vet-sage/10 focus:text-vet-navy"
+                      >
+                        {vet.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Section créneaux disponibles */}
@@ -154,8 +205,8 @@ const AppointmentSlots = () => {
                   />
                 )}
                 
-                {/* Autres cartes collapsées */}
-                {filteredSlots.slice(1).map((daySlots) => (
+                {/* Autres cartes collapsées - limité à 5 jours */}
+                {filteredSlots.slice(1, 5).map((daySlots) => (
                   <DateSlotCard
                     key={daySlots.date}
                     date={daySlots.date}
@@ -169,7 +220,7 @@ const AppointmentSlots = () => {
                 ))}
 
                 {/* Bouton "Voir plus de dates" si nécessaire */}
-                {filteredSlots.length >= 7 && (
+                {filteredSlots.length > 5 && (
                   <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/20 shadow-sm">
                     <CardContent className="p-4">
                       <Button
@@ -204,17 +255,8 @@ const AppointmentSlots = () => {
             )}
           </div>
 
-          {/* Boutons de navigation */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between mt-8 sm:mt-12">
-            <Button
-              variant="outline"
-              onClick={handleBack}
-              className="border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white transition-colors text-sm sm:text-base py-3"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Retour
-            </Button>
-            
+          {/* Bouton de confirmation */}
+          <div className="flex justify-end mt-8 sm:mt-12">
             <Button
               onClick={handleConfirm}
               disabled={!selectedSlot}
