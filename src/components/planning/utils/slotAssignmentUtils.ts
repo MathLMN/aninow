@@ -75,10 +75,11 @@ export const getAssignedVeterinarian = async (date: string, timeSlot: string): P
       .select('veterinarian_id')
       .eq('date', date)
       .eq('time_slot', timeSlot)
-      .maybeSingle();
+      .order('created_at', { ascending: true })
+      .limit(1);
 
     if (error) throw error;
-    return data?.veterinarian_id || null;
+    return (data && data.length > 0) ? data[0].veterinarian_id : null;
   } catch (error) {
     console.error('Erreur lors de la récupération de l\'attribution:', error);
     return null;
