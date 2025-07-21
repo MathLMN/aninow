@@ -3,6 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { TimeSlotCell } from "./TimeSlotCell";
 import { generateAllTimeSlots, isTimeSlotOpen, getBookingsForSlot, isFullHour } from "./utils/scheduleUtils";
+import { useClinicSettings } from "@/hooks/useClinicSettings";
+import { useState, useEffect } from "react";
 
 interface DailyCalendarGridProps {
   selectedDate: Date;
@@ -23,7 +25,35 @@ export const DailyCalendarGrid = ({
   onAppointmentClick,
   veterinarians
 }: DailyCalendarGridProps) => {
+  const { settings } = useClinicSettings();
   const timeSlots = generateAllTimeSlots();
+  const [slotBookings, setSlotBookings] = useState<Record<string, any[]>>({});
+
+  // Charger les réservations pour chaque créneau de manière asynchrone
+  useEffect(() => {
+    const loadSlotBookings = async () => {
+      const newSlotBookings: Record<string, any[]> = {};
+      
+      for (const time of timeSlots) {
+        for (const column of columns) {
+          const key = `${time}-${column.id}`;
+          const bookingsForSlot = await getBookingsForSlot(
+            time, 
+            column.id, 
+            bookings, 
+            selectedDate, 
+            veterinarians,
+            settings
+          );
+          newSlotBookings[key] = bookingsForSlot;
+        }
+      }
+      
+      setSlotBookings(newSlotBookings);
+    };
+
+    loadSlotBookings();
+  }, [timeSlots, columns, bookings, selectedDate, veterinarians, settings]);
 
   return (
     <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
@@ -35,16 +65,24 @@ export const DailyCalendarGrid = ({
               <div className="p-2 font-semibold text-vet-navy text-center border-r border-vet-blue/20 text-sm">
                 Horaires
               </div>
-              {columns.map((column) => (
-                <div key={column.id} className="p-2 text-center border-l border-vet-blue/20">
-                  <div className="font-semibold text-sm text-vet-navy">
-                    {column.title}
+              {columns.map((column) => {
+                // Compter le total des RDV pour cette colonne pour toute la journée
+                const totalBookings = timeSlots.reduce((total, time) => {
+                  const key = `${time}-${column.id}`;
+                  return total + (slotBookings[key]?.length || 0);
+                }, 0);
+
+                return (
+                  <div key={column.id} className="p-2 text-center border-l border-vet-blue/20">
+                    <div className="font-semibold text-sm text-vet-navy">
+                      {column.title}
+                    </div>
+                    <div className="text-xs text-vet-brown mt-1">
+                      {totalBookings} RDV
+                    </div>
                   </div>
-                  <div className="text-xs text-vet-brown mt-1">
-                    {getBookingsForSlot('', column.id, bookings, selectedDate, veterinarians).length} RDV
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Grille horaire 8h-19h avec affichage de toutes les heures */}
@@ -84,14 +122,15 @@ export const DailyCalendarGrid = ({
                     
                     {/* Colonnes par vétérinaire et ASV */}
                     {columns.map((column) => {
-                      const slotBookings = getBookingsForSlot(time, column.id, bookings, selectedDate, veterinarians);
+                      const key = `${time}-${column.id}`;
+                      const slotBookingsForCell = slotBookings[key] || [];
                       
                       return (
                         <TimeSlotCell
                           key={`${column.id}-${time}`}
                           time={time}
                           columnId={column.id}
-                          bookings={slotBookings}
+                          bookings={slotBookingsForCell}
                           isOpen={isOpen}
                           canBook={true}
                           onCreateAppointment={onCreateAppointment}

@@ -1,16 +1,20 @@
 
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Settings } from "lucide-react";
 import VetLayout from "@/components/layout/VetLayout";
 import { useVetBookings } from "@/hooks/useVetBookings";
 import { useSlotManagement } from "@/hooks/useSlotManagement";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { usePlanningLogic } from "@/hooks/usePlanningLogic";
+import { useSlotAssignments } from "@/hooks/useSlotAssignments";
 import { WeeklyCalendarView } from "@/components/planning/WeeklyCalendarView";
 import { DailyCalendarView } from "@/components/planning/DailyCalendarView";
 import { AppointmentDetailsModal } from "@/components/planning/AppointmentDetailsModal";
 import { CreateAppointmentModal } from "@/components/planning/CreateAppointmentModal";
 import { PlanningHeader } from "@/components/planning/PlanningHeader";
 import { WeeklyNavigation } from "@/components/planning/WeeklyNavigation";
+import { SlotAssignmentManager } from "@/components/planning/SlotAssignmentManager";
 
 const VetPlanning = () => {
   const {
@@ -23,6 +27,8 @@ const VetPlanning = () => {
     setIsCreateModalOpen,
     isDetailsModalOpen,
     setIsDetailsModalOpen,
+    showAssignmentManager,
+    setShowAssignmentManager,
     filters,
     setFilters,
     handleAppointmentClick,
@@ -34,6 +40,7 @@ const VetPlanning = () => {
   const { bookings, isLoading: bookingsLoading, updateBookingStatus } = useVetBookings();
   const { consultationTypes, isLoading: slotsLoading } = useSlotManagement();
   const { veterinarians, isLoading: vetsLoading } = useClinicVeterinarians();
+  const { assignments, refreshAssignments } = useSlotAssignments(currentDate);
 
   const isLoading = bookingsLoading || slotsLoading || vetsLoading;
   const weekDates = getWeekDates();
@@ -42,10 +49,34 @@ const VetPlanning = () => {
     <VetLayout>
       <div className="space-y-6">
         {/* En-tête */}
-        <PlanningHeader 
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-        />
+        <div className="flex items-center justify-between">
+          <PlanningHeader 
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+          />
+          
+          {viewMode === 'daily' && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowAssignmentManager(!showAssignmentManager)}
+              className="flex items-center gap-2"
+            >
+              <Settings className="h-4 w-4" />
+              {showAssignmentManager ? 'Masquer' : 'Gérer'} les attributions
+            </Button>
+          )}
+        </div>
+
+        {/* Gestionnaire d'attributions - visible uniquement en vue quotidienne */}
+        {viewMode === 'daily' && showAssignmentManager && (
+          <SlotAssignmentManager
+            assignments={assignments}
+            veterinarians={veterinarians}
+            selectedDate={currentDate}
+            onAssignmentsChange={refreshAssignments}
+          />
+        )}
 
         {/* Filtres pour la vue hebdomadaire */}
         {viewMode === 'weekly' && (

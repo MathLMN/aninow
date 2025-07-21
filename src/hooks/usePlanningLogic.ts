@@ -9,6 +9,7 @@ export const usePlanningLogic = () => {
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [showAssignmentManager, setShowAssignmentManager] = useState(false);
   const [filters, setFilters] = useState({
     veterinarian: 'all',
     status: 'all',
@@ -58,6 +59,8 @@ export const usePlanningLogic = () => {
     setIsCreateModalOpen,
     isDetailsModalOpen,
     setIsDetailsModalOpen,
+    showAssignmentManager,
+    setShowAssignmentManager,
     filters,
     setFilters,
     handleAppointmentClick,

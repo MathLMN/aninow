@@ -1,6 +1,7 @@
 
 import { isWithinInterval } from 'date-fns';
 import { processBookingWithoutPreference } from './appointmentAssignment';
+import { getAssignedVeterinarian } from './slotAssignmentUtils';
 
 export const generateAllTimeSlots = () => {
   const timeSlots = [];
@@ -100,7 +101,7 @@ export const isFullHour = (time: string) => {
   return time.endsWith('00');
 };
 
-export const getBookingsForSlot = (
+export const getBookingsForSlot = async (
   time: string, 
   columnId: string, 
   bookings: any[], 
@@ -110,9 +111,22 @@ export const getBookingsForSlot = (
 ) => {
   const dateStr = selectedDate.toISOString().split('T')[0];
   
-  // Traiter les bookings sans préférence de vétérinaire SEULEMENT pour les colonnes vétérinaires
+  // Pour la colonne ASV : ne jamais afficher les rendez-vous clients
+  if (columnId === 'asv') {
+    return [];
+  }
+
+  // Vérifier s'il y a une attribution spécifique pour ce créneau
+  const assignedVetId = await getAssignedVeterinarian(dateStr, time);
+  
+  // Traiter les bookings sans préférence de vétérinaire
   const processedBookings = bookings.map(booking => {
-    if (!booking.veterinarian_id && booking.appointment_date === dateStr && columnId !== 'asv') {
+    if (!booking.veterinarian_id && booking.appointment_date === dateStr) {
+      // Si il y a une attribution spécifique, l'utiliser
+      if (assignedVetId) {
+        return { ...booking, veterinarian_id: assignedVetId };
+      }
+      // Sinon, utiliser l'ancien système de fallback
       return processBookingWithoutPreference(booking, veterinarians, bookings, settings);
     }
     return booking;
@@ -124,11 +138,6 @@ export const getBookingsForSlot = (
     
     // Vérifier l'heure
     if (booking.appointment_time !== time) return false;
-    
-    // Pour la colonne ASV : ne jamais afficher les rendez-vous clients
-    if (columnId === 'asv') {
-      return false; // Les créneaux clients ne doivent jamais apparaître dans la colonne ASV
-    }
     
     // Pour les colonnes vétérinaires : afficher les rendez-vous assignés à ce vétérinaire
     return booking.veterinarian_id === columnId;
