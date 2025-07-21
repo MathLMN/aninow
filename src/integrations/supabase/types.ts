@@ -505,6 +505,44 @@ export type Database = {
         }
         Relationships: []
       }
+      slot_assignments: {
+        Row: {
+          assignment_type: string
+          created_at: string
+          date: string
+          id: string
+          time_slot: string
+          updated_at: string
+          veterinarian_id: string
+        }
+        Insert: {
+          assignment_type?: string
+          created_at?: string
+          date: string
+          id?: string
+          time_slot: string
+          updated_at?: string
+          veterinarian_id: string
+        }
+        Update: {
+          assignment_type?: string
+          created_at?: string
+          date?: string
+          id?: string
+          time_slot?: string
+          updated_at?: string
+          veterinarian_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "slot_assignments_veterinarian_id_fkey"
+            columns: ["veterinarian_id"]
+            isOneToOne: false
+            referencedRelation: "clinic_veterinarians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       veterinarians: {
         Row: {
           clinic_name: string
