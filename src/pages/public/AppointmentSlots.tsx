@@ -119,6 +119,14 @@ const AppointmentSlots = () => {
         <div className="max-w-4xl mx-auto">
           <ProgressBar value={100} />
 
+          {/* Bouton retour cohérent avec les autres pages */}
+          <div className="mb-4 sm:mb-6">
+            <Button variant="ghost" onClick={handleBack} className="text-vet-navy hover:bg-vet-beige/20 p-2 text-sm sm:text-base -ml-2">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Retour
+            </Button>
+          </div>
+
           <div className="text-center mb-6 sm:mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold text-vet-navy mb-2 sm:mb-4">
               Choisissez votre créneau
@@ -128,30 +136,20 @@ const AppointmentSlots = () => {
             </p>
           </div>
 
-          {/* Section préférence de vétérinaire avec bouton retour */}
+          {/* Section préférence de vétérinaire */}
           <div className="mb-6">
             <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/20 shadow-lg">
               <CardHeader className="pb-3 sm:pb-4 px-3 sm:px-6 pt-3 sm:pt-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <UserCheck className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-vet-sage flex-shrink-0" />
-                    <div>
-                      <CardTitle className="text-vet-navy text-lg sm:text-xl text-sm sm:text-base">
-                        Préférence de vétérinaire
-                      </CardTitle>
-                      <CardDescription className="text-vet-brown text-xs sm:text-sm">
-                        Choisissez un vétérinaire spécifique ou laissez le choix à la clinique
-                      </CardDescription>
-                    </div>
+                <div className="flex items-center">
+                  <UserCheck className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-vet-sage flex-shrink-0" />
+                  <div>
+                    <CardTitle className="text-vet-navy text-lg sm:text-xl text-sm sm:text-base">
+                      Préférence de vétérinaire
+                    </CardTitle>
+                    <CardDescription className="text-vet-brown text-xs sm:text-sm">
+                      Choisissez un vétérinaire spécifique ou laissez le choix à la clinique
+                    </CardDescription>
                   </div>
-                  <Button
-                    variant="outline"
-                    onClick={handleBack}
-                    className="border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white transition-colors text-sm py-2 px-3 flex-shrink-0"
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-1" />
-                    Retour
-                  </Button>
                 </div>
               </CardHeader>
               <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
