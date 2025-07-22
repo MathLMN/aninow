@@ -200,21 +200,23 @@ export const ClinicSettingsForm = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="clinic_name">Nom de la clinique</Label>
-            <Input
-              id="clinic_name"
-              value={formData.clinic_name}
-              onChange={(e) => setFormData(prev => ({ ...prev, clinic_name: e.target.value }))}
-              placeholder="Nom de votre clinique"
-            />
-          </div>
-          <div className="flex justify-end">
+          <div className="flex items-end gap-4">
+            <div className="flex-1">
+              <Label htmlFor="clinic_name">Nom de la clinique</Label>
+              <Input
+                id="clinic_name"
+                value={formData.clinic_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, clinic_name: e.target.value }))}
+                placeholder="Nom de votre clinique"
+              />
+            </div>
             <Button
               onClick={handleSaveClinicInfo}
-              className="bg-vet-sage hover:bg-vet-sage/90 text-white"
+              size="sm"
+              variant="outline"
+              className="text-vet-sage border-vet-sage hover:bg-vet-sage hover:text-white"
             >
-              Sauvegarder les informations
+              Sauvegarder
             </Button>
           </div>
         </CardContent>
@@ -231,44 +233,56 @@ export const ClinicSettingsForm = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="default_slot_duration">Durée par défaut des créneaux (minutes)</Label>
-            <Select
-              value={formData.default_slot_duration_minutes.toString()}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, default_slot_duration_minutes: parseInt(value) }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner la durée" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="15">15 minutes</SelectItem>
-                <SelectItem value="20">20 minutes</SelectItem>
-                <SelectItem value="30">30 minutes</SelectItem>
-                <SelectItem value="45">45 minutes</SelectItem>
-                <SelectItem value="60">60 minutes</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex justify-end">
+          <div className="flex items-end gap-4">
+            <div className="flex-1">
+              <Label htmlFor="default_slot_duration">Durée par défaut des créneaux (minutes)</Label>
+              <Select
+                value={formData.default_slot_duration_minutes.toString()}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, default_slot_duration_minutes: parseInt(value) }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner la durée" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="15">15 minutes</SelectItem>
+                  <SelectItem value="20">20 minutes</SelectItem>
+                  <SelectItem value="30">30 minutes</SelectItem>
+                  <SelectItem value="45">45 minutes</SelectItem>
+                  <SelectItem value="60">60 minutes</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <Button
               onClick={handleSaveSlotConfig}
-              className="bg-vet-sage hover:bg-vet-sage/90 text-white"
+              size="sm"
+              variant="outline"
+              className="text-vet-sage border-vet-sage hover:bg-vet-sage hover:text-white"
             >
-              Sauvegarder la configuration
+              Sauvegarder
             </Button>
           </div>
         </CardContent>
       </Card>
 
       <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-        <CardHeader>
-          <CardTitle className="text-vet-navy flex items-center">
-            <Clock className="h-5 w-5 mr-2" />
-            Horaires d'ouverture par jour
-          </CardTitle>
-          <CardDescription>
-            Configurez les horaires d'ouverture pour chaque jour de la semaine
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-vet-navy flex items-center">
+              <Clock className="h-5 w-5 mr-2" />
+              Horaires d'ouverture par jour
+            </CardTitle>
+            <CardDescription>
+              Configurez les horaires d'ouverture pour chaque jour de la semaine
+            </CardDescription>
+          </div>
+          <Button
+            onClick={handleSaveSchedules}
+            size="sm"
+            variant="outline"
+            className="text-vet-sage border-vet-sage hover:bg-vet-sage hover:text-white"
+          >
+            Sauvegarder
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
@@ -329,14 +343,6 @@ export const ClinicSettingsForm = () => {
               );
             })}
           </div>
-          <div className="flex justify-end mt-6">
-            <Button
-              onClick={handleSaveSchedules}
-              className="bg-vet-sage hover:bg-vet-sage/90 text-white"
-            >
-              Sauvegarder les horaires
-            </Button>
-          </div>
         </CardContent>
       </Card>
 
@@ -351,24 +357,25 @@ export const ClinicSettingsForm = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="asv_enabled"
-              checked={formData.asv_enabled}
-              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, asv_enabled: checked }))}
-            />
-            <Label htmlFor="asv_enabled" className="flex items-center">
-              <Shield className="h-4 w-4 mr-2" />
-              Afficher la colonne ASV
-            </Label>
-          </div>
-
-          <div className="flex justify-end">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="asv_enabled"
+                checked={formData.asv_enabled}
+                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, asv_enabled: checked }))}
+              />
+              <Label htmlFor="asv_enabled" className="flex items-center">
+                <Shield className="h-4 w-4 mr-2" />
+                Afficher la colonne ASV
+              </Label>
+            </div>
             <Button
               onClick={handleSavePlanningConfig}
-              className="bg-vet-sage hover:bg-vet-sage/90 text-white"
+              size="sm"
+              variant="outline"
+              className="text-vet-sage border-vet-sage hover:bg-vet-sage hover:text-white"
             >
-              Sauvegarder la configuration
+              Sauvegarder
             </Button>
           </div>
 
