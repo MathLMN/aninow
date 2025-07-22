@@ -28,6 +28,12 @@ interface DailySchedules {
 interface ClinicSettings {
   id?: string
   clinic_name: string
+  clinic_phone?: string
+  clinic_email?: string
+  clinic_address_street?: string
+  clinic_address_city?: string
+  clinic_address_postal_code?: string
+  clinic_address_country?: string
   asv_enabled: boolean
   daily_schedules: DailySchedules
   default_slot_duration_minutes?: number
@@ -83,6 +89,12 @@ const convertToDailySchedules = (jsonData: any): DailySchedules => {
 export const useClinicSettings = () => {
   const [settings, setSettings] = useState<ClinicSettings>({
     clinic_name: 'Clinique Vétérinaire',
+    clinic_phone: '',
+    clinic_email: '',
+    clinic_address_street: '',
+    clinic_address_city: '',
+    clinic_address_postal_code: '',
+    clinic_address_country: 'France',
     asv_enabled: true,
     default_slot_duration_minutes: 30,
     daily_schedules: {
@@ -115,7 +127,13 @@ export const useClinicSettings = () => {
         const settingsData: ClinicSettings = {
           ...data,
           daily_schedules: convertToDailySchedules(data.daily_schedules),
-          default_slot_duration_minutes: data.default_slot_duration_minutes || 30
+          default_slot_duration_minutes: data.default_slot_duration_minutes || 30,
+          clinic_phone: data.clinic_phone || '',
+          clinic_email: data.clinic_email || '',
+          clinic_address_street: data.clinic_address_street || '',
+          clinic_address_city: data.clinic_address_city || '',
+          clinic_address_postal_code: data.clinic_address_postal_code || '',
+          clinic_address_country: data.clinic_address_country || 'France'
         }
         setSettings(settingsData)
       }
@@ -138,6 +156,12 @@ export const useClinicSettings = () => {
       // Préparer les données pour Supabase avec le bon format
       const dataToUpdate = {
         clinic_name: updatedSettings.clinic_name,
+        clinic_phone: updatedSettings.clinic_phone,
+        clinic_email: updatedSettings.clinic_email,
+        clinic_address_street: updatedSettings.clinic_address_street,
+        clinic_address_city: updatedSettings.clinic_address_city,
+        clinic_address_postal_code: updatedSettings.clinic_address_postal_code,
+        clinic_address_country: updatedSettings.clinic_address_country,
         asv_enabled: updatedSettings.asv_enabled,
         daily_schedules: JSON.parse(JSON.stringify(updatedSettings.daily_schedules)),
         default_slot_duration_minutes: updatedSettings.default_slot_duration_minutes || 30
@@ -154,7 +178,13 @@ export const useClinicSettings = () => {
       const settingsData: ClinicSettings = {
         ...data,
         daily_schedules: convertToDailySchedules(data.daily_schedules),
-        default_slot_duration_minutes: data.default_slot_duration_minutes || 30
+        default_slot_duration_minutes: data.default_slot_duration_minutes || 30,
+        clinic_phone: data.clinic_phone || '',
+        clinic_email: data.clinic_email || '',
+        clinic_address_street: data.clinic_address_street || '',
+        clinic_address_city: data.clinic_address_city || '',
+        clinic_address_postal_code: data.clinic_address_postal_code || '',
+        clinic_address_country: data.clinic_address_country || 'France'
       }
       setSettings(settingsData)
       

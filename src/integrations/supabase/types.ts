@@ -299,7 +299,13 @@ export type Database = {
       clinic_settings: {
         Row: {
           asv_enabled: boolean
+          clinic_address_city: string | null
+          clinic_address_country: string | null
+          clinic_address_postal_code: string | null
+          clinic_address_street: string | null
+          clinic_email: string | null
           clinic_name: string
+          clinic_phone: string | null
           created_at: string
           daily_schedules: Json | null
           default_slot_duration_minutes: number
@@ -308,7 +314,13 @@ export type Database = {
         }
         Insert: {
           asv_enabled?: boolean
+          clinic_address_city?: string | null
+          clinic_address_country?: string | null
+          clinic_address_postal_code?: string | null
+          clinic_address_street?: string | null
+          clinic_email?: string | null
           clinic_name?: string
+          clinic_phone?: string | null
           created_at?: string
           daily_schedules?: Json | null
           default_slot_duration_minutes?: number
@@ -317,7 +329,13 @@ export type Database = {
         }
         Update: {
           asv_enabled?: boolean
+          clinic_address_city?: string | null
+          clinic_address_country?: string | null
+          clinic_address_postal_code?: string | null
+          clinic_address_street?: string | null
+          clinic_email?: string | null
           clinic_name?: string
+          clinic_phone?: string | null
           created_at?: string
           daily_schedules?: Json | null
           default_slot_duration_minutes?: number

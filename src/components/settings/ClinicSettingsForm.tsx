@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useClinicSettings } from "@/hooks/useClinicSettings";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
-import { Building2, Clock, Shield, UserPlus, Edit, Trash2, Stethoscope, Timer } from "lucide-react";
+import { Building2, Clock, Shield, UserPlus, Edit, Trash2, Stethoscope, Timer, Phone, Mail, MapPin } from "lucide-react";
 
 const DAYS_OF_WEEK = [
   { key: 'monday', label: 'Lundi' },
@@ -28,6 +27,12 @@ export const ClinicSettingsForm = () => {
   
   const [formData, setFormData] = useState({
     clinic_name: '',
+    clinic_phone: '',
+    clinic_email: '',
+    clinic_address_street: '',
+    clinic_address_city: '',
+    clinic_address_postal_code: '',
+    clinic_address_country: 'France',
     asv_enabled: true,
     daily_schedules: {
       monday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
@@ -55,6 +60,12 @@ export const ClinicSettingsForm = () => {
     console.log('Settings updated:', settings);
     setFormData({
       clinic_name: settings.clinic_name || 'Clinique Vétérinaire',
+      clinic_phone: settings.clinic_phone || '',
+      clinic_email: settings.clinic_email || '',
+      clinic_address_street: settings.clinic_address_street || '',
+      clinic_address_city: settings.clinic_address_city || '',
+      clinic_address_postal_code: settings.clinic_address_postal_code || '',
+      clinic_address_country: settings.clinic_address_country || 'France',
       asv_enabled: settings.asv_enabled ?? true,
       daily_schedules: settings.daily_schedules || {
         monday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
@@ -70,8 +81,24 @@ export const ClinicSettingsForm = () => {
   }, [settings]);
 
   const handleSaveClinicInfo = async () => {
-    console.log('Saving clinic info:', { clinic_name: formData.clinic_name });
-    const success = await updateSettings({ clinic_name: formData.clinic_name });
+    console.log('Saving clinic info:', {
+      clinic_name: formData.clinic_name,
+      clinic_phone: formData.clinic_phone,
+      clinic_email: formData.clinic_email,
+      clinic_address_street: formData.clinic_address_street,
+      clinic_address_city: formData.clinic_address_city,
+      clinic_address_postal_code: formData.clinic_address_postal_code,
+      clinic_address_country: formData.clinic_address_country
+    });
+    const success = await updateSettings({
+      clinic_name: formData.clinic_name,
+      clinic_phone: formData.clinic_phone,
+      clinic_email: formData.clinic_email,
+      clinic_address_street: formData.clinic_address_street,
+      clinic_address_city: formData.clinic_address_city,
+      clinic_address_postal_code: formData.clinic_address_postal_code,
+      clinic_address_country: formData.clinic_address_country
+    });
     if (success) {
       console.log('Clinic info saved successfully');
     } else {
@@ -199,9 +226,9 @@ export const ClinicSettingsForm = () => {
             Paramètres généraux de votre établissement
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-end gap-4">
-            <div className="flex-1">
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
               <Label htmlFor="clinic_name">Nom de la clinique</Label>
               <Input
                 id="clinic_name"
@@ -210,6 +237,82 @@ export const ClinicSettingsForm = () => {
                 placeholder="Nom de votre clinique"
               />
             </div>
+            <div>
+              <Label htmlFor="clinic_phone" className="flex items-center">
+                <Phone className="h-4 w-4 mr-1" />
+                Téléphone
+              </Label>
+              <Input
+                id="clinic_phone"
+                value={formData.clinic_phone}
+                onChange={(e) => setFormData(prev => ({ ...prev, clinic_phone: e.target.value }))}
+                placeholder="01 23 45 67 89"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="clinic_email" className="flex items-center">
+              <Mail className="h-4 w-4 mr-1" />
+              Email
+            </Label>
+            <Input
+              id="clinic_email"
+              type="email"
+              value={formData.clinic_email}
+              onChange={(e) => setFormData(prev => ({ ...prev, clinic_email: e.target.value }))}
+              placeholder="contact@clinique.com"
+            />
+          </div>
+
+          <div className="space-y-4">
+            <Label className="flex items-center text-base font-medium">
+              <MapPin className="h-4 w-4 mr-1" />
+              Adresse
+            </Label>
+            <div className="grid grid-cols-1 gap-4 ml-5">
+              <div>
+                <Label htmlFor="clinic_address_street">Rue</Label>
+                <Input
+                  id="clinic_address_street"
+                  value={formData.clinic_address_street}
+                  onChange={(e) => setFormData(prev => ({ ...prev, clinic_address_street: e.target.value }))}
+                  placeholder="123 Rue de la Paix"
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="clinic_address_city">Ville</Label>
+                  <Input
+                    id="clinic_address_city"
+                    value={formData.clinic_address_city}
+                    onChange={(e) => setFormData(prev => ({ ...prev, clinic_address_city: e.target.value }))}
+                    placeholder="Paris"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="clinic_address_postal_code">Code postal</Label>
+                  <Input
+                    id="clinic_address_postal_code"
+                    value={formData.clinic_address_postal_code}
+                    onChange={(e) => setFormData(prev => ({ ...prev, clinic_address_postal_code: e.target.value }))}
+                    placeholder="75001"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="clinic_address_country">Pays</Label>
+                  <Input
+                    id="clinic_address_country"
+                    value={formData.clinic_address_country}
+                    onChange={(e) => setFormData(prev => ({ ...prev, clinic_address_country: e.target.value }))}
+                    placeholder="France"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end">
             <Button
               onClick={handleSaveClinicInfo}
               size="sm"
@@ -269,7 +372,7 @@ export const ClinicSettingsForm = () => {
           <div>
             <CardTitle className="text-vet-navy flex items-center">
               <Clock className="h-5 w-5 mr-2" />
-              Horaires d'ouverture par jour
+              Horaires d'ouverture
             </CardTitle>
             <CardDescription>
               Configurez les horaires d'ouverture pour chaque jour de la semaine
