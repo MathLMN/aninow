@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,31 +22,32 @@ const DAYS_OF_WEEK = [
   { key: 'sunday', label: 'Dimanche' }
 ];
 
+const getDefaultFormData = () => ({
+  clinic_name: 'Clinique Vétérinaire',
+  clinic_phone: '',
+  clinic_email: '',
+  clinic_address_street: '',
+  clinic_address_city: '',
+  clinic_address_postal_code: '',
+  clinic_address_country: 'France',
+  asv_enabled: true,
+  daily_schedules: {
+    monday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+    tuesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+    wednesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+    thursday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+    friday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+    saturday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } },
+    sunday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } }
+  },
+  default_slot_duration_minutes: 30
+});
+
 export const ClinicSettingsForm = () => {
   const { settings, isLoading, updateSettings } = useClinicSettings();
   const { veterinarians, isLoading: isLoadingVets, addVeterinarian, updateVeterinarian, deleteVeterinarian } = useClinicVeterinarians();
   
-  const [formData, setFormData] = useState({
-    clinic_name: '',
-    clinic_phone: '',
-    clinic_email: '',
-    clinic_address_street: '',
-    clinic_address_city: '',
-    clinic_address_postal_code: '',
-    clinic_address_country: 'France',
-    asv_enabled: true,
-    daily_schedules: {
-      monday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
-      tuesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
-      wednesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
-      thursday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
-      friday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
-      saturday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } },
-      sunday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } }
-    },
-    default_slot_duration_minutes: 30
-  });
-
+  const [formData, setFormData] = useState(getDefaultFormData());
   const [isSavingClinicInfo, setIsSavingClinicInfo] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingVet, setEditingVet] = useState<any>(null);
@@ -58,28 +60,24 @@ export const ClinicSettingsForm = () => {
 
   // Synchroniser formData avec settings à chaque changement
   useEffect(() => {
-    console.log('🔄 Settings changed, updating form data:', settings);
-    setFormData({
-      clinic_name: settings.clinic_name || 'Clinique Vétérinaire',
-      clinic_phone: settings.clinic_phone || '',
-      clinic_email: settings.clinic_email || '',
-      clinic_address_street: settings.clinic_address_street || '',
-      clinic_address_city: settings.clinic_address_city || '',
-      clinic_address_postal_code: settings.clinic_address_postal_code || '',
-      clinic_address_country: settings.clinic_address_country || 'France',
-      asv_enabled: settings.asv_enabled ?? true,
-      daily_schedules: settings.daily_schedules || {
-        monday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
-        tuesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
-        wednesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
-        thursday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
-        friday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
-        saturday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } },
-        sunday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } }
-      },
-      default_slot_duration_minutes: settings.default_slot_duration_minutes || 30
-    });
-  }, [settings]);
+    if (!isLoading && settings) {
+      console.log('🔄 Syncing form data with settings:', settings);
+      const newFormData = {
+        clinic_name: settings.clinic_name || 'Clinique Vétérinaire',
+        clinic_phone: settings.clinic_phone || '',
+        clinic_email: settings.clinic_email || '',
+        clinic_address_street: settings.clinic_address_street || '',
+        clinic_address_city: settings.clinic_address_city || '',
+        clinic_address_postal_code: settings.clinic_address_postal_code || '',
+        clinic_address_country: settings.clinic_address_country || 'France',
+        asv_enabled: settings.asv_enabled ?? true,
+        daily_schedules: settings.daily_schedules || getDefaultFormData().daily_schedules,
+        default_slot_duration_minutes: settings.default_slot_duration_minutes || 30
+      };
+      console.log('📝 New form data to set:', newFormData);
+      setFormData(newFormData);
+    }
+  }, [settings, isLoading]);
 
   const handleSaveClinicInfo = async () => {
     console.log('🚀 Save clinic info button clicked');
@@ -219,6 +217,8 @@ export const ClinicSettingsForm = () => {
       </Card>
     );
   }
+
+  console.log('🖼️ Rendering form with data:', formData);
 
   return (
     <div className="space-y-6">

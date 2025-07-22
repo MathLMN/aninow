@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
@@ -86,48 +85,50 @@ const convertToDailySchedules = (jsonData: any): DailySchedules => {
   return result
 }
 
+const getDefaultSettings = (): ClinicSettings => ({
+  clinic_name: 'Clinique Vétérinaire',
+  clinic_phone: '',
+  clinic_email: '',
+  clinic_address_street: '',
+  clinic_address_city: '',
+  clinic_address_postal_code: '',
+  clinic_address_country: 'France',
+  asv_enabled: true,
+  default_slot_duration_minutes: 30,
+  daily_schedules: {
+    monday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+    tuesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+    wednesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+    thursday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+    friday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+    saturday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } },
+    sunday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } }
+  }
+});
+
 export const useClinicSettings = () => {
-  const [settings, setSettings] = useState<ClinicSettings>({
-    clinic_name: 'Clinique Vétérinaire',
-    clinic_phone: '',
-    clinic_email: '',
-    clinic_address_street: '',
-    clinic_address_city: '',
-    clinic_address_postal_code: '',
-    clinic_address_country: 'France',
-    asv_enabled: true,
-    default_slot_duration_minutes: 30,
-    daily_schedules: {
-      monday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
-      tuesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
-      wednesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
-      thursday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
-      friday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
-      saturday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } },
-      sunday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } }
-    }
-  })
-  const [isLoading, setIsLoading] = useState(true)
-  const { toast } = useToast()
+  const [settings, setSettings] = useState<ClinicSettings>(getDefaultSettings());
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   const fetchSettings = async () => {
     try {
-      setIsLoading(true)
-      console.log('🔍 Fetching clinic settings...')
+      setIsLoading(true);
+      console.log('🔍 Fetching clinic settings...');
       
       const { data, error } = await supabase
         .from('clinic_settings')
         .select('*')
         .limit(1)
-        .maybeSingle()
+        .maybeSingle();
 
       if (error) {
-        console.error('❌ Error fetching settings:', error)
-        throw error
+        console.error('❌ Error fetching settings:', error);
+        throw error;
       }
 
       if (data) {
-        console.log('✅ Settings found and loaded:', data)
+        console.log('✅ Settings found and loaded:', data);
         const settingsData: ClinicSettings = {
           ...data,
           daily_schedules: convertToDailySchedules(data.daily_schedules),
@@ -138,30 +139,32 @@ export const useClinicSettings = () => {
           clinic_address_city: data.clinic_address_city || '',
           clinic_address_postal_code: data.clinic_address_postal_code || '',
           clinic_address_country: data.clinic_address_country || 'France'
-        }
-        setSettings(settingsData)
+        };
+        setSettings(settingsData);
+        console.log('🔄 Settings state updated with:', settingsData);
       } else {
-        console.log('ℹ️ No settings found, using defaults')
+        console.log('ℹ️ No settings found, using defaults');
+        // Keep default settings if no data found
       }
     } catch (err) {
-      console.error('❌ Erreur lors du chargement des paramètres:', err)
+      console.error('❌ Erreur lors du chargement des paramètres:', err);
       toast({
         title: "Erreur",
         description: "Impossible de charger les paramètres",
         variant: "destructive"
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const updateSettings = async (newSettings: Partial<ClinicSettings>) => {
     try {
-      console.log('💾 Starting settings update...')
-      console.log('📝 New settings data:', newSettings)
+      console.log('💾 Starting settings update...');
+      console.log('📝 New settings data:', newSettings);
       
-      const updatedSettings = { ...settings, ...newSettings }
-      console.log('🔄 Merged settings:', updatedSettings)
+      const updatedSettings = { ...settings, ...newSettings };
+      console.log('🔄 Merged settings:', updatedSettings);
       
       // Préparer les données pour Supabase avec le bon format
       const dataToUpdate = {
@@ -175,51 +178,51 @@ export const useClinicSettings = () => {
         asv_enabled: updatedSettings.asv_enabled,
         daily_schedules: JSON.parse(JSON.stringify(updatedSettings.daily_schedules)),
         default_slot_duration_minutes: updatedSettings.default_slot_duration_minutes || 30
-      }
+      };
       
-      console.log('📤 Data to save to database:', dataToUpdate)
+      console.log('📤 Data to save to database:', dataToUpdate);
       
       // D'abord vérifier s'il y a déjà un enregistrement
       const { data: existingData, error: fetchError } = await supabase
         .from('clinic_settings')
         .select('id')
         .limit(1)
-        .maybeSingle()
+        .maybeSingle();
 
       if (fetchError) {
-        console.error('❌ Error checking existing data:', fetchError)
-        throw fetchError
+        console.error('❌ Error checking existing data:', fetchError);
+        throw fetchError;
       }
 
       let result;
       
       if (existingData?.id) {
         // Mettre à jour l'enregistrement existant
-        console.log('🔄 Updating existing record with ID:', existingData.id)
+        console.log('🔄 Updating existing record with ID:', existingData.id);
         result = await supabase
           .from('clinic_settings')
           .update(dataToUpdate)
           .eq('id', existingData.id)
           .select()
-          .single()
+          .single();
       } else {
         // Créer un nouvel enregistrement
-        console.log('🆕 Creating new record')
+        console.log('🆕 Creating new record');
         result = await supabase
           .from('clinic_settings')
           .insert([dataToUpdate])
           .select()
-          .single()
+          .single();
       }
 
-      const { data, error } = result
+      const { data, error } = result;
 
       if (error) {
-        console.error('❌ Database error:', error)
-        throw error
+        console.error('❌ Database error:', error);
+        throw error;
       }
 
-      console.log('✅ Settings saved successfully to database:', data)
+      console.log('✅ Settings saved successfully to database:', data);
       
       // Mettre à jour le state local avec les données sauvegardées
       const settingsData: ClinicSettings = {
@@ -232,35 +235,35 @@ export const useClinicSettings = () => {
         clinic_address_city: data.clinic_address_city || '',
         clinic_address_postal_code: data.clinic_address_postal_code || '',
         clinic_address_country: data.clinic_address_country || 'France'
-      }
+      };
       
-      console.log('🔄 Updating local state with:', settingsData)
-      setSettings(settingsData)
+      console.log('🔄 Updating local state with:', settingsData);
+      setSettings(settingsData);
       
       toast({
         title: "✅ Paramètres mis à jour",
         description: "Les paramètres de la clinique ont été sauvegardés avec succès",
-      })
+      });
 
-      return true
+      return true;
     } catch (err) {
-      console.error('❌ Erreur lors de la mise à jour:', err)
+      console.error('❌ Erreur lors de la mise à jour:', err);
       toast({
         title: "Erreur",
         description: `Impossible de sauvegarder les paramètres: ${err instanceof Error ? err.message : 'Erreur inconnue'}`,
         variant: "destructive"
-      })
-      return false
+      });
+      return false;
     }
-  }
+  };
 
   useEffect(() => {
-    fetchSettings()
-  }, [])
+    fetchSettings();
+  }, []);
 
   return {
     settings,
     isLoading,
     updateSettings
-  }
-}
+  };
+};
