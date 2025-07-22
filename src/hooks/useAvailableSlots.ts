@@ -34,14 +34,17 @@ export const useAvailableSlots = () => {
     return 20 // 20 minutes pour tous les autres
   }
 
-  const generateTimeSlots = (startTime: string, endTime: string, intervalMinutes: number = 15) => {
+  const generateTimeSlots = (startTime: string, endTime: string, intervalMinutes?: number) => {
+    // Utiliser la durée configurée dans les paramètres de la clinique
+    const slotDuration = intervalMinutes || settings.default_slot_duration_minutes || 30
+    
     const slots = []
     const start = new Date(`2000-01-01T${startTime}:00`)
     const end = new Date(`2000-01-01T${endTime}:00`)
     
     while (start < end) {
       slots.push(start.toTimeString().slice(0, 5))
-      start.setMinutes(start.getMinutes() + intervalMinutes)
+      start.setMinutes(start.getMinutes() + slotDuration)
     }
     
     return slots
@@ -133,7 +136,7 @@ export const useAvailableSlots = () => {
     const slots: TimeSlot[] = []
     const dateStr = date.toISOString().split('T')[0]
     
-    // Générer tous les créneaux temporels possibles
+    // Générer tous les créneaux temporels possibles avec la durée configurée
     const allTimeSlots: string[] = []
     
     // Créneaux du matin
