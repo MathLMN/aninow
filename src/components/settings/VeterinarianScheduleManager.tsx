@@ -1,7 +1,6 @@
-
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { UserClock } from "lucide-react";
+import { Clock } from "lucide-react";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { useVeterinarianSchedules } from "@/hooks/useVeterinarianSchedules";
 import { useVeterinarianAbsences } from "@/hooks/useVeterinarianAbsences";
@@ -30,7 +29,7 @@ export const VeterinarianScheduleManager = () => {
       <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
         <CardHeader>
           <CardTitle className="text-vet-navy flex items-center">
-            <UserClock className="h-5 w-5 mr-2" />
+            <Clock className="h-5 w-5 mr-2" />
             Gestion des horaires et absences
           </CardTitle>
           <CardDescription>
@@ -51,7 +50,7 @@ export const VeterinarianScheduleManager = () => {
       <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
         <CardHeader>
           <CardTitle className="text-vet-navy flex items-center">
-            <UserClock className="h-5 w-5 mr-2" />
+            <Clock className="h-5 w-5 mr-2" />
             Gestion des horaires et absences
           </CardTitle>
           <CardDescription>
