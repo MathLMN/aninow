@@ -1,11 +1,12 @@
+
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock } from "lucide-react";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { useVeterinarianSchedules } from "@/hooks/useVeterinarianSchedules";
 import { useVeterinarianAbsences } from "@/hooks/useVeterinarianAbsences";
-import { VeterinarianScheduleCard } from "./VeterinarianScheduleCard";
-import { VeterinarianAbsencesCard } from "./VeterinarianAbsencesCard";
+import { VeterinarianWeeklySchedule } from "./VeterinarianWeeklySchedule";
+import { VeterinarianAbsenceCalendar } from "./VeterinarianAbsenceCalendar";
 
 export const VeterinarianScheduleManager = () => {
   const { veterinarians, isLoading: isLoadingVets } = useClinicVeterinarians();
@@ -33,7 +34,7 @@ export const VeterinarianScheduleManager = () => {
             Gestion des horaires et absences
           </CardTitle>
           <CardDescription>
-            Configurez les horaires de travail et les périodes d'absence pour chaque vétérinaire
+            Configuration rapide des horaires hebdomadaires et gestion des absences
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -54,7 +55,7 @@ export const VeterinarianScheduleManager = () => {
             Gestion des horaires et absences
           </CardTitle>
           <CardDescription>
-            Configurez les horaires de travail et les périodes d'absence pour chaque vétérinaire
+            Configuration rapide des horaires hebdomadaires et gestion des absences sur calendrier
           </CardDescription>
         </CardHeader>
       </Card>
@@ -64,12 +65,12 @@ export const VeterinarianScheduleManager = () => {
         const vetAbsences = absences.filter(a => a.veterinarian_id === veterinarian.id);
 
         return (
-          <div key={veterinarian.id} className="space-y-4">
-            <VeterinarianScheduleCard
+          <div key={veterinarian.id} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <VeterinarianWeeklySchedule
               veterinarian={veterinarian}
               schedules={vetSchedules}
             />
-            <VeterinarianAbsencesCard
+            <VeterinarianAbsenceCalendar
               veterinarian={veterinarian}
               absences={vetAbsences}
             />
