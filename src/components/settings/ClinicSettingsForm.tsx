@@ -69,13 +69,43 @@ export const ClinicSettingsForm = () => {
     });
   }, [settings]);
 
-  const handleSave = async () => {
-    console.log('Saving settings:', formData);
-    const success = await updateSettings(formData);
+  const handleSaveClinicInfo = async () => {
+    console.log('Saving clinic info:', { clinic_name: formData.clinic_name });
+    const success = await updateSettings({ clinic_name: formData.clinic_name });
     if (success) {
-      console.log('Settings saved successfully');
+      console.log('Clinic info saved successfully');
     } else {
-      console.error('Failed to save settings');
+      console.error('Failed to save clinic info');
+    }
+  };
+
+  const handleSaveSlotConfig = async () => {
+    console.log('Saving slot configuration:', { default_slot_duration_minutes: formData.default_slot_duration_minutes });
+    const success = await updateSettings({ default_slot_duration_minutes: formData.default_slot_duration_minutes });
+    if (success) {
+      console.log('Slot configuration saved successfully');
+    } else {
+      console.error('Failed to save slot configuration');
+    }
+  };
+
+  const handleSaveSchedules = async () => {
+    console.log('Saving schedules:', { daily_schedules: formData.daily_schedules });
+    const success = await updateSettings({ daily_schedules: formData.daily_schedules });
+    if (success) {
+      console.log('Schedules saved successfully');
+    } else {
+      console.error('Failed to save schedules');
+    }
+  };
+
+  const handleSavePlanningConfig = async () => {
+    console.log('Saving planning configuration:', { asv_enabled: formData.asv_enabled });
+    const success = await updateSettings({ asv_enabled: formData.asv_enabled });
+    if (success) {
+      console.log('Planning configuration saved successfully');
+    } else {
+      console.error('Failed to save planning configuration');
     }
   };
 
@@ -179,6 +209,14 @@ export const ClinicSettingsForm = () => {
               placeholder="Nom de votre clinique"
             />
           </div>
+          <div className="flex justify-end">
+            <Button
+              onClick={handleSaveClinicInfo}
+              className="bg-vet-sage hover:bg-vet-sage/90 text-white"
+            >
+              Sauvegarder les informations
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
@@ -210,6 +248,14 @@ export const ClinicSettingsForm = () => {
                 <SelectItem value="60">60 minutes</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="flex justify-end">
+            <Button
+              onClick={handleSaveSlotConfig}
+              className="bg-vet-sage hover:bg-vet-sage/90 text-white"
+            >
+              Sauvegarder la configuration
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -283,6 +329,14 @@ export const ClinicSettingsForm = () => {
               );
             })}
           </div>
+          <div className="flex justify-end mt-6">
+            <Button
+              onClick={handleSaveSchedules}
+              className="bg-vet-sage hover:bg-vet-sage/90 text-white"
+            >
+              Sauvegarder les horaires
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
@@ -307,6 +361,15 @@ export const ClinicSettingsForm = () => {
               <Shield className="h-4 w-4 mr-2" />
               Afficher la colonne ASV
             </Label>
+          </div>
+
+          <div className="flex justify-end">
+            <Button
+              onClick={handleSavePlanningConfig}
+              className="bg-vet-sage hover:bg-vet-sage/90 text-white"
+            >
+              Sauvegarder la configuration
+            </Button>
           </div>
 
           <div className="space-y-4">
@@ -496,15 +559,6 @@ export const ClinicSettingsForm = () => {
           </div>
         </CardContent>
       </Card>
-
-      <div className="flex justify-end">
-        <Button
-          onClick={handleSave}
-          className="bg-vet-sage hover:bg-vet-sage/90 text-white"
-        >
-          Sauvegarder les paramètres
-        </Button>
-      </div>
     </div>
   );
 };
