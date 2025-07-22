@@ -47,6 +47,13 @@ export const useAvailableSlots = () => {
     return slots
   }
 
+  // Fonction pour vérifier si un créneau est dans le futur
+  const isSlotInFuture = (date: string, time: string) => {
+    const now = new Date()
+    const slotDateTime = new Date(`${date}T${time}:00`)
+    return slotDateTime > now
+  }
+
   // Nouvelle fonction pour l'attribution intelligente des créneaux
   const getOrAssignVeterinarianForSlot = async (date: string, time: string): Promise<string> => {
     try {
@@ -141,8 +148,13 @@ export const useAvailableSlots = () => {
       allTimeSlots.push(...afternoonSlots)
     }
 
-    // Pour chaque créneau temporel, assigner un vétérinaire de manière intelligente
+    // Pour chaque créneau temporel, vérifier s'il est dans le futur et assigner un vétérinaire
     for (const time of allTimeSlots) {
+      // Filtrer les créneaux passés pour la journée en cours
+      if (!isSlotInFuture(dateStr, time)) {
+        continue
+      }
+
       const veterinarianId = await getOrAssignVeterinarianForSlot(dateStr, time)
       
       slots.push({
@@ -198,7 +210,7 @@ export const useAvailableSlots = () => {
       
       const { bookings, blockedSlots } = await checkSlotAvailability(dateStr)
       
-      // Générer les créneaux avec attribution intelligente
+      // Générer les créneaux avec attribution intelligente et filtrage des créneaux passés
       const daySlots = await generateDaySlots(date)
       
       // Appliquer les vérifications de disponibilité
