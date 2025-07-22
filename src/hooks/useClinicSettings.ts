@@ -115,18 +115,35 @@ export const useClinicSettings = () => {
       setIsLoading(true)
       console.log('Fetching clinic settings...')
       
+      // Récupérer TOUTES les lignes pour voir ce qui se passe
+      const { data: allData, error: allError } = await supabase
+        .from('clinic_settings')
+        .select('*')
+
+      if (allError) {
+        console.error('Error fetching all settings:', allError)
+      } else {
+        console.log('All clinic settings in database:', allData)
+      }
+      
+      // Récupérer la première ligne (ou la seule)
       const { data, error } = await supabase
         .from('clinic_settings')
         .select('*')
-        .maybeSingle()
+        .limit(1)
+        .single()
 
-      if (error && error.code !== 'PGRST116') {
-        throw error
+      if (error) {
+        if (error.code === 'PGRST116') {
+          console.log('No settings found in database, using defaults')
+        } else {
+          console.error('Error fetching settings:', error)
+          throw error
+        }
       }
 
       if (data) {
-        console.log('Settings fetched successfully:', data)
-        // Convertir les données avec le bon typage et validation
+        console.log('Settings found and loaded:', data)
         const settingsData: ClinicSettings = {
           ...data,
           daily_schedules: convertToDailySchedules(data.daily_schedules),
@@ -175,11 +192,35 @@ export const useClinicSettings = () => {
       
       console.log('Data to save:', dataToUpdate)
       
-      const { data, error } = await supabase
+      // Vérifier s'il y a déjà un enregistrement
+      const { data: existingData } = await supabase
         .from('clinic_settings')
-        .upsert([dataToUpdate], { onConflict: 'id' })
-        .select()
+        .select('id')
+        .limit(1)
         .single()
+
+      let result;
+      
+      if (existingData?.id) {
+        // Mettre à jour l'enregistrement existant
+        console.log('Updating existing record with ID:', existingData.id)
+        result = await supabase
+          .from('clinic_settings')
+          .update(dataToUpdate)
+          .eq('id', existingData.id)
+          .select()
+          .single()
+      } else {
+        // Créer un nouvel enregistrement
+        console.log('Creating new record')
+        result = await supabase
+          .from('clinic_settings')
+          .insert([dataToUpdate])
+          .select()
+          .single()
+      }
+
+      const { data, error } = result
 
       if (error) {
         console.error('Database error:', error)
