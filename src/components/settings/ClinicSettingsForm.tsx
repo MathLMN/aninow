@@ -46,6 +46,7 @@ export const ClinicSettingsForm = () => {
     default_slot_duration_minutes: 30
   });
 
+  const [isSavingClinicInfo, setIsSavingClinicInfo] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingVet, setEditingVet] = useState<any>(null);
   const [vetFormData, setVetFormData] = useState({
@@ -81,6 +82,7 @@ export const ClinicSettingsForm = () => {
   }, [settings]);
 
   const handleSaveClinicInfo = async () => {
+    setIsSavingClinicInfo(true);
     console.log('Saving clinic info:', {
       clinic_name: formData.clinic_name,
       clinic_phone: formData.clinic_phone,
@@ -90,19 +92,27 @@ export const ClinicSettingsForm = () => {
       clinic_address_postal_code: formData.clinic_address_postal_code,
       clinic_address_country: formData.clinic_address_country
     });
-    const success = await updateSettings({
-      clinic_name: formData.clinic_name,
-      clinic_phone: formData.clinic_phone,
-      clinic_email: formData.clinic_email,
-      clinic_address_street: formData.clinic_address_street,
-      clinic_address_city: formData.clinic_address_city,
-      clinic_address_postal_code: formData.clinic_address_postal_code,
-      clinic_address_country: formData.clinic_address_country
-    });
-    if (success) {
-      console.log('Clinic info saved successfully');
-    } else {
-      console.error('Failed to save clinic info');
+    
+    try {
+      const success = await updateSettings({
+        clinic_name: formData.clinic_name || 'Clinique Vétérinaire',
+        clinic_phone: formData.clinic_phone || '',
+        clinic_email: formData.clinic_email || '',
+        clinic_address_street: formData.clinic_address_street || '',
+        clinic_address_city: formData.clinic_address_city || '',
+        clinic_address_postal_code: formData.clinic_address_postal_code || '',
+        clinic_address_country: formData.clinic_address_country || 'France'
+      });
+      
+      if (success) {
+        console.log('Clinic info saved successfully');
+      } else {
+        console.error('Failed to save clinic info');
+      }
+    } catch (error) {
+      console.error('Error saving clinic info:', error);
+    } finally {
+      setIsSavingClinicInfo(false);
     }
   };
 
@@ -315,11 +325,12 @@ export const ClinicSettingsForm = () => {
           <div className="flex justify-end">
             <Button
               onClick={handleSaveClinicInfo}
+              disabled={isSavingClinicInfo}
               size="sm"
               variant="outline"
               className="text-vet-sage border-vet-sage hover:bg-vet-sage hover:text-white"
             >
-              Sauvegarder
+              {isSavingClinicInfo ? 'Sauvegarde...' : 'Sauvegarder'}
             </Button>
           </div>
         </CardContent>

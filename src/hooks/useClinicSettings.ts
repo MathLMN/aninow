@@ -113,16 +113,19 @@ export const useClinicSettings = () => {
   const fetchSettings = async () => {
     try {
       setIsLoading(true)
+      console.log('Fetching clinic settings...')
+      
       const { data, error } = await supabase
         .from('clinic_settings')
         .select('*')
-        .single()
+        .maybeSingle()
 
       if (error && error.code !== 'PGRST116') {
         throw error
       }
 
       if (data) {
+        console.log('Settings fetched successfully:', data)
         // Convertir les données avec le bon typage et validation
         const settingsData: ClinicSettings = {
           ...data,
@@ -136,6 +139,8 @@ export const useClinicSettings = () => {
           clinic_address_country: data.clinic_address_country || 'France'
         }
         setSettings(settingsData)
+      } else {
+        console.log('No settings found, using defaults')
       }
     } catch (err) {
       console.error('Erreur lors du chargement des paramètres:', err)
@@ -151,30 +156,38 @@ export const useClinicSettings = () => {
 
   const updateSettings = async (newSettings: Partial<ClinicSettings>) => {
     try {
+      console.log('Updating settings with:', newSettings)
       const updatedSettings = { ...settings, ...newSettings }
       
       // Préparer les données pour Supabase avec le bon format
       const dataToUpdate = {
-        clinic_name: updatedSettings.clinic_name,
-        clinic_phone: updatedSettings.clinic_phone,
-        clinic_email: updatedSettings.clinic_email,
-        clinic_address_street: updatedSettings.clinic_address_street,
-        clinic_address_city: updatedSettings.clinic_address_city,
-        clinic_address_postal_code: updatedSettings.clinic_address_postal_code,
-        clinic_address_country: updatedSettings.clinic_address_country,
+        clinic_name: updatedSettings.clinic_name || 'Clinique Vétérinaire',
+        clinic_phone: updatedSettings.clinic_phone || null,
+        clinic_email: updatedSettings.clinic_email || null,
+        clinic_address_street: updatedSettings.clinic_address_street || null,
+        clinic_address_city: updatedSettings.clinic_address_city || null,
+        clinic_address_postal_code: updatedSettings.clinic_address_postal_code || null,
+        clinic_address_country: updatedSettings.clinic_address_country || 'France',
         asv_enabled: updatedSettings.asv_enabled,
         daily_schedules: JSON.parse(JSON.stringify(updatedSettings.daily_schedules)),
         default_slot_duration_minutes: updatedSettings.default_slot_duration_minutes || 30
       }
       
+      console.log('Data to save:', dataToUpdate)
+      
       const { data, error } = await supabase
         .from('clinic_settings')
-        .upsert([dataToUpdate])
+        .upsert([dataToUpdate], { onConflict: 'id' })
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Database error:', error)
+        throw error
+      }
 
+      console.log('Settings saved successfully:', data)
+      
       const settingsData: ClinicSettings = {
         ...data,
         daily_schedules: convertToDailySchedules(data.daily_schedules),
@@ -198,7 +211,7 @@ export const useClinicSettings = () => {
       console.error('Erreur lors de la mise à jour:', err)
       toast({
         title: "Erreur",
-        description: "Impossible de sauvegarder les paramètres",
+        description: `Impossible de sauvegarder les paramètres: ${err instanceof Error ? err.message : 'Erreur inconnue'}`,
         variant: "destructive"
       })
       return false
