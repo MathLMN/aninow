@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -49,6 +48,9 @@ export const ClinicSettingsForm = () => {
   
   const [formData, setFormData] = useState(getDefaultFormData());
   const [isSavingClinicInfo, setIsSavingClinicInfo] = useState(false);
+  const [isSavingSlotConfig, setIsSavingSlotConfig] = useState(false);
+  const [isSavingSchedules, setIsSavingSchedules] = useState(false);
+  const [isSavingPlanningConfig, setIsSavingPlanningConfig] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingVet, setEditingVet] = useState<any>(null);
   const [vetFormData, setVetFormData] = useState({
@@ -111,32 +113,77 @@ export const ClinicSettingsForm = () => {
   };
 
   const handleSaveSlotConfig = async () => {
-    console.log('⏱️ Saving slot configuration:', { default_slot_duration_minutes: formData.default_slot_duration_minutes });
-    const success = await updateSettings({ default_slot_duration_minutes: formData.default_slot_duration_minutes });
-    if (success) {
-      console.log('✅ Slot configuration saved successfully');
-    } else {
-      console.error('❌ Failed to save slot configuration');
+    console.log('⏱️ Save slot configuration button clicked');
+    setIsSavingSlotConfig(true);
+    
+    const slotConfig = {
+      default_slot_duration_minutes: formData.default_slot_duration_minutes
+    };
+
+    console.log('📤 Saving slot configuration:', slotConfig);
+    
+    try {
+      const success = await updateSettings(slotConfig);
+      
+      if (success) {
+        console.log('✅ Slot configuration saved successfully');
+      } else {
+        console.error('❌ Failed to save slot configuration');
+      }
+    } catch (error) {
+      console.error('❌ Error saving slot configuration:', error);
+    } finally {
+      setIsSavingSlotConfig(false);
     }
   };
 
   const handleSaveSchedules = async () => {
-    console.log('📅 Saving schedules:', { daily_schedules: formData.daily_schedules });
-    const success = await updateSettings({ daily_schedules: formData.daily_schedules });
-    if (success) {
-      console.log('✅ Schedules saved successfully');
-    } else {
-      console.error('❌ Failed to save schedules');
+    console.log('📅 Save schedules button clicked');
+    setIsSavingSchedules(true);
+    
+    const schedulesData = {
+      daily_schedules: formData.daily_schedules
+    };
+
+    console.log('📤 Saving schedules:', schedulesData);
+    
+    try {
+      const success = await updateSettings(schedulesData);
+      
+      if (success) {
+        console.log('✅ Schedules saved successfully');
+      } else {
+        console.error('❌ Failed to save schedules');
+      }
+    } catch (error) {
+      console.error('❌ Error saving schedules:', error);
+    } finally {
+      setIsSavingSchedules(false);
     }
   };
 
   const handleSavePlanningConfig = async () => {
-    console.log('🔧 Saving planning configuration:', { asv_enabled: formData.asv_enabled });
-    const success = await updateSettings({ asv_enabled: formData.asv_enabled });
-    if (success) {
-      console.log('✅ Planning configuration saved successfully');
-    } else {
-      console.error('❌ Failed to save planning configuration');
+    console.log('🔧 Save planning configuration button clicked');
+    setIsSavingPlanningConfig(true);
+    
+    const planningConfig = {
+      asv_enabled: formData.asv_enabled
+    };
+
+    console.log('📤 Saving planning configuration:', planningConfig);
+    
+    try {
+      const success = await updateSettings(planningConfig);
+      
+      if (success) {
+        console.log('✅ Planning configuration saved successfully');
+      } else {
+        console.error('❌ Failed to save planning configuration');
+      }
+    } catch (error) {
+      console.error('❌ Error saving planning configuration:', error);
+    } finally {
+      setIsSavingPlanningConfig(false);
     }
   };
 
@@ -364,11 +411,12 @@ export const ClinicSettingsForm = () => {
             </div>
             <Button
               onClick={handleSaveSlotConfig}
+              disabled={isSavingSlotConfig}
               size="sm"
               variant="outline"
               className="text-vet-sage border-vet-sage hover:bg-vet-sage hover:text-white"
             >
-              Sauvegarder
+              {isSavingSlotConfig ? 'Sauvegarde...' : 'Sauvegarder'}
             </Button>
           </div>
         </CardContent>
@@ -387,11 +435,12 @@ export const ClinicSettingsForm = () => {
           </div>
           <Button
             onClick={handleSaveSchedules}
+            disabled={isSavingSchedules}
             size="sm"
             variant="outline"
             className="text-vet-sage border-vet-sage hover:bg-vet-sage hover:text-white"
           >
-            Sauvegarder
+            {isSavingSchedules ? 'Sauvegarde...' : 'Sauvegarder'}
           </Button>
         </CardHeader>
         <CardContent>
@@ -481,11 +530,12 @@ export const ClinicSettingsForm = () => {
             </div>
             <Button
               onClick={handleSavePlanningConfig}
+              disabled={isSavingPlanningConfig}
               size="sm"
               variant="outline"
               className="text-vet-sage border-vet-sage hover:bg-vet-sage hover:text-white"
             >
-              Sauvegarder
+              {isSavingPlanningConfig ? 'Sauvegarde...' : 'Sauvegarder'}
             </Button>
           </div>
 
