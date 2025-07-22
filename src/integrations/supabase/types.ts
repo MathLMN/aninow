@@ -302,6 +302,7 @@ export type Database = {
           clinic_name: string
           created_at: string
           daily_schedules: Json | null
+          default_slot_duration_minutes: number
           id: string
           updated_at: string
         }
@@ -310,6 +311,7 @@ export type Database = {
           clinic_name?: string
           created_at?: string
           daily_schedules?: Json | null
+          default_slot_duration_minutes?: number
           id?: string
           updated_at?: string
         }
@@ -318,6 +320,7 @@ export type Database = {
           clinic_name?: string
           created_at?: string
           daily_schedules?: Json | null
+          default_slot_duration_minutes?: number
           id?: string
           updated_at?: string
         }

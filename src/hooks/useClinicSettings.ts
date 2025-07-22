@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
@@ -29,6 +30,7 @@ interface ClinicSettings {
   clinic_name: string
   asv_enabled: boolean
   daily_schedules: DailySchedules
+  default_slot_duration_minutes?: number
   created_at?: string
   updated_at?: string
 }
@@ -82,6 +84,7 @@ export const useClinicSettings = () => {
   const [settings, setSettings] = useState<ClinicSettings>({
     clinic_name: 'Clinique Vétérinaire',
     asv_enabled: true,
+    default_slot_duration_minutes: 30,
     daily_schedules: {
       monday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
       tuesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
@@ -111,7 +114,8 @@ export const useClinicSettings = () => {
         // Convertir les données avec le bon typage et validation
         const settingsData: ClinicSettings = {
           ...data,
-          daily_schedules: convertToDailySchedules(data.daily_schedules)
+          daily_schedules: convertToDailySchedules(data.daily_schedules),
+          default_slot_duration_minutes: data.default_slot_duration_minutes || 30
         }
         setSettings(settingsData)
       }
@@ -135,7 +139,8 @@ export const useClinicSettings = () => {
       const dataToUpdate = {
         clinic_name: updatedSettings.clinic_name,
         asv_enabled: updatedSettings.asv_enabled,
-        daily_schedules: JSON.parse(JSON.stringify(updatedSettings.daily_schedules))
+        daily_schedules: JSON.parse(JSON.stringify(updatedSettings.daily_schedules)),
+        default_slot_duration_minutes: updatedSettings.default_slot_duration_minutes || 30
       }
       
       const { data, error } = await supabase
@@ -148,7 +153,8 @@ export const useClinicSettings = () => {
 
       const settingsData: ClinicSettings = {
         ...data,
-        daily_schedules: convertToDailySchedules(data.daily_schedules)
+        daily_schedules: convertToDailySchedules(data.daily_schedules),
+        default_slot_duration_minutes: data.default_slot_duration_minutes || 30
       }
       setSettings(settingsData)
       

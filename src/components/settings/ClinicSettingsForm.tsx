@@ -1,15 +1,15 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useClinicSettings } from "@/hooks/useClinicSettings";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
-import { Building2, Clock, Shield, UserPlus, Edit, Trash2, Stethoscope } from "lucide-react";
+import { Building2, Clock, Shield, UserPlus, Edit, Trash2, Stethoscope, Timer } from "lucide-react";
 
 const DAYS_OF_WEEK = [
   { key: 'monday', label: 'Lundi' },
@@ -28,7 +28,8 @@ export const ClinicSettingsForm = () => {
   const [formData, setFormData] = useState({
     clinic_name: settings.clinic_name,
     asv_enabled: settings.asv_enabled,
-    daily_schedules: settings.daily_schedules
+    daily_schedules: settings.daily_schedules,
+    default_slot_duration_minutes: settings.default_slot_duration_minutes || 30
   });
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -117,7 +118,8 @@ export const ClinicSettingsForm = () => {
     setFormData({
       clinic_name: settings.clinic_name,
       asv_enabled: settings.asv_enabled,
-      daily_schedules: settings.daily_schedules
+      daily_schedules: settings.daily_schedules,
+      default_slot_duration_minutes: settings.default_slot_duration_minutes || 30
     });
   }, [settings]);
 
@@ -152,6 +154,38 @@ export const ClinicSettingsForm = () => {
               onChange={(e) => setFormData(prev => ({ ...prev, clinic_name: e.target.value }))}
               placeholder="Nom de votre clinique"
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
+        <CardHeader>
+          <CardTitle className="text-vet-navy flex items-center">
+            <Timer className="h-5 w-5 mr-2" />
+            Configuration des créneaux
+          </CardTitle>
+          <CardDescription>
+            Paramètres pour la durée des créneaux de rendez-vous
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="default_slot_duration">Durée par défaut des créneaux (minutes)</Label>
+            <Select
+              value={formData.default_slot_duration_minutes.toString()}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, default_slot_duration_minutes: parseInt(value) }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner la durée" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="15">15 minutes</SelectItem>
+                <SelectItem value="20">20 minutes</SelectItem>
+                <SelectItem value="30">30 minutes</SelectItem>
+                <SelectItem value="45">45 minutes</SelectItem>
+                <SelectItem value="60">60 minutes</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
