@@ -15,6 +15,7 @@ import { CreateAppointmentModal } from "@/components/planning/CreateAppointmentM
 import { PlanningHeader } from "@/components/planning/PlanningHeader";
 import { WeeklyNavigation } from "@/components/planning/WeeklyNavigation";
 import { SlotAssignmentManager } from "@/components/planning/SlotAssignmentManager";
+import { useEffect } from "react";
 
 const VetPlanning = () => {
   const {
@@ -37,13 +38,59 @@ const VetPlanning = () => {
     getWeekDates
   } = usePlanningLogic();
 
-  const { bookings, isLoading: bookingsLoading, updateBookingStatus } = useVetBookings();
-  const { consultationTypes, isLoading: slotsLoading } = useSlotManagement();
-  const { veterinarians, isLoading: vetsLoading } = useClinicVeterinarians();
-  const { assignments, refreshAssignments } = useSlotAssignments(currentDate);
+  // Add debugging logs to identify which hook is causing the error
+  useEffect(() => {
+    console.log('🏥 VetPlanning component mounted');
+    console.log('📅 Current date:', currentDate);
+  }, [currentDate]);
+
+  const { bookings, isLoading: bookingsLoading, updateBookingStatus, error: bookingsError } = useVetBookings();
+  const { consultationTypes, isLoading: slotsLoading, error: slotsError } = useSlotManagement();
+  const { veterinarians, isLoading: vetsLoading, error: vetsError } = useClinicVeterinarians();
+  const { assignments, refreshAssignments, error: assignmentsError } = useSlotAssignments(currentDate);
+
+  // Log any errors from the hooks
+  useEffect(() => {
+    if (bookingsError) {
+      console.error('❌ Error loading bookings:', bookingsError);
+    }
+    if (slotsError) {
+      console.error('❌ Error loading slots:', slotsError);
+    }
+    if (vetsError) {
+      console.error('❌ Error loading veterinarians:', vetsError);
+    }
+    if (assignmentsError) {
+      console.error('❌ Error loading assignments:', assignmentsError);
+    }
+  }, [bookingsError, slotsError, vetsError, assignmentsError]);
 
   const isLoading = bookingsLoading || slotsLoading || vetsLoading;
   const weekDates = getWeekDates();
+
+  // Show error state if any critical data fails to load
+  if (bookingsError || vetsError) {
+    return (
+      <VetLayout>
+        <div className="space-y-6">
+          <div className="text-center py-8">
+            <h2 className="text-xl font-semibold text-red-600 mb-2">
+              Erreur de chargement
+            </h2>
+            <p className="text-gray-600 mb-4">
+              Une erreur s'est produite lors du chargement des données du planning.
+            </p>
+            <Button 
+              onClick={() => window.location.reload()} 
+              variant="outline"
+            >
+              Actualiser la page
+            </Button>
+          </div>
+        </div>
+      </VetLayout>
+    );
+  }
 
   return (
     <VetLayout>

@@ -1,138 +1,78 @@
 
-import { useState, useEffect } from 'react'
-import { supabase } from '@/integrations/supabase/client'
-import { useToast } from '@/hooks/use-toast'
-import type { Database } from '@/integrations/supabase/types'
-
-type BookingRow = Database['public']['Tables']['bookings']['Row']
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export const useVetBookings = () => {
-  const [bookings, setBookings] = useState<BookingRow[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const { toast } = useToast()
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const fetchBookings = async () => {
-    try {
-      setIsLoading(true)
+  const { 
+    data: bookings = [], 
+    isLoading, 
+    error,
+    refetch 
+  } = useQuery({
+    queryKey: ["vet-bookings"],
+    queryFn: async () => {
+      console.log('🔄 Fetching vet bookings...');
       
       const { data, error } = await supabase
-        .from('bookings')
-        .select('*')
-        .order('created_at', { ascending: false })
+        .from("bookings")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) {
-        throw error
+        console.error('❌ Error fetching bookings:', error);
+        throw error;
       }
 
-      setBookings(data || [])
-      setError(null)
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors du chargement'
-      setError(errorMessage)
-      console.error('Erreur lors du chargement des réservations:', err)
+      console.log('✅ Bookings loaded:', data?.length || 0, 'items');
+      return data || [];
+    },
+  });
+
+  const updateBookingStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      console.log('🔄 Updating booking status:', { id, status });
       
-      toast({
-        title: "Erreur",
-        description: errorMessage,
-        variant: "destructive"
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const updateBookingStatus = async (bookingId: string, status: 'pending' | 'confirmed' | 'cancelled' | 'completed') => {
-    try {
-      const { error } = await supabase
-        .from('bookings')
+      const { data, error } = await supabase
+        .from("bookings")
         .update({ status })
-        .eq('id', bookingId)
+        .eq("id", id)
+        .select()
+        .single();
 
       if (error) {
-        throw error
+        console.error('❌ Error updating booking status:', error);
+        throw error;
       }
 
-      // Mettre à jour l'état local
-      setBookings(prev => prev.map(booking => 
-        booking.id === bookingId 
-          ? { ...booking, status, updated_at: new Date().toISOString() }
-          : booking
-      ))
-
+      console.log('✅ Booking status updated:', data);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vet-bookings"] });
       toast({
         title: "Statut mis à jour",
-        description: `La réservation est maintenant ${status}`,
-      })
-
-      return true
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la mise à jour'
+        description: "Le statut du rendez-vous a été modifié avec succès",
+      });
+    },
+    onError: (error: any) => {
+      console.error('❌ Failed to update booking status:', error);
       toast({
         title: "Erreur",
-        description: errorMessage,
-        variant: "destructive"
-      })
-      return false
-    }
-  }
-
-  const deleteBooking = async (bookingId: string) => {
-    try {
-      const { error } = await supabase
-        .from('bookings')
-        .delete()
-        .eq('id', bookingId)
-
-      if (error) {
-        throw error
-      }
-
-      // Mettre à jour l'état local
-      setBookings(prev => prev.filter(booking => booking.id !== bookingId))
-
-      toast({
-        title: "Réservation supprimée",
-        description: "La réservation a été supprimée avec succès",
-      })
-
-      return true
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la suppression'
-      toast({
-        title: "Erreur",
-        description: errorMessage,
-        variant: "destructive"
-      })
-      return false
-    }
-  }
-
-  useEffect(() => {
-    fetchBookings()
-  }, [])
-
-  // Statistiques calculées
-  const stats = {
-    total: bookings.length,
-    pending: bookings.filter(b => b.status === 'pending').length,
-    confirmed: bookings.filter(b => b.status === 'confirmed').length,
-    cancelled: bookings.filter(b => b.status === 'cancelled').length,
-    completed: bookings.filter(b => b.status === 'completed').length,
-    highUrgency: bookings.filter(b => (b.urgency_score || 0) >= 7).length,
-    todayBookings: bookings.filter(b => {
-      const today = new Date().toISOString().split('T')[0]
-      return b.appointment_date === today
-    }).length
-  }
+        description: "Impossible de mettre à jour le statut du rendez-vous",
+        variant: "destructive",
+      });
+    },
+  });
 
   return {
     bookings,
     isLoading,
-    error,
-    stats,
-    fetchBookings,
-    updateBookingStatus,
-    deleteBooking
-  }
-}
+    error: error?.message || null,
+    refetch,
+    updateBookingStatus: updateBookingStatusMutation.mutate,
+  };
+};
