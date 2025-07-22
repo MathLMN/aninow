@@ -58,7 +58,7 @@ export const ClinicSettingsForm = () => {
 
   // Synchroniser formData avec settings à chaque changement
   useEffect(() => {
-    console.log('Settings updated:', settings);
+    console.log('🔄 Settings changed, updating form data:', settings);
     setFormData({
       clinic_name: settings.clinic_name || 'Clinique Vétérinaire',
       clinic_phone: settings.clinic_phone || '',
@@ -82,8 +82,10 @@ export const ClinicSettingsForm = () => {
   }, [settings]);
 
   const handleSaveClinicInfo = async () => {
+    console.log('🚀 Save clinic info button clicked');
     setIsSavingClinicInfo(true);
-    console.log('Saving clinic info:', {
+    
+    const clinicInfo = {
       clinic_name: formData.clinic_name,
       clinic_phone: formData.clinic_phone,
       clinic_email: formData.clinic_email,
@@ -91,58 +93,52 @@ export const ClinicSettingsForm = () => {
       clinic_address_city: formData.clinic_address_city,
       clinic_address_postal_code: formData.clinic_address_postal_code,
       clinic_address_country: formData.clinic_address_country
-    });
+    };
+
+    console.log('📤 Saving clinic info:', clinicInfo);
     
     try {
-      const success = await updateSettings({
-        clinic_name: formData.clinic_name || 'Clinique Vétérinaire',
-        clinic_phone: formData.clinic_phone || '',
-        clinic_email: formData.clinic_email || '',
-        clinic_address_street: formData.clinic_address_street || '',
-        clinic_address_city: formData.clinic_address_city || '',
-        clinic_address_postal_code: formData.clinic_address_postal_code || '',
-        clinic_address_country: formData.clinic_address_country || 'France'
-      });
+      const success = await updateSettings(clinicInfo);
       
       if (success) {
-        console.log('Clinic info saved successfully');
+        console.log('✅ Clinic info saved successfully');
       } else {
-        console.error('Failed to save clinic info');
+        console.error('❌ Failed to save clinic info');
       }
     } catch (error) {
-      console.error('Error saving clinic info:', error);
+      console.error('❌ Error saving clinic info:', error);
     } finally {
       setIsSavingClinicInfo(false);
     }
   };
 
   const handleSaveSlotConfig = async () => {
-    console.log('Saving slot configuration:', { default_slot_duration_minutes: formData.default_slot_duration_minutes });
+    console.log('⏱️ Saving slot configuration:', { default_slot_duration_minutes: formData.default_slot_duration_minutes });
     const success = await updateSettings({ default_slot_duration_minutes: formData.default_slot_duration_minutes });
     if (success) {
-      console.log('Slot configuration saved successfully');
+      console.log('✅ Slot configuration saved successfully');
     } else {
-      console.error('Failed to save slot configuration');
+      console.error('❌ Failed to save slot configuration');
     }
   };
 
   const handleSaveSchedules = async () => {
-    console.log('Saving schedules:', { daily_schedules: formData.daily_schedules });
+    console.log('📅 Saving schedules:', { daily_schedules: formData.daily_schedules });
     const success = await updateSettings({ daily_schedules: formData.daily_schedules });
     if (success) {
-      console.log('Schedules saved successfully');
+      console.log('✅ Schedules saved successfully');
     } else {
-      console.error('Failed to save schedules');
+      console.error('❌ Failed to save schedules');
     }
   };
 
   const handleSavePlanningConfig = async () => {
-    console.log('Saving planning configuration:', { asv_enabled: formData.asv_enabled });
+    console.log('🔧 Saving planning configuration:', { asv_enabled: formData.asv_enabled });
     const success = await updateSettings({ asv_enabled: formData.asv_enabled });
     if (success) {
-      console.log('Planning configuration saved successfully');
+      console.log('✅ Planning configuration saved successfully');
     } else {
-      console.error('Failed to save planning configuration');
+      console.error('❌ Failed to save planning configuration');
     }
   };
 

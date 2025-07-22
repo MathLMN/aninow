@@ -113,37 +113,21 @@ export const useClinicSettings = () => {
   const fetchSettings = async () => {
     try {
       setIsLoading(true)
-      console.log('Fetching clinic settings...')
+      console.log('🔍 Fetching clinic settings...')
       
-      // Récupérer TOUTES les lignes pour voir ce qui se passe
-      const { data: allData, error: allError } = await supabase
-        .from('clinic_settings')
-        .select('*')
-
-      if (allError) {
-        console.error('Error fetching all settings:', allError)
-      } else {
-        console.log('All clinic settings in database:', allData)
-      }
-      
-      // Récupérer la première ligne (ou la seule)
       const { data, error } = await supabase
         .from('clinic_settings')
         .select('*')
         .limit(1)
-        .single()
+        .maybeSingle()
 
       if (error) {
-        if (error.code === 'PGRST116') {
-          console.log('No settings found in database, using defaults')
-        } else {
-          console.error('Error fetching settings:', error)
-          throw error
-        }
+        console.error('❌ Error fetching settings:', error)
+        throw error
       }
 
       if (data) {
-        console.log('Settings found and loaded:', data)
+        console.log('✅ Settings found and loaded:', data)
         const settingsData: ClinicSettings = {
           ...data,
           daily_schedules: convertToDailySchedules(data.daily_schedules),
@@ -157,10 +141,10 @@ export const useClinicSettings = () => {
         }
         setSettings(settingsData)
       } else {
-        console.log('No settings found, using defaults')
+        console.log('ℹ️ No settings found, using defaults')
       }
     } catch (err) {
-      console.error('Erreur lors du chargement des paramètres:', err)
+      console.error('❌ Erreur lors du chargement des paramètres:', err)
       toast({
         title: "Erreur",
         description: "Impossible de charger les paramètres",
@@ -173,8 +157,11 @@ export const useClinicSettings = () => {
 
   const updateSettings = async (newSettings: Partial<ClinicSettings>) => {
     try {
-      console.log('Updating settings with:', newSettings)
+      console.log('💾 Starting settings update...')
+      console.log('📝 New settings data:', newSettings)
+      
       const updatedSettings = { ...settings, ...newSettings }
+      console.log('🔄 Merged settings:', updatedSettings)
       
       // Préparer les données pour Supabase avec le bon format
       const dataToUpdate = {
@@ -190,20 +177,25 @@ export const useClinicSettings = () => {
         default_slot_duration_minutes: updatedSettings.default_slot_duration_minutes || 30
       }
       
-      console.log('Data to save:', dataToUpdate)
+      console.log('📤 Data to save to database:', dataToUpdate)
       
-      // Vérifier s'il y a déjà un enregistrement
-      const { data: existingData } = await supabase
+      // D'abord vérifier s'il y a déjà un enregistrement
+      const { data: existingData, error: fetchError } = await supabase
         .from('clinic_settings')
         .select('id')
         .limit(1)
-        .single()
+        .maybeSingle()
+
+      if (fetchError) {
+        console.error('❌ Error checking existing data:', fetchError)
+        throw fetchError
+      }
 
       let result;
       
       if (existingData?.id) {
         // Mettre à jour l'enregistrement existant
-        console.log('Updating existing record with ID:', existingData.id)
+        console.log('🔄 Updating existing record with ID:', existingData.id)
         result = await supabase
           .from('clinic_settings')
           .update(dataToUpdate)
@@ -212,7 +204,7 @@ export const useClinicSettings = () => {
           .single()
       } else {
         // Créer un nouvel enregistrement
-        console.log('Creating new record')
+        console.log('🆕 Creating new record')
         result = await supabase
           .from('clinic_settings')
           .insert([dataToUpdate])
@@ -223,12 +215,13 @@ export const useClinicSettings = () => {
       const { data, error } = result
 
       if (error) {
-        console.error('Database error:', error)
+        console.error('❌ Database error:', error)
         throw error
       }
 
-      console.log('Settings saved successfully:', data)
+      console.log('✅ Settings saved successfully to database:', data)
       
+      // Mettre à jour le state local avec les données sauvegardées
       const settingsData: ClinicSettings = {
         ...data,
         daily_schedules: convertToDailySchedules(data.daily_schedules),
@@ -240,16 +233,18 @@ export const useClinicSettings = () => {
         clinic_address_postal_code: data.clinic_address_postal_code || '',
         clinic_address_country: data.clinic_address_country || 'France'
       }
+      
+      console.log('🔄 Updating local state with:', settingsData)
       setSettings(settingsData)
       
       toast({
-        title: "Paramètres mis à jour",
-        description: "Les paramètres de la clinique ont été sauvegardés",
+        title: "✅ Paramètres mis à jour",
+        description: "Les paramètres de la clinique ont été sauvegardés avec succès",
       })
 
       return true
     } catch (err) {
-      console.error('Erreur lors de la mise à jour:', err)
+      console.error('❌ Erreur lors de la mise à jour:', err)
       toast({
         title: "Erreur",
         description: `Impossible de sauvegarder les paramètres: ${err instanceof Error ? err.message : 'Erreur inconnue'}`,
