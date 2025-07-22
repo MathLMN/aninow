@@ -33,7 +33,7 @@ export const useClinicVeterinarians = () => {
   });
 
   const addVeterinarianMutation = useMutation({
-    mutationFn: async (vetData: { name: string; email: string; specialty: string; is_active: boolean }) => {
+    mutationFn: async (vetData: { name: string; specialty: string; is_active: boolean }) => {
       console.log('🔄 Adding veterinarian:', vetData);
       
       const { data, error } = await supabase
@@ -68,7 +68,7 @@ export const useClinicVeterinarians = () => {
   });
 
   const updateVeterinarianMutation = useMutation({
-    mutationFn: async ({ id, vetData }: { id: string; vetData: { name: string; email: string; specialty: string; is_active: boolean } }) => {
+    mutationFn: async ({ id, vetData }: { id: string; vetData: { name: string; specialty: string; is_active: boolean } }) => {
       console.log('🔄 Updating veterinarian:', { id, vetData });
       
       const { data, error } = await supabase
@@ -142,7 +142,7 @@ export const useClinicVeterinarians = () => {
     isLoading,
     error: error?.message || null,
     refetch,
-    addVeterinarian: async (vetData: { name: string; email: string; specialty: string; is_active: boolean }) => {
+    addVeterinarian: async (vetData: { name: string; specialty: string; is_active: boolean }) => {
       try {
         await addVeterinarianMutation.mutateAsync(vetData);
         return true;
@@ -150,7 +150,7 @@ export const useClinicVeterinarians = () => {
         return false;
       }
     },
-    updateVeterinarian: async (id: string, vetData: { name: string; email: string; specialty: string; is_active: boolean }) => {
+    updateVeterinarian: async (id: string, vetData: { name: string; specialty: string; is_active: boolean }) => {
       try {
         await updateVeterinarianMutation.mutateAsync({ id, vetData });
         return true;

@@ -12,15 +12,6 @@ interface LoginRequest {
   password: string
 }
 
-interface VetSession {
-  id: string
-  veterinarian_id: string
-  session_token: string
-  expires_at: string
-  created_at: string
-  last_activity: string
-}
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -66,45 +57,29 @@ async function handleLogin(supabase: any, { email, password }: LoginRequest) {
     throw new Error('Identifiants invalides')
   }
 
-  // Chercher le vétérinaire ou en créer un pour la démo
-  let { data: veterinarian, error: vetError } = await supabase
-    .from('clinic_veterinarians')
-    .select('*')
-    .eq('email', email)
-    .eq('is_active', true)
+  // Vérifier que l'email correspond à l'email de la clinique
+  const { data: clinicSettings, error: clinicError } = await supabase
+    .from('clinic_settings')
+    .select('clinic_email')
     .single()
 
-  if (vetError || !veterinarian) {
-    console.log('⚠️ Vétérinaire non trouvé, création d\'un compte démo pour:', email)
-    
-    // Créer un vétérinaire de démo s'il n'existe pas
-    const { data: newVet, error: createError } = await supabase
-      .from('clinic_veterinarians')
-      .insert({
-        email: email,
-        name: 'Dr. ' + email.split('@')[0],
-        specialty: 'Médecine générale',
-        is_active: true
-      })
-      .select()
-      .single()
-
-    if (createError) {
-      console.error('❌ Erreur lors de la création du vétérinaire:', createError)
-      throw new Error('Erreur lors de la création du compte')
-    }
-
-    veterinarian = newVet
-    console.log('✅ Vétérinaire créé:', veterinarian.name)
+  if (clinicError) {
+    console.error('❌ Erreur lors de la récupération des paramètres de la clinique:', clinicError)
+    throw new Error('Erreur de configuration de la clinique')
   }
 
-  console.log('✅ Vétérinaire trouvé:', veterinarian.name)
+  if (!clinicSettings.clinic_email || clinicSettings.clinic_email !== email) {
+    console.log('❌ Email ne correspond pas à celui de la clinique')
+    throw new Error('Identifiants invalides')
+  }
 
-  // Supprimer les sessions existantes pour ce vétérinaire
+  console.log('✅ Email de la clinique vérifié')
+
+  // Supprimer les sessions existantes pour cette clinique
   await supabase
     .from('vet_sessions')
     .delete()
-    .eq('veterinarian_id', veterinarian.id)
+    .eq('clinic_email', email)
 
   // Créer une nouvelle session
   const sessionToken = generateSessionToken()
@@ -113,7 +88,7 @@ async function handleLogin(supabase: any, { email, password }: LoginRequest) {
   const { data: session, error: sessionError } = await supabase
     .from('vet_sessions')
     .insert({
-      veterinarian_id: veterinarian.id,
+      clinic_email: email,
       session_token: sessionToken,
       expires_at: expiresAt.toISOString(),
       last_activity: new Date().toISOString()
@@ -132,11 +107,9 @@ async function handleLogin(supabase: any, { email, password }: LoginRequest) {
     JSON.stringify({
       success: true,
       session_token: sessionToken,
-      veterinarian: {
-        id: veterinarian.id,
-        name: veterinarian.name,
-        email: veterinarian.email,
-        specialty: veterinarian.specialty
+      clinic: {
+        email: email,
+        name: 'Clinique Vétérinaire'
       },
       expires_at: expiresAt.toISOString()
     }),
@@ -175,10 +148,7 @@ async function handleVerifySession(supabase: any, sessionToken: string) {
 
   const { data: session, error } = await supabase
     .from('vet_sessions')
-    .select(`
-      *,
-      veterinarian:clinic_veterinarians(id, name, email, specialty, is_active)
-    `)
+    .select('*')
     .eq('session_token', sessionToken)
     .gt('expires_at', new Date().toISOString())
     .single()
@@ -196,7 +166,10 @@ async function handleVerifySession(supabase: any, sessionToken: string) {
   return new Response(
     JSON.stringify({
       valid: true,
-      veterinarian: session.veterinarian,
+      clinic: {
+        email: session.clinic_email,
+        name: 'Clinique Vétérinaire'
+      },
       expires_at: session.expires_at
     }),
     { 

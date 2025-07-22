@@ -347,7 +347,6 @@ export type Database = {
       clinic_veterinarians: {
         Row: {
           created_at: string
-          email: string | null
           id: string
           is_active: boolean
           name: string
@@ -356,7 +355,6 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          email?: string | null
           id?: string
           is_active?: boolean
           name: string
@@ -365,7 +363,6 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          email?: string | null
           id?: string
           is_active?: boolean
           name?: string
@@ -563,6 +560,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      vet_sessions: {
+        Row: {
+          clinic_email: string
+          created_at: string
+          expires_at: string
+          id: string
+          last_activity: string
+          session_token: string
+        }
+        Insert: {
+          clinic_email: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          last_activity?: string
+          session_token: string
+        }
+        Update: {
+          clinic_email?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          last_activity?: string
+          session_token?: string
+        }
+        Relationships: []
       }
       veterinarian_absences: {
         Row: {
