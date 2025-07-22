@@ -68,6 +68,17 @@ const VetPlanning = () => {
   const isLoading = bookingsLoading || slotsLoading || vetsLoading;
   const weekDates = getWeekDates();
 
+  // Create a wrapper function to handle the status update with correct signature
+  const handleUpdateBookingStatus = async (appointmentId: string, status: string, notes?: string): Promise<boolean> => {
+    try {
+      updateBookingStatus({ id: appointmentId, status });
+      return true;
+    } catch (error) {
+      console.error('❌ Error updating booking status:', error);
+      return false;
+    }
+  };
+
   // Show error state if any critical data fails to load
   if (bookingsError || vetsError) {
     return (
@@ -169,7 +180,7 @@ const VetPlanning = () => {
           appointment={selectedAppointment}
           isOpen={isDetailsModalOpen}
           onClose={() => setIsDetailsModalOpen(false)}
-          onUpdateStatus={updateBookingStatus}
+          onUpdateStatus={handleUpdateBookingStatus}
         />
 
         <CreateAppointmentModal
