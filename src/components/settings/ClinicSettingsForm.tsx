@@ -17,17 +17,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
-
 interface ClinicSettings {
   clinic_name: string;
   clinic_phone: string;
@@ -39,7 +30,6 @@ interface ClinicSettings {
   asv_enabled: boolean;
   default_slot_duration_minutes: number;
 }
-
 const defaultSettings: ClinicSettings = {
   clinic_name: "Clinique Vétérinaire",
   clinic_phone: "",
@@ -49,47 +39,56 @@ const defaultSettings: ClinicSettings = {
   clinic_address_postal_code: "",
   clinic_address_country: "France",
   asv_enabled: true,
-  default_slot_duration_minutes: 15,
+  default_slot_duration_minutes: 15
 };
-
 const formSchema = z.object({
   clinicName: z.string().min(2, {
-    message: "Le nom de la clinique doit comporter au moins 2 caractères.",
+    message: "Le nom de la clinique doit comporter au moins 2 caractères."
   }),
   clinicPhone: z.string().optional(),
   clinicEmail: z.string().email({
-    message: "Veuillez entrer une adresse email valide.",
+    message: "Veuillez entrer une adresse email valide."
   }).optional(),
   clinicAddressStreet: z.string().optional(),
   clinicAddressCity: z.string().optional(),
   clinicAddressPostalCode: z.string().optional(),
   clinicAddressCountry: z.string().optional(),
   asvEnabled: z.boolean().default(true),
-  defaultSlotDurationMinutes: z.number().min(5).max(60).default(15),
+  defaultSlotDurationMinutes: z.number().min(5).max(60).default(15)
 });
-
 interface Veterinarian {
   id: string;
   name: string;
   specialty: string;
   is_active: boolean;
 }
-
 interface NewVeterinarian {
   name: string;
   specialty: string;
   is_active: boolean;
 }
-
 export const ClinicSettingsForm = () => {
-  const { settings, isLoading, updateSettings } = useClinicSettings();
-  const { veterinarians, addVeterinarian, updateVeterinarian, deleteVeterinarian } = useClinicVeterinarians();
-  const { toast } = useToast();
-
+  const {
+    settings,
+    isLoading,
+    updateSettings
+  } = useClinicSettings();
+  const {
+    veterinarians,
+    addVeterinarian,
+    updateVeterinarian,
+    deleteVeterinarian
+  } = useClinicVeterinarians();
+  const {
+    toast
+  } = useToast();
   const [isVetDialogOpen, setIsVetDialogOpen] = useState(false);
-  const [newVeterinarian, setNewVeterinarian] = useState<NewVeterinarian>({ name: '', specialty: '', is_active: true });
+  const [newVeterinarian, setNewVeterinarian] = useState<NewVeterinarian>({
+    name: '',
+    specialty: '',
+    is_active: true
+  });
   const [editingVeterinarian, setEditingVeterinarian] = useState<Veterinarian | null>(null);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -101,10 +100,9 @@ export const ClinicSettingsForm = () => {
       clinicAddressPostalCode: settings?.clinic_address_postal_code || defaultSettings.clinic_address_postal_code,
       clinicAddressCountry: settings?.clinic_address_country || defaultSettings.clinic_address_country,
       asvEnabled: settings?.asv_enabled || defaultSettings.asv_enabled,
-      defaultSlotDurationMinutes: settings?.default_slot_duration_minutes || defaultSettings.default_slot_duration_minutes,
-    },
+      defaultSlotDurationMinutes: settings?.default_slot_duration_minutes || defaultSettings.default_slot_duration_minutes
+    }
   });
-
   useEffect(() => {
     if (settings) {
       form.reset({
@@ -116,11 +114,10 @@ export const ClinicSettingsForm = () => {
         clinicAddressPostalCode: settings.clinic_address_postal_code,
         clinicAddressCountry: settings.clinic_address_country,
         asvEnabled: settings.asv_enabled,
-        defaultSlotDurationMinutes: settings.default_slot_duration_minutes,
+        defaultSlotDurationMinutes: settings.default_slot_duration_minutes
       });
     }
   }, [settings, form]);
-
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const success = await updateSettings({
       clinic_name: values.clinicName,
@@ -131,56 +128,51 @@ export const ClinicSettingsForm = () => {
       clinic_address_postal_code: values.clinicAddressPostalCode || '',
       clinic_address_country: values.clinicAddressCountry || 'France',
       asv_enabled: values.asvEnabled,
-      default_slot_duration_minutes: values.defaultSlotDurationMinutes,
+      default_slot_duration_minutes: values.defaultSlotDurationMinutes
     });
-
     if (success) {
       toast({
         title: "Paramètres mis à jour",
-        description: "Les paramètres de la clinique ont été mis à jour avec succès",
+        description: "Les paramètres de la clinique ont été mis à jour avec succès"
       });
     } else {
       toast({
         title: "Erreur",
         description: "Impossible de mettre à jour les paramètres de la clinique",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const handleVeterinarianSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!newVeterinarian.name.trim() || !newVeterinarian.specialty.trim()) {
       toast({
         title: "Erreur",
         description: "Veuillez remplir tous les champs obligatoires",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
-    const success = await (editingVeterinarian 
-      ? updateVeterinarian(editingVeterinarian.id, {
-          name: newVeterinarian.name,
-          specialty: newVeterinarian.specialty,
-          is_active: newVeterinarian.is_active,
-        })
-      : addVeterinarian({
-          name: newVeterinarian.name,
-          specialty: newVeterinarian.specialty,
-          is_active: newVeterinarian.is_active,
-        }));
-
+    const success = await (editingVeterinarian ? updateVeterinarian(editingVeterinarian.id, {
+      name: newVeterinarian.name,
+      specialty: newVeterinarian.specialty,
+      is_active: newVeterinarian.is_active
+    }) : addVeterinarian({
+      name: newVeterinarian.name,
+      specialty: newVeterinarian.specialty,
+      is_active: newVeterinarian.is_active
+    }));
     if (success) {
       setIsVetDialogOpen(false);
-      setNewVeterinarian({ name: '', specialty: '', is_active: true });
+      setNewVeterinarian({
+        name: '',
+        specialty: '',
+        is_active: true
+      });
       setEditingVeterinarian(null);
     }
   };
-
-  return (
-    <div className="space-y-8">
+  return <div className="space-y-8">
       {/* Informations générales */}
       <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
         <CardHeader>
@@ -196,53 +188,39 @@ export const ClinicSettingsForm = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="clinicName"
-                  render={({ field }) => (
-                    <FormItem>
+                <FormField control={form.control} name="clinicName" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Nom de la clinique *</FormLabel>
                       <FormControl>
                         <Input placeholder="Clinique Vétérinaire" {...field} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="clinicPhone"
-                  render={({ field }) => (
-                    <FormItem>
+                    </FormItem>} />
+                <FormField control={form.control} name="clinicPhone" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Téléphone</FormLabel>
                       <FormControl>
                         <Input placeholder="01 23 45 67 89" {...field} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    </FormItem>} />
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="clinicEmail"
-                  render={({ field }) => (
-                    <FormItem>
+                <FormField control={form.control} name="clinicEmail" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
                         <Input placeholder="contact@clinique.fr" {...field} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="defaultSlotDurationMinutes"
-                  render={({ field }) => (
-                    <FormItem>
+                    </FormItem>} />
+                <FormField control={form.control} name="defaultSlotDurationMinutes" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Durée par défaut d'un créneau (minutes)</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
                         <FormControl>
@@ -251,97 +229,68 @@ export const ClinicSettingsForm = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {[5, 10, 15, 20, 30, 45, 60].map(duration => (
-                            <SelectItem key={duration} value={duration.toString()}>{duration} minutes</SelectItem>
-                          ))}
+                          {[5, 10, 15, 20, 30, 45, 60].map(duration => <SelectItem key={duration} value={duration.toString()}>{duration} minutes</SelectItem>)}
                         </SelectContent>
                       </Select>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    </FormItem>} />
               </div>
 
               <Separator />
 
               <div className="grid md:grid-cols-3 gap-4">
-                <FormField
-                  control={form.control}
-                  name="clinicAddressStreet"
-                  render={({ field }) => (
-                    <FormItem>
+                <FormField control={form.control} name="clinicAddressStreet" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Adresse (rue)</FormLabel>
                       <FormControl>
                         <Input placeholder="123 rue de la République" {...field} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="clinicAddressCity"
-                  render={({ field }) => (
-                    <FormItem>
+                    </FormItem>} />
+                <FormField control={form.control} name="clinicAddressCity" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Ville</FormLabel>
                       <FormControl>
                         <Input placeholder="Paris" {...field} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="clinicAddressPostalCode"
-                  render={({ field }) => (
-                    <FormItem>
+                    </FormItem>} />
+                <FormField control={form.control} name="clinicAddressPostalCode" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Code Postal</FormLabel>
                       <FormControl>
                         <Input placeholder="75001" {...field} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    </FormItem>} />
               </div>
 
-              <FormField
-                control={form.control}
-                name="clinicAddressCountry"
-                render={({ field }) => (
-                  <FormItem>
+              <FormField control={form.control} name="clinicAddressCountry" render={({
+              field
+            }) => <FormItem>
                     <FormLabel>Pays</FormLabel>
                     <FormControl>
                       <Input placeholder="France" {...field} />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  </FormItem>} />
 
               <Separator />
 
-              <FormField
-                control={form.control}
-                name="asvEnabled"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <FormField control={form.control} name="asvEnabled" render={({
+              field
+            }) => <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
-                      <FormLabel>Activer l'analyse sémantique vétérinaire (ASV)</FormLabel>
-                      <FormDescription>
-                        Activez cette option pour utiliser l'analyse sémantique vétérinaire afin d'améliorer la qualité des consultations.
-                      </FormDescription>
+                      <FormLabel>Ajouter la colonne ASV dans votre planning</FormLabel>
+                      <FormDescription>Activez cette option pour créer une colonne dédiée uniquement aux ASV et fermée à la prise de rendez-vous en ligne.</FormDescription>
                     </div>
                     <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
-                  </FormItem>
-                )}
-              />
+                  </FormItem>} />
 
               <Button type="submit" className="bg-vet-blue hover:bg-vet-blue/90">
                 Enregistrer les modifications
@@ -367,13 +316,14 @@ export const ClinicSettingsForm = () => {
             <h3 className="text-lg font-medium text-vet-navy">Vétérinaires</h3>
             <Dialog open={isVetDialogOpen} onOpenChange={setIsVetDialogOpen}>
               <DialogTrigger asChild>
-                <Button 
-                  onClick={() => {
-                    setEditingVeterinarian(null);
-                    setNewVeterinarian({ name: '', specialty: '', is_active: true });
-                  }}
-                  className="bg-vet-blue hover:bg-vet-blue/90"
-                >
+                <Button onClick={() => {
+                setEditingVeterinarian(null);
+                setNewVeterinarian({
+                  name: '',
+                  specialty: '',
+                  is_active: true
+                });
+              }} className="bg-vet-blue hover:bg-vet-blue/90">
                   <Plus className="h-4 w-4 mr-2" />
                   Ajouter un vétérinaire
                 </Button>
@@ -384,49 +334,35 @@ export const ClinicSettingsForm = () => {
                     {editingVeterinarian ? 'Modifier le vétérinaire' : 'Ajouter un vétérinaire'}
                   </DialogTitle>
                   <DialogDescription>
-                    {editingVeterinarian 
-                      ? 'Modifiez les informations du vétérinaire.' 
-                      : 'Ajoutez un nouveau vétérinaire à votre équipe.'
-                    }
+                    {editingVeterinarian ? 'Modifiez les informations du vétérinaire.' : 'Ajoutez un nouveau vétérinaire à votre équipe.'}
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleVeterinarianSubmit}>
                   <div className="grid gap-4 py-4">
                     <div className="space-y-2">
                       <Label htmlFor="vet-name">Nom complet *</Label>
-                      <Input
-                        id="vet-name"
-                        value={newVeterinarian.name}
-                        onChange={(e) => setNewVeterinarian(prev => ({ ...prev, name: e.target.value }))}
-                        placeholder="Dr. Martin Dupont"
-                        required
-                      />
+                      <Input id="vet-name" value={newVeterinarian.name} onChange={e => setNewVeterinarian(prev => ({
+                      ...prev,
+                      name: e.target.value
+                    }))} placeholder="Dr. Martin Dupont" required />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="vet-specialty">Spécialité *</Label>
-                      <Input
-                        id="vet-specialty"
-                        value={newVeterinarian.specialty}
-                        onChange={(e) => setNewVeterinarian(prev => ({ ...prev, specialty: e.target.value }))}
-                        placeholder="Médecine générale, Chirurgie, etc."
-                        required
-                      />
+                      <Input id="vet-specialty" value={newVeterinarian.specialty} onChange={e => setNewVeterinarian(prev => ({
+                      ...prev,
+                      specialty: e.target.value
+                    }))} placeholder="Médecine générale, Chirurgie, etc." required />
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Switch
-                        id="vet-active"
-                        checked={newVeterinarian.is_active}
-                        onCheckedChange={(checked) => setNewVeterinarian(prev => ({ ...prev, is_active: checked }))}
-                      />
+                      <Switch id="vet-active" checked={newVeterinarian.is_active} onCheckedChange={checked => setNewVeterinarian(prev => ({
+                      ...prev,
+                      is_active: checked
+                    }))} />
                       <Label htmlFor="vet-active">Vétérinaire actif</Label>
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => setIsVetDialogOpen(false)}
-                    >
+                    <Button type="button" variant="outline" onClick={() => setIsVetDialogOpen(false)}>
                       Annuler
                     </Button>
                     <Button type="submit" className="bg-vet-blue hover:bg-vet-blue/90">
@@ -439,34 +375,26 @@ export const ClinicSettingsForm = () => {
           </div>
 
           <div className="space-y-3">
-            {veterinarians.map((vet) => (
-              <div key={vet.id} className="flex items-center justify-between p-4 bg-vet-beige/20 rounded-lg border border-vet-blue/20">
+            {veterinarians.map(vet => <div key={vet.id} className="flex items-center justify-between p-4 bg-vet-beige/20 rounded-lg border border-vet-blue/20">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h4 className="font-medium text-vet-navy">{vet.name}</h4>
-                    <Badge 
-                      variant={vet.is_active ? "default" : "secondary"}
-                      className={vet.is_active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}
-                    >
+                    <Badge variant={vet.is_active ? "default" : "secondary"} className={vet.is_active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}>
                       {vet.is_active ? 'Actif' : 'Inactif'}
                     </Badge>
                   </div>
                   <p className="text-sm text-vet-brown">{vet.specialty}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setEditingVeterinarian(vet);
-                      setNewVeterinarian({
-                        name: vet.name,
-                        specialty: vet.specialty || '',
-                        is_active: vet.is_active,
-                      });
-                      setIsVetDialogOpen(true);
-                    }}
-                  >
+                  <Button size="sm" variant="outline" onClick={() => {
+                setEditingVeterinarian(vet);
+                setNewVeterinarian({
+                  name: vet.name,
+                  specialty: vet.specialty || '',
+                  is_active: vet.is_active
+                });
+                setIsVetDialogOpen(true);
+              }}>
                     <Edit className="h-4 w-4" />
                   </Button>
                   <AlertDialog>
@@ -484,32 +412,25 @@ export const ClinicSettingsForm = () => {
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Annuler</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => deleteVeterinarian(vet.id)}
-                          className="bg-red-600 hover:bg-red-700"
-                        >
+                        <AlertDialogAction onClick={() => deleteVeterinarian(vet.id)} className="bg-red-600 hover:bg-red-700">
                           Supprimer
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
                 </div>
-              </div>
-            ))}
+              </div>)}
             
-            {veterinarians.length === 0 && (
-              <div className="text-center py-8 text-vet-brown bg-vet-beige/10 rounded-lg border border-vet-blue/20">
+            {veterinarians.length === 0 && <div className="text-center py-8 text-vet-brown bg-vet-beige/10 rounded-lg border border-vet-blue/20">
                 <Users className="h-8 w-8 mx-auto mb-2 text-vet-blue/60" />
                 <p>Aucun vétérinaire ajouté</p>
                 <p className="text-sm">Commencez par ajouter votre premier vétérinaire</p>
-              </div>
-            )}
+              </div>}
           </div>
         </CardContent>
       </Card>
 
       {/* Schedule Manager */}
       <VeterinarianScheduleManager />
-    </div>
-  );
+    </div>;
 };
