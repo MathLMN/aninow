@@ -58,8 +58,16 @@ serve(async (req) => {
 })
 
 async function handleLogin(supabase: any, { email, password }: LoginRequest) {
-  // Vérifier les identifiants (simulation - en production, utiliser un hash)
-  const { data: veterinarian, error: vetError } = await supabase
+  console.log('🔄 Tentative de connexion pour:', email)
+  
+  // Vérifier d'abord si c'est le mot de passe de démo
+  if (password !== 'vet123') {
+    console.log('❌ Mot de passe invalide')
+    throw new Error('Identifiants invalides')
+  }
+
+  // Chercher le vétérinaire ou en créer un pour la démo
+  let { data: veterinarian, error: vetError } = await supabase
     .from('clinic_veterinarians')
     .select('*')
     .eq('email', email)
@@ -67,18 +75,38 @@ async function handleLogin(supabase: any, { email, password }: LoginRequest) {
     .single()
 
   if (vetError || !veterinarian) {
-    throw new Error('Identifiants invalides')
+    console.log('⚠️ Vétérinaire non trouvé, création d\'un compte démo pour:', email)
+    
+    // Créer un vétérinaire de démo s'il n'existe pas
+    const { data: newVet, error: createError } = await supabase
+      .from('clinic_veterinarians')
+      .insert({
+        email: email,
+        name: 'Dr. ' + email.split('@')[0],
+        specialty: 'Médecine générale',
+        is_active: true
+      })
+      .select()
+      .single()
+
+    if (createError) {
+      console.error('❌ Erreur lors de la création du vétérinaire:', createError)
+      throw new Error('Erreur lors de la création du compte')
+    }
+
+    veterinarian = newVet
+    console.log('✅ Vétérinaire créé:', veterinarian.name)
   }
 
-  // Pour cette démo, utiliser un mot de passe simple
-  // En production, utiliser un hash bcrypt
-  const validPassword = password === 'vet123' // Mot de passe temporaire
+  console.log('✅ Vétérinaire trouvé:', veterinarian.name)
 
-  if (!validPassword) {
-    throw new Error('Identifiants invalides')
-  }
+  // Supprimer les sessions existantes pour ce vétérinaire
+  await supabase
+    .from('vet_sessions')
+    .delete()
+    .eq('veterinarian_id', veterinarian.id)
 
-  // Créer une session
+  // Créer une nouvelle session
   const sessionToken = generateSessionToken()
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24h
 
@@ -94,8 +122,11 @@ async function handleLogin(supabase: any, { email, password }: LoginRequest) {
     .single()
 
   if (sessionError) {
+    console.error('❌ Erreur lors de la création de la session:', sessionError)
     throw new Error('Erreur lors de la création de la session')
   }
+
+  console.log('✅ Session créée avec succès')
 
   return new Response(
     JSON.stringify({
