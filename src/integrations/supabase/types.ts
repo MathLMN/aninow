@@ -564,6 +564,97 @@ export type Database = {
           },
         ]
       }
+      veterinarian_absences: {
+        Row: {
+          absence_type: string
+          created_at: string
+          end_date: string
+          id: string
+          is_recurring: boolean
+          reason: string | null
+          start_date: string
+          updated_at: string
+          veterinarian_id: string
+        }
+        Insert: {
+          absence_type?: string
+          created_at?: string
+          end_date: string
+          id?: string
+          is_recurring?: boolean
+          reason?: string | null
+          start_date: string
+          updated_at?: string
+          veterinarian_id: string
+        }
+        Update: {
+          absence_type?: string
+          created_at?: string
+          end_date?: string
+          id?: string
+          is_recurring?: boolean
+          reason?: string | null
+          start_date?: string
+          updated_at?: string
+          veterinarian_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "veterinarian_absences_veterinarian_id_fkey"
+            columns: ["veterinarian_id"]
+            isOneToOne: false
+            referencedRelation: "clinic_veterinarians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      veterinarian_schedules: {
+        Row: {
+          afternoon_end: string | null
+          afternoon_start: string | null
+          created_at: string
+          day_of_week: number
+          id: string
+          is_working: boolean
+          morning_end: string | null
+          morning_start: string | null
+          updated_at: string
+          veterinarian_id: string
+        }
+        Insert: {
+          afternoon_end?: string | null
+          afternoon_start?: string | null
+          created_at?: string
+          day_of_week: number
+          id?: string
+          is_working?: boolean
+          morning_end?: string | null
+          morning_start?: string | null
+          updated_at?: string
+          veterinarian_id: string
+        }
+        Update: {
+          afternoon_end?: string | null
+          afternoon_start?: string | null
+          created_at?: string
+          day_of_week?: number
+          id?: string
+          is_working?: boolean
+          morning_end?: string | null
+          morning_start?: string | null
+          updated_at?: string
+          veterinarian_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "veterinarian_schedules_veterinarian_id_fkey"
+            columns: ["veterinarian_id"]
+            isOneToOne: false
+            referencedRelation: "clinic_veterinarians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       veterinarians: {
         Row: {
           clinic_name: string

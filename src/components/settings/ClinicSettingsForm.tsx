@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useClinicSettings } from "@/hooks/useClinicSettings";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { Building2, Clock, Shield, UserPlus, Edit, Trash2, Stethoscope, Timer, Phone, Mail, MapPin } from "lucide-react";
+import { VeterinarianScheduleManager } from "./VeterinarianScheduleManager";
 
 const DAYS_OF_WEEK = [
   { key: 'monday', label: 'Lundi' },
@@ -726,6 +727,8 @@ export const ClinicSettingsForm = () => {
           </div>
         </CardContent>
       </Card>
+
+      <VeterinarianScheduleManager />
     </div>
   );
 };
