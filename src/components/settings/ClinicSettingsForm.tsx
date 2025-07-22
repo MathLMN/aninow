@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,10 +27,18 @@ export const ClinicSettingsForm = () => {
   const { veterinarians, isLoading: isLoadingVets, addVeterinarian, updateVeterinarian, deleteVeterinarian } = useClinicVeterinarians();
   
   const [formData, setFormData] = useState({
-    clinic_name: settings.clinic_name,
-    asv_enabled: settings.asv_enabled,
-    daily_schedules: settings.daily_schedules,
-    default_slot_duration_minutes: settings.default_slot_duration_minutes || 30
+    clinic_name: '',
+    asv_enabled: true,
+    daily_schedules: {
+      monday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+      tuesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+      wednesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+      thursday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+      friday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+      saturday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } },
+      sunday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } }
+    },
+    default_slot_duration_minutes: 30
   });
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -41,8 +50,33 @@ export const ClinicSettingsForm = () => {
     is_active: true
   });
 
+  // Synchroniser formData avec settings à chaque changement
+  useEffect(() => {
+    console.log('Settings updated:', settings);
+    setFormData({
+      clinic_name: settings.clinic_name || 'Clinique Vétérinaire',
+      asv_enabled: settings.asv_enabled ?? true,
+      daily_schedules: settings.daily_schedules || {
+        monday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+        tuesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+        wednesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+        thursday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+        friday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+        saturday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } },
+        sunday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } }
+      },
+      default_slot_duration_minutes: settings.default_slot_duration_minutes || 30
+    });
+  }, [settings]);
+
   const handleSave = async () => {
-    await updateSettings(formData);
+    console.log('Saving settings:', formData);
+    const success = await updateSettings(formData);
+    if (success) {
+      console.log('Settings saved successfully');
+    } else {
+      console.error('Failed to save settings');
+    }
   };
 
   const handleDayToggle = (day: string, isOpen: boolean) => {
@@ -112,16 +146,6 @@ export const ClinicSettingsForm = () => {
     setVetFormData({ name: '', email: '', specialty: '', is_active: true });
     setEditingVet(null);
   };
-
-  // Update formData when settings change
-  React.useEffect(() => {
-    setFormData({
-      clinic_name: settings.clinic_name,
-      asv_enabled: settings.asv_enabled,
-      daily_schedules: settings.daily_schedules,
-      default_slot_duration_minutes: settings.default_slot_duration_minutes || 30
-    });
-  }, [settings]);
 
   if (isLoading || isLoadingVets) {
     return (
