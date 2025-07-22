@@ -97,112 +97,97 @@ export const VeterinarianWeeklySchedule: React.FC<VeterinarianWeeklyScheduleProp
         </div>
       </CardHeader>
       <CardContent>
-        {/* Grille des jours de la semaine */}
-        <div className="grid grid-cols-7 gap-2 mb-4">
-          {DAYS_SHORT.map((dayShort, index) => {
+        {/* Configuration détaillée par jour */}
+        <div className="space-y-4">
+          {DAYS_FULL.map((dayFull, index) => {
             const dayKey = index === 6 ? 0 : index + 1; // Dimanche = 0
-            const dayFull = DAYS_FULL[index];
+            const dayShort = DAYS_SHORT[index];
             const schedule = weekSchedule[dayKey];
             
             return (
-              <div key={dayKey} className="text-center">
-                <div className="flex flex-col items-center space-y-2 p-2 border rounded-lg">
-                  <Label className="text-xs font-medium">{dayShort}</Label>
-                  <Switch
-                    checked={schedule.is_working}
-                    onCheckedChange={(checked) => handleDayToggle(dayKey, checked)}
-                    className="scale-75"
-                  />
-                  <span className="text-xs text-muted-foreground">
-                    {schedule.is_working ? 'Travail' : 'Repos'}
-                  </span>
+              <div key={dayKey} className="border rounded-lg p-4 bg-gray-50">
+                {/* En-tête du jour */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 rounded-full bg-vet-blue/20 flex items-center justify-center">
+                      <span className="text-xs font-medium text-vet-navy">{dayShort}</span>
+                    </div>
+                    <Label className="font-medium text-vet-navy">{dayFull}</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs text-muted-foreground">
+                      {schedule.is_working ? 'Jour travaillé' : 'Jour de repos'}
+                    </span>
+                    <Switch
+                      checked={schedule.is_working}
+                      onCheckedChange={(checked) => handleDayToggle(dayKey, checked)}
+                    />
+                  </div>
                 </div>
+
+                {/* Horaires si jour travaillé */}
+                {schedule.is_working && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Matin */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-vet-brown">Matin</Label>
+                      <div className="flex space-x-2">
+                        <Input
+                          type="time"
+                          value={schedule.morning_start || '08:00'}
+                          onChange={(e) => handleTimeChange(dayKey, 'morning_start', e.target.value)}
+                          className="flex-1"
+                        />
+                        <span className="flex items-center px-2 text-sm text-muted-foreground">à</span>
+                        <Input
+                          type="time"
+                          value={schedule.morning_end || '12:00'}
+                          onChange={(e) => handleTimeChange(dayKey, 'morning_end', e.target.value)}
+                          className="flex-1"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Après-midi */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-vet-brown">Après-midi</Label>
+                      <div className="flex space-x-2">
+                        <Input
+                          type="time"
+                          value={schedule.afternoon_start || '14:00'}
+                          onChange={(e) => handleTimeChange(dayKey, 'afternoon_start', e.target.value)}
+                          className="flex-1"
+                        />
+                        <span className="flex items-center px-2 text-sm text-muted-foreground">à</span>
+                        <Input
+                          type="time"
+                          value={schedule.afternoon_end || '18:00'}
+                          onChange={(e) => handleTimeChange(dayKey, 'afternoon_end', e.target.value)}
+                          className="flex-1"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Message si jour de repos */}
+                {!schedule.is_working && (
+                  <div className="text-center py-2">
+                    <span className="text-sm text-muted-foreground italic">
+                      Jour de repos - aucun créneau disponible
+                    </span>
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
 
-        {/* Horaires pour les jours travaillés */}
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Horaires du matin */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Matin (jours travaillés)</Label>
-              <div className="flex space-x-2">
-                <Input
-                  type="time"
-                  value={weekSchedule[1]?.morning_start || '08:00'}
-                  onChange={(e) => {
-                    // Appliquer à tous les jours travaillés
-                    const newTime = e.target.value;
-                    Object.keys(weekSchedule).forEach(dayStr => {
-                      const dayKey = parseInt(dayStr);
-                      if (weekSchedule[dayKey].is_working) {
-                        handleTimeChange(dayKey, 'morning_start', newTime);
-                      }
-                    });
-                  }}
-                  className="flex-1"
-                />
-                <span className="flex items-center px-2">à</span>
-                <Input
-                  type="time"
-                  value={weekSchedule[1]?.morning_end || '12:00'}
-                  onChange={(e) => {
-                    const newTime = e.target.value;
-                    Object.keys(weekSchedule).forEach(dayStr => {
-                      const dayKey = parseInt(dayStr);
-                      if (weekSchedule[dayKey].is_working) {
-                        handleTimeChange(dayKey, 'morning_end', newTime);
-                      }
-                    });
-                  }}
-                  className="flex-1"
-                />
-              </div>
-            </div>
-
-            {/* Horaires de l'après-midi */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Après-midi (jours travaillés)</Label>
-              <div className="flex space-x-2">
-                <Input
-                  type="time"
-                  value={weekSchedule[1]?.afternoon_start || '14:00'}
-                  onChange={(e) => {
-                    const newTime = e.target.value;
-                    Object.keys(weekSchedule).forEach(dayStr => {
-                      const dayKey = parseInt(dayStr);
-                      if (weekSchedule[dayKey].is_working) {
-                        handleTimeChange(dayKey, 'afternoon_start', newTime);
-                      }
-                    });
-                  }}
-                  className="flex-1"
-                />
-                <span className="flex items-center px-2">à</span>
-                <Input
-                  type="time"
-                  value={weekSchedule[1]?.afternoon_end || '18:00'}
-                  onChange={(e) => {
-                    const newTime = e.target.value;
-                    Object.keys(weekSchedule).forEach(dayStr => {
-                      const dayKey = parseInt(dayStr);
-                      if (weekSchedule[dayKey].is_working) {
-                        handleTimeChange(dayKey, 'afternoon_end', newTime);
-                      }
-                    });
-                  }}
-                  className="flex-1"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="text-xs text-muted-foreground">
-            💡 Les horaires s'appliquent automatiquement à tous les jours travaillés. 
-            Utilisez les boutons ci-dessus pour définir les jours de repos.
-          </div>
+        <div className="mt-4 text-xs text-muted-foreground bg-vet-sage/10 p-3 rounded border-l-4 border-vet-sage">
+          💡 <strong>Horaires spéciaux :</strong> Vous pouvez configurer des horaires différents pour chaque jour. 
+          Par exemple, si Dr {veterinarian.name} ne travaille pas le mercredi après-midi, 
+          laissez les champs après-midi vides ou désactivez complètement le mercredi.
         </div>
       </CardContent>
     </Card>
