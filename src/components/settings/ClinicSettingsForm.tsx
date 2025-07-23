@@ -349,31 +349,44 @@ export const ClinicSettingsForm = () => {
               <FormField
                 control={form.control}
                 name="defaultSlotDurationMinutes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Durée par défaut d'un créneau (minutes)</FormLabel>
-                    <Select 
-                      onValueChange={(value) => field.onChange(parseInt(value))} 
-                      value={field.value?.toString() || "15"}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner la durée" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="5">5 minutes</SelectItem>
-                        <SelectItem value="10">10 minutes</SelectItem>
-                        <SelectItem value="15">15 minutes</SelectItem>
-                        <SelectItem value="20">20 minutes</SelectItem>
-                        <SelectItem value="30">30 minutes</SelectItem>
-                        <SelectItem value="45">45 minutes</SelectItem>
-                        <SelectItem value="60">60 minutes</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  // Ensure we always have a valid string value for the Select
+                  const selectValue = field.value && typeof field.value === 'number' && field.value >= 5 && field.value <= 60
+                    ? field.value.toString()
+                    : "15";
+                  
+                  console.log('🔄 Select field value:', field.value, 'Select value:', selectValue);
+                  
+                  return (
+                    <FormItem>
+                      <FormLabel>Durée par défaut d'un créneau (minutes)</FormLabel>
+                      <Select 
+                        onValueChange={(value) => {
+                          const numValue = parseInt(value);
+                          console.log('🔄 Select onChange:', value, 'parsed:', numValue);
+                          field.onChange(numValue);
+                        }} 
+                        value={selectValue}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner la durée" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="5">5 minutes</SelectItem>
+                          <SelectItem value="10">10 minutes</SelectItem>
+                          <SelectItem value="15">15 minutes</SelectItem>
+                          <SelectItem value="20">20 minutes</SelectItem>
+                          <SelectItem value="30">30 minutes</SelectItem>
+                          <SelectItem value="45">45 minutes</SelectItem>
+                          <SelectItem value="60">60 minutes</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
 
               <FormField
