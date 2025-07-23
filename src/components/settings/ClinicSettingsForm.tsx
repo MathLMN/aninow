@@ -73,6 +73,66 @@ interface NewVeterinarian {
   is_active: boolean;
 }
 
+// Composant pour la gestion de la durée des créneaux
+const SlotDurationSelector = ({ form }: { form: any }) => {
+  const validOptions = [
+    { value: "5", label: "5 minutes" },
+    { value: "10", label: "10 minutes" },
+    { value: "15", label: "15 minutes" },
+    { value: "20", label: "20 minutes" },
+    { value: "30", label: "30 minutes" },
+    { value: "45", label: "45 minutes" },
+    { value: "60", label: "60 minutes" }
+  ];
+
+  return (
+    <FormField
+      control={form.control}
+      name="defaultSlotDurationMinutes"
+      render={({ field }) => {
+        // Ensure we always have a valid value
+        const currentValue = field.value?.toString() || "15";
+        const isValidOption = validOptions.some(opt => opt.value === currentValue);
+        const selectValue = isValidOption ? currentValue : "15";
+        
+        console.log('🔄 SlotDurationSelector - field value:', field.value, 'select value:', selectValue);
+        
+        return (
+          <FormItem>
+            <FormLabel>Durée par défaut d'un créneau (minutes)</FormLabel>
+            <Select 
+              onValueChange={(value) => {
+                console.log('🔄 SlotDurationSelector onChange:', value);
+                if (value && validOptions.some(opt => opt.value === value)) {
+                  const numValue = parseInt(value, 10);
+                  if (!isNaN(numValue)) {
+                    field.onChange(numValue);
+                  }
+                }
+              }} 
+              value={selectValue}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner la durée" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {validOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        );
+      }}
+    />
+  );
+};
+
 export const ClinicSettingsForm = () => {
   const {
     settings,
@@ -347,50 +407,7 @@ export const ClinicSettingsForm = () => {
         <CardContent className="space-y-4">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="defaultSlotDurationMinutes"
-                render={({ field }) => {
-                  // Ensure we always have a valid non-empty string value for the Select
-                  const validOptions = ["5", "10", "15", "20", "30", "45", "60"];
-                  const currentValue = field.value?.toString() || "15";
-                  const selectValue = validOptions.includes(currentValue) ? currentValue : "15";
-                  
-                  console.log('🔄 Select field value:', field.value, 'Select value:', selectValue);
-                  
-                  return (
-                    <FormItem>
-                      <FormLabel>Durée par défaut d'un créneau (minutes)</FormLabel>
-                      <Select 
-                        onValueChange={(value) => {
-                          if (value && validOptions.includes(value)) {
-                            const numValue = parseInt(value);
-                            console.log('🔄 Select onChange:', value, 'parsed:', numValue);
-                            field.onChange(numValue);
-                          }
-                        }} 
-                        value={selectValue}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner la durée" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="5">5 minutes</SelectItem>
-                          <SelectItem value="10">10 minutes</SelectItem>
-                          <SelectItem value="15">15 minutes</SelectItem>
-                          <SelectItem value="20">20 minutes</SelectItem>
-                          <SelectItem value="30">30 minutes</SelectItem>
-                          <SelectItem value="45">45 minutes</SelectItem>
-                          <SelectItem value="60">60 minutes</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  );
-                }}
-              />
+              <SlotDurationSelector form={form} />
 
               <FormField
                 control={form.control}
