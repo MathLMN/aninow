@@ -12,15 +12,6 @@ interface LoginRequest {
   password: string
 }
 
-interface VetSession {
-  id: string
-  veterinarian_id: string
-  session_token: string
-  expires_at: string
-  created_at: string
-  last_activity: string
-}
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -58,34 +49,46 @@ serve(async (req) => {
 })
 
 async function handleLogin(supabase: any, { email, password }: LoginRequest) {
-  // Vérifier les identifiants (simulation - en production, utiliser un hash)
-  const { data: veterinarian, error: vetError } = await supabase
-    .from('clinic_veterinarians')
-    .select('*')
-    .eq('email', email)
-    .eq('is_active', true)
+  console.log('🔄 Tentative de connexion pour:', email)
+  
+  // Vérifier d'abord si c'est le mot de passe de démo
+  if (password !== 'vet123') {
+    console.log('❌ Mot de passe invalide')
+    throw new Error('Identifiants invalides')
+  }
+
+  // Vérifier que l'email correspond à l'email de la clinique
+  const { data: clinicSettings, error: clinicError } = await supabase
+    .from('clinic_settings')
+    .select('clinic_email')
     .single()
 
-  if (vetError || !veterinarian) {
+  if (clinicError) {
+    console.error('❌ Erreur lors de la récupération des paramètres de la clinique:', clinicError)
+    throw new Error('Erreur de configuration de la clinique')
+  }
+
+  if (!clinicSettings.clinic_email || clinicSettings.clinic_email !== email) {
+    console.log('❌ Email ne correspond pas à celui de la clinique')
     throw new Error('Identifiants invalides')
   }
 
-  // Pour cette démo, utiliser un mot de passe simple
-  // En production, utiliser un hash bcrypt
-  const validPassword = password === 'vet123' // Mot de passe temporaire
+  console.log('✅ Email de la clinique vérifié')
 
-  if (!validPassword) {
-    throw new Error('Identifiants invalides')
-  }
+  // Supprimer les sessions existantes pour cette clinique
+  await supabase
+    .from('vet_sessions')
+    .delete()
+    .eq('clinic_email', email)
 
-  // Créer une session
+  // Créer une nouvelle session
   const sessionToken = generateSessionToken()
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24h
 
   const { data: session, error: sessionError } = await supabase
     .from('vet_sessions')
     .insert({
-      veterinarian_id: veterinarian.id,
+      clinic_email: email,
       session_token: sessionToken,
       expires_at: expiresAt.toISOString(),
       last_activity: new Date().toISOString()
@@ -94,18 +97,19 @@ async function handleLogin(supabase: any, { email, password }: LoginRequest) {
     .single()
 
   if (sessionError) {
+    console.error('❌ Erreur lors de la création de la session:', sessionError)
     throw new Error('Erreur lors de la création de la session')
   }
+
+  console.log('✅ Session créée avec succès')
 
   return new Response(
     JSON.stringify({
       success: true,
       session_token: sessionToken,
-      veterinarian: {
-        id: veterinarian.id,
-        name: veterinarian.name,
-        email: veterinarian.email,
-        specialty: veterinarian.specialty
+      clinic: {
+        email: email,
+        name: 'Clinique Vétérinaire'
       },
       expires_at: expiresAt.toISOString()
     }),
@@ -144,10 +148,7 @@ async function handleVerifySession(supabase: any, sessionToken: string) {
 
   const { data: session, error } = await supabase
     .from('vet_sessions')
-    .select(`
-      *,
-      veterinarian:clinic_veterinarians(id, name, email, specialty, is_active)
-    `)
+    .select('*')
     .eq('session_token', sessionToken)
     .gt('expires_at', new Date().toISOString())
     .single()
@@ -165,7 +166,10 @@ async function handleVerifySession(supabase: any, sessionToken: string) {
   return new Response(
     JSON.stringify({
       valid: true,
-      veterinarian: session.veterinarian,
+      clinic: {
+        email: session.clinic_email,
+        name: 'Clinique Vétérinaire'
+      },
       expires_at: session.expires_at
     }),
     { 

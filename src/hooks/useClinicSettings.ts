@@ -94,7 +94,7 @@ const getDefaultSettings = (): ClinicSettings => ({
   clinic_address_postal_code: '',
   clinic_address_country: 'France',
   asv_enabled: true,
-  default_slot_duration_minutes: 30,
+  default_slot_duration_minutes: 15,
   daily_schedules: {
     monday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
     tuesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
@@ -124,7 +124,18 @@ export const useClinicSettings = () => {
 
       if (error) {
         console.error('❌ Error fetching settings:', error);
-        throw error;
+        
+        // Ne pas afficher d'erreur si c'est juste un problème de connexion
+        if (error.message !== 'Failed to fetch') {
+          toast({
+            title: "Erreur",
+            description: "Impossible de charger les paramètres",
+            variant: "destructive"
+          });
+        }
+        
+        // Utiliser les paramètres par défaut en cas d'erreur
+        return;
       }
 
       if (data) {
@@ -132,7 +143,7 @@ export const useClinicSettings = () => {
         const settingsData: ClinicSettings = {
           ...data,
           daily_schedules: convertToDailySchedules(data.daily_schedules),
-          default_slot_duration_minutes: data.default_slot_duration_minutes || 30,
+          default_slot_duration_minutes: data.default_slot_duration_minutes || 15,
           clinic_phone: data.clinic_phone || '',
           clinic_email: data.clinic_email || '',
           clinic_address_street: data.clinic_address_street || '',
@@ -147,12 +158,16 @@ export const useClinicSettings = () => {
         // Keep default settings if no data found
       }
     } catch (err) {
-      console.error('❌ Erreur lors du chargement des paramètres:', err);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les paramètres",
-        variant: "destructive"
-      });
+      console.error('❌ Exception lors du chargement des paramètres:', err);
+      
+      // Ne pas afficher d'erreur pour les problèmes de connexion
+      if (err instanceof Error && err.message !== 'Failed to fetch') {
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les paramètres",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -177,7 +192,7 @@ export const useClinicSettings = () => {
         clinic_address_country: updatedSettings.clinic_address_country || 'France',
         asv_enabled: updatedSettings.asv_enabled,
         daily_schedules: JSON.parse(JSON.stringify(updatedSettings.daily_schedules)),
-        default_slot_duration_minutes: updatedSettings.default_slot_duration_minutes || 30
+        default_slot_duration_minutes: updatedSettings.default_slot_duration_minutes || 15
       };
       
       console.log('📤 Data to save to database:', dataToUpdate);
@@ -189,7 +204,7 @@ export const useClinicSettings = () => {
         .limit(1)
         .maybeSingle();
 
-      if (fetchError) {
+      if (fetchError && fetchError.message !== 'Failed to fetch') {
         console.error('❌ Error checking existing data:', fetchError);
         throw fetchError;
       }
@@ -228,7 +243,7 @@ export const useClinicSettings = () => {
       const settingsData: ClinicSettings = {
         ...data,
         daily_schedules: convertToDailySchedules(data.daily_schedules),
-        default_slot_duration_minutes: data.default_slot_duration_minutes || 30,
+        default_slot_duration_minutes: data.default_slot_duration_minutes || 15,
         clinic_phone: data.clinic_phone || '',
         clinic_email: data.clinic_email || '',
         clinic_address_street: data.clinic_address_street || '',
@@ -248,11 +263,18 @@ export const useClinicSettings = () => {
       return true;
     } catch (err) {
       console.error('❌ Erreur lors de la mise à jour:', err);
-      toast({
-        title: "Erreur",
-        description: `Impossible de sauvegarder les paramètres: ${err instanceof Error ? err.message : 'Erreur inconnue'}`,
-        variant: "destructive"
-      });
+      
+      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
+      
+      // Ne pas afficher d'erreur pour les problèmes de connexion
+      if (errorMessage !== 'Failed to fetch') {
+        toast({
+          title: "Erreur",
+          description: `Impossible de sauvegarder les paramètres: ${errorMessage}`,
+          variant: "destructive"
+        });
+      }
+      
       return false;
     }
   };

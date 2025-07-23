@@ -4,6 +4,7 @@ import { useClinicSettings } from "@/hooks/useClinicSettings";
 import { DailyCalendarHeader } from "./DailyCalendarHeader";
 import { DailyCalendarGrid } from "./DailyCalendarGrid";
 import { getDaySchedule, getScheduleInfo, generateColumns } from "./utils/scheduleUtils";
+import { Loader2 } from "lucide-react";
 
 interface DailyCalendarViewProps {
   selectedDate: Date;
@@ -22,10 +23,25 @@ export const DailyCalendarView = ({
   onCreateAppointment,
   onAppointmentClick
 }: DailyCalendarViewProps) => {
-  const { settings } = useClinicSettings();
+  const { settings, isLoading: settingsLoading } = useClinicSettings();
 
   console.log('DailyCalendarView - Veterinarians received:', veterinarians);
   console.log('DailyCalendarView - Settings:', settings);
+  console.log('DailyCalendarView - Settings loading:', settingsLoading);
+
+  // Show loading state if settings are still loading
+  if (settingsLoading) {
+    return (
+      <div className="space-y-4">
+        <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
+          <CardContent className="p-8 text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-vet-sage mb-4" />
+            <p className="text-vet-brown">Chargement des paramètres...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const daySchedule = getDaySchedule(selectedDate, settings);
   const columns = generateColumns(veterinarians, settings);
