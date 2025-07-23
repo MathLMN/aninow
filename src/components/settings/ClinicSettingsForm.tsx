@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -113,12 +112,15 @@ export const ClinicSettingsForm = () => {
     if (settings && !isLoading) {
       console.log('🔄 Updating form with settings:', settings);
       
-      // Ensure we have a valid slot duration value
+      // Ensure we have a valid slot duration value with proper fallback
       const slotDuration = settings.default_slot_duration_minutes && 
+                          typeof settings.default_slot_duration_minutes === 'number' &&
                           settings.default_slot_duration_minutes >= 5 && 
                           settings.default_slot_duration_minutes <= 60
         ? settings.default_slot_duration_minutes
         : defaultSettings.default_slot_duration_minutes;
+
+      console.log('🔄 Using slot duration:', slotDuration);
 
       form.reset({
         clinicName: settings.clinic_name || defaultSettings.clinic_name,
@@ -352,7 +354,7 @@ export const ClinicSettingsForm = () => {
                     <FormLabel>Durée par défaut d'un créneau (minutes)</FormLabel>
                     <Select 
                       onValueChange={(value) => field.onChange(parseInt(value))} 
-                      value={field.value ? field.value.toString() : "15"}
+                      value={field.value?.toString() || "15"}
                     >
                       <FormControl>
                         <SelectTrigger>
