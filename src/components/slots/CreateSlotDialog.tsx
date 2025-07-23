@@ -8,11 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus } from "lucide-react"
 import type { Database } from '@/integrations/supabase/types'
 
-type VeterinarianRow = Database['public']['Tables']['veterinarians']['Row']
+type ClinicVeterinarianRow = Database['public']['Tables']['clinic_veterinarians']['Row']
 type ConsultationTypeRow = Database['public']['Tables']['consultation_types']['Row']
 
 interface CreateSlotDialogProps {
-  veterinarians: VeterinarianRow[]
+  veterinarians: ClinicVeterinarianRow[]
   consultationTypes: ConsultationTypeRow[]
   onCreateSlot: (slotData: {
     veterinarian_id: string
@@ -105,7 +105,7 @@ export const CreateSlotDialog = ({ veterinarians, consultationTypes, onCreateSlo
               <SelectContent>
                 {veterinarians.map((vet) => (
                   <SelectItem key={vet.id} value={vet.id}>
-                    {vet.name} - {vet.specialty}
+                    {vet.name} {vet.specialty && `- ${vet.specialty}`}
                   </SelectItem>
                 ))}
               </SelectContent>

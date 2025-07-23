@@ -4,13 +4,13 @@ import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import type { Database } from '@/integrations/supabase/types'
 
-type VeterinarianRow = Database['public']['Tables']['veterinarians']['Row']
+type ClinicVeterinarianRow = Database['public']['Tables']['clinic_veterinarians']['Row']
 type ConsultationTypeRow = Database['public']['Tables']['consultation_types']['Row']
 type AvailableSlotRow = Database['public']['Tables']['available_slots']['Row']
 type SlotInsert = Database['public']['Tables']['available_slots']['Insert']
 
 export const useSlotManagement = () => {
-  const [veterinarians, setVeterinarians] = useState<VeterinarianRow[]>([])
+  const [veterinarians, setVeterinarians] = useState<ClinicVeterinarianRow[]>([])
   const [consultationTypes, setConsultationTypes] = useState<ConsultationTypeRow[]>([])
   const [availableSlots, setAvailableSlots] = useState<AvailableSlotRow[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -20,8 +20,9 @@ export const useSlotManagement = () => {
   const fetchVeterinarians = async () => {
     try {
       const { data, error } = await supabase
-        .from('veterinarians')
+        .from('clinic_veterinarians')
         .select('*')
+        .eq('is_active', true)
         .order('name')
 
       if (error) throw error
@@ -63,7 +64,7 @@ export const useSlotManagement = () => {
         .from('available_slots')
         .select(`
           *,
-          veterinarians(name, clinic_name),
+          clinic_veterinarians(name),
           consultation_types(name, duration_minutes, color)
         `)
         .order('date')
