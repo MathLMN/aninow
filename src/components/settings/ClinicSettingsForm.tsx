@@ -19,7 +19,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { cn } from "@/lib/utils";
 
 interface ClinicSettings {
   clinic_name: string;
@@ -86,9 +85,7 @@ export const ClinicSettingsForm = () => {
     updateVeterinarian,
     deleteVeterinarian
   } = useClinicVeterinarians();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [isVetDialogOpen, setIsVetDialogOpen] = useState(false);
   const [newVeterinarian, setNewVeterinarian] = useState<NewVeterinarian>({
     name: '',
@@ -115,6 +112,14 @@ export const ClinicSettingsForm = () => {
   useEffect(() => {
     if (settings && !isLoading) {
       console.log('🔄 Updating form with settings:', settings);
+      
+      // Ensure we have a valid slot duration value
+      const slotDuration = settings.default_slot_duration_minutes && 
+                          settings.default_slot_duration_minutes >= 5 && 
+                          settings.default_slot_duration_minutes <= 60
+        ? settings.default_slot_duration_minutes
+        : defaultSettings.default_slot_duration_minutes;
+
       form.reset({
         clinicName: settings.clinic_name || defaultSettings.clinic_name,
         clinicPhone: settings.clinic_phone || defaultSettings.clinic_phone,
@@ -124,7 +129,7 @@ export const ClinicSettingsForm = () => {
         clinicAddressPostalCode: settings.clinic_address_postal_code || defaultSettings.clinic_address_postal_code,
         clinicAddressCountry: settings.clinic_address_country || defaultSettings.clinic_address_country,
         asvEnabled: settings.asv_enabled ?? defaultSettings.asv_enabled,
-        defaultSlotDurationMinutes: settings.default_slot_duration_minutes || defaultSettings.default_slot_duration_minutes
+        defaultSlotDurationMinutes: slotDuration
       });
     }
   }, [settings, isLoading, form]);
@@ -342,40 +347,31 @@ export const ClinicSettingsForm = () => {
               <FormField
                 control={form.control}
                 name="defaultSlotDurationMinutes"
-                render={({ field }) => {
-                  console.log('🔍 Form field value:', field.value);
-                  const currentValue = field.value || 15;
-                  console.log('🔍 Current value for select:', currentValue);
-                  
-                  return (
-                    <FormItem>
-                      <FormLabel>Durée par défaut d'un créneau (minutes)</FormLabel>
-                      <Select 
-                        onValueChange={(value) => {
-                          console.log('🔄 Select value changed to:', value);
-                          field.onChange(parseInt(value));
-                        }} 
-                        value={currentValue.toString()}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner la durée" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="5">5 minutes</SelectItem>
-                          <SelectItem value="10">10 minutes</SelectItem>
-                          <SelectItem value="15">15 minutes</SelectItem>
-                          <SelectItem value="20">20 minutes</SelectItem>
-                          <SelectItem value="30">30 minutes</SelectItem>
-                          <SelectItem value="45">45 minutes</SelectItem>
-                          <SelectItem value="60">60 minutes</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  );
-                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Durée par défaut d'un créneau (minutes)</FormLabel>
+                    <Select 
+                      onValueChange={(value) => field.onChange(parseInt(value))} 
+                      value={field.value?.toString() || "15"}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner la durée" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="5">5 minutes</SelectItem>
+                        <SelectItem value="10">10 minutes</SelectItem>
+                        <SelectItem value="15">15 minutes</SelectItem>
+                        <SelectItem value="20">20 minutes</SelectItem>
+                        <SelectItem value="30">30 minutes</SelectItem>
+                        <SelectItem value="45">45 minutes</SelectItem>
+                        <SelectItem value="60">60 minutes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
 
               <FormField
