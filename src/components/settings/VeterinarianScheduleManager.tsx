@@ -70,7 +70,7 @@ export const VeterinarianScheduleManager = () => {
         <VeterinarianWeeklySchedule
           key={veterinarian.id}
           veterinarian={veterinarian}
-          schedule={schedules.find(s => s.veterinarian_id === veterinarian.id)}
+          schedules={schedules.filter(s => s.veterinarian_id === veterinarian.id)}
         />
       ))}
 
