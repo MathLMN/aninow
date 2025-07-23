@@ -90,31 +90,33 @@ const SlotDurationSelector = ({ form }: { form: any }) => {
       control={form.control}
       name="defaultSlotDurationMinutes"
       render={({ field }) => {
-        // Ensure we always have a valid value, never empty string
-        const currentValue = field.value || 15;
+        // Transforme la valeur en string, et fallback sur "15" si pas valide
+        let currentValue = field.value;
+        // Si la valeur est undefined, null ou vide, on met "15"
+        if (
+          currentValue === undefined ||
+          currentValue === null ||
+          currentValue === "" ||
+          !SLOT_DURATION_OPTIONS.some(opt => opt.value === Number(currentValue))
+        ) {
+          currentValue = 15;
+        }
         const stringValue = String(currentValue);
-        
-        // Validate that the string value is not empty and corresponds to a valid option
-        const isValidValue = SLOT_DURATION_OPTIONS.some(option => String(option.value) === stringValue);
-        const safeValue = isValidValue ? stringValue : "15";
-        
-        console.log('🔄 SlotDurationSelector - field value:', field.value, 'safe value:', safeValue);
-        
+
         return (
           <FormItem>
             <FormLabel>Durée par défaut d'un créneau (minutes)</FormLabel>
-            <Select 
+            <Select
               onValueChange={(value) => {
-                console.log('🔄 SlotDurationSelector onChange:', value);
-                // Ensure the value is never empty
-                if (value && value.trim() !== '') {
+                // On ignore les valeurs vides
+                if (value && value.trim() !== "") {
                   const numValue = parseInt(value, 10);
                   if (!isNaN(numValue) && numValue >= 5 && numValue <= 60) {
                     field.onChange(numValue);
                   }
                 }
-              }} 
-              value={safeValue}
+              }}
+              value={stringValue}
             >
               <FormControl>
                 <SelectTrigger>
@@ -122,18 +124,12 @@ const SlotDurationSelector = ({ form }: { form: any }) => {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {SLOT_DURATION_OPTIONS.map((option) => {
-                  const optionValue = String(option.value);
-                  // Ensure we never pass empty strings to SelectItem
-                  if (!optionValue || optionValue.trim() === '') {
-                    return null;
-                  }
-                  return (
-                    <SelectItem key={option.value} value={optionValue}>
-                      {option.label}
-                    </SelectItem>
-                  );
-                })}
+                {SLOT_DURATION_OPTIONS.map((option) => (
+                  // optionValue est toujours une string non vide
+                  <SelectItem key={option.value} value={String(option.value)}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <FormMessage />
