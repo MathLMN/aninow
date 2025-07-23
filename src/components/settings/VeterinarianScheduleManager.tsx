@@ -6,7 +6,7 @@ import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { useVeterinarianSchedules } from "@/hooks/useVeterinarianSchedules";
 import { useVeterinarianAbsences } from "@/hooks/useVeterinarianAbsences";
 import { VeterinarianWeeklySchedule } from "./VeterinarianWeeklySchedule";
-import { VeterinarianAbsenceCalendar } from "./VeterinarianAbsenceCalendar";
+import { CentralizedAbsenceManager } from "./CentralizedAbsenceManager";
 
 export const VeterinarianScheduleManager = () => {
   const { veterinarians, isLoading: isLoadingVets } = useClinicVeterinarians();
@@ -55,28 +55,32 @@ export const VeterinarianScheduleManager = () => {
             Gestion des horaires et absences
           </CardTitle>
           <CardDescription>
-            Configuration rapide des horaires hebdomadaires et gestion des absences sur calendrier
+            Configuration rapide des horaires hebdomadaires et gestion des absences
           </CardDescription>
         </CardHeader>
       </Card>
 
-      {activeVeterinarians.map((veterinarian) => {
-        const vetSchedules = schedules.filter(s => s.veterinarian_id === veterinarian.id);
-        const vetAbsences = absences.filter(a => a.veterinarian_id === veterinarian.id);
+      <div className="grid grid-cols-1 gap-6">
+        {/* Section horaires hebdomadaires */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {activeVeterinarians.map((veterinarian) => {
+            const vetSchedules = schedules.filter(s => s.veterinarian_id === veterinarian.id);
+            return (
+              <VeterinarianWeeklySchedule
+                key={veterinarian.id}
+                veterinarian={veterinarian}
+                schedules={vetSchedules}
+              />
+            );
+          })}
+        </div>
 
-        return (
-          <div key={veterinarian.id} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <VeterinarianWeeklySchedule
-              veterinarian={veterinarian}
-              schedules={vetSchedules}
-            />
-            <VeterinarianAbsenceCalendar
-              veterinarian={veterinarian}
-              absences={vetAbsences}
-            />
-          </div>
-        );
-      })}
+        {/* Section absences centralisée */}
+        <CentralizedAbsenceManager
+          veterinarians={activeVeterinarians}
+          absences={absences}
+        />
+      </div>
     </div>
   );
 };
