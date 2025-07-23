@@ -332,18 +332,23 @@ export const ClinicSettingsForm = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Durée par défaut d'un créneau (minutes)</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
+                    <Select 
+                      onValueChange={(value) => field.onChange(parseInt(value))} 
+                      value={field.value ? field.value.toString() : "15"}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionner la durée" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {[5, 10, 15, 20, 30, 45, 60].map(duration => (
-                          <SelectItem key={duration} value={duration.toString()}>
-                            {duration} minutes
-                          </SelectItem>
-                        ))}
+                        <SelectItem value="5">5 minutes</SelectItem>
+                        <SelectItem value="10">10 minutes</SelectItem>
+                        <SelectItem value="15">15 minutes</SelectItem>
+                        <SelectItem value="20">20 minutes</SelectItem>
+                        <SelectItem value="30">30 minutes</SelectItem>
+                        <SelectItem value="45">45 minutes</SelectItem>
+                        <SelectItem value="60">60 minutes</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
