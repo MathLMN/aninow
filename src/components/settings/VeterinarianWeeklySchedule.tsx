@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -149,7 +148,7 @@ export const VeterinarianWeeklySchedule: React.FC<VeterinarianWeeklyScheduleProp
           onScheduleChange={handleDefaultScheduleChange}
         />
         
-        <div className="space-y-2">
+        <div className="grid grid-cols-7 gap-2">
           {DAYS.map(day => {
             const schedule = localSchedules.find(s => s.day_of_week === day.value);
             if (!schedule) return null;
