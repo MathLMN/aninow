@@ -4,20 +4,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Clock } from "lucide-react";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { useVeterinarianSchedules } from "@/hooks/useVeterinarianSchedules";
-import { useVeterinarianAbsences } from "@/hooks/useVeterinarianAbsences";
 import { VeterinarianWeeklySchedule } from "./VeterinarianWeeklySchedule";
-import { VeterinarianAbsenceCalendar } from "./VeterinarianAbsenceCalendar";
+import { VeterinarianAbsenceManager } from "./VeterinarianAbsenceManager";
 
 export const VeterinarianScheduleManager = () => {
   const { veterinarians, isLoading: isLoadingVets } = useClinicVeterinarians();
   const { schedules, isLoading: isLoadingSchedules } = useVeterinarianSchedules();
-  const { absences, isLoading: isLoadingAbsences } = useVeterinarianAbsences();
 
-  if (isLoadingVets || isLoadingSchedules || isLoadingAbsences) {
+  if (isLoadingVets || isLoadingSchedules) {
     return (
       <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
         <CardContent className="p-8">
-          <div className="text-center text-vet-brown">Chargement des horaires et absences...</div>
+          <div className="text-center text-vet-brown">Chargement des horaires...</div>
         </CardContent>
       </Card>
     );
@@ -34,7 +32,7 @@ export const VeterinarianScheduleManager = () => {
             Gestion des horaires et absences
           </CardTitle>
           <CardDescription>
-            Configuration rapide des horaires hebdomadaires et gestion des absences
+            Configuration des horaires hebdomadaires et gestion des absences
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -55,28 +53,31 @@ export const VeterinarianScheduleManager = () => {
             Gestion des horaires et absences
           </CardTitle>
           <CardDescription>
-            Configuration rapide des horaires hebdomadaires et gestion des absences sur calendrier
+            Configuration des horaires hebdomadaires et gestion centralisée des absences
           </CardDescription>
         </CardHeader>
       </Card>
 
-      {activeVeterinarians.map((veterinarian) => {
-        const vetSchedules = schedules.filter(s => s.veterinarian_id === veterinarian.id);
-        const vetAbsences = absences.filter(a => a.veterinarian_id === veterinarian.id);
+      {/* Weekly Schedules */}
+      <div className="space-y-4">
+        <h3 className="text-xl font-medium text-vet-navy">Horaires hebdomadaires</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {activeVeterinarians.map((veterinarian) => {
+            const vetSchedules = schedules.filter(s => s.veterinarian_id === veterinarian.id);
 
-        return (
-          <div key={veterinarian.id} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <VeterinarianWeeklySchedule
-              veterinarian={veterinarian}
-              schedules={vetSchedules}
-            />
-            <VeterinarianAbsenceCalendar
-              veterinarian={veterinarian}
-              absences={vetAbsences}
-            />
-          </div>
-        );
-      })}
+            return (
+              <VeterinarianWeeklySchedule
+                key={veterinarian.id}
+                veterinarian={veterinarian}
+                schedules={vetSchedules}
+              />
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Unified Absence Management */}
+      <VeterinarianAbsenceManager veterinarians={activeVeterinarians} />
     </div>
   );
 };
