@@ -107,13 +107,6 @@ export type Database = {
             referencedRelation: "consultation_types"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "available_slots_veterinarian_id_fkey"
-            columns: ["veterinarian_id"]
-            isOneToOne: false
-            referencedRelation: "veterinarians"
-            referencedColumns: ["id"]
-          },
         ]
       }
       bookings: {
@@ -563,27 +556,42 @@ export type Database = {
       }
       vet_sessions: {
         Row: {
+          account_status: string | null
+          clinic_address: string | null
           clinic_email: string
+          clinic_name: string | null
+          clinic_phone: string | null
           created_at: string
           expires_at: string
           id: string
           last_activity: string
+          registration_date: string | null
           session_token: string
         }
         Insert: {
+          account_status?: string | null
+          clinic_address?: string | null
           clinic_email: string
+          clinic_name?: string | null
+          clinic_phone?: string | null
           created_at?: string
           expires_at: string
           id?: string
           last_activity?: string
+          registration_date?: string | null
           session_token: string
         }
         Update: {
+          account_status?: string | null
+          clinic_address?: string | null
           clinic_email?: string
+          clinic_name?: string | null
+          clinic_phone?: string | null
           created_at?: string
           expires_at?: string
           id?: string
           last_activity?: string
+          registration_date?: string | null
           session_token?: string
         }
         Relationships: []
@@ -678,36 +686,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      veterinarians: {
-        Row: {
-          clinic_name: string
-          created_at: string
-          email: string
-          id: string
-          name: string
-          specialty: string | null
-          updated_at: string
-        }
-        Insert: {
-          clinic_name: string
-          created_at?: string
-          email: string
-          id?: string
-          name: string
-          specialty?: string | null
-          updated_at?: string
-        }
-        Update: {
-          clinic_name?: string
-          created_at?: string
-          email?: string
-          id?: string
-          name?: string
-          specialty?: string | null
-          updated_at?: string
-        }
-        Relationships: []
       }
     }
     Views: {
