@@ -2,11 +2,10 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { useVeterinarianSchedules } from "@/hooks/useVeterinarianSchedules";
 import { Clock, Save } from "lucide-react";
+import { DefaultScheduleForm } from "./DefaultScheduleForm";
+import { DayScheduleRow } from "./DayScheduleRow";
 
 interface Veterinarian {
   id: string;
@@ -24,6 +23,10 @@ interface VeterinarianSchedule {
   morning_end?: string;
   afternoon_start?: string;
   afternoon_end?: string;
+}
+
+interface ExtendedVeterinarianSchedule extends VeterinarianSchedule {
+  has_special_hours: boolean;
 }
 
 interface VeterinarianWeeklyScheduleProps {
@@ -46,29 +49,71 @@ export const VeterinarianWeeklySchedule: React.FC<VeterinarianWeeklyScheduleProp
   schedules
 }) => {
   const { updateSchedule } = useVeterinarianSchedules();
-  const [localSchedules, setLocalSchedules] = useState<VeterinarianSchedule[]>(() => {
-    // Initialize with existing schedules or default values
+  
+  const [defaultSchedule, setDefaultSchedule] = useState({
+    morning_start: "08:00",
+    morning_end: "12:00",
+    afternoon_start: "14:00",
+    afternoon_end: "18:00"
+  });
+
+  const [localSchedules, setLocalSchedules] = useState<ExtendedVeterinarianSchedule[]>(() => {
     return DAYS.map(day => {
       const existingSchedule = schedules.find(s => s.day_of_week === day.value);
-      return existingSchedule || {
+      const hasSpecialHours = existingSchedule ? (
+        existingSchedule.morning_start !== defaultSchedule.morning_start ||
+        existingSchedule.morning_end !== defaultSchedule.morning_end ||
+        existingSchedule.afternoon_start !== defaultSchedule.afternoon_start ||
+        existingSchedule.afternoon_end !== defaultSchedule.afternoon_end
+      ) : false;
+      
+      return {
+        ...existingSchedule,
         veterinarian_id: veterinarian.id,
         day_of_week: day.value,
-        is_working: day.value >= 1 && day.value <= 5, // Default: working Mon-Fri
-        morning_start: "08:00",
-        morning_end: "12:00",
-        afternoon_start: "14:00",
-        afternoon_end: "18:00"
+        is_working: existingSchedule?.is_working ?? (day.value >= 1 && day.value <= 5),
+        morning_start: existingSchedule?.morning_start || defaultSchedule.morning_start,
+        morning_end: existingSchedule?.morning_end || defaultSchedule.morning_end,
+        afternoon_start: existingSchedule?.afternoon_start || defaultSchedule.afternoon_start,
+        afternoon_end: existingSchedule?.afternoon_end || defaultSchedule.afternoon_end,
+        has_special_hours: hasSpecialHours
       };
     });
   });
 
-  const handleScheduleChange = (dayOfWeek: number, field: string, value: string | boolean) => {
+  const handleDefaultScheduleChange = (field: string, value: string) => {
+    setDefaultSchedule(prev => ({ ...prev, [field]: value }));
+    
+    // Update all schedules that don't have special hours
     setLocalSchedules(prev => 
       prev.map(schedule => 
-        schedule.day_of_week === dayOfWeek 
+        !schedule.has_special_hours 
           ? { ...schedule, [field]: value }
           : schedule
       )
+    );
+  };
+
+  const handleScheduleChange = (dayOfWeek: number, field: string, value: string | boolean) => {
+    setLocalSchedules(prev => 
+      prev.map(schedule => {
+        if (schedule.day_of_week !== dayOfWeek) return schedule;
+        
+        const updatedSchedule = { ...schedule, [field]: value };
+        
+        // If disabling special hours, revert to default schedule
+        if (field === 'has_special_hours' && !value) {
+          return {
+            ...updatedSchedule,
+            morning_start: defaultSchedule.morning_start,
+            morning_end: defaultSchedule.morning_end,
+            afternoon_start: defaultSchedule.afternoon_start,
+            afternoon_end: defaultSchedule.afternoon_end
+          };
+        }
+        
+        return updatedSchedule;
+      })
     );
   };
 
@@ -76,8 +121,15 @@ export const VeterinarianWeeklySchedule: React.FC<VeterinarianWeeklyScheduleProp
     console.log('💾 Saving schedules for veterinarian:', veterinarian.name);
     
     const promises = localSchedules.map(schedule => {
-      console.log('📅 Saving schedule for day:', schedule.day_of_week, schedule);
-      return updateSchedule(schedule);
+      const scheduleToSave = {
+        ...schedule,
+        // Remove the has_special_hours field as it's not in the database
+        has_special_hours: undefined
+      };
+      delete scheduleToSave.has_special_hours;
+      
+      console.log('📅 Saving schedule for day:', schedule.day_of_week, scheduleToSave);
+      return updateSchedule(scheduleToSave);
     });
     
     await Promise.all(promises);
@@ -92,68 +144,26 @@ export const VeterinarianWeeklySchedule: React.FC<VeterinarianWeeklyScheduleProp
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {DAYS.map(day => {
-          const schedule = localSchedules.find(s => s.day_of_week === day.value);
-          if (!schedule) return null;
+        <DefaultScheduleForm
+          defaultSchedule={defaultSchedule}
+          onScheduleChange={handleDefaultScheduleChange}
+        />
+        
+        <div className="space-y-2">
+          {DAYS.map(day => {
+            const schedule = localSchedules.find(s => s.day_of_week === day.value);
+            if (!schedule) return null;
 
-          return (
-            <div key={day.value} className="space-y-3 p-4 bg-vet-beige/10 rounded-lg border border-vet-blue/20">
-              <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium text-vet-navy">{day.label}</Label>
-                <Switch
-                  checked={schedule.is_working}
-                  onCheckedChange={(checked) => handleScheduleChange(day.value, 'is_working', checked)}
-                />
-              </div>
-              
-              {schedule.is_working && (
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <Label className="text-xs text-vet-brown">Matin - Début</Label>
-                      <Input
-                        type="time"
-                        value={schedule.morning_start || "08:00"}
-                        onChange={(e) => handleScheduleChange(day.value, 'morning_start', e.target.value)}
-                        className="text-xs"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs text-vet-brown">Matin - Fin</Label>
-                      <Input
-                        type="time"
-                        value={schedule.morning_end || "12:00"}
-                        onChange={(e) => handleScheduleChange(day.value, 'morning_end', e.target.value)}
-                        className="text-xs"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <Label className="text-xs text-vet-brown">Après-midi - Début</Label>
-                      <Input
-                        type="time"
-                        value={schedule.afternoon_start || "14:00"}
-                        onChange={(e) => handleScheduleChange(day.value, 'afternoon_start', e.target.value)}
-                        className="text-xs"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs text-vet-brown">Après-midi - Fin</Label>
-                      <Input
-                        type="time"
-                        value={schedule.afternoon_end || "18:00"}
-                        onChange={(e) => handleScheduleChange(day.value, 'afternoon_end', e.target.value)}
-                        className="text-xs"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
+            return (
+              <DayScheduleRow
+                key={day.value}
+                day={day}
+                schedule={schedule}
+                onScheduleChange={(field, value) => handleScheduleChange(day.value, field, value)}
+              />
+            );
+          })}
+        </div>
         
         <Button
           onClick={handleSaveSchedules}
