@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -50,7 +51,7 @@ const formSchema = z.object({
   clinicPhone: z.string().optional(),
   clinicEmail: z.string().email({
     message: "Veuillez entrer une adresse email valide."
-  }).optional(),
+  }).optional().or(z.literal("")),
   clinicAddressStreet: z.string().optional(),
   clinicAddressCity: z.string().optional(),
   clinicAddressPostalCode: z.string().optional(),
@@ -350,10 +351,10 @@ export const ClinicSettingsForm = () => {
                 control={form.control}
                 name="defaultSlotDurationMinutes"
                 render={({ field }) => {
-                  // Ensure we always have a valid string value for the Select
-                  const selectValue = field.value && typeof field.value === 'number' && field.value >= 5 && field.value <= 60
-                    ? field.value.toString()
-                    : "15";
+                  // Ensure we always have a valid non-empty string value for the Select
+                  const validOptions = ["5", "10", "15", "20", "30", "45", "60"];
+                  const currentValue = field.value?.toString() || "15";
+                  const selectValue = validOptions.includes(currentValue) ? currentValue : "15";
                   
                   console.log('🔄 Select field value:', field.value, 'Select value:', selectValue);
                   
@@ -362,9 +363,11 @@ export const ClinicSettingsForm = () => {
                       <FormLabel>Durée par défaut d'un créneau (minutes)</FormLabel>
                       <Select 
                         onValueChange={(value) => {
-                          const numValue = parseInt(value);
-                          console.log('🔄 Select onChange:', value, 'parsed:', numValue);
-                          field.onChange(numValue);
+                          if (value && validOptions.includes(value)) {
+                            const numValue = parseInt(value);
+                            console.log('🔄 Select onChange:', value, 'parsed:', numValue);
+                            field.onChange(numValue);
+                          }
                         }} 
                         value={selectValue}
                       >
