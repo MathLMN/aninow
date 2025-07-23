@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import type { Database } from '@/integrations/supabase/types'
 
-type VeterinarianRow = Database['public']['Tables']['clinic_veterinarians']['Row']
+type VeterinarianRow = Database['public']['Tables']['veterinarians']['Row']
 type ConsultationTypeRow = Database['public']['Tables']['consultation_types']['Row']
 type AvailableSlotRow = Database['public']['Tables']['available_slots']['Row']
 type SlotInsert = Database['public']['Tables']['available_slots']['Insert']
@@ -20,7 +20,7 @@ export const useSlotManagement = () => {
   const fetchVeterinarians = async () => {
     try {
       const { data, error } = await supabase
-        .from('clinic_veterinarians')
+        .from('veterinarians')
         .select('*')
         .order('name')
 
@@ -63,7 +63,7 @@ export const useSlotManagement = () => {
         .from('available_slots')
         .select(`
           *,
-          clinic_veterinarians(name, specialty),
+          veterinarians(name, clinic_name),
           consultation_types(name, duration_minutes, color)
         `)
         .order('date')

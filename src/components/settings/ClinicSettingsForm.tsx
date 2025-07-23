@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { cn } from "@/lib/utils";
 
 interface ClinicSettings {
   clinic_name: string;
@@ -50,7 +52,7 @@ const formSchema = z.object({
   clinicPhone: z.string().optional(),
   clinicEmail: z.string().email({
     message: "Veuillez entrer une adresse email valide."
-  }).optional().or(z.literal("")),
+  }).optional(),
   clinicAddressStreet: z.string().optional(),
   clinicAddressCity: z.string().optional(),
   clinicAddressPostalCode: z.string().optional(),
@@ -72,74 +74,6 @@ interface NewVeterinarian {
   is_active: boolean;
 }
 
-// Définition des options de durée valides
-const SLOT_DURATION_OPTIONS = [
-  { value: 5, label: "5 minutes" },
-  { value: 10, label: "10 minutes" },
-  { value: 15, label: "15 minutes" },
-  { value: 20, label: "20 minutes" },
-  { value: 30, label: "30 minutes" },
-  { value: 45, label: "45 minutes" },
-  { value: 60, label: "60 minutes" }
-] as const;
-
-// Composant pour la gestion de la durée des créneaux
-const SlotDurationSelector = ({ form }: { form: any }) => {
-  return (
-    <FormField
-      control={form.control}
-      name="defaultSlotDurationMinutes"
-      render={({ field }) => {
-        // Transforme la valeur en string, et fallback sur "15" si pas valide
-        let currentValue = field.value;
-        // Si la valeur est undefined, null ou vide, on met "15"
-        if (
-          currentValue === undefined ||
-          currentValue === null ||
-          currentValue === "" ||
-          !SLOT_DURATION_OPTIONS.some(opt => opt.value === Number(currentValue))
-        ) {
-          currentValue = 15;
-        }
-        const stringValue = String(currentValue);
-
-        return (
-          <FormItem>
-            <FormLabel>Durée par défaut d'un créneau (minutes)</FormLabel>
-            <Select
-              onValueChange={(value) => {
-                // On ignore les valeurs vides
-                if (value && value.trim() !== "") {
-                  const numValue = parseInt(value, 10);
-                  if (!isNaN(numValue) && numValue >= 5 && numValue <= 60) {
-                    field.onChange(numValue);
-                  }
-                }
-              }}
-              value={stringValue}
-            >
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner la durée" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {SLOT_DURATION_OPTIONS.map((option) => (
-                  // optionValue est toujours une string non vide
-                  <SelectItem key={option.value} value={String(option.value)}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        );
-      }}
-    />
-  );
-};
-
 export const ClinicSettingsForm = () => {
   const {
     settings,
@@ -152,7 +86,9 @@ export const ClinicSettingsForm = () => {
     updateVeterinarian,
     deleteVeterinarian
   } = useClinicVeterinarians();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [isVetDialogOpen, setIsVetDialogOpen] = useState(false);
   const [newVeterinarian, setNewVeterinarian] = useState<NewVeterinarian>({
     name: '',
@@ -164,45 +100,33 @@ export const ClinicSettingsForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      clinicName: defaultSettings.clinic_name,
-      clinicPhone: defaultSettings.clinic_phone,
-      clinicEmail: defaultSettings.clinic_email,
-      clinicAddressStreet: defaultSettings.clinic_address_street,
-      clinicAddressCity: defaultSettings.clinic_address_city,
-      clinicAddressPostalCode: defaultSettings.clinic_address_postal_code,
-      clinicAddressCountry: defaultSettings.clinic_address_country,
-      asvEnabled: defaultSettings.asv_enabled,
-      defaultSlotDurationMinutes: defaultSettings.default_slot_duration_minutes
+      clinicName: settings?.clinic_name || defaultSettings.clinic_name,
+      clinicPhone: settings?.clinic_phone || defaultSettings.clinic_phone,
+      clinicEmail: settings?.clinic_email || defaultSettings.clinic_email,
+      clinicAddressStreet: settings?.clinic_address_street || defaultSettings.clinic_address_street,
+      clinicAddressCity: settings?.clinic_address_city || defaultSettings.clinic_address_city,
+      clinicAddressPostalCode: settings?.clinic_address_postal_code || defaultSettings.clinic_address_postal_code,
+      clinicAddressCountry: settings?.clinic_address_country || defaultSettings.clinic_address_country,
+      asvEnabled: settings?.asv_enabled || defaultSettings.asv_enabled,
+      defaultSlotDurationMinutes: settings?.default_slot_duration_minutes || defaultSettings.default_slot_duration_minutes
     }
   });
 
   useEffect(() => {
-    if (settings && !isLoading) {
-      console.log('🔄 Updating form with settings:', settings);
-      
-      // Ensure we have a valid slot duration value
-      const slotDuration = settings.default_slot_duration_minutes && 
-                          typeof settings.default_slot_duration_minutes === 'number' &&
-                          settings.default_slot_duration_minutes >= 5 && 
-                          settings.default_slot_duration_minutes <= 60
-        ? settings.default_slot_duration_minutes
-        : 15;
-
-      console.log('🔄 Using slot duration:', slotDuration);
-
+    if (settings) {
       form.reset({
-        clinicName: settings.clinic_name || defaultSettings.clinic_name,
-        clinicPhone: settings.clinic_phone || defaultSettings.clinic_phone,
-        clinicEmail: settings.clinic_email || defaultSettings.clinic_email,
-        clinicAddressStreet: settings.clinic_address_street || defaultSettings.clinic_address_street,
-        clinicAddressCity: settings.clinic_address_city || defaultSettings.clinic_address_city,
-        clinicAddressPostalCode: settings.clinic_address_postal_code || defaultSettings.clinic_address_postal_code,
-        clinicAddressCountry: settings.clinic_address_country || defaultSettings.clinic_address_country,
-        asvEnabled: settings.asv_enabled ?? defaultSettings.asv_enabled,
-        defaultSlotDurationMinutes: slotDuration
+        clinicName: settings.clinic_name,
+        clinicPhone: settings.clinic_phone,
+        clinicEmail: settings.clinic_email,
+        clinicAddressStreet: settings.clinic_address_street,
+        clinicAddressCity: settings.clinic_address_city,
+        clinicAddressPostalCode: settings.clinic_address_postal_code,
+        clinicAddressCountry: settings.clinic_address_country,
+        asvEnabled: settings.asv_enabled,
+        defaultSlotDurationMinutes: settings.default_slot_duration_minutes
       });
     }
-  }, [settings, isLoading, form]);
+  }, [settings, form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const success = await updateSettings({
@@ -262,17 +186,6 @@ export const ClinicSettingsForm = () => {
       setEditingVeterinarian(null);
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vet-blue mx-auto mb-4"></div>
-          <p className="text-vet-brown">Chargement des paramètres...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-8">
@@ -413,7 +326,30 @@ export const ClinicSettingsForm = () => {
         <CardContent className="space-y-4">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <SlotDurationSelector form={form} />
+              <FormField
+                control={form.control}
+                name="defaultSlotDurationMinutes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Durée par défaut d'un créneau (minutes)</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner la durée" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {[5, 10, 15, 20, 30, 45, 60].map(duration => (
+                          <SelectItem key={duration} value={duration.toString()}>
+                            {duration} minutes
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
