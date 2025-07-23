@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Clock, MapPin, Phone, Mail, Users, Plus, Edit, Trash2, Building2, Calendar, Settings } from "lucide-react";
 import { useClinicSettings } from "@/hooks/useClinicSettings";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
-import { VeterinarianScheduleManager } from "@/components/settings/VeterinarianScheduleManager";
+import { VeterinarianScheduleManager } from "./VeterinarianScheduleManager";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
