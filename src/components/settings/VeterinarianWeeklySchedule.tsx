@@ -5,190 +5,163 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useVeterinarianSchedules } from "@/hooks/useVeterinarianSchedules";
 import { Clock, Save } from "lucide-react";
-import { VeterinarianSchedule, useVeterinarianSchedules } from "@/hooks/useVeterinarianSchedules";
 
-const DAYS_SHORT = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-const DAYS_FULL = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+interface Veterinarian {
+  id: string;
+  name: string;
+  specialty: string;
+  is_active: boolean;
+}
+
+interface VeterinarianSchedule {
+  id?: string;
+  veterinarian_id: string;
+  day_of_week: number;
+  is_working: boolean;
+  morning_start?: string;
+  morning_end?: string;
+  afternoon_start?: string;
+  afternoon_end?: string;
+}
 
 interface VeterinarianWeeklyScheduleProps {
-  veterinarian: {
-    id: string;
-    name: string;
-  };
+  veterinarian: Veterinarian;
   schedules: VeterinarianSchedule[];
 }
+
+const DAYS = [
+  { value: 1, label: "Lundi", short: "Lun" },
+  { value: 2, label: "Mardi", short: "Mar" },
+  { value: 3, label: "Mercredi", short: "Mer" },
+  { value: 4, label: "Jeudi", short: "Jeu" },
+  { value: 5, label: "Vendredi", short: "Ven" },
+  { value: 6, label: "Samedi", short: "Sam" },
+  { value: 0, label: "Dimanche", short: "Dim" }
+];
 
 export const VeterinarianWeeklySchedule: React.FC<VeterinarianWeeklyScheduleProps> = ({
   veterinarian,
   schedules
 }) => {
   const { updateSchedule } = useVeterinarianSchedules();
-  const [isSaving, setIsSaving] = useState(false);
-  const [weekSchedule, setWeekSchedule] = useState<Record<number, VeterinarianSchedule>>(() => {
-    const scheduleMap: Record<number, VeterinarianSchedule> = {};
-    
-    // Initialiser avec les horaires existants ou des valeurs par défaut
-    for (let day = 1; day <= 7; day++) {
-      const dayKey = day === 7 ? 0 : day; // Dimanche = 0
-      const existingSchedule = schedules.find(s => s.day_of_week === dayKey);
-      scheduleMap[dayKey] = existingSchedule || {
+  const [localSchedules, setLocalSchedules] = useState<VeterinarianSchedule[]>(() => {
+    // Initialize with existing schedules or default values
+    return DAYS.map(day => {
+      const existingSchedule = schedules.find(s => s.day_of_week === day.value);
+      return existingSchedule || {
         veterinarian_id: veterinarian.id,
-        day_of_week: dayKey,
-        is_working: day <= 5, // Lundi-Vendredi par défaut
-        morning_start: '08:00',
-        morning_end: '12:00',
-        afternoon_start: '14:00',
-        afternoon_end: '18:00'
+        day_of_week: day.value,
+        is_working: day.value >= 1 && day.value <= 5, // Default: working Mon-Fri
+        morning_start: "08:00",
+        morning_end: "12:00",
+        afternoon_start: "14:00",
+        afternoon_end: "18:00"
       };
-    }
-    
-    return scheduleMap;
+    });
   });
 
-  const handleDayToggle = (dayKey: number, isWorking: boolean) => {
-    setWeekSchedule(prev => ({
-      ...prev,
-      [dayKey]: {
-        ...prev[dayKey],
-        is_working: isWorking
-      }
-    }));
+  const handleScheduleChange = (dayOfWeek: number, field: string, value: string | boolean) => {
+    setLocalSchedules(prev => 
+      prev.map(schedule => 
+        schedule.day_of_week === dayOfWeek 
+          ? { ...schedule, [field]: value }
+          : schedule
+      )
+    );
   };
 
-  const handleTimeChange = (dayKey: number, field: keyof VeterinarianSchedule, value: string) => {
-    setWeekSchedule(prev => ({
-      ...prev,
-      [dayKey]: {
-        ...prev[dayKey],
-        [field]: value
-      }
-    }));
-  };
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      for (const schedule of Object.values(weekSchedule)) {
-        await updateSchedule(schedule);
-      }
-    } finally {
-      setIsSaving(false);
-    }
+  const handleSaveSchedules = async () => {
+    console.log('💾 Saving schedules for veterinarian:', veterinarian.name);
+    
+    const promises = localSchedules.map(schedule => {
+      console.log('📅 Saving schedule for day:', schedule.day_of_week, schedule);
+      return updateSchedule(schedule);
+    });
+    
+    await Promise.all(promises);
   };
 
   return (
     <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-      <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-vet-navy text-lg flex items-center">
-            <Clock className="h-4 w-4 mr-2" />
-            Dr. {veterinarian.name}
-          </CardTitle>
-          <Button
-            onClick={handleSave}
-            disabled={isSaving}
-            size="sm"
-            className="bg-vet-sage hover:bg-vet-sage/90"
-          >
-            <Save className="h-3 w-3 mr-1" />
-            {isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
-          </Button>
-        </div>
+      <CardHeader>
+        <CardTitle className="text-vet-navy flex items-center text-lg">
+          <Clock className="h-5 w-5 mr-2" />
+          Horaires - {veterinarian.name}
+        </CardTitle>
       </CardHeader>
-      <CardContent>
-        {/* Configuration détaillée par jour */}
-        <div className="space-y-4">
-          {DAYS_FULL.map((dayFull, index) => {
-            const dayKey = index === 6 ? 0 : index + 1; // Dimanche = 0
-            const dayShort = DAYS_SHORT[index];
-            const schedule = weekSchedule[dayKey];
-            
-            return (
-              <div key={dayKey} className="border rounded-lg p-4 bg-gray-50">
-                {/* En-tête du jour */}
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-full bg-vet-blue/20 flex items-center justify-center">
-                      <span className="text-xs font-medium text-vet-navy">{dayShort}</span>
+      <CardContent className="space-y-4">
+        {DAYS.map(day => {
+          const schedule = localSchedules.find(s => s.day_of_week === day.value);
+          if (!schedule) return null;
+
+          return (
+            <div key={day.value} className="space-y-3 p-4 bg-vet-beige/10 rounded-lg border border-vet-blue/20">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium text-vet-navy">{day.label}</Label>
+                <Switch
+                  checked={schedule.is_working}
+                  onCheckedChange={(checked) => handleScheduleChange(day.value, 'is_working', checked)}
+                />
+              </div>
+              
+              {schedule.is_working && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-xs text-vet-brown">Matin - Début</Label>
+                      <Input
+                        type="time"
+                        value={schedule.morning_start || "08:00"}
+                        onChange={(e) => handleScheduleChange(day.value, 'morning_start', e.target.value)}
+                        className="text-xs"
+                      />
                     </div>
-                    <Label className="font-medium text-vet-navy">{dayFull}</Label>
+                    <div>
+                      <Label className="text-xs text-vet-brown">Matin - Fin</Label>
+                      <Input
+                        type="time"
+                        value={schedule.morning_end || "12:00"}
+                        onChange={(e) => handleScheduleChange(day.value, 'morning_end', e.target.value)}
+                        className="text-xs"
+                      />
+                    </div>
                   </div>
                   
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs text-muted-foreground">
-                      {schedule.is_working ? 'Jour travaillé' : 'Jour de repos'}
-                    </span>
-                    <Switch
-                      checked={schedule.is_working}
-                      onCheckedChange={(checked) => handleDayToggle(dayKey, checked)}
-                    />
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-xs text-vet-brown">Après-midi - Début</Label>
+                      <Input
+                        type="time"
+                        value={schedule.afternoon_start || "14:00"}
+                        onChange={(e) => handleScheduleChange(day.value, 'afternoon_start', e.target.value)}
+                        className="text-xs"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-vet-brown">Après-midi - Fin</Label>
+                      <Input
+                        type="time"
+                        value={schedule.afternoon_end || "18:00"}
+                        onChange={(e) => handleScheduleChange(day.value, 'afternoon_end', e.target.value)}
+                        className="text-xs"
+                      />
+                    </div>
                   </div>
                 </div>
-
-                {/* Horaires si jour travaillé */}
-                {schedule.is_working && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Matin */}
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-vet-brown">Matin</Label>
-                      <div className="flex space-x-2">
-                        <Input
-                          type="time"
-                          value={schedule.morning_start || '08:00'}
-                          onChange={(e) => handleTimeChange(dayKey, 'morning_start', e.target.value)}
-                          className="flex-1"
-                        />
-                        <span className="flex items-center px-2 text-sm text-muted-foreground">à</span>
-                        <Input
-                          type="time"
-                          value={schedule.morning_end || '12:00'}
-                          onChange={(e) => handleTimeChange(dayKey, 'morning_end', e.target.value)}
-                          className="flex-1"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Après-midi */}
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-vet-brown">Après-midi</Label>
-                      <div className="flex space-x-2">
-                        <Input
-                          type="time"
-                          value={schedule.afternoon_start || '14:00'}
-                          onChange={(e) => handleTimeChange(dayKey, 'afternoon_start', e.target.value)}
-                          className="flex-1"
-                        />
-                        <span className="flex items-center px-2 text-sm text-muted-foreground">à</span>
-                        <Input
-                          type="time"
-                          value={schedule.afternoon_end || '18:00'}
-                          onChange={(e) => handleTimeChange(dayKey, 'afternoon_end', e.target.value)}
-                          className="flex-1"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Message si jour de repos */}
-                {!schedule.is_working && (
-                  <div className="text-center py-2">
-                    <span className="text-sm text-muted-foreground italic">
-                      Jour de repos - aucun créneau disponible
-                    </span>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="mt-4 text-xs text-muted-foreground bg-vet-sage/10 p-3 rounded border-l-4 border-vet-sage">
-          💡 <strong>Horaires spéciaux :</strong> Vous pouvez configurer des horaires différents pour chaque jour. 
-          Par exemple, si Dr {veterinarian.name} ne travaille pas le mercredi après-midi, 
-          laissez les champs après-midi vides ou désactivez complètement le mercredi.
-        </div>
+              )}
+            </div>
+          );
+        })}
+        
+        <Button
+          onClick={handleSaveSchedules}
+          className="w-full bg-vet-blue hover:bg-vet-blue/90 text-white"
+        >
+          <Save className="h-4 w-4 mr-2" />
+          Enregistrer les modifications
+        </Button>
       </CardContent>
     </Card>
   );

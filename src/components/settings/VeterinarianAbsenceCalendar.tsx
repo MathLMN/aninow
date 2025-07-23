@@ -5,229 +5,228 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Plus, Trash2, CalendarIcon } from "lucide-react";
-import { VeterinarianAbsence, useVeterinarianAbsences } from "@/hooks/useVeterinarianAbsences";
-import { format, parseISO, isWithinInterval } from "date-fns";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useVeterinarianAbsences } from "@/hooks/useVeterinarianAbsences";
+import { CalendarDays, Plus, Trash2 } from "lucide-react";
+import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { cn } from "@/lib/utils";
+
+interface Veterinarian {
+  id: string;
+  name: string;
+  specialty: string;
+  is_active: boolean;
+}
+
+interface VeterinarianAbsence {
+  id?: string;
+  veterinarian_id: string;
+  start_date: string;
+  end_date: string;
+  absence_type: string;
+  reason?: string;
+  is_recurring: boolean;
+}
 
 interface VeterinarianAbsenceCalendarProps {
-  veterinarian: {
-    id: string;
-    name: string;
-  };
-  absences: any[];
+  veterinarian: Veterinarian;
+  absences: VeterinarianAbsence[];
 }
+
+const ABSENCE_TYPES = [
+  { value: "vacation", label: "Congés" },
+  { value: "sick", label: "Maladie" },
+  { value: "training", label: "Formation" },
+  { value: "other", label: "Autre" }
+];
 
 export const VeterinarianAbsenceCalendar: React.FC<VeterinarianAbsenceCalendarProps> = ({
   veterinarian,
   absences
 }) => {
   const { addAbsence, deleteAbsence } = useVeterinarianAbsences();
-  const [selectedStartDate, setSelectedStartDate] = useState<Date>();
-  const [selectedEndDate, setSelectedEndDate] = useState<Date>();
-  const [absenceType, setAbsenceType] = useState('vacation');
-  const [reason, setReason] = useState('');
-  const [isAdding, setIsAdding] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newAbsence, setNewAbsence] = useState({
+    start_date: "",
+    end_date: "",
+    absence_type: "",
+    reason: ""
+  });
 
-  const handleAddAbsence = async () => {
-    if (!selectedStartDate || !selectedEndDate) return;
-
-    setIsAdding(true);
-    try {
-      const success = await addAbsence({
-        veterinarian_id: veterinarian.id,
-        start_date: format(selectedStartDate, 'yyyy-MM-dd'),
-        end_date: format(selectedEndDate, 'yyyy-MM-dd'),
-        absence_type: absenceType,
-        reason: reason,
-        is_recurring: false
-      });
-
-      if (success) {
-        setSelectedStartDate(undefined);
-        setSelectedEndDate(undefined);
-        setReason('');
-      }
-    } finally {
-      setIsAdding(false);
+  const handleAddAbsence = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!newAbsence.start_date || !newAbsence.end_date || !newAbsence.absence_type) {
+      return;
     }
-  };
 
-  const getAbsenceTypeLabel = (type: string) => {
-    const types: Record<string, { label: string; color: string }> = {
-      'vacation': { label: 'Vacances', color: 'bg-blue-100 text-blue-800' },
-      'sick': { label: 'Maladie', color: 'bg-red-100 text-red-800' },
-      'training': { label: 'Formation', color: 'bg-green-100 text-green-800' },
-      'other': { label: 'Autre', color: 'bg-gray-100 text-gray-800' }
-    };
-    return types[type] || types['other'];
-  };
-
-  const isDateInAbsence = (date: Date) => {
-    return absences.some(absence => {
-      const startDate = parseISO(absence.start_date);
-      const endDate = parseISO(absence.end_date);
-      return isWithinInterval(date, { start: startDate, end: endDate });
+    const success = await addAbsence({
+      veterinarian_id: veterinarian.id,
+      start_date: newAbsence.start_date,
+      end_date: newAbsence.end_date,
+      absence_type: newAbsence.absence_type,
+      reason: newAbsence.reason || undefined,
+      is_recurring: false
     });
-  };
 
-  const modifiers = {
-    absence: (date: Date) => isDateInAbsence(date),
-    selected: (date: Date) => {
-      if (selectedStartDate && !selectedEndDate) {
-        return date.getTime() === selectedStartDate.getTime();
-      }
-      if (selectedStartDate && selectedEndDate) {
-        return isWithinInterval(date, { start: selectedStartDate, end: selectedEndDate });
-      }
-      return false;
+    if (success) {
+      setIsDialogOpen(false);
+      setNewAbsence({
+        start_date: "",
+        end_date: "",
+        absence_type: "",
+        reason: ""
+      });
     }
   };
 
-  const modifiersClassNames = {
-    absence: "bg-red-100 text-red-900 font-medium",
-    selected: "bg-vet-sage text-white"
-  };
-
-  const handleDateSelect = (date: Date | undefined) => {
-    if (!date) return;
-
-    if (!selectedStartDate || (selectedStartDate && selectedEndDate)) {
-      // Nouveau début de sélection
-      setSelectedStartDate(date);
-      setSelectedEndDate(undefined);
-    } else if (selectedStartDate && !selectedEndDate) {
-      // Fin de sélection
-      if (date >= selectedStartDate) {
-        setSelectedEndDate(date);
-      } else {
-        // Si on clique sur une date antérieure, on recommence
-        setSelectedStartDate(date);
-        setSelectedEndDate(undefined);
-      }
-    }
+  const handleDeleteAbsence = async (absenceId: string) => {
+    await deleteAbsence(absenceId);
   };
 
   return (
     <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
       <CardHeader>
-        <CardTitle className="text-vet-navy text-lg flex items-center">
-          <CalendarDays className="h-4 w-4 mr-2" />
-          Absences - Dr. {veterinarian.name}
+        <CardTitle className="text-vet-navy flex items-center text-lg">
+          <CalendarDays className="h-5 w-5 mr-2" />
+          Absences - {veterinarian.name}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Formulaire d'ajout rapide */}
-        <div className="border rounded-lg p-4 bg-gray-50">
-          <h4 className="font-medium mb-4 flex items-center">
-            <Plus className="h-4 w-4 mr-2" />
-            Ajouter une absence
-          </h4>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div>
-              <Label className="text-sm">Type d'absence</Label>
-              <Select value={absenceType} onValueChange={setAbsenceType}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="vacation">Vacances</SelectItem>
-                  <SelectItem value="sick">Maladie</SelectItem>
-                  <SelectItem value="training">Formation</SelectItem>
-                  <SelectItem value="other">Autre</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="md:col-span-2">
-              <Label className="text-sm">Motif (optionnel)</Label>
-              <Input
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder="Détails de l'absence..."
-              />
-            </div>
-          </div>
-
-          {selectedStartDate && (
-            <div className="mb-4 p-2 bg-vet-sage/10 rounded border-l-4 border-vet-sage">
-              <div className="text-sm">
-                <strong>Période sélectionnée :</strong> {format(selectedStartDate, 'dd/MM/yyyy', { locale: fr })}
-                {selectedEndDate && selectedEndDate !== selectedStartDate && 
-                  ` → ${format(selectedEndDate, 'dd/MM/yyyy', { locale: fr })}`
-                }
+      <CardContent className="space-y-4">
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="w-full bg-vet-blue hover:bg-vet-blue/90 text-white">
+              <Plus className="h-4 w-4 mr-2" />
+              Ajouter une absence
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-vet-navy">Ajouter une absence</DialogTitle>
+              <DialogDescription>
+                Définissez une période d'absence pour {veterinarian.name}
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleAddAbsence}>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="start-date">Date de début</Label>
+                    <Input
+                      id="start-date"
+                      type="date"
+                      value={newAbsence.start_date}
+                      onChange={(e) => setNewAbsence(prev => ({ ...prev, start_date: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="end-date">Date de fin</Label>
+                    <Input
+                      id="end-date"
+                      type="date"
+                      value={newAbsence.end_date}
+                      onChange={(e) => setNewAbsence(prev => ({ ...prev, end_date: e.target.value }))}
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="absence-type">Type d'absence</Label>
+                  <Select
+                    value={newAbsence.absence_type}
+                    onValueChange={(value) => setNewAbsence(prev => ({ ...prev, absence_type: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner le type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ABSENCE_TYPES.map(type => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="reason">Raison (optionnel)</Label>
+                  <Input
+                    id="reason"
+                    value={newAbsence.reason}
+                    onChange={(e) => setNewAbsence(prev => ({ ...prev, reason: e.target.value }))}
+                    placeholder="Précisez la raison si nécessaire"
+                  />
+                </div>
               </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Annuler
+                </Button>
+                <Button type="submit" className="bg-vet-blue hover:bg-vet-blue/90 text-white">
+                  Ajouter
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        <div className="space-y-2">
+          {absences.length === 0 ? (
+            <div className="text-center py-8 text-vet-brown bg-vet-beige/10 rounded-lg border border-vet-blue/20">
+              <CalendarDays className="h-8 w-8 mx-auto mb-2 text-vet-blue/60" />
+              <p>Aucune absence programmée</p>
+              <p className="text-sm">Ajoutez des absences pour bloquer des créneaux</p>
             </div>
-          )}
-
-          <Button
-            onClick={handleAddAbsence}
-            disabled={!selectedStartDate || !selectedEndDate || isAdding}
-            className="w-full bg-vet-sage hover:bg-vet-sage/90"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            {isAdding ? 'Ajout en cours...' : 'Ajouter cette absence'}
-          </Button>
-        </div>
-
-        {/* Calendrier */}
-        <div className="flex justify-center">
-          <Calendar
-            mode="single"
-            selected={selectedStartDate}
-            onSelect={handleDateSelect}
-            modifiers={modifiers}
-            modifiersClassNames={modifiersClassNames}
-            className="rounded-md border"
-            locale={fr}
-          />
-        </div>
-
-        <div className="text-xs text-muted-foreground text-center">
-          💡 Cliquez sur une date de début, puis sur une date de fin pour sélectionner une période d'absence
-        </div>
-
-        {/* Liste des absences */}
-        {absences.length > 0 && (
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Absences programmées</Label>
-            <div className="space-y-2 max-h-40 overflow-y-auto">
-              {absences.map((absence) => {
-                const typeInfo = getAbsenceTypeLabel(absence.absence_type);
-                return (
-                  <div key={absence.id} className="flex items-center justify-between p-2 border rounded">
-                    <div className="flex items-center space-x-2">
-                      <Badge className={typeInfo.color}>
-                        {typeInfo.label}
-                      </Badge>
-                      <span className="text-sm">
-                        {format(parseISO(absence.start_date), 'dd/MM/yy')} - {format(parseISO(absence.end_date), 'dd/MM/yy')}
-                      </span>
-                      {absence.reason && (
-                        <span className="text-xs text-muted-foreground">
-                          ({absence.reason})
-                        </span>
-                      )}
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => deleteAbsence(absence.id)}
-                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
+          ) : (
+            absences.map(absence => (
+              <div key={absence.id} className="flex items-center justify-between p-3 bg-vet-beige/10 rounded-lg border border-vet-blue/20">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-medium text-vet-navy">
+                      {ABSENCE_TYPES.find(t => t.value === absence.absence_type)?.label}
+                    </span>
+                  </div>
+                  <p className="text-sm text-vet-brown">
+                    {format(new Date(absence.start_date), "dd/MM/yyyy", { locale: fr })} 
+                    {" - "}
+                    {format(new Date(absence.end_date), "dd/MM/yyyy", { locale: fr })}
+                  </p>
+                  {absence.reason && (
+                    <p className="text-xs text-vet-brown mt-1">{absence.reason}</p>
+                  )}
+                </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
                       <Trash2 className="h-4 w-4" />
                     </Button>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Êtes-vous sûr de vouloir supprimer cette absence ?
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Annuler</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDeleteAbsence(absence.id!)}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        Supprimer
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            ))
+          )}
+        </div>
       </CardContent>
     </Card>
   );
