@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -73,29 +72,29 @@ interface NewVeterinarian {
   is_active: boolean;
 }
 
+// Définition des options de durée valides
+const SLOT_DURATION_OPTIONS = [
+  { value: 5, label: "5 minutes" },
+  { value: 10, label: "10 minutes" },
+  { value: 15, label: "15 minutes" },
+  { value: 20, label: "20 minutes" },
+  { value: 30, label: "30 minutes" },
+  { value: 45, label: "45 minutes" },
+  { value: 60, label: "60 minutes" }
+] as const;
+
 // Composant pour la gestion de la durée des créneaux
 const SlotDurationSelector = ({ form }: { form: any }) => {
-  const validOptions = [
-    { value: "5", label: "5 minutes" },
-    { value: "10", label: "10 minutes" },
-    { value: "15", label: "15 minutes" },
-    { value: "20", label: "20 minutes" },
-    { value: "30", label: "30 minutes" },
-    { value: "45", label: "45 minutes" },
-    { value: "60", label: "60 minutes" }
-  ];
-
   return (
     <FormField
       control={form.control}
       name="defaultSlotDurationMinutes"
       render={({ field }) => {
-        // Ensure we always have a valid value
-        const currentValue = field.value?.toString() || "15";
-        const isValidOption = validOptions.some(opt => opt.value === currentValue);
-        const selectValue = isValidOption ? currentValue : "15";
+        // Assurer que nous avons toujours une valeur valide
+        const currentValue = field.value || 15;
+        const stringValue = currentValue.toString();
         
-        console.log('🔄 SlotDurationSelector - field value:', field.value, 'select value:', selectValue);
+        console.log('🔄 SlotDurationSelector - field value:', field.value, 'string value:', stringValue);
         
         return (
           <FormItem>
@@ -103,14 +102,12 @@ const SlotDurationSelector = ({ form }: { form: any }) => {
             <Select 
               onValueChange={(value) => {
                 console.log('🔄 SlotDurationSelector onChange:', value);
-                if (value && validOptions.some(opt => opt.value === value)) {
-                  const numValue = parseInt(value, 10);
-                  if (!isNaN(numValue)) {
-                    field.onChange(numValue);
-                  }
+                const numValue = parseInt(value, 10);
+                if (!isNaN(numValue) && numValue >= 5 && numValue <= 60) {
+                  field.onChange(numValue);
                 }
               }} 
-              value={selectValue}
+              value={stringValue}
             >
               <FormControl>
                 <SelectTrigger>
@@ -118,8 +115,8 @@ const SlotDurationSelector = ({ form }: { form: any }) => {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {validOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
+                {SLOT_DURATION_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value.toString()}>
                     {option.label}
                   </SelectItem>
                 ))}
@@ -173,13 +170,13 @@ export const ClinicSettingsForm = () => {
     if (settings && !isLoading) {
       console.log('🔄 Updating form with settings:', settings);
       
-      // Ensure we have a valid slot duration value with proper fallback
+      // Assurer que nous avons toujours une valeur valide pour la durée des créneaux
       const slotDuration = settings.default_slot_duration_minutes && 
                           typeof settings.default_slot_duration_minutes === 'number' &&
                           settings.default_slot_duration_minutes >= 5 && 
                           settings.default_slot_duration_minutes <= 60
         ? settings.default_slot_duration_minutes
-        : defaultSettings.default_slot_duration_minutes;
+        : 15; // Valeur par défaut sûre
 
       console.log('🔄 Using slot duration:', slotDuration);
 
