@@ -100,33 +100,34 @@ export const ClinicSettingsForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      clinicName: settings?.clinic_name || defaultSettings.clinic_name,
-      clinicPhone: settings?.clinic_phone || defaultSettings.clinic_phone,
-      clinicEmail: settings?.clinic_email || defaultSettings.clinic_email,
-      clinicAddressStreet: settings?.clinic_address_street || defaultSettings.clinic_address_street,
-      clinicAddressCity: settings?.clinic_address_city || defaultSettings.clinic_address_city,
-      clinicAddressPostalCode: settings?.clinic_address_postal_code || defaultSettings.clinic_address_postal_code,
-      clinicAddressCountry: settings?.clinic_address_country || defaultSettings.clinic_address_country,
-      asvEnabled: settings?.asv_enabled || defaultSettings.asv_enabled,
-      defaultSlotDurationMinutes: settings?.default_slot_duration_minutes || defaultSettings.default_slot_duration_minutes
+      clinicName: defaultSettings.clinic_name,
+      clinicPhone: defaultSettings.clinic_phone,
+      clinicEmail: defaultSettings.clinic_email,
+      clinicAddressStreet: defaultSettings.clinic_address_street,
+      clinicAddressCity: defaultSettings.clinic_address_city,
+      clinicAddressPostalCode: defaultSettings.clinic_address_postal_code,
+      clinicAddressCountry: defaultSettings.clinic_address_country,
+      asvEnabled: defaultSettings.asv_enabled,
+      defaultSlotDurationMinutes: defaultSettings.default_slot_duration_minutes
     }
   });
 
   useEffect(() => {
-    if (settings) {
+    if (settings && !isLoading) {
+      console.log('🔄 Updating form with settings:', settings);
       form.reset({
-        clinicName: settings.clinic_name,
-        clinicPhone: settings.clinic_phone,
-        clinicEmail: settings.clinic_email,
-        clinicAddressStreet: settings.clinic_address_street,
-        clinicAddressCity: settings.clinic_address_city,
-        clinicAddressPostalCode: settings.clinic_address_postal_code,
-        clinicAddressCountry: settings.clinic_address_country,
-        asvEnabled: settings.asv_enabled,
-        defaultSlotDurationMinutes: settings.default_slot_duration_minutes
+        clinicName: settings.clinic_name || defaultSettings.clinic_name,
+        clinicPhone: settings.clinic_phone || defaultSettings.clinic_phone,
+        clinicEmail: settings.clinic_email || defaultSettings.clinic_email,
+        clinicAddressStreet: settings.clinic_address_street || defaultSettings.clinic_address_street,
+        clinicAddressCity: settings.clinic_address_city || defaultSettings.clinic_address_city,
+        clinicAddressPostalCode: settings.clinic_address_postal_code || defaultSettings.clinic_address_postal_code,
+        clinicAddressCountry: settings.clinic_address_country || defaultSettings.clinic_address_country,
+        asvEnabled: settings.asv_enabled ?? defaultSettings.asv_enabled,
+        defaultSlotDurationMinutes: settings.default_slot_duration_minutes || defaultSettings.default_slot_duration_minutes
       });
     }
-  }, [settings, form]);
+  }, [settings, isLoading, form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const success = await updateSettings({
@@ -186,6 +187,18 @@ export const ClinicSettingsForm = () => {
       setEditingVeterinarian(null);
     }
   };
+
+  // Afficher un indicateur de chargement pendant que les settings se chargent
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vet-blue mx-auto mb-4"></div>
+          <p className="text-vet-brown">Chargement des paramètres...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -329,31 +342,40 @@ export const ClinicSettingsForm = () => {
               <FormField
                 control={form.control}
                 name="defaultSlotDurationMinutes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Durée par défaut d'un créneau (minutes)</FormLabel>
-                    <Select 
-                      onValueChange={(value) => field.onChange(parseInt(value))} 
-                      value={field.value ? field.value.toString() : "15"}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner la durée" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="5">5 minutes</SelectItem>
-                        <SelectItem value="10">10 minutes</SelectItem>
-                        <SelectItem value="15">15 minutes</SelectItem>
-                        <SelectItem value="20">20 minutes</SelectItem>
-                        <SelectItem value="30">30 minutes</SelectItem>
-                        <SelectItem value="45">45 minutes</SelectItem>
-                        <SelectItem value="60">60 minutes</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  console.log('🔍 Form field value:', field.value);
+                  const currentValue = field.value || 15;
+                  console.log('🔍 Current value for select:', currentValue);
+                  
+                  return (
+                    <FormItem>
+                      <FormLabel>Durée par défaut d'un créneau (minutes)</FormLabel>
+                      <Select 
+                        onValueChange={(value) => {
+                          console.log('🔄 Select value changed to:', value);
+                          field.onChange(parseInt(value));
+                        }} 
+                        value={currentValue.toString()}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner la durée" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="5">5 minutes</SelectItem>
+                          <SelectItem value="10">10 minutes</SelectItem>
+                          <SelectItem value="15">15 minutes</SelectItem>
+                          <SelectItem value="20">20 minutes</SelectItem>
+                          <SelectItem value="30">30 minutes</SelectItem>
+                          <SelectItem value="45">45 minutes</SelectItem>
+                          <SelectItem value="60">60 minutes</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
 
               <FormField
