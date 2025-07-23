@@ -80,11 +80,24 @@ export const CreateSlotDialog = ({ veterinarians, consultationTypes, onCreateSlo
     }
   }
 
-  // Filter out any veterinarians with empty or invalid ids
-  const validVeterinarians = veterinarians.filter(vet => vet.id && vet.id.trim() !== '')
+  // Enhanced filtering to ensure no empty values reach SelectItem
+  const validVeterinarians = veterinarians.filter(vet => {
+    const hasValidId = vet.id && typeof vet.id === 'string' && vet.id.trim() !== ''
+    const hasValidName = vet.name && typeof vet.name === 'string' && vet.name.trim() !== ''
+    console.log('Veterinarian validation:', { id: vet.id, name: vet.name, hasValidId, hasValidName })
+    return hasValidId && hasValidName
+  })
   
-  // Filter out any consultation types with empty or invalid ids
-  const validConsultationTypes = consultationTypes.filter(type => type.id && type.id.trim() !== '')
+  // Enhanced filtering to ensure no empty values reach SelectItem
+  const validConsultationTypes = consultationTypes.filter(type => {
+    const hasValidId = type.id && typeof type.id === 'string' && type.id.trim() !== ''
+    const hasValidName = type.name && typeof type.name === 'string' && type.name.trim() !== ''
+    console.log('ConsultationType validation:', { id: type.id, name: type.name, hasValidId, hasValidName })
+    return hasValidId && hasValidName
+  })
+
+  console.log('Valid veterinarians:', validVeterinarians.length)
+  console.log('Valid consultation types:', validConsultationTypes.length)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -104,34 +117,62 @@ export const CreateSlotDialog = ({ veterinarians, consultationTypes, onCreateSlo
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="veterinarian">Vétérinaire</Label>
-            <Select value={formData.veterinarian_id} onValueChange={(value) => setFormData(prev => ({ ...prev, veterinarian_id: value }))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez un vétérinaire" />
-              </SelectTrigger>
-              <SelectContent>
-                {validVeterinarians.map((vet) => (
-                  <SelectItem key={vet.id} value={vet.id}>
-                    {vet.name} - {vet.specialty}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {validVeterinarians.length > 0 ? (
+              <Select value={formData.veterinarian_id} onValueChange={(value) => setFormData(prev => ({ ...prev, veterinarian_id: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionnez un vétérinaire" />
+                </SelectTrigger>
+                <SelectContent>
+                  {validVeterinarians.map((vet) => {
+                    // Double-check the ID is valid before rendering
+                    const vetId = vet.id?.toString() || ''
+                    if (!vetId || vetId.trim() === '') {
+                      console.warn('Skipping veterinarian with invalid ID:', vet)
+                      return null
+                    }
+                    return (
+                      <SelectItem key={vetId} value={vetId}>
+                        {vet.name} {vet.specialty ? `- ${vet.specialty}` : ''}
+                      </SelectItem>
+                    )
+                  })}
+                </SelectContent>
+              </Select>
+            ) : (
+              <div className="text-sm text-vet-brown p-2 bg-vet-beige/20 rounded">
+                Aucun vétérinaire disponible
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="consultation_type">Type de consultation</Label>
-            <Select value={formData.consultation_type_id} onValueChange={handleConsultationTypeChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez un type" />
-              </SelectTrigger>
-              <SelectContent>
-                {validConsultationTypes.map((type) => (
-                  <SelectItem key={type.id} value={type.id}>
-                    {type.name} ({type.duration_minutes} min)
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {validConsultationTypes.length > 0 ? (
+              <Select value={formData.consultation_type_id} onValueChange={handleConsultationTypeChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionnez un type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {validConsultationTypes.map((type) => {
+                    // Double-check the ID is valid before rendering
+                    const typeId = type.id?.toString() || ''
+                    if (!typeId || typeId.trim() === '') {
+                      console.warn('Skipping consultation type with invalid ID:', type)
+                      return null
+                    }
+                    return (
+                      <SelectItem key={typeId} value={typeId}>
+                        {type.name} {type.duration_minutes ? `(${type.duration_minutes} min)` : ''}
+                      </SelectItem>
+                    )
+                  })}
+                </SelectContent>
+              </Select>
+            ) : (
+              <div className="text-sm text-vet-brown p-2 bg-vet-beige/20 rounded">
+                Aucun type de consultation disponible
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
