@@ -107,13 +107,6 @@ export type Database = {
             referencedRelation: "consultation_types"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "available_slots_veterinarian_id_fkey"
-            columns: ["veterinarian_id"]
-            isOneToOne: false
-            referencedRelation: "veterinarians"
-            referencedColumns: ["id"]
-          },
         ]
       }
       bookings: {
@@ -678,36 +671,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      veterinarians: {
-        Row: {
-          clinic_name: string
-          created_at: string
-          email: string
-          id: string
-          name: string
-          specialty: string | null
-          updated_at: string
-        }
-        Insert: {
-          clinic_name: string
-          created_at?: string
-          email: string
-          id?: string
-          name: string
-          specialty?: string | null
-          updated_at?: string
-        }
-        Update: {
-          clinic_name?: string
-          created_at?: string
-          email?: string
-          id?: string
-          name?: string
-          specialty?: string | null
-          updated_at?: string
-        }
-        Relationships: []
       }
     }
     Views: {
