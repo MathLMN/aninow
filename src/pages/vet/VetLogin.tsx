@@ -24,8 +24,6 @@ const VetLogin = () => {
     setIsLoading(true);
 
     try {
-      console.log('🔄 Tentative de connexion vétérinaire...');
-      
       // Appeler la fonction d'authentification
       const { data, error } = await supabase.functions.invoke('vet-auth', {
         body: {
@@ -35,57 +33,32 @@ const VetLogin = () => {
         }
       });
 
-      console.log('📄 Réponse de la fonction:', { data, error });
-
       if (error) {
-        console.error('❌ Erreur de la fonction edge:', error);
-        throw new Error(error.message || 'Erreur de connexion');
+        throw new Error(error.message);
       }
 
-      if (!data) {
-        throw new Error('Aucune réponse reçue du serveur');
+      if (data.success) {
+        // Sauvegarder les informations de session
+        localStorage.setItem('vet_session_token', data.session_token);
+        localStorage.setItem('vet_user', JSON.stringify(data.veterinarian));
+        localStorage.setItem('vet_session_expires', data.expires_at);
+
+        toast({
+          title: "Connexion réussie",
+          description: `Bienvenue, ${data.veterinarian.name}!`,
+        });
+
+        navigate('/vet/dashboard');
+      } else {
+        throw new Error('Échec de la connexion');
       }
-
-      if (!data.success) {
-        throw new Error(data.error || 'Échec de la connexion');
-      }
-
-      console.log('✅ Connexion réussie');
-
-      // Sauvegarder les informations de session
-      localStorage.setItem('vet_session_token', data.session_token);
-      localStorage.setItem('vet_user', JSON.stringify(data.veterinarian));
-      localStorage.setItem('vet_session_expires', data.expires_at);
-
-      toast({
-        title: "Connexion réussie",
-        description: `Bienvenue, ${data.veterinarian.name}!`,
-      });
-
-      navigate('/vet/dashboard');
     } catch (error) {
-      console.error('❌ Erreur de connexion:', error);
-      
-      let errorMessage = 'Erreur de connexion';
-      
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      }
-      
-      // Messages d'erreur plus spécifiques
-      if (errorMessage.includes('non-2xx status code')) {
-        errorMessage = 'Problème de connexion au serveur. Veuillez réessayer.';
-      } else if (errorMessage.includes('Identifiants invalides')) {
-        errorMessage = 'Email ou mot de passe incorrect. Utilisez "vet123" comme mot de passe.';
-      }
-      
-      setError(errorMessage);
+      console.error('Erreur de connexion:', error);
+      setError(error instanceof Error ? error.message : 'Erreur de connexion');
       
       toast({
         title: "Erreur de connexion",
-        description: errorMessage,
+        description: "Veuillez vérifier vos identifiants",
         variant: "destructive"
       });
     } finally {
@@ -118,7 +91,7 @@ const VetLogin = () => {
             <Alert className="mb-6 border-vet-blue/30 bg-vet-blue/10">
               <AlertCircle className="h-4 w-4 text-vet-blue" />
               <AlertDescription className="text-vet-navy text-sm">
-                <strong>Démo:</strong> Utilisez n'importe quel email et le mot de passe "vet123"
+                <strong>Démo:</strong> Utilisez n'importe quel email de vétérinaire et le mot de passe "vet123"
               </AlertDescription>
             </Alert>
 

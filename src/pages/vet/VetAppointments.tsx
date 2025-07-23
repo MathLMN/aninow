@@ -48,7 +48,7 @@ const VetAppointments = () => {
   );
 
   const handleStatusChange = (bookingId: string, newStatus: 'pending' | 'confirmed' | 'cancelled' | 'completed') => {
-    updateBookingStatus({ id: bookingId, status: newStatus });
+    updateBookingStatus(bookingId, newStatus);
   };
 
   // Type guard to check if ai_analysis has the expected structure

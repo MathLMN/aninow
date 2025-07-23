@@ -17,20 +17,17 @@ export const usePlanningLogic = () => {
   });
 
   const handleAppointmentClick = (appointment: any) => {
-    console.log('🔄 Appointment clicked:', appointment);
     setSelectedAppointment(appointment);
     setIsDetailsModalOpen(true);
   };
 
   const handleCreateAppointment = (timeSlot: { date: string; time: string; veterinarian?: string }) => {
-    console.log('🔄 Create appointment for slot:', timeSlot);
     setSelectedAppointment(timeSlot);
     setIsCreateModalOpen(true);
   };
 
   // Navigation par semaine (pour la vue hebdomadaire)
   const navigateWeek = (direction: 'prev' | 'next') => {
-    console.log('🔄 Navigate week:', direction);
     const newDate = new Date(currentDate);
     newDate.setDate(currentDate.getDate() + (direction === 'next' ? 7 : -7));
     setCurrentDate(newDate);

@@ -2,7 +2,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useMemo } from "react";
 
 export const useVetBookings = () => {
   const { toast } = useToast();
@@ -32,23 +31,6 @@ export const useVetBookings = () => {
       return data || [];
     },
   });
-
-  const stats = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
-    
-    return {
-      total: bookings.length,
-      pending: bookings.filter(b => b.status === 'pending').length,
-      confirmed: bookings.filter(b => b.status === 'confirmed').length,
-      completed: bookings.filter(b => b.status === 'completed').length,
-      cancelled: bookings.filter(b => b.status === 'cancelled').length,
-      todayBookings: bookings.filter(b => 
-        b.appointment_date === today || 
-        b.created_at.split('T')[0] === today
-      ).length,
-      highUrgency: bookings.filter(b => b.urgency_score && b.urgency_score >= 7).length
-    };
-  }, [bookings]);
 
   const updateBookingStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
@@ -90,7 +72,6 @@ export const useVetBookings = () => {
     bookings,
     isLoading,
     error: error?.message || null,
-    stats,
     refetch,
     updateBookingStatus: updateBookingStatusMutation.mutate,
   };

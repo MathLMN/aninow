@@ -1,7 +1,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Settings, AlertCircle, Loader2 } from "lucide-react";
+import { Settings } from "lucide-react";
 import VetLayout from "@/components/layout/VetLayout";
 import { useVetBookings } from "@/hooks/useVetBookings";
 import { useSlotManagement } from "@/hooks/useSlotManagement";
@@ -44,11 +44,10 @@ const VetPlanning = () => {
     console.log('📅 Current date:', currentDate);
   }, [currentDate]);
 
-  // Load data with individual error handling
-  const { bookings = [], isLoading: bookingsLoading, updateBookingStatus, error: bookingsError } = useVetBookings();
-  const { consultationTypes = [], isLoading: slotsLoading, error: slotsError } = useSlotManagement();
-  const { veterinarians = [], isLoading: vetsLoading, error: vetsError } = useClinicVeterinarians();
-  const { assignments = [], refreshAssignments, error: assignmentsError } = useSlotAssignments(currentDate);
+  const { bookings, isLoading: bookingsLoading, updateBookingStatus, error: bookingsError } = useVetBookings();
+  const { consultationTypes, isLoading: slotsLoading, error: slotsError } = useSlotManagement();
+  const { veterinarians, isLoading: vetsLoading, error: vetsError } = useClinicVeterinarians();
+  const { assignments, refreshAssignments, error: assignmentsError } = useSlotAssignments(currentDate);
 
   // Log any errors from the hooks
   useEffect(() => {
@@ -69,52 +68,17 @@ const VetPlanning = () => {
   const isLoading = bookingsLoading || slotsLoading || vetsLoading;
   const weekDates = getWeekDates();
 
-  console.log('🔄 Component render state:', {
-    isLoading,
-    bookingsCount: bookings.length,
-    veterinariansCount: veterinarians.length,
-    consultationTypesCount: consultationTypes.length,
-    assignmentsCount: assignments.length
-  });
-
-  // Create a wrapper function to handle the status update with correct signature
-  const handleUpdateBookingStatus = async (appointmentId: string, status: string, notes?: string): Promise<boolean> => {
-    try {
-      console.log('🔄 Updating booking status:', { appointmentId, status, notes });
-      updateBookingStatus({ id: appointmentId, status });
-      return true;
-    } catch (error) {
-      console.error('❌ Error updating booking status:', error);
-      return false;
-    }
-  };
-
-  // Show loading state
-  if (isLoading) {
-    return (
-      <VetLayout>
-        <div className="space-y-6">
-          <div className="text-center py-12">
-            <Loader2 className="h-12 w-12 animate-spin mx-auto text-vet-sage" />
-            <p className="text-vet-brown mt-4">Chargement du planning...</p>
-          </div>
-        </div>
-      </VetLayout>
-    );
-  }
-
   // Show error state if any critical data fails to load
   if (bookingsError || vetsError) {
     return (
       <VetLayout>
         <div className="space-y-6">
           <div className="text-center py-8">
-            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-red-600 mb-2">
               Erreur de chargement
             </h2>
             <p className="text-gray-600 mb-4">
-              {vetsError ? 'Impossible de charger les vétérinaires' : 'Impossible de charger les réservations'}
+              Une erreur s'est produite lors du chargement des données du planning.
             </p>
             <Button 
               onClick={() => window.location.reload()} 
@@ -205,7 +169,7 @@ const VetPlanning = () => {
           appointment={selectedAppointment}
           isOpen={isDetailsModalOpen}
           onClose={() => setIsDetailsModalOpen(false)}
-          onUpdateStatus={handleUpdateBookingStatus}
+          onUpdateStatus={updateBookingStatus}
         />
 
         <CreateAppointmentModal

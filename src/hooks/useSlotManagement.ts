@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import type { Database } from '@/integrations/supabase/types'
 
-type VeterinarianRow = Database['public']['Tables']['clinic_veterinarians']['Row']
+type VeterinarianRow = Database['public']['Tables']['veterinarians']['Row']
 type ConsultationTypeRow = Database['public']['Tables']['consultation_types']['Row']
 type AvailableSlotRow = Database['public']['Tables']['available_slots']['Row']
 type SlotInsert = Database['public']['Tables']['available_slots']['Insert']
@@ -14,21 +14,19 @@ export const useSlotManagement = () => {
   const [consultationTypes, setConsultationTypes] = useState<ConsultationTypeRow[]>([])
   const [availableSlots, setAvailableSlots] = useState<AvailableSlotRow[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
 
   const fetchVeterinarians = async () => {
     try {
       const { data, error } = await supabase
-        .from('clinic_veterinarians')
+        .from('veterinarians')
         .select('*')
         .order('name')
 
       if (error) throw error
       setVeterinarians(data || [])
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erreur lors du chargement des vétérinaires:', err)
-      setError(err.message)
       toast({
         title: "Erreur",
         description: "Impossible de charger les vétérinaires",
@@ -46,9 +44,8 @@ export const useSlotManagement = () => {
 
       if (error) throw error
       setConsultationTypes(data || [])
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erreur lors du chargement des types de consultation:', err)
-      setError(err.message)
       toast({
         title: "Erreur",
         description: "Impossible de charger les types de consultation",
@@ -63,7 +60,7 @@ export const useSlotManagement = () => {
         .from('available_slots')
         .select(`
           *,
-          clinic_veterinarians(name, specialty),
+          veterinarians(name, clinic_name),
           consultation_types(name, duration_minutes, color)
         `)
         .order('date')
@@ -77,9 +74,8 @@ export const useSlotManagement = () => {
 
       if (error) throw error
       setAvailableSlots(data || [])
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erreur lors du chargement des créneaux:', err)
-      setError(err.message)
       toast({
         title: "Erreur",
         description: "Impossible de charger les créneaux",
@@ -105,9 +101,8 @@ export const useSlotManagement = () => {
       // Recharger les créneaux
       await fetchAvailableSlots()
       return true
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erreur lors de la création du créneau:', err)
-      setError(err.message)
       toast({
         title: "Erreur",
         description: "Impossible de créer le créneau",
@@ -134,9 +129,8 @@ export const useSlotManagement = () => {
       // Recharger les créneaux
       await fetchAvailableSlots()
       return true
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erreur lors de la suppression du créneau:', err)
-      setError(err.message)
       toast({
         title: "Erreur",
         description: "Impossible de supprimer le créneau",
@@ -149,7 +143,6 @@ export const useSlotManagement = () => {
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true)
-      setError(null)
       await Promise.all([
         fetchVeterinarians(),
         fetchConsultationTypes(),
@@ -166,7 +159,6 @@ export const useSlotManagement = () => {
     consultationTypes,
     availableSlots,
     isLoading,
-    error,
     fetchAvailableSlots,
     createSlot,
     deleteSlot
