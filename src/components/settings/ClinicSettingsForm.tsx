@@ -352,7 +352,7 @@ export const ClinicSettingsForm = () => {
                     <FormLabel>Durée par défaut d'un créneau (minutes)</FormLabel>
                     <Select 
                       onValueChange={(value) => field.onChange(parseInt(value))} 
-                      value={field.value?.toString() || "15"}
+                      value={field.value ? field.value.toString() : "15"}
                     >
                       <FormControl>
                         <SelectTrigger>
