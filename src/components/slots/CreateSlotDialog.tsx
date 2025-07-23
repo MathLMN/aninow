@@ -80,6 +80,12 @@ export const CreateSlotDialog = ({ veterinarians, consultationTypes, onCreateSlo
     }
   }
 
+  // Filter out any veterinarians with empty or invalid ids
+  const validVeterinarians = veterinarians.filter(vet => vet.id && vet.id.trim() !== '')
+  
+  // Filter out any consultation types with empty or invalid ids
+  const validConsultationTypes = consultationTypes.filter(type => type.id && type.id.trim() !== '')
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -103,7 +109,7 @@ export const CreateSlotDialog = ({ veterinarians, consultationTypes, onCreateSlo
                 <SelectValue placeholder="Sélectionnez un vétérinaire" />
               </SelectTrigger>
               <SelectContent>
-                {veterinarians.map((vet) => (
+                {validVeterinarians.map((vet) => (
                   <SelectItem key={vet.id} value={vet.id}>
                     {vet.name} - {vet.specialty}
                   </SelectItem>
@@ -119,7 +125,7 @@ export const CreateSlotDialog = ({ veterinarians, consultationTypes, onCreateSlo
                 <SelectValue placeholder="Sélectionnez un type" />
               </SelectTrigger>
               <SelectContent>
-                {consultationTypes.map((type) => (
+                {validConsultationTypes.map((type) => (
                   <SelectItem key={type.id} value={type.id}>
                     {type.name} ({type.duration_minutes} min)
                   </SelectItem>

@@ -90,11 +90,15 @@ const SlotDurationSelector = ({ form }: { form: any }) => {
       control={form.control}
       name="defaultSlotDurationMinutes"
       render={({ field }) => {
-        // Assurer que nous avons toujours une valeur valide
+        // Ensure we always have a valid value, never empty string
         const currentValue = field.value || 15;
-        const stringValue = currentValue.toString();
+        const stringValue = String(currentValue);
         
-        console.log('🔄 SlotDurationSelector - field value:', field.value, 'string value:', stringValue);
+        // Validate that the string value is not empty and corresponds to a valid option
+        const isValidValue = SLOT_DURATION_OPTIONS.some(option => String(option.value) === stringValue);
+        const safeValue = isValidValue ? stringValue : "15";
+        
+        console.log('🔄 SlotDurationSelector - field value:', field.value, 'safe value:', safeValue);
         
         return (
           <FormItem>
@@ -102,12 +106,15 @@ const SlotDurationSelector = ({ form }: { form: any }) => {
             <Select 
               onValueChange={(value) => {
                 console.log('🔄 SlotDurationSelector onChange:', value);
-                const numValue = parseInt(value, 10);
-                if (!isNaN(numValue) && numValue >= 5 && numValue <= 60) {
-                  field.onChange(numValue);
+                // Ensure the value is never empty
+                if (value && value.trim() !== '') {
+                  const numValue = parseInt(value, 10);
+                  if (!isNaN(numValue) && numValue >= 5 && numValue <= 60) {
+                    field.onChange(numValue);
+                  }
                 }
               }} 
-              value={stringValue}
+              value={safeValue}
             >
               <FormControl>
                 <SelectTrigger>
@@ -115,11 +122,18 @@ const SlotDurationSelector = ({ form }: { form: any }) => {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {SLOT_DURATION_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value.toString()}>
-                    {option.label}
-                  </SelectItem>
-                ))}
+                {SLOT_DURATION_OPTIONS.map((option) => {
+                  const optionValue = String(option.value);
+                  // Ensure we never pass empty strings to SelectItem
+                  if (!optionValue || optionValue.trim() === '') {
+                    return null;
+                  }
+                  return (
+                    <SelectItem key={option.value} value={optionValue}>
+                      {option.label}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
             <FormMessage />
@@ -170,13 +184,13 @@ export const ClinicSettingsForm = () => {
     if (settings && !isLoading) {
       console.log('🔄 Updating form with settings:', settings);
       
-      // Assurer que nous avons toujours une valeur valide pour la durée des créneaux
+      // Ensure we have a valid slot duration value
       const slotDuration = settings.default_slot_duration_minutes && 
                           typeof settings.default_slot_duration_minutes === 'number' &&
                           settings.default_slot_duration_minutes >= 5 && 
                           settings.default_slot_duration_minutes <= 60
         ? settings.default_slot_duration_minutes
-        : 15; // Valeur par défaut sûre
+        : 15;
 
       console.log('🔄 Using slot duration:', slotDuration);
 
@@ -253,7 +267,6 @@ export const ClinicSettingsForm = () => {
     }
   };
 
-  // Afficher un indicateur de chargement pendant que les settings se chargent
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
