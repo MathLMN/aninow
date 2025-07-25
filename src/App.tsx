@@ -17,6 +17,7 @@ import AppointmentSlots from "./pages/public/AppointmentSlots";
 import BookingConfirmation from "./pages/public/BookingConfirmation";
 import LandingPage from "./pages/public/LandingPage";
 import ArticlesPage from "./pages/public/ArticlesPage";
+import DiscoverAniNowPro from "./pages/public/DiscoverAniNowPro";
 import VetLogin from "./pages/vet/VetLogin";
 import VetDashboard from "./pages/vet/VetDashboard";
 import VetPlanning from "./pages/vet/VetPlanning";
@@ -40,6 +41,9 @@ function App() {
             
             {/* Page des articles */}
             <Route path="/articles" element={<ArticlesPage />} />
+            
+            {/* Page Découvrir AniNow Pro */}
+            <Route path="/discover-aninow-pro" element={<DiscoverAniNowPro />} />
             
             {/* Processus de réservation */}
             <Route path="/booking" element={<BookingStart />} />
