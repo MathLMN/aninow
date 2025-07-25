@@ -687,6 +687,60 @@ export type Database = {
           },
         ]
       }
+      veterinary_practice_requests: {
+        Row: {
+          address_city: string
+          address_country: string
+          address_postal_code: string
+          address_street: string
+          contact_email: string
+          contact_person_name: string
+          contact_person_role: string
+          contact_phone: string
+          created_at: string
+          establishment_name: string
+          id: string
+          notes: string | null
+          number_of_veterinarians: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          address_city: string
+          address_country?: string
+          address_postal_code: string
+          address_street: string
+          contact_email: string
+          contact_person_name: string
+          contact_person_role: string
+          contact_phone: string
+          created_at?: string
+          establishment_name: string
+          id?: string
+          notes?: string | null
+          number_of_veterinarians: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          address_city?: string
+          address_country?: string
+          address_postal_code?: string
+          address_street?: string
+          contact_email?: string
+          contact_person_name?: string
+          contact_person_role?: string
+          contact_phone?: string
+          created_at?: string
+          establishment_name?: string
+          id?: string
+          notes?: string | null
+          number_of_veterinarians?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
