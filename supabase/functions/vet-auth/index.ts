@@ -12,12 +12,11 @@ interface LoginRequest {
   password: string
 }
 
-interface CreateAccountRequest {
+interface ChangePasswordRequest {
+  session_token: string
   email: string
-  password: string
-  clinic_name: string
-  clinic_phone?: string
-  clinic_address?: string
+  current_password: string
+  new_password: string
 }
 
 serve(async (req) => {
@@ -36,8 +35,8 @@ serve(async (req) => {
     switch (action) {
       case 'login':
         return await handleLogin(supabaseClient, data as LoginRequest)
-      case 'create_account':
-        return await handleCreateAccount(supabaseClient, data as CreateAccountRequest)
+      case 'change_password':
+        return await handleChangePassword(supabaseClient, data as ChangePasswordRequest)
       case 'logout':
         return await handleLogout(supabaseClient, data.session_token)
       case 'verify':
@@ -58,80 +57,48 @@ serve(async (req) => {
   }
 })
 
-async function handleCreateAccount(supabase: any, { email, password, clinic_name, clinic_phone, clinic_address }: CreateAccountRequest) {
-  console.log('🔄 Création de compte pour:', email)
+async function handleChangePassword(supabase: any, { session_token, email, current_password, new_password }: ChangePasswordRequest) {
+  console.log('🔄 Changement de mot de passe pour:', email)
   
-  // Vérifier le mot de passe de démo
-  if (password !== 'vet123') {
-    console.log('❌ Mot de passe invalide pour la création de compte')
-    throw new Error('Le mot de passe doit être "vet123" pour la démo')
-  }
-
-  // Vérifier si l'email existe déjà
-  const { data: existingSession, error: checkError } = await supabase
-    .from('vet_sessions')
-    .select('clinic_email')
-    .eq('clinic_email', email)
-    .single()
-
-  if (existingSession) {
-    console.log('❌ Email déjà utilisé')
-    throw new Error('Un compte existe déjà avec cet email')
-  }
-
-  // Mettre à jour les paramètres de la clinique avec le nouvel email
-  const { error: clinicError } = await supabase
-    .from('clinic_settings')
-    .upsert({
-      clinic_email: email,
-      clinic_name: clinic_name,
-      clinic_phone: clinic_phone,
-      clinic_address_street: clinic_address
-    })
-
-  if (clinicError) {
-    console.error('❌ Erreur lors de la mise à jour des paramètres de la clinique:', clinicError)
-    throw new Error('Erreur lors de la configuration de la clinique')
-  }
-
-  // Créer une nouvelle session avec les informations de la clinique
-  const sessionToken = generateSessionToken()
-  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24h
-
+  // Vérifier la session
   const { data: session, error: sessionError } = await supabase
     .from('vet_sessions')
-    .insert({
-      clinic_email: email,
-      session_token: sessionToken,
-      expires_at: expiresAt.toISOString(),
-      last_activity: new Date().toISOString(),
-      clinic_name: clinic_name,
-      clinic_phone: clinic_phone,
-      clinic_address: clinic_address,
-      account_status: 'active',
-      registration_date: new Date().toISOString()
-    })
-    .select()
+    .select('*')
+    .eq('session_token', session_token)
+    .eq('clinic_email', email)
+    .gt('expires_at', new Date().toISOString())
     .single()
 
-  if (sessionError) {
-    console.error('❌ Erreur lors de la création de la session:', sessionError)
-    throw new Error('Erreur lors de la création du compte')
+  if (sessionError || !session) {
+    console.log('❌ Session invalide ou expirée')
+    throw new Error('Session invalide ou expirée')
   }
 
-  console.log('✅ Compte créé avec succès')
+  // Vérifier l'ancien mot de passe
+  if (current_password !== 'vet123') {
+    console.log('❌ Mot de passe actuel incorrect')
+    throw new Error('Mot de passe actuel incorrect')
+  }
+
+  // Validation du nouveau mot de passe
+  if (!new_password || new_password.length < 6) {
+    throw new Error('Le nouveau mot de passe doit contenir au moins 6 caractères')
+  }
+
+  // Simuler le changement de mot de passe
+  // Dans un système réel, vous stockeriez le hash du nouveau mot de passe
+  console.log('✅ Mot de passe changé avec succès pour:', email)
+
+  // Mettre à jour la dernière activité de la session
+  await supabase
+    .from('vet_sessions')
+    .update({ last_activity: new Date().toISOString() })
+    .eq('session_token', session_token)
 
   return new Response(
     JSON.stringify({
       success: true,
-      session_token: sessionToken,
-      clinic: {
-        email: email,
-        name: clinic_name,
-        phone: clinic_phone,
-        address: clinic_address
-      },
-      expires_at: expiresAt.toISOString()
+      message: 'Mot de passe modifié avec succès'
     }),
     { 
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -142,7 +109,7 @@ async function handleCreateAccount(supabase: any, { email, password, clinic_name
 async function handleLogin(supabase: any, { email, password }: LoginRequest) {
   console.log('🔄 Tentative de connexion pour:', email)
   
-  // Vérifier d'abord si c'est le mot de passe de démo
+  // Vérifier que c'est le mot de passe de démo
   if (password !== 'vet123') {
     console.log('❌ Mot de passe invalide')
     throw new Error('Identifiants invalides')
