@@ -180,7 +180,16 @@ const VetLogin = () => {
 
             <div className="mt-6 text-center">
               <p className="text-sm text-vet-brown">
-                Vous n'avez pas encore de compte ? Contactez l'administrateur pour obtenir vos identifiants.
+                Nos solutions vous intéressent ?{" "}
+                <button 
+                  onClick={() => {
+                    // URL sera fournie plus tard
+                    console.log('Redirection vers AniNow Pro');
+                  }}
+                  className="text-vet-sage hover:text-vet-sage/80 font-medium underline transition-colors"
+                >
+                  Découvrez AniNow Pro
+                </button>
               </p>
             </div>
           </CardContent>
