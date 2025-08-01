@@ -1,13 +1,29 @@
+
 import VetLayout from "@/components/layout/VetLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import PasswordChangeForm from "@/components/vet/PasswordChangeForm";
-import ClinicSettingsForm from "@/components/settings/ClinicSettingsForm";
-import DefaultScheduleForm from "@/components/settings/DefaultScheduleForm";
-import VeterinarianScheduleManager from "@/components/settings/VeterinarianScheduleManager";
-import VeterinarianAbsenceManager from "@/components/settings/VeterinarianAbsenceManager";
+import { ClinicSettingsForm } from "@/components/settings/ClinicSettingsForm";
+import { DefaultScheduleForm } from "@/components/settings/DefaultScheduleForm";
+import { VeterinarianScheduleManager } from "@/components/settings/VeterinarianScheduleManager";
+import { VeterinarianAbsenceManager } from "@/components/settings/VeterinarianAbsenceManager";
+import { useState } from "react";
 
 const VetSettings = () => {
+  const [defaultSchedule, setDefaultSchedule] = useState({
+    morning_start: "08:00",
+    morning_end: "12:00",
+    afternoon_start: "14:00",
+    afternoon_end: "18:00"
+  });
+
+  const handleScheduleChange = (field: string, value: string) => {
+    setDefaultSchedule(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   return (
     <VetLayout>
       <div className="space-y-8">
@@ -49,7 +65,10 @@ const VetSettings = () => {
             <CardTitle className="text-vet-navy">Horaires par défaut</CardTitle>
           </CardHeader>
           <CardContent>
-            <DefaultScheduleForm />
+            <DefaultScheduleForm 
+              defaultSchedule={defaultSchedule}
+              onScheduleChange={handleScheduleChange}
+            />
           </CardContent>
         </Card>
 
@@ -73,7 +92,7 @@ const VetSettings = () => {
             <CardTitle className="text-vet-navy">Gestion des absences</CardTitle>
           </CardHeader>
           <CardContent>
-            <VeterinarianAbsenceManager />
+            <VeterinarianAbsenceManager veterinarians={[]} />
           </CardContent>
         </Card>
       </div>
