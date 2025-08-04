@@ -1,8 +1,9 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, Clinic } from "lucide-react";
+import { Shield, Building2 } from "lucide-react";
 
 const VetSettings = () => {
   return (
@@ -18,7 +19,7 @@ const VetSettings = () => {
       <Tabs defaultValue="clinic" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="clinic" className="flex items-center gap-2">
-            <Clinic className="h-4 w-4" />
+            <Building2 className="h-4 w-4" />
             Clinique
           </TabsTrigger>
           <TabsTrigger value="advanced" className="flex items-center gap-2">
