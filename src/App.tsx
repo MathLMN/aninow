@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -8,6 +9,18 @@ import LandingPage from '@/pages/LandingPage';
 import PricingPage from '@/pages/PricingPage';
 import ContactPage from '@/pages/ContactPage';
 import FeaturesPage from '@/pages/FeaturesPage';
+
+// Booking Pages
+import BookingStart from '@/pages/public/BookingStart';
+import ConsultationReason from '@/pages/public/ConsultationReason';
+import ConditionalQuestions from '@/pages/public/ConditionalQuestions';
+import SymptomDuration from '@/pages/public/SymptomDuration';
+import AdditionalConsultationPoints from '@/pages/public/AdditionalConsultationPoints';
+import AnimalInfo from '@/pages/public/AnimalInfo';
+import ClientComment from '@/pages/public/ClientComment';
+import ContactInfo from '@/pages/public/ContactInfo';
+import AppointmentSlots from '@/pages/public/AppointmentSlots';
+import BookingConfirmation from '@/pages/public/BookingConfirmation';
 
 // Vet Pages
 import VetLogin from '@/pages/vet/VetLogin';
@@ -33,6 +46,18 @@ function App() {
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/features" element={<FeaturesPage />} />
+          
+          {/* Booking Routes */}
+          <Route path="/booking" element={<BookingStart />} />
+          <Route path="/booking/consultation-reason" element={<ConsultationReason />} />
+          <Route path="/booking/conditional-questions" element={<ConditionalQuestions />} />
+          <Route path="/booking/symptom-duration" element={<SymptomDuration />} />
+          <Route path="/booking/additional-points" element={<AdditionalConsultationPoints />} />
+          <Route path="/booking/animal-info" element={<AnimalInfo />} />
+          <Route path="/booking/client-comment" element={<ClientComment />} />
+          <Route path="/booking/contact-info" element={<ContactInfo />} />
+          <Route path="/booking/appointment-slots" element={<AppointmentSlots />} />
+          <Route path="/booking/confirmation" element={<BookingConfirmation />} />
           
           {/* Vet Routes */}
           <Route path="/vet/login" element={<VetLogin />} />
