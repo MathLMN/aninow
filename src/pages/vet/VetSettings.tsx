@@ -8,10 +8,16 @@ import { ClinicSettingsForm } from "@/components/settings/ClinicSettingsForm";
 import { ClinicSelector } from "@/components/clinic/ClinicSelector";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
 import { useClinicAccess } from "@/hooks/useClinicAccess";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 const VetSettings = () => {
   const { userRole } = useClinicAccess();
-  const isAdmin = userRole === 'admin';
+  const { isAdmin: isGlobalAdmin } = useAdminAuth();
+  
+  // Un utilisateur est admin s'il a le rôle admin dans une clinique OU s'il est admin global
+  const isAdmin = userRole === 'admin' || isGlobalAdmin;
+
+  console.log('🔍 VetSettings - Admin status:', { userRole, isGlobalAdmin, isAdmin });
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -26,7 +32,7 @@ const VetSettings = () => {
       {/* Sélecteur de clinique */}
       <ClinicSelector />
 
-      <Tabs defaultValue="clinic" className="space-y-6">
+      <Tabs defaultValue={isGlobalAdmin ? "admin" : "clinic"} className="space-y-6">
         <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
           <TabsTrigger value="clinic" className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
@@ -56,7 +62,10 @@ const VetSettings = () => {
                   Administration des comptes cliniques
                 </CardTitle>
                 <CardDescription className="text-vet-brown">
-                  Tableau de bord pour la gestion des comptes créés manuellement
+                  {isGlobalAdmin 
+                    ? "Tableau de bord pour la gestion globale des comptes cliniques"
+                    : "Tableau de bord pour la gestion des comptes créés manuellement"
+                  }
                 </CardDescription>
               </CardHeader>
               <CardContent>
