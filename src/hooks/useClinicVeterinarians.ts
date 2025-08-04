@@ -2,10 +2,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useClinicAccess } from './useClinicAccess';
 
 export const useClinicVeterinarians = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { currentClinicId } = useClinicAccess();
 
   const { 
     data: veterinarians = [], 
@@ -13,9 +15,9 @@ export const useClinicVeterinarians = () => {
     error,
     refetch 
   } = useQuery({
-    queryKey: ['clinic-veterinarians'],
+    queryKey: ['clinic-veterinarians', currentClinicId],
     queryFn: async () => {
-      console.log('🔄 Fetching clinic veterinarians...');
+      console.log('🔄 Fetching clinic veterinarians for clinic:', currentClinicId);
       
       const { data, error } = await supabase
         .from('clinic_veterinarians')
@@ -30,15 +32,23 @@ export const useClinicVeterinarians = () => {
       console.log('✅ Veterinarians loaded:', data?.length || 0, 'items');
       return data || [];
     },
+    enabled: !!currentClinicId,
   });
 
   const addVeterinarianMutation = useMutation({
     mutationFn: async (vetData: { name: string; specialty: string; is_active: boolean }) => {
+      if (!currentClinicId) {
+        throw new Error('No clinic selected');
+      }
+
       console.log('🔄 Adding veterinarian:', vetData);
       
       const { data, error } = await supabase
         .from('clinic_veterinarians')
-        .insert([vetData])
+        .insert([{
+          ...vetData,
+          clinic_id: currentClinicId
+        }])
         .select()
         .single();
 

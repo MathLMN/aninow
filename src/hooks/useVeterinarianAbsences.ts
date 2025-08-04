@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useClinicAccess } from './useClinicAccess';
 
 export interface VeterinarianAbsence {
   id?: string;
@@ -11,11 +12,13 @@ export interface VeterinarianAbsence {
   absence_type: string;
   reason?: string;
   is_recurring: boolean;
+  clinic_id?: string;
 }
 
 export const useVeterinarianAbsences = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { currentClinicId } = useClinicAccess();
 
   const { 
     data: absences = [], 
@@ -23,9 +26,9 @@ export const useVeterinarianAbsences = () => {
     error,
     refetch 
   } = useQuery({
-    queryKey: ['veterinarian-absences'],
+    queryKey: ['veterinarian-absences', currentClinicId],
     queryFn: async () => {
-      console.log('🔄 Fetching veterinarian absences...');
+      console.log('🔄 Fetching veterinarian absences for clinic:', currentClinicId);
       
       const { data, error } = await supabase
         .from('veterinarian_absences')
@@ -43,15 +46,23 @@ export const useVeterinarianAbsences = () => {
       console.log('✅ Absences loaded:', data?.length || 0, 'items');
       return data || [];
     },
+    enabled: !!currentClinicId,
   });
 
   const addAbsenceMutation = useMutation({
     mutationFn: async (absence: Omit<VeterinarianAbsence, 'id'>) => {
+      if (!currentClinicId) {
+        throw new Error('No clinic selected');
+      }
+
       console.log('🔄 Adding absence:', absence);
       
       const { data, error } = await supabase
         .from('veterinarian_absences')
-        .insert([absence])
+        .insert([{
+          ...absence,
+          clinic_id: currentClinicId
+        }])
         .select()
         .single();
 

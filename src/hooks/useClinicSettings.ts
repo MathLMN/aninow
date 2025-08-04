@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
+import { useClinicAccess } from './useClinicAccess'
 
 interface DaySchedule {
   isOpen: boolean
@@ -36,6 +37,7 @@ interface ClinicSettings {
   asv_enabled: boolean
   daily_schedules: DailySchedules
   default_slot_duration_minutes?: number
+  clinic_id?: string
   created_at?: string
   updated_at?: string
 }
@@ -110,11 +112,18 @@ export const useClinicSettings = () => {
   const [settings, setSettings] = useState<ClinicSettings>(getDefaultSettings());
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { currentClinicId } = useClinicAccess();
 
   const fetchSettings = async () => {
+    if (!currentClinicId) {
+      console.log('⏳ No clinic ID available, skipping settings fetch');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
-      console.log('🔍 Fetching clinic settings...');
+      console.log('🔍 Fetching clinic settings for clinic:', currentClinicId);
       
       const { data, error } = await supabase
         .from('clinic_settings')
@@ -141,10 +150,8 @@ export const useClinicSettings = () => {
           clinic_address_country: data.clinic_address_country || 'France'
         };
         setSettings(settingsData);
-        console.log('🔄 Settings state updated with:', settingsData);
       } else {
         console.log('ℹ️ No settings found, using defaults');
-        // Keep default settings if no data found
       }
     } catch (err) {
       console.error('❌ Erreur lors du chargement des paramètres:', err);
@@ -159,14 +166,22 @@ export const useClinicSettings = () => {
   };
 
   const updateSettings = async (newSettings: Partial<ClinicSettings>) => {
+    if (!currentClinicId) {
+      toast({
+        title: "Erreur",
+        description: "Aucune clinique sélectionnée",
+        variant: "destructive"
+      });
+      return false;
+    }
+
     try {
-      console.log('💾 Starting settings update...');
+      console.log('💾 Starting settings update for clinic:', currentClinicId);
       console.log('📝 New settings data:', newSettings);
       
       const updatedSettings = { ...settings, ...newSettings };
       console.log('🔄 Merged settings:', updatedSettings);
       
-      // Préparer les données pour Supabase avec le bon format
       const dataToUpdate = {
         clinic_name: updatedSettings.clinic_name || 'Clinique Vétérinaire',
         clinic_phone: updatedSettings.clinic_phone || null,
@@ -177,12 +192,12 @@ export const useClinicSettings = () => {
         clinic_address_country: updatedSettings.clinic_address_country || 'France',
         asv_enabled: updatedSettings.asv_enabled,
         daily_schedules: JSON.parse(JSON.stringify(updatedSettings.daily_schedules)),
-        default_slot_duration_minutes: updatedSettings.default_slot_duration_minutes || 30
+        default_slot_duration_minutes: updatedSettings.default_slot_duration_minutes || 30,
+        clinic_id: currentClinicId
       };
       
       console.log('📤 Data to save to database:', dataToUpdate);
       
-      // D'abord vérifier s'il y a déjà un enregistrement
       const { data: existingData, error: fetchError } = await supabase
         .from('clinic_settings')
         .select('id')
@@ -197,7 +212,6 @@ export const useClinicSettings = () => {
       let result;
       
       if (existingData?.id) {
-        // Mettre à jour l'enregistrement existant
         console.log('🔄 Updating existing record with ID:', existingData.id);
         result = await supabase
           .from('clinic_settings')
@@ -206,7 +220,6 @@ export const useClinicSettings = () => {
           .select()
           .single();
       } else {
-        // Créer un nouvel enregistrement
         console.log('🆕 Creating new record');
         result = await supabase
           .from('clinic_settings')
@@ -224,7 +237,6 @@ export const useClinicSettings = () => {
 
       console.log('✅ Settings saved successfully to database:', data);
       
-      // Mettre à jour le state local avec les données sauvegardées
       const settingsData: ClinicSettings = {
         ...data,
         daily_schedules: convertToDailySchedules(data.daily_schedules),
@@ -259,7 +271,7 @@ export const useClinicSettings = () => {
 
   useEffect(() => {
     fetchSettings();
-  }, []);
+  }, [currentClinicId]);
 
   return {
     settings,

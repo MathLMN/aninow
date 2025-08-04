@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Shield, Building2, Settings, Users, Calendar } from "lucide-react";
 import { ClinicSettingsForm } from "@/components/settings/ClinicSettingsForm";
+import { ClinicSelector } from "@/components/clinic/ClinicSelector";
 
 const VetSettings = () => {
   return (
@@ -16,6 +17,9 @@ const VetSettings = () => {
           <p className="text-vet-brown">Gérez les paramètres de votre clinique et de votre compte</p>
         </div>
       </div>
+
+      {/* Sélecteur de clinique */}
+      <ClinicSelector />
 
       <Tabs defaultValue="clinic" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2">

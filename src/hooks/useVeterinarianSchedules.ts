@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useClinicAccess } from './useClinicAccess';
 
 export interface VeterinarianSchedule {
   id?: string;
@@ -12,11 +13,13 @@ export interface VeterinarianSchedule {
   morning_end?: string;
   afternoon_start?: string;
   afternoon_end?: string;
+  clinic_id?: string;
 }
 
 export const useVeterinarianSchedules = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { currentClinicId } = useClinicAccess();
 
   const { 
     data: schedules = [], 
@@ -24,9 +27,9 @@ export const useVeterinarianSchedules = () => {
     error,
     refetch 
   } = useQuery({
-    queryKey: ['veterinarian-schedules'],
+    queryKey: ['veterinarian-schedules', currentClinicId],
     queryFn: async () => {
-      console.log('🔄 Fetching veterinarian schedules...');
+      console.log('🔄 Fetching veterinarian schedules for clinic:', currentClinicId);
       
       const { data, error } = await supabase
         .from('veterinarian_schedules')
@@ -45,10 +48,15 @@ export const useVeterinarianSchedules = () => {
       console.log('✅ Schedules loaded:', data?.length || 0, 'items');
       return data || [];
     },
+    enabled: !!currentClinicId,
   });
 
   const updateScheduleMutation = useMutation({
     mutationFn: async (schedule: VeterinarianSchedule) => {
+      if (!currentClinicId) {
+        throw new Error('No clinic selected');
+      }
+
       console.log('🔄 Updating schedule:', schedule);
       
       const scheduleData = {
@@ -59,6 +67,7 @@ export const useVeterinarianSchedules = () => {
         morning_end: schedule.morning_end || null,
         afternoon_start: schedule.afternoon_start || null,
         afternoon_end: schedule.afternoon_end || null,
+        clinic_id: currentClinicId,
       };
 
       const { data, error } = await supabase

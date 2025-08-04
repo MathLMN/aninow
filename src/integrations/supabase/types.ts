@@ -88,6 +88,7 @@ export type Database = {
       available_slots: {
         Row: {
           booking_id: string | null
+          clinic_id: string | null
           consultation_type_id: string
           created_at: string
           date: string
@@ -100,6 +101,7 @@ export type Database = {
         }
         Insert: {
           booking_id?: string | null
+          clinic_id?: string | null
           consultation_type_id: string
           created_at?: string
           date: string
@@ -112,6 +114,7 @@ export type Database = {
         }
         Update: {
           booking_id?: string | null
+          clinic_id?: string | null
           consultation_type_id?: string
           created_at?: string
           date?: string
@@ -128,6 +131,13 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "available_slots_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
             referencedColumns: ["id"]
           },
           {
@@ -158,6 +168,7 @@ export type Database = {
           client_email: string
           client_name: string
           client_phone: string
+          clinic_id: string | null
           conditional_answers: Json | null
           consultation_reason: string
           consultation_type_id: string | null
@@ -212,6 +223,7 @@ export type Database = {
           client_email: string
           client_name: string
           client_phone: string
+          clinic_id?: string | null
           conditional_answers?: Json | null
           consultation_reason: string
           consultation_type_id?: string | null
@@ -266,6 +278,7 @@ export type Database = {
           client_email?: string
           client_name?: string
           client_phone?: string
+          clinic_id?: string | null
           conditional_answers?: Json | null
           consultation_reason?: string
           consultation_type_id?: string | null
@@ -304,6 +317,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "bookings_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "bookings_consultation_type_id_fkey"
             columns: ["consultation_type_id"]
             isOneToOne: false
@@ -327,6 +347,7 @@ export type Database = {
           clinic_address_postal_code: string | null
           clinic_address_street: string | null
           clinic_email: string | null
+          clinic_id: string | null
           clinic_name: string
           clinic_phone: string | null
           created_at: string
@@ -342,6 +363,7 @@ export type Database = {
           clinic_address_postal_code?: string | null
           clinic_address_street?: string | null
           clinic_email?: string | null
+          clinic_id?: string | null
           clinic_name?: string
           clinic_phone?: string | null
           created_at?: string
@@ -357,6 +379,7 @@ export type Database = {
           clinic_address_postal_code?: string | null
           clinic_address_street?: string | null
           clinic_email?: string | null
+          clinic_id?: string | null
           clinic_name?: string
           clinic_phone?: string | null
           created_at?: string
@@ -365,11 +388,20 @@ export type Database = {
           id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "clinic_settings_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       clinic_veterinarians: {
         Row: {
           auth_migration_status: string | null
+          clinic_id: string | null
           created_at: string
           email: string | null
           id: string
@@ -380,6 +412,7 @@ export type Database = {
         }
         Insert: {
           auth_migration_status?: string | null
+          clinic_id?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -390,6 +423,7 @@ export type Database = {
         }
         Update: {
           auth_migration_status?: string | null
+          clinic_id?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -398,10 +432,40 @@ export type Database = {
           specialty?: string | null
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "clinic_veterinarians_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clinics: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
         Relationships: []
       }
       consultation_types: {
         Row: {
+          clinic_id: string | null
           color: string | null
           created_at: string
           description: string | null
@@ -410,6 +474,7 @@ export type Database = {
           name: string
         }
         Insert: {
+          clinic_id?: string | null
           color?: string | null
           created_at?: string
           description?: string | null
@@ -418,6 +483,7 @@ export type Database = {
           name: string
         }
         Update: {
+          clinic_id?: string | null
           color?: string | null
           created_at?: string
           description?: string | null
@@ -425,7 +491,15 @@ export type Database = {
           id?: string
           name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "consultation_types_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       prompt_performance_logs: {
         Row: {
@@ -555,6 +629,7 @@ export type Database = {
       slot_assignments: {
         Row: {
           assignment_type: string
+          clinic_id: string | null
           created_at: string
           date: string
           id: string
@@ -564,6 +639,7 @@ export type Database = {
         }
         Insert: {
           assignment_type?: string
+          clinic_id?: string | null
           created_at?: string
           date: string
           id?: string
@@ -573,6 +649,7 @@ export type Database = {
         }
         Update: {
           assignment_type?: string
+          clinic_id?: string | null
           created_at?: string
           date?: string
           id?: string
@@ -582,10 +659,55 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "slot_assignments_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "slot_assignments_veterinarian_id_fkey"
             columns: ["veterinarian_id"]
             isOneToOne: false
             referencedRelation: "clinic_veterinarians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_clinic_access: {
+        Row: {
+          clinic_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          clinic_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          clinic_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_clinic_access_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
             referencedColumns: ["id"]
           },
         ]
@@ -635,6 +757,7 @@ export type Database = {
       veterinarian_absences: {
         Row: {
           absence_type: string
+          clinic_id: string | null
           created_at: string
           end_date: string
           id: string
@@ -646,6 +769,7 @@ export type Database = {
         }
         Insert: {
           absence_type?: string
+          clinic_id?: string | null
           created_at?: string
           end_date: string
           id?: string
@@ -657,6 +781,7 @@ export type Database = {
         }
         Update: {
           absence_type?: string
+          clinic_id?: string | null
           created_at?: string
           end_date?: string
           id?: string
@@ -667,6 +792,13 @@ export type Database = {
           veterinarian_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "veterinarian_absences_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "veterinarian_absences_veterinarian_id_fkey"
             columns: ["veterinarian_id"]
@@ -712,6 +844,7 @@ export type Database = {
         Row: {
           afternoon_end: string | null
           afternoon_start: string | null
+          clinic_id: string | null
           created_at: string
           day_of_week: number
           id: string
@@ -724,6 +857,7 @@ export type Database = {
         Insert: {
           afternoon_end?: string | null
           afternoon_start?: string | null
+          clinic_id?: string | null
           created_at?: string
           day_of_week: number
           id?: string
@@ -736,6 +870,7 @@ export type Database = {
         Update: {
           afternoon_end?: string | null
           afternoon_start?: string | null
+          clinic_id?: string | null
           created_at?: string
           day_of_week?: number
           id?: string
@@ -746,6 +881,13 @@ export type Database = {
           veterinarian_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "veterinarian_schedules_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "veterinarian_schedules_veterinarian_id_fkey"
             columns: ["veterinarian_id"]
@@ -814,7 +956,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_clinic_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
