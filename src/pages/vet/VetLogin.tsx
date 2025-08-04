@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import { ConfigModeToggle } from "@/components/vet/ConfigModeToggle";
 
 const VetLogin = () => {
   const navigate = useNavigate();
-  const { signIn, isLoading, isAuthenticated, veterinarian } = useVetAuth();
+  const { signIn, isLoading, isAuthenticated, veterinarian, adminProfile } = useVetAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showResetForm, setShowResetForm] = useState(false);
@@ -21,18 +22,27 @@ const VetLogin = () => {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated && veterinarian) {
-      navigate('/vet/dashboard');
+    if (isAuthenticated) {
+      console.log('🔄 User is authenticated, redirecting...', { veterinarian, adminProfile });
+      
+      if (adminProfile) {
+        // Admin users go to settings page where they can access admin dashboard
+        navigate('/vet/settings');
+      } else if (veterinarian) {
+        // Veterinarians go to dashboard
+        navigate('/vet/dashboard');
+      }
     }
-  }, [isAuthenticated, veterinarian, navigate]);
+  }, [isAuthenticated, veterinarian, adminProfile, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('🔄 Starting login process');
     const { error } = await signIn(email, password);
     
     if (!error) {
-      // Navigation will be handled by the useEffect above
+      console.log('✅ Login successful, redirection will be handled by useEffect');
     }
   };
 

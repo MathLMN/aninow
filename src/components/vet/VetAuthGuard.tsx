@@ -10,7 +10,7 @@ interface VetAuthGuardProps {
 }
 
 export const VetAuthGuard = ({ children }: VetAuthGuardProps) => {
-  const { isAuthenticated, isLoading, veterinarian } = useVetAuth();
+  const { isAuthenticated, isLoading, veterinarian, adminProfile } = useVetAuth();
   const navigate = useNavigate();
 
   // Check if configuration mode is enabled
@@ -25,11 +25,15 @@ export const VetAuthGuard = ({ children }: VetAuthGuardProps) => {
     }
 
     // Otherwise, enforce authentication as usual
-    if (!isLoading && (!isAuthenticated || !veterinarian)) {
-      console.log('🚫 Access denied, redirecting to login');
+    if (!isLoading && !isAuthenticated) {
+      console.log('🚫 Access denied, redirecting to login', { 
+        isAuthenticated, 
+        veterinarian: !!veterinarian, 
+        adminProfile: !!adminProfile 
+      });
       navigate('/vet/login');
     }
-  }, [isAuthenticated, isLoading, veterinarian, navigate, configModeEnabled]);
+  }, [isAuthenticated, isLoading, veterinarian, adminProfile, navigate, configModeEnabled]);
 
   if (isLoading && !configModeEnabled) {
     return (
@@ -60,7 +64,7 @@ export const VetAuthGuard = ({ children }: VetAuthGuardProps) => {
     );
   }
 
-  if (!isAuthenticated || !veterinarian) {
+  if (!isAuthenticated) {
     return null; // Will be redirected by useEffect
   }
 

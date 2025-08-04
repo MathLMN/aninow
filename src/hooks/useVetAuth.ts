@@ -12,10 +12,19 @@ interface VeterinarianProfile {
   is_active: boolean;
 }
 
+interface AdminProfile {
+  id: string;
+  user_id: string;
+  email: string;
+  role: string;
+  is_active: boolean;
+}
+
 export const useVetAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [veterinarian, setVeterinarian] = useState<VeterinarianProfile | null>(null);
+  const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -27,13 +36,14 @@ export const useVetAuth = () => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Fetch veterinarian profile when user logs in
+        // Fetch profile when user logs in
         if (session?.user) {
           setTimeout(() => {
-            fetchVeterinarianProfile(session.user.id);
+            fetchUserProfile(session.user.id);
           }, 0);
         } else {
           setVeterinarian(null);
+          setAdminProfile(null);
         }
       }
     );
@@ -45,7 +55,7 @@ export const useVetAuth = () => {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        fetchVeterinarianProfile(session.user.id);
+        fetchUserProfile(session.user.id);
       } else {
         setIsLoading(false);
       }
@@ -54,10 +64,11 @@ export const useVetAuth = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchVeterinarianProfile = async (userId: string) => {
+  const fetchUserProfile = async (userId: string) => {
     try {
-      console.log('🔄 Fetching veterinarian profile for user:', userId);
+      console.log('🔄 Fetching user profile for user:', userId);
       
+      // First, try to get veterinarian profile
       const { data: authLink, error: linkError } = await supabase
         .from('veterinarian_auth_users')
         .select(`
@@ -72,20 +83,33 @@ export const useVetAuth = () => {
         .eq('user_id', userId)
         .single();
 
-      if (linkError) {
-        console.error('❌ Error fetching veterinarian profile:', linkError);
+      if (!linkError && authLink?.veterinarian) {
+        console.log('✅ Veterinarian profile loaded:', authLink.veterinarian);
+        setVeterinarian(authLink.veterinarian as VeterinarianProfile);
         setIsLoading(false);
         return;
       }
 
-      if (authLink?.veterinarian) {
-        console.log('✅ Veterinarian profile loaded:', authLink.veterinarian);
-        setVeterinarian(authLink.veterinarian as VeterinarianProfile);
+      // If no veterinarian profile, check for admin profile
+      console.log('🔄 No veterinarian profile found, checking for admin profile');
+      
+      const { data: adminData, error: adminError } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .single();
+
+      if (!adminError && adminData) {
+        console.log('✅ Admin profile loaded:', adminData);
+        setAdminProfile(adminData);
+      } else {
+        console.log('❌ No valid profile found for user');
       }
       
       setIsLoading(false);
     } catch (error) {
-      console.error('❌ Error in fetchVeterinarianProfile:', error);
+      console.error('❌ Error in fetchUserProfile:', error);
       setIsLoading(false);
     }
   };
@@ -151,6 +175,7 @@ export const useVetAuth = () => {
       setUser(null);
       setSession(null);
       setVeterinarian(null);
+      setAdminProfile(null);
       
       toast({
         title: "Déconnexion",
@@ -223,19 +248,24 @@ export const useVetAuth = () => {
     }
   };
 
+  // User is authenticated if they have either a veterinarian profile OR an admin profile
+  const isAuthenticated = !!user && (!!veterinarian || !!adminProfile);
+
   return {
     user,
     session,
     veterinarian,
+    adminProfile,
+    isAdmin: !!adminProfile,
     isLoading,
-    isAuthenticated: !!user && !!veterinarian,
+    isAuthenticated,
     signIn,
     signOut,
     resetPassword,
     updatePassword,
     refetchProfile: () => {
       if (user) {
-        fetchVeterinarianProfile(user.id);
+        fetchUserProfile(user.id);
       }
     }
   };
