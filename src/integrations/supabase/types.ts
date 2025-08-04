@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_clinic_creations: {
+        Row: {
+          admin_user_id: string
+          clinic_id: string
+          clinic_user_id: string
+          created_at: string
+          first_login_completed: boolean | null
+          id: string
+          password_changed: boolean | null
+          provisional_password: string
+        }
+        Insert: {
+          admin_user_id: string
+          clinic_id: string
+          clinic_user_id: string
+          created_at?: string
+          first_login_completed?: boolean | null
+          id?: string
+          password_changed?: boolean | null
+          provisional_password: string
+        }
+        Update: {
+          admin_user_id?: string
+          clinic_id?: string
+          clinic_user_id?: string
+          created_at?: string
+          first_login_completed?: boolean | null
+          id?: string
+          password_changed?: boolean | null
+          provisional_password?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_clinic_creations_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_users: {
         Row: {
           created_at: string
@@ -678,8 +719,10 @@ export type Database = {
         Row: {
           clinic_id: string
           created_at: string
+          created_by_admin: string | null
           id: string
           is_active: boolean
+          provisional_password_set: boolean | null
           role: string
           updated_at: string
           user_id: string
@@ -687,8 +730,10 @@ export type Database = {
         Insert: {
           clinic_id: string
           created_at?: string
+          created_by_admin?: string | null
           id?: string
           is_active?: boolean
+          provisional_password_set?: boolean | null
           role?: string
           updated_at?: string
           user_id: string
@@ -696,8 +741,10 @@ export type Database = {
         Update: {
           clinic_id?: string
           created_at?: string
+          created_by_admin?: string | null
           id?: string
           is_active?: boolean
+          provisional_password_set?: boolean | null
           role?: string
           updated_at?: string
           user_id?: string

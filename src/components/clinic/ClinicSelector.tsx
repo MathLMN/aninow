@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Building2, Users, Plus } from "lucide-react";
 import { useClinicAccess } from "@/hooks/useClinicAccess";
 import { useClinicManagement } from "@/hooks/useClinicManagement";
+import { ManualClinicCreationModal } from "@/components/admin/ManualClinicCreationModal";
 
 export const ClinicSelector = () => {
   const { clinicAccess, currentClinic, userRole, isLoading } = useClinicAccess();
@@ -44,17 +45,30 @@ export const ClinicSelector = () => {
         </CardHeader>
         <CardContent>
           <div className="text-center py-6">
-            <p className="text-vet-brown mb-4">
-              Vous n'avez accès à aucune clinique. Créez votre première clinique pour commencer.
+            <p className="text-vet-brown mb-6">
+              Vous n'avez accès à aucune clinique. Vous pouvez créer votre clinique ou utiliser la création manuelle pour les comptes clients.
             </p>
-            <Button 
-              onClick={handleCreateClinic}
-              disabled={isCreatingClinic}
-              className="bg-vet-blue hover:bg-vet-blue/90 text-white"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              {isCreatingClinic ? 'Création...' : 'Créer ma clinique'}
-            </Button>
+            <div className="space-y-3">
+              <Button 
+                onClick={handleCreateClinic}
+                disabled={isCreatingClinic}
+                className="bg-vet-blue hover:bg-vet-blue/90 text-white w-full"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                {isCreatingClinic ? 'Création...' : 'Créer ma clinique'}
+              </Button>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-vet-blue/20" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-2 text-vet-brown">ou</span>
+                </div>
+              </div>
+              
+              <ManualClinicCreationModal />
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -69,9 +83,11 @@ export const ClinicSelector = () => {
             <Building2 className="h-5 w-5 mr-2" />
             Clinique actuelle
           </div>
-          <Badge variant="outline" className="border-vet-sage text-vet-sage">
-            {userRole}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="border-vet-sage text-vet-sage">
+              {userRole}
+            </Badge>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -83,14 +99,20 @@ export const ClinicSelector = () => {
             </p>
           </div>
           
-          {clinicAccess.length > 1 && (
-            <div className="pt-2 border-t border-vet-blue/20">
-              <p className="text-sm text-vet-brown">
-                <Users className="h-4 w-4 inline mr-1" />
-                Vous avez accès à {clinicAccess.length} clinique{clinicAccess.length > 1 ? 's' : ''}
-              </p>
+          <div className="flex items-center justify-between">
+            <div>
+              {clinicAccess.length > 1 && (
+                <p className="text-sm text-vet-brown">
+                  <Users className="h-4 w-4 inline mr-1" />
+                  Vous avez accès à {clinicAccess.length} clinique{clinicAccess.length > 1 ? 's' : ''}
+                </p>
+              )}
             </div>
-          )}
+            
+            {userRole === 'admin' && (
+              <ManualClinicCreationModal />
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>
