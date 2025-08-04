@@ -1,28 +1,14 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Users, Plus } from "lucide-react";
+import { Building2, Users } from "lucide-react";
 import { useClinicAccess } from "@/hooks/useClinicAccess";
-import { useClinicManagement } from "@/hooks/useClinicManagement";
 import { ManualClinicCreationModal } from "@/components/admin/ManualClinicCreationModal";
+import { NoClinicAssigned } from "./NoClinicAssigned";
 
 export const ClinicSelector = () => {
   const { clinicAccess, currentClinic, userRole, isLoading } = useClinicAccess();
-  const { createClinic, isCreatingClinic } = useClinicManagement();
-
-  const handleCreateClinic = async () => {
-    // Pour l'instant, créer une clinique avec un nom par défaut
-    // Dans une vraie implémentation, on ouvrirait un modal avec un formulaire
-    const success = await createClinic({
-      name: `Nouvelle clinique ${new Date().toLocaleDateString()}`
-    });
-    
-    if (success) {
-      console.log('Clinique créée avec succès');
-    }
-  };
 
   if (isLoading) {
     return (
@@ -34,45 +20,9 @@ export const ClinicSelector = () => {
     );
   }
 
+  // Si aucune clinique n'est assignée, afficher le message approprié
   if (!currentClinic) {
-    return (
-      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-        <CardHeader>
-          <CardTitle className="text-vet-navy flex items-center">
-            <Building2 className="h-5 w-5 mr-2" />
-            Aucune clinique configurée
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-6">
-            <p className="text-vet-brown mb-6">
-              Vous n'avez accès à aucune clinique. Vous pouvez créer votre clinique ou utiliser la création manuelle pour les comptes clients.
-            </p>
-            <div className="space-y-3">
-              <Button 
-                onClick={handleCreateClinic}
-                disabled={isCreatingClinic}
-                className="bg-vet-blue hover:bg-vet-blue/90 text-white w-full"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                {isCreatingClinic ? 'Création...' : 'Créer ma clinique'}
-              </Button>
-              
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-vet-blue/20" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-vet-brown">ou</span>
-                </div>
-              </div>
-              
-              <ManualClinicCreationModal />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return <NoClinicAssigned />;
   }
 
   return (
@@ -109,6 +59,7 @@ export const ClinicSelector = () => {
               )}
             </div>
             
+            {/* Seuls les administrateurs peuvent créer des comptes manuellement */}
             {userRole === 'admin' && (
               <ManualClinicCreationModal />
             )}

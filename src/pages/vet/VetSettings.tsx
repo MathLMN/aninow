@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Shield, Building2, Settings, Users, Calendar } from "lucide-react";
 import { ClinicSettingsForm } from "@/components/settings/ClinicSettingsForm";
 import { ClinicSelector } from "@/components/clinic/ClinicSelector";
-import { ManuallyCreatedAccountsList } from "@/components/admin/ManuallyCreatedAccountsList";
+import { AdminDashboard } from "@/components/admin/AdminDashboard";
 import { useClinicAccess } from "@/hooks/useClinicAccess";
 
 const VetSettings = () => {
@@ -35,7 +35,7 @@ const VetSettings = () => {
           {isAdmin && (
             <TabsTrigger value="admin" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
-              Gestion des comptes
+              Administration
             </TabsTrigger>
           )}
           <TabsTrigger value="advanced" className="flex items-center gap-2">
@@ -50,21 +50,19 @@ const VetSettings = () => {
 
         {isAdmin && (
           <TabsContent value="admin" className="space-y-6">
-            <div className="space-y-6">
-              <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-vet-navy">
-                    Gestion des comptes cliniques
-                  </CardTitle>
-                  <CardDescription className="text-vet-brown">
-                    Gérez les comptes créés manuellement et suivez leur statut d'activation
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ManuallyCreatedAccountsList />
-                </CardContent>
-              </Card>
-            </div>
+            <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-2xl text-vet-navy">
+                  Administration des comptes cliniques
+                </CardTitle>
+                <CardDescription className="text-vet-brown">
+                  Tableau de bord pour la gestion des comptes créés manuellement
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AdminDashboard />
+              </CardContent>
+            </Card>
           </TabsContent>
         )}
 

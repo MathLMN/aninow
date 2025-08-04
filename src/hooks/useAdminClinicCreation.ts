@@ -33,7 +33,8 @@ export const useAdminClinicCreation = () => {
         email_confirm: true,
         user_metadata: {
           name: data.userName,
-          provisional_password: true
+          provisional_password: true,
+          first_login: true
         }
       });
 
@@ -86,7 +87,9 @@ export const useAdminClinicCreation = () => {
           clinic_id: clinic.id,
           admin_user_id: adminUser.id,
           clinic_user_id: userId,
-          provisional_password: provisionalPassword
+          provisional_password: provisionalPassword,
+          password_changed: false,
+          first_login_completed: false
         }]);
 
       if (trackingError) {
@@ -103,6 +106,8 @@ export const useAdminClinicCreation = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clinic-access'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['manually-created-accounts'] });
       toast({
         title: "Compte clinique créé",
         description: "Le compte a été créé avec succès. Les identifiants ont été générés.",
