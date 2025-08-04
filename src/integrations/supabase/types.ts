@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_active: boolean
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          is_active?: boolean
+          role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_active?: boolean
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_analysis_logs: {
         Row: {
           analysis_type: string
@@ -339,7 +369,9 @@ export type Database = {
       }
       clinic_veterinarians: {
         Row: {
+          auth_migration_status: string | null
           created_at: string
+          email: string | null
           id: string
           is_active: boolean
           name: string
@@ -347,7 +379,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          auth_migration_status?: string | null
           created_at?: string
+          email?: string | null
           id?: string
           is_active?: boolean
           name: string
@@ -355,7 +389,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          auth_migration_status?: string | null
           created_at?: string
+          email?: string | null
           id?: string
           is_active?: boolean
           name?: string
@@ -640,6 +676,38 @@ export type Database = {
           },
         ]
       }
+      veterinarian_auth_users: {
+        Row: {
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+          veterinarian_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          veterinarian_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          veterinarian_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "veterinarian_auth_users_veterinarian_id_fkey"
+            columns: ["veterinarian_id"]
+            isOneToOne: true
+            referencedRelation: "clinic_veterinarians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       veterinarian_schedules: {
         Row: {
           afternoon_end: string | null
@@ -686,6 +754,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      veterinary_practice_requests: {
+        Row: {
+          address_city: string
+          address_country: string
+          address_postal_code: string
+          address_street: string
+          contact_email: string
+          contact_person_name: string
+          contact_person_role: string
+          contact_phone: string
+          created_at: string
+          establishment_name: string
+          id: string
+          notes: string | null
+          number_of_veterinarians: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          address_city: string
+          address_country?: string
+          address_postal_code: string
+          address_street: string
+          contact_email: string
+          contact_person_name: string
+          contact_person_role: string
+          contact_phone: string
+          created_at?: string
+          establishment_name: string
+          id?: string
+          notes?: string | null
+          number_of_veterinarians: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          address_city?: string
+          address_country?: string
+          address_postal_code?: string
+          address_street?: string
+          contact_email?: string
+          contact_person_name?: string
+          contact_person_role?: string
+          contact_phone?: string
+          created_at?: string
+          establishment_name?: string
+          id?: string
+          notes?: string | null
+          number_of_veterinarians?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {

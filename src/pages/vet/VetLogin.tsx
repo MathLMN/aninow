@@ -7,85 +7,101 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Heart, Mail, Lock, Loader2, AlertCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useVetAuth } from "@/hooks/useVetAuth";
+import { useEffect } from "react";
 
 const VetLogin = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { signIn, isLoading, isAuthenticated, veterinarian } = useVetAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [showResetForm, setShowResetForm] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && veterinarian) {
+      navigate('/vet/dashboard');
+    }
+  }, [isAuthenticated, veterinarian, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setIsLoading(true);
-
-    try {
-      console.log('🔄 Tentative de connexion vétérinaire...');
-      
-      const { data, error } = await supabase.functions.invoke('vet-auth', {
-        body: {
-          action: 'login',
-          email,
-          password
-        }
-      });
-
-      console.log('📄 Réponse de la fonction:', { data, error });
-
-      if (error) {
-        console.error('❌ Erreur de la fonction edge:', error);
-        throw new Error(error.message || 'Erreur de connexion');
-      }
-
-      if (!data || !data.success) {
-        throw new Error(data?.error || 'Échec de la connexion');
-      }
-
-      console.log('✅ Connexion réussie');
-
-      // Sauvegarder les informations de session
-      localStorage.setItem('vet_session_token', data.session_token);
-      localStorage.setItem('vet_user', JSON.stringify(data.clinic));
-      localStorage.setItem('vet_session_expires', data.expires_at);
-
-      toast({
-        title: "Connexion réussie",
-        description: `Bienvenue, ${data.clinic.name}!`,
-      });
-
-      navigate('/vet/dashboard');
-    } catch (error) {
-      console.error('❌ Erreur de connexion:', error);
-      
-      let errorMessage = 'Erreur de connexion';
-      
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      }
-      
-      if (errorMessage.includes('non-2xx status code')) {
-        errorMessage = 'Problème de connexion au serveur. Veuillez réessayer.';
-      } else if (errorMessage.includes('Identifiants invalides')) {
-        errorMessage = 'Email ou mot de passe incorrect.';
-      }
-      
-      setError(errorMessage);
-      
-      toast({
-        title: "Erreur de connexion",
-        description: errorMessage,
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
+    
+    const { error } = await signIn(email, password);
+    
+    if (!error) {
+      // Navigation will be handled by the useEffect above
     }
   };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // This would be implemented when we add the reset functionality
+    console.log('Password reset requested for:', resetEmail);
+  };
+
+  if (showResetForm) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20 flex items-center justify-center">
+        <div className="w-full max-w-md mx-auto p-6">
+          <div className="text-center mb-8">
+            <Link to="/" className="inline-flex items-center space-x-3 hover:opacity-80 transition-opacity">
+              <Heart className="h-10 w-10 text-vet-sage" />
+              <span className="text-2xl font-bold text-vet-navy">AniNow</span>
+            </Link>
+            <p className="text-vet-brown mt-2">Réinitialisation du mot de passe</p>
+          </div>
+
+          <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl text-vet-navy">
+                Mot de passe oublié ?
+              </CardTitle>
+              <CardDescription className="text-vet-brown">
+                Entrez votre email pour recevoir un lien de réinitialisation
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handlePasswordReset} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="resetEmail" className="text-vet-navy">Email *</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-vet-brown" />
+                    <Input
+                      id="resetEmail"
+                      type="email"
+                      placeholder="votre@email.com"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      className="pl-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <Button 
+                  type="submit" 
+                  className="w-full bg-vet-sage hover:bg-vet-sage/90 text-white"
+                >
+                  Envoyer le lien de réinitialisation
+                </Button>
+
+                <Button 
+                  type="button"
+                  variant="ghost"
+                  className="w-full text-vet-brown hover:text-vet-navy"
+                  onClick={() => setShowResetForm(false)}
+                >
+                  Retour à la connexion
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20 flex items-center justify-center">
@@ -110,22 +126,13 @@ const VetLogin = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {/* Infos de démo */}
+            {/* Infos de migration */}
             <Alert className="mb-6 border-vet-blue/30 bg-vet-blue/10">
               <AlertCircle className="h-4 w-4 text-vet-blue" />
               <AlertDescription className="text-vet-navy text-sm">
-                <strong>Connexion:</strong> Utilisez vos identifiants fournis par l'administrateur
+                <strong>Nouveau système:</strong> Utilisez vos identifiants Supabase Auth pour vous connecter
               </AlertDescription>
             </Alert>
-
-            {error && (
-              <Alert className="mb-6 border-red-300 bg-red-50">
-                <AlertCircle className="h-4 w-4 text-red-600" />
-                <AlertDescription className="text-red-800">
-                  {error}
-                </AlertDescription>
-              </Alert>
-            )}
 
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
@@ -160,6 +167,16 @@ const VetLogin = () => {
                     disabled={isLoading}
                   />
                 </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowResetForm(true)}
+                  className="text-sm text-vet-sage hover:text-vet-sage/80 underline"
+                >
+                  Mot de passe oublié ?
+                </button>
               </div>
 
               <Button 

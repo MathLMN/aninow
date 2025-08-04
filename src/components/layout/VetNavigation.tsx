@@ -1,0 +1,144 @@
+
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { 
+  Heart, 
+  Calendar, 
+  Users, 
+  Settings, 
+  LogOut, 
+  Clock,
+  BarChart3
+} from "lucide-react";
+import { useVetAuth } from "@/hooks/useVetAuth";
+
+export const VetNavigation = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { signOut, veterinarian } = useVetAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/vet/login');
+  };
+
+  const navigationItems = [
+    {
+      path: "/vet/dashboard",
+      label: "Dashboard",
+      icon: BarChart3
+    },
+    {
+      path: "/vet/appointments",
+      label: "Rendez-vous",
+      icon: Calendar
+    },
+    {
+      path: "/vet/planning",
+      label: "Planning",
+      icon: Clock
+    },
+    {
+      path: "/vet/schedule",
+      label: "Horaires",
+      icon: Users
+    },
+    {
+      path: "/vet/settings",
+      label: "Paramètres",
+      icon: Settings
+    }
+  ];
+
+  return (
+    <nav className="bg-white shadow-sm border-b border-gray-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex items-center">
+            {/* Logo */}
+            <Link to="/vet/dashboard" className="flex items-center space-x-3">
+              <Heart className="h-8 w-8 text-vet-sage" />
+              <span className="text-xl font-bold text-vet-navy">AniNow Pro</span>
+            </Link>
+
+            {/* Navigation Links */}
+            <div className="hidden md:ml-10 md:flex md:space-x-8">
+              {navigationItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.path;
+                
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors ${
+                      isActive
+                        ? "border-vet-sage text-vet-sage"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4 mr-2" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* User Menu */}
+          <div className="flex items-center space-x-4">
+            {veterinarian && (
+              <div className="hidden md:flex md:items-center md:space-x-4">
+                <span className="text-sm text-gray-700">
+                  Dr. {veterinarian.name}
+                </span>
+                {veterinarian.specialty && (
+                  <span className="text-xs text-gray-500">
+                    {veterinarian.specialty}
+                  </span>
+                )}
+              </div>
+            )}
+            
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleSignOut}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Déconnexion
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Navigation */}
+      <div className="md:hidden border-t border-gray-200">
+        <div className="pt-2 pb-3 space-y-1">
+          {navigationItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors ${
+                  isActive
+                    ? "border-vet-sage text-vet-sage bg-vet-sage/10"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                <div className="flex items-center">
+                  <Icon className="h-4 w-4 mr-3" />
+                  {item.label}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </nav>
+  );
+};

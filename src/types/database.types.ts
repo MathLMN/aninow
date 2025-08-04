@@ -1,4 +1,3 @@
-
 export interface Database {
   public: {
     Tables: {
@@ -187,6 +186,90 @@ export interface Database {
           confidence_score?: number
           processing_time_ms?: number
           created_at?: string
+        }
+      }
+      clinic_veterinarians: {
+        Row: {
+          id: string
+          name: string
+          specialty?: string
+          is_active: boolean
+          created_at: string
+          updated_at: string
+          auth_migration_status: 'legacy' | 'migrated'
+          email?: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          specialty?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+          auth_migration_status?: 'legacy' | 'migrated'
+          email?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          specialty?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+          auth_migration_status?: 'legacy' | 'migrated'
+          email?: string
+        }
+      }
+      veterinarian_auth_users: {
+        Row: {
+          id: string
+          user_id: string
+          veterinarian_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          veterinarian_id: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          veterinarian_id?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      admin_users: {
+        Row: {
+          id: string
+          user_id: string
+          email: string
+          role: string
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          email: string
+          role?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          email?: string
+          role?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
         }
       }
     }
