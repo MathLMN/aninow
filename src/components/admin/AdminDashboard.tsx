@@ -2,26 +2,42 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Building2, 
   Users, 
   Clock, 
   CheckCircle, 
   AlertTriangle,
-  TrendingUp 
+  TrendingUp,
+  Crown
 } from "lucide-react";
 import { useAdminStats } from "@/hooks/useAdminStats";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { ManualClinicCreationModal } from "./ManualClinicCreationModal";
 import { ManuallyCreatedAccountsList } from "./ManuallyCreatedAccountsList";
 
 export const AdminDashboard = () => {
   const { data: stats, isLoading } = useAdminStats();
+  const { isAdmin: isGlobalAdmin } = useAdminAuth();
+
+  // Vérification de sécurité : seuls les admins globaux peuvent accéder
+  if (!isGlobalAdmin) {
+    return (
+      <Alert className="border-red-300 bg-red-50">
+        <AlertTriangle className="h-4 w-4 text-red-600" />
+        <AlertDescription className="text-red-800">
+          <strong>Accès refusé:</strong> Cette section est réservée aux administrateurs globaux AniNow.
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   if (isLoading) {
     return (
       <div className="space-y-6">
         <div className="text-center py-8">
-          <div className="text-vet-brown">Chargement du tableau de bord...</div>
+          <div className="text-vet-brown">Chargement du tableau de bord administrateur...</div>
         </div>
       </div>
     );
@@ -29,11 +45,17 @@ export const AdminDashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* En-tête avec action rapide */}
+      {/* En-tête avec badge admin global */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-vet-navy">Tableau de bord administrateur</h2>
-          <p className="text-vet-brown">Gestion des comptes cliniques</p>
+          <div className="flex items-center gap-2 mb-2">
+            <Crown className="h-5 w-5 text-amber-500" />
+            <Badge variant="outline" className="border-amber-500 text-amber-600">
+              Administration globale AniNow
+            </Badge>
+          </div>
+          <h2 className="text-2xl font-bold text-vet-navy">Gestion des comptes cliniques</h2>
+          <p className="text-vet-brown">Création et suivi des comptes créés par l'équipe AniNow</p>
         </div>
         <ManualClinicCreationModal />
       </div>

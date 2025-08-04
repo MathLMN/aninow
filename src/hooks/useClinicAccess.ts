@@ -61,13 +61,11 @@ export const useClinicAccess = () => {
   // Get the current clinic (first active one)
   const currentClinic = clinicAccess?.[0]?.clinics || null;
   const currentClinicId = currentClinic?.id || null;
-  const userRole = clinicAccess?.[0]?.role || null;
 
   return {
     clinicAccess: clinicAccess || [],
     currentClinic,
     currentClinicId,
-    userRole,
     isLoading,
     error: error?.message || null,
     refetch

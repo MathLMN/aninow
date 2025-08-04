@@ -2,14 +2,14 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Users, Crown } from "lucide-react";
+import { Building2, Crown } from "lucide-react";
 import { useClinicAccess } from "@/hooks/useClinicAccess";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { ManualClinicCreationModal } from "@/components/admin/ManualClinicCreationModal";
 import { NoClinicAssigned } from "./NoClinicAssigned";
 
 export const ClinicSelector = () => {
-  const { clinicAccess, currentClinic, userRole, isLoading } = useClinicAccess();
+  const { clinicAccess, currentClinic, isLoading } = useClinicAccess();
   const { isAdmin: isGlobalAdmin } = useAdminAuth();
 
   if (isLoading) {
@@ -33,7 +33,7 @@ export const ClinicSelector = () => {
               Administrateur global
             </div>
             <Badge variant="outline" className="border-amber-500 text-amber-600">
-              Super Admin
+              Admin AniNow
             </Badge>
           </CardTitle>
         </CardHeader>
@@ -41,7 +41,7 @@ export const ClinicSelector = () => {
           <div className="space-y-4">
             <div>
               <p className="text-vet-brown">
-                Vous êtes connecté en tant qu'administrateur global. Vous avez accès à tous les outils d'administration sans être lié à une clinique spécifique.
+                Vous êtes connecté en tant qu'administrateur global AniNow. Vous avez accès à tous les outils d'administration pour gérer les comptes cliniques.
               </p>
             </div>
             
@@ -58,9 +58,6 @@ export const ClinicSelector = () => {
   if (!currentClinic && !isGlobalAdmin) {
     return <NoClinicAssigned />;
   }
-
-  // Déterminer le rôle à afficher
-  const displayRole = isGlobalAdmin ? 'super admin' : userRole;
 
   return (
     <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
@@ -82,7 +79,7 @@ export const ClinicSelector = () => {
                 : "border-vet-sage text-vet-sage"
               }
             >
-              {displayRole}
+              {isGlobalAdmin ? "Admin AniNow" : "Utilisateur"}
             </Badge>
           </div>
         </CardTitle>
@@ -102,7 +99,6 @@ export const ClinicSelector = () => {
             <div>
               {clinicAccess.length > 1 && (
                 <p className="text-sm text-vet-brown">
-                  <Users className="h-4 w-4 inline mr-1" />
                   Vous avez accès à {clinicAccess.length} clinique{clinicAccess.length > 1 ? 's' : ''}
                 </p>
               )}
@@ -114,8 +110,8 @@ export const ClinicSelector = () => {
               )}
             </div>
             
-            {/* Les administrateurs (globaux ou de clinique) peuvent créer des comptes */}
-            {(userRole === 'admin' || isGlobalAdmin) && (
+            {/* Seuls les admins globaux peuvent créer des comptes */}
+            {isGlobalAdmin && (
               <ManualClinicCreationModal />
             )}
           </div>

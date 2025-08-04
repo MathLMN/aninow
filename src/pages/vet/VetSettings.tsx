@@ -3,21 +3,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, Building2, Settings, Users, Calendar } from "lucide-react";
+import { Shield, Building2, Settings } from "lucide-react";
 import { ClinicSettingsForm } from "@/components/settings/ClinicSettingsForm";
 import { ClinicSelector } from "@/components/clinic/ClinicSelector";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
-import { useClinicAccess } from "@/hooks/useClinicAccess";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 const VetSettings = () => {
-  const { userRole } = useClinicAccess();
   const { isAdmin: isGlobalAdmin } = useAdminAuth();
-  
-  // Un utilisateur est admin s'il a le rôle admin dans une clinique OU s'il est admin global
-  const isAdmin = userRole === 'admin' || isGlobalAdmin;
 
-  console.log('🔍 VetSettings - Admin status:', { userRole, isGlobalAdmin, isAdmin });
+  console.log('🔍 VetSettings - Global admin status:', isGlobalAdmin);
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -33,15 +28,15 @@ const VetSettings = () => {
       <ClinicSelector />
 
       <Tabs defaultValue={isGlobalAdmin ? "admin" : "clinic"} className="space-y-6">
-        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
+        <TabsList className={`grid w-full ${isGlobalAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
           <TabsTrigger value="clinic" className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
             Configuration de la clinique
           </TabsTrigger>
-          {isAdmin && (
+          {isGlobalAdmin && (
             <TabsTrigger value="admin" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Administration
+              <Shield className="h-4 w-4" />
+              Administration globale
             </TabsTrigger>
           )}
           <TabsTrigger value="advanced" className="flex items-center gap-2">
@@ -54,18 +49,15 @@ const VetSettings = () => {
           <ClinicSettingsForm />
         </TabsContent>
 
-        {isAdmin && (
+        {isGlobalAdmin && (
           <TabsContent value="admin" className="space-y-6">
             <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
               <CardHeader>
                 <CardTitle className="text-2xl text-vet-navy">
-                  Administration des comptes cliniques
+                  Administration globale
                 </CardTitle>
                 <CardDescription className="text-vet-brown">
-                  {isGlobalAdmin 
-                    ? "Tableau de bord pour la gestion globale des comptes cliniques"
-                    : "Tableau de bord pour la gestion des comptes créés manuellement"
-                  }
+                  Tableau de bord pour la gestion globale des comptes cliniques (AniNow)
                 </CardDescription>
               </CardHeader>
               <CardContent>
