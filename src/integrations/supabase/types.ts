@@ -769,48 +769,6 @@ export type Database = {
           },
         ]
       }
-      vet_sessions: {
-        Row: {
-          account_status: string | null
-          clinic_address: string | null
-          clinic_email: string
-          clinic_name: string | null
-          clinic_phone: string | null
-          created_at: string
-          expires_at: string
-          id: string
-          last_activity: string
-          registration_date: string | null
-          session_token: string
-        }
-        Insert: {
-          account_status?: string | null
-          clinic_address?: string | null
-          clinic_email: string
-          clinic_name?: string | null
-          clinic_phone?: string | null
-          created_at?: string
-          expires_at: string
-          id?: string
-          last_activity?: string
-          registration_date?: string | null
-          session_token: string
-        }
-        Update: {
-          account_status?: string | null
-          clinic_address?: string | null
-          clinic_email?: string
-          clinic_name?: string | null
-          clinic_phone?: string | null
-          created_at?: string
-          expires_at?: string
-          id?: string
-          last_activity?: string
-          registration_date?: string | null
-          session_token?: string
-        }
-        Relationships: []
-      }
       veterinarian_absences: {
         Row: {
           absence_type: string
@@ -921,60 +879,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      veterinary_practice_requests: {
-        Row: {
-          address_city: string
-          address_country: string
-          address_postal_code: string
-          address_street: string
-          contact_email: string
-          contact_person_name: string
-          contact_person_role: string
-          contact_phone: string
-          created_at: string
-          establishment_name: string
-          id: string
-          notes: string | null
-          number_of_veterinarians: number
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          address_city: string
-          address_country?: string
-          address_postal_code: string
-          address_street: string
-          contact_email: string
-          contact_person_name: string
-          contact_person_role: string
-          contact_phone: string
-          created_at?: string
-          establishment_name: string
-          id?: string
-          notes?: string | null
-          number_of_veterinarians: number
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          address_city?: string
-          address_country?: string
-          address_postal_code?: string
-          address_street?: string
-          contact_email?: string
-          contact_person_name?: string
-          contact_person_role?: string
-          contact_phone?: string
-          created_at?: string
-          establishment_name?: string
-          id?: string
-          notes?: string | null
-          number_of_veterinarians?: number
-          status?: string
-          updated_at?: string
-        }
-        Relationships: []
       }
     }
     Views: {
