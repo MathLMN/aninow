@@ -233,8 +233,7 @@ const VetLogin = () => {
                 Nos solutions vous intéressent ?{" "}
                 <button 
                   onClick={() => {
-                    // URL sera fournie plus tard
-                    console.log('Redirection vers AniNow Pro');
+                    window.open('https://aninowvet.fr/demandes-aninow-pro/', '_blank');
                   }}
                   className="text-vet-sage hover:text-vet-sage/80 font-medium underline transition-colors"
                 >
