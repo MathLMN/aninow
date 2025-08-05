@@ -6,11 +6,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Building2, KeyRound, CheckCircle, ArrowRight } from "lucide-react";
 import { useVetAuth } from "@/hooks/useVetAuth";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export const FirstLoginWelcome = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const { updatePassword } = useVetAuth();
+  const [isCompletingSetup, setIsCompletingSetup] = useState(false);
+  const { updatePassword, user } = useVetAuth();
   const { toast } = useToast();
 
   const handlePasswordChange = async (newPassword: string) => {
@@ -35,6 +37,21 @@ export const FirstLoginWelcome = () => {
         return;
       }
 
+      // Update the password_changed flag in admin_clinic_creations
+      if (user) {
+        const { error: updateError } = await supabase
+          .from('admin_clinic_creations')
+          .update({ 
+            password_changed: true,
+            updated_at: new Date().toISOString()
+          })
+          .eq('clinic_user_id', user.id);
+
+        if (updateError) {
+          console.error('Error updating password changed status:', updateError);
+        }
+      }
+
       toast({
         title: "Mot de passe changé",
         description: "Votre mot de passe a été mis à jour avec succès",
@@ -45,6 +62,50 @@ export const FirstLoginWelcome = () => {
       console.error('Error changing password:', error);
     } finally {
       setIsChangingPassword(false);
+    }
+  };
+
+  const handleCompleteSetup = async () => {
+    setIsCompletingSetup(true);
+    try {
+      if (user) {
+        // Mark first login as completed
+        const { error } = await supabase
+          .from('admin_clinic_creations')
+          .update({ 
+            first_login_completed: true,
+            updated_at: new Date().toISOString()
+          })
+          .eq('clinic_user_id', user.id);
+
+        if (error) {
+          console.error('Error updating first login status:', error);
+        }
+
+        // Update user metadata to remove provisional password flags
+        const { error: metadataError } = await supabase.auth.updateUser({
+          data: {
+            provisional_password: false,
+            first_login: false
+          }
+        });
+
+        if (metadataError) {
+          console.error('Error updating user metadata:', metadataError);
+        }
+      }
+
+      // Redirect to settings
+      window.location.href = '/vet/settings';
+    } catch (error) {
+      console.error('Error completing setup:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la finalisation",
+        variant: "destructive"
+      });
+    } finally {
+      setIsCompletingSetup(false);
     }
   };
 
@@ -129,10 +190,11 @@ export const FirstLoginWelcome = () => {
               </div>
 
               <Button
-                onClick={() => window.location.href = '/vet/settings'}
+                onClick={handleCompleteSetup}
+                disabled={isCompletingSetup}
                 className="bg-vet-sage hover:bg-vet-sage/90 text-white"
               >
-                Accéder aux paramètres
+                {isCompletingSetup ? 'Finalisation...' : 'Accéder aux paramètres'}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </div>

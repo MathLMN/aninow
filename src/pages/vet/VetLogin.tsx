@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { ArrowLeft, Heart, Mail, Lock, Loader2, AlertCircle } from "lucide-react
 import { Link, useNavigate } from "react-router-dom";
 import { useVetAuth } from "@/hooks/useVetAuth";
 import { useEffect } from "react";
+import { FirstLoginWelcome } from "@/components/clinic/FirstLoginWelcome";
 
 const VetLogin = () => {
   const navigate = useNavigate();
@@ -17,6 +19,14 @@ const VetLogin = () => {
   const [showResetForm, setShowResetForm] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
 
+  // Check if user needs first login flow
+  const needsFirstLogin = isAuthenticated && user?.user_metadata?.provisional_password === true && user?.user_metadata?.first_login === true;
+
+  // Show first login welcome if needed
+  if (needsFirstLogin) {
+    return <FirstLoginWelcome />;
+  }
+
   // Redirect if already authenticated
   useEffect(() => {
     console.log('🔄 VetLogin useEffect - checking auth status:', {
@@ -24,22 +34,12 @@ const VetLogin = () => {
       adminProfile: !!adminProfile,
       clinicAccess: !!clinicAccess,
       user: !!user,
-      isLoading
+      isLoading,
+      needsFirstLogin
     });
 
-    if (isAuthenticated && !isLoading) {
+    if (isAuthenticated && !isLoading && !needsFirstLogin) {
       console.log('🚀 User is authenticated, determining redirection...');
-      
-      // Check if user has provisional password metadata
-      const hasProvisionalPassword = user?.user_metadata?.provisional_password === true;
-      const isFirstLogin = user?.user_metadata?.first_login === true;
-      
-      if (hasProvisionalPassword && isFirstLogin) {
-        console.log('🔐 First login with provisional password detected, redirecting to welcome page');
-        // For now, redirect to settings since FirstLoginWelcome component exists but isn't routed
-        navigate('/vet/settings');
-        return;
-      }
       
       if (adminProfile) {
         console.log('👨‍💼 Admin user detected, redirecting to settings');
@@ -53,7 +53,7 @@ const VetLogin = () => {
     } else {
       console.log('❌ Not authenticated or still loading:', { isAuthenticated, isLoading });
     }
-  }, [isAuthenticated, adminProfile, clinicAccess, user, navigate, isLoading]);
+  }, [isAuthenticated, adminProfile, clinicAccess, user, navigate, isLoading, needsFirstLogin]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,7 +163,7 @@ const VetLogin = () => {
             <Alert className="mb-6 border-vet-blue/30 bg-vet-blue/10">
               <AlertCircle className="h-4 w-4 text-vet-blue" />
               <AlertDescription className="text-vet-navy text-sm">
-                <strong>Système mis à jour:</strong> Nouvelle gestion des profils utilisateur avec support des comptes manuellement créés
+                <strong>Système mis à jour:</strong> Nouvelle gestion des profils utilisateur avec support complet des comptes provisoires
               </AlertDescription>
             </Alert>
 
