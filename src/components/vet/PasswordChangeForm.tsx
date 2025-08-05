@@ -6,11 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Lock, Loader2, AlertCircle, CheckCircle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { useAdvancedVetAuth } from "@/hooks/useAdvancedVetAuth";
 import { useToast } from "@/hooks/use-toast";
 
 const PasswordChangeForm = () => {
   const { toast } = useToast();
+  const { changePassword } = useAdvancedVetAuth();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -40,34 +41,11 @@ const PasswordChangeForm = () => {
     try {
       console.log('🔄 Tentative de changement de mot de passe...');
       
-      const sessionToken = localStorage.getItem('vet_session_token');
-      const vetUser = localStorage.getItem('vet_user');
-      
-      if (!sessionToken || !vetUser) {
-        throw new Error('Session invalide');
-      }
-
-      const clinic = JSON.parse(vetUser);
-
-      const { data, error } = await supabase.functions.invoke('vet-auth', {
-        body: {
-          action: 'change_password',
-          session_token: sessionToken,
-          email: clinic.email,
-          current_password: currentPassword,
-          new_password: newPassword
-        }
-      });
-
-      console.log('📄 Réponse de la fonction:', { data, error });
+      const { error } = await changePassword(currentPassword, newPassword);
 
       if (error) {
-        console.error('❌ Erreur de la fonction edge:', error);
-        throw new Error(error.message || 'Erreur lors du changement de mot de passe');
-      }
-
-      if (!data || !data.success) {
-        throw new Error(data?.error || 'Échec du changement de mot de passe');
+        console.error('❌ Erreur de changement de mot de passe:', error);
+        throw error;
       }
 
       console.log('✅ Mot de passe changé avec succès');
@@ -95,7 +73,7 @@ const PasswordChangeForm = () => {
       
       if (errorMessage.includes('Mot de passe actuel incorrect')) {
         errorMessage = 'Le mot de passe actuel est incorrect';
-      } else if (errorMessage.includes('Session invalide')) {
+      } else if (errorMessage.includes('Session invalide') || errorMessage.includes('Utilisateur non authentifié')) {
         errorMessage = 'Votre session a expiré, veuillez vous reconnecter';
       }
       
