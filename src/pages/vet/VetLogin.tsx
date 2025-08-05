@@ -8,52 +8,61 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Heart, Mail, Lock, Loader2, AlertCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useVetAuth } from "@/hooks/useVetAuth";
+import { useFirstLoginStatus } from "@/hooks/useFirstLoginStatus";
 import { useEffect } from "react";
-import { FirstLoginWelcome } from "@/components/clinic/FirstLoginWelcome";
 
 const VetLogin = () => {
   const navigate = useNavigate();
   const { signIn, isLoading, isAuthenticated, adminProfile, clinicAccess, user } = useVetAuth();
+  const { needsFirstLogin, isLoading: firstLoginLoading } = useFirstLoginStatus();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showResetForm, setShowResetForm] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
 
-  // Check if user needs first login flow
-  const needsFirstLogin = isAuthenticated && user?.user_metadata?.provisional_password === true && user?.user_metadata?.first_login === true;
-
-  // Show first login welcome if needed
-  if (needsFirstLogin) {
-    return <FirstLoginWelcome />;
-  }
-
-  // Redirect if already authenticated
+  // Redirect logic
   useEffect(() => {
+    const totalLoading = isLoading || firstLoginLoading;
+    
     console.log('🔄 VetLogin useEffect - checking auth status:', {
       isAuthenticated,
       adminProfile: !!adminProfile,
       clinicAccess: !!clinicAccess,
       user: !!user,
       isLoading,
+      firstLoginLoading,
       needsFirstLogin
     });
 
-    if (isAuthenticated && !isLoading && !needsFirstLogin) {
-      console.log('🚀 User is authenticated, determining redirection...');
-      
-      if (adminProfile) {
-        console.log('👨‍💼 Admin user detected, redirecting to settings');
-        navigate('/vet/settings');
-      } else if (clinicAccess) {
-        console.log('🏥 Clinic user detected, redirecting to dashboard');
-        navigate('/vet/dashboard');
-      } else {
-        console.log('⚠️ Authenticated but no valid profile found - staying on login');
-      }
-    } else {
-      console.log('❌ Not authenticated or still loading:', { isAuthenticated, isLoading });
+    if (totalLoading) {
+      console.log('⏳ Still loading, waiting...');
+      return;
     }
-  }, [isAuthenticated, adminProfile, clinicAccess, user, navigate, isLoading, needsFirstLogin]);
+
+    if (!isAuthenticated) {
+      console.log('❌ Not authenticated, staying on login page');
+      return;
+    }
+
+    if (needsFirstLogin) {
+      console.log('🔐 User needs first login, redirecting to first-login');
+      navigate('/vet/first-login');
+      return;
+    }
+
+    // User is authenticated and doesn't need first login
+    console.log('🚀 User is authenticated, determining redirection...');
+    
+    if (adminProfile) {
+      console.log('👨‍💼 Admin user detected, redirecting to settings');
+      navigate('/vet/settings');
+    } else if (clinicAccess) {
+      console.log('🏥 Clinic user detected, redirecting to dashboard');
+      navigate('/vet/dashboard');
+    } else {
+      console.log('⚠️ Authenticated but no valid profile found - staying on login');
+    }
+  }, [isAuthenticated, adminProfile, clinicAccess, user, navigate, isLoading, firstLoginLoading, needsFirstLogin]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,7 +172,7 @@ const VetLogin = () => {
             <Alert className="mb-6 border-vet-blue/30 bg-vet-blue/10">
               <AlertCircle className="h-4 w-4 text-vet-blue" />
               <AlertDescription className="text-vet-navy text-sm">
-                <strong>Système mis à jour:</strong> Nouvelle gestion des profils utilisateur avec support complet des comptes provisoires
+                <strong>Système mis à jour:</strong> Gestion complète des mots de passe provisoires avec validation renforcée
               </AlertDescription>
             </Alert>
 

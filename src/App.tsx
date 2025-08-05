@@ -32,6 +32,7 @@ import VetSettings from '@/pages/vet/VetSettings';
 import VetResetPassword from '@/pages/vet/VetResetPassword';
 import VetLayout from '@/components/layout/VetLayout';
 import VetAdvancedSettings from "@/pages/vet/VetAdvancedSettings";
+import { EnhancedFirstLoginWelcome } from '@/components/clinic/EnhancedFirstLoginWelcome';
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ function App() {
           
           {/* Vet Routes */}
           <Route path="/vet/login" element={<VetLogin />} />
+          <Route path="/vet/first-login" element={<EnhancedFirstLoginWelcome />} />
           <Route path="/vet/reset-password" element={<VetResetPassword />} />
           <Route path="/vet" element={<VetLayout />}>
             <Route path="dashboard" element={<VetDashboard />} />

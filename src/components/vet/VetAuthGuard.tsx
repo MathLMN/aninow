@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useVetAuth } from "@/hooks/useVetAuth";
+import { useFirstLoginStatus } from "@/hooks/useFirstLoginStatus";
 import { Loader2 } from "lucide-react";
 
 interface VetAuthGuardProps {
@@ -9,19 +10,31 @@ interface VetAuthGuardProps {
 }
 
 export const VetAuthGuard = ({ children }: VetAuthGuardProps) => {
-  const { isAuthenticated, isLoading, veterinarian, adminProfile } = useVetAuth();
+  const { isAuthenticated, isLoading: authLoading, veterinarian, adminProfile } = useVetAuth();
+  const { needsFirstLogin, isLoading: firstLoginLoading } = useFirstLoginStatus();
   const navigate = useNavigate();
 
+  const isLoading = authLoading || firstLoginLoading;
+
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (isLoading) return;
+
+    if (!isAuthenticated) {
       console.log('🚫 Access denied, redirecting to login', { 
         isAuthenticated, 
         veterinarian: !!veterinarian, 
         adminProfile: !!adminProfile 
       });
       navigate('/vet/login');
+      return;
     }
-  }, [isAuthenticated, isLoading, veterinarian, adminProfile, navigate]);
+
+    if (needsFirstLogin) {
+      console.log('🔐 User needs first login, redirecting to first-login');
+      navigate('/vet/first-login');
+      return;
+    }
+  }, [isAuthenticated, isLoading, needsFirstLogin, veterinarian, adminProfile, navigate]);
 
   if (isLoading) {
     return (
@@ -34,7 +47,7 @@ export const VetAuthGuard = ({ children }: VetAuthGuardProps) => {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || needsFirstLogin) {
     return null; // Will be redirected by useEffect
   }
 
