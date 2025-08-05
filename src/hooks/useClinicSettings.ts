@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
@@ -112,7 +113,7 @@ export const useClinicSettings = () => {
   const [settings, setSettings] = useState<ClinicSettings>(getDefaultSettings());
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-  const { currentClinicId } = useClinicAccess();
+  const { currentClinicId, refetch: refetchClinicAccess } = useClinicAccess();
 
   const fetchSettings = async () => {
     if (!currentClinicId) {
@@ -128,6 +129,7 @@ export const useClinicSettings = () => {
       const { data, error } = await supabase
         .from('clinic_settings')
         .select('*')
+        .eq('clinic_id', currentClinicId)
         .limit(1)
         .maybeSingle();
 
@@ -201,6 +203,7 @@ export const useClinicSettings = () => {
       const { data: existingData, error: fetchError } = await supabase
         .from('clinic_settings')
         .select('id')
+        .eq('clinic_id', currentClinicId)
         .limit(1)
         .maybeSingle();
 
@@ -271,6 +274,14 @@ export const useClinicSettings = () => {
 
   useEffect(() => {
     fetchSettings();
+  }, [currentClinicId]);
+
+  // Force refetch when clinic access changes
+  useEffect(() => {
+    if (currentClinicId) {
+      console.log('🔄 Clinic ID changed, refetching settings...');
+      fetchSettings();
+    }
   }, [currentClinicId]);
 
   return {

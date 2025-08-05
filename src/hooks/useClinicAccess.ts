@@ -55,7 +55,9 @@ export const useClinicAccess = () => {
       return (data || []) as UserClinicAccess[];
     },
     retry: 3,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0, // Force fresh data
+    refetchOnMount: true, // Always refetch on mount
+    refetchOnWindowFocus: true, // Refetch when window gains focus
   });
 
   // Get the current clinic (first active one)
