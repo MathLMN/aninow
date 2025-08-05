@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,6 +31,8 @@ export const ManuallyCreatedAccountsList = () => {
         .from('admin_clinic_creations')
         .select(`
           id,
+          clinic_id,
+          admin_user_id,
           provisional_password,
           password_changed,
           first_login_completed,
