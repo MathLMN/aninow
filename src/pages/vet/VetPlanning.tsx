@@ -14,9 +14,13 @@ import { CreateAppointmentModal } from "@/components/planning/CreateAppointmentM
 import { PlanningHeader } from "@/components/planning/PlanningHeader";
 import { WeeklyNavigation } from "@/components/planning/WeeklyNavigation";
 import { SlotAssignmentManager } from "@/components/planning/SlotAssignmentManager";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const VetPlanning = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   const {
     currentDate,
     setCurrentDate,
@@ -37,49 +41,97 @@ const VetPlanning = () => {
     getWeekDates
   } = usePlanningLogic();
 
-  // Add debugging logs to identify which hook is causing the error
+  // Add error boundary logic
   useEffect(() => {
     console.log('🏥 VetPlanning component mounted');
     console.log('📅 Current date:', currentDate);
+    setIsLoading(false);
   }, [currentDate]);
 
-  const { bookings, isLoading: bookingsLoading, updateBookingStatus, error: bookingsError } = useVetBookings();
-  const { consultationTypes, isLoading: slotsLoading, error: slotsError } = useSlotManagement();
-  const { veterinarians, isLoading: vetsLoading, error: vetsError } = useClinicVeterinarians();
-  const { assignments, refreshAssignments, error: assignmentsError } = useSlotAssignments(currentDate);
+  // Use safe hook calls with error handling
+  const { 
+    bookings = [], 
+    isLoading: bookingsLoading = false, 
+    updateBookingStatus, 
+    error: bookingsError 
+  } = useVetBookings() || {};
+
+  const { 
+    consultationTypes = [], 
+    isLoading: slotsLoading = false, 
+    error: slotsError 
+  } = useSlotManagement() || {};
+
+  const { 
+    veterinarians = [], 
+    isLoading: vetsLoading = false, 
+    error: vetsError 
+  } = useClinicVeterinarians() || {};
+
+  const { 
+    assignments = [], 
+    refreshAssignments = () => {}, 
+    error: assignmentsError 
+  } = useSlotAssignments(currentDate) || {};
 
   // Log any errors from the hooks
   useEffect(() => {
     if (bookingsError) {
       console.error('❌ Error loading bookings:', bookingsError);
+      setHasError(true);
+      setErrorMessage('Erreur lors du chargement des rendez-vous');
     }
     if (slotsError) {
       console.error('❌ Error loading slots:', slotsError);
+      setHasError(true);
+      setErrorMessage('Erreur lors du chargement des créneaux');
     }
     if (vetsError) {
       console.error('❌ Error loading veterinarians:', vetsError);
+      setHasError(true);
+      setErrorMessage('Erreur lors du chargement des vétérinaires');
     }
     if (assignmentsError) {
       console.error('❌ Error loading assignments:', assignmentsError);
+      // Assignments error is not critical, don't set hasError
     }
   }, [bookingsError, slotsError, vetsError, assignmentsError]);
 
-  const isLoading = bookingsLoading || slotsLoading || vetsLoading;
+  const allLoading = isLoading || bookingsLoading || slotsLoading || vetsLoading;
   const weekDates = getWeekDates();
 
   // Create a wrapper function to handle the status update with correct signature
   const handleUpdateBookingStatus = async (appointmentId: string, status: string, notes?: string): Promise<boolean> => {
     try {
-      updateBookingStatus({ id: appointmentId, status });
-      return true;
+      if (updateBookingStatus) {
+        updateBookingStatus({ id: appointmentId, status });
+        return true;
+      }
+      return false;
     } catch (error) {
       console.error('❌ Error updating booking status:', error);
       return false;
     }
   };
 
+  // Show loading state
+  if (allLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-8">
+          <h2 className="text-xl font-semibold text-vet-navy mb-2">
+            Chargement du planning...
+          </h2>
+          <p className="text-vet-brown">
+            Veuillez patienter pendant le chargement des données.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   // Show error state if any critical data fails to load
-  if (bookingsError || vetsError) {
+  if (hasError) {
     return (
       <div className="space-y-6">
         <div className="text-center py-8">
@@ -87,7 +139,7 @@ const VetPlanning = () => {
             Erreur de chargement
           </h2>
           <p className="text-gray-600 mb-4">
-            Une erreur s'est produite lors du chargement des données du planning.
+            {errorMessage || 'Une erreur s\'est produite lors du chargement des données du planning.'}
           </p>
           <Button 
             onClick={() => window.location.reload()} 
@@ -165,27 +217,31 @@ const VetPlanning = () => {
           bookings={bookings}
           veterinarians={veterinarians}
           filters={filters}
-          isLoading={isLoading}
+          isLoading={allLoading}
           onAppointmentClick={handleAppointmentClick}
           onCreateAppointment={handleCreateAppointment}
         />
       )}
 
       {/* Modales */}
-      <AppointmentDetailsModal
-        appointment={selectedAppointment}
-        isOpen={isDetailsModalOpen}
-        onClose={() => setIsDetailsModalOpen(false)}
-        onUpdateStatus={handleUpdateBookingStatus}
-      />
+      {selectedAppointment && (
+        <AppointmentDetailsModal
+          appointment={selectedAppointment}
+          isOpen={isDetailsModalOpen}
+          onClose={() => setIsDetailsModalOpen(false)}
+          onUpdateStatus={handleUpdateBookingStatus}
+        />
+      )}
 
-      <CreateAppointmentModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        defaultData={selectedAppointment}
-        veterinarians={veterinarians}
-        consultationTypes={consultationTypes}
-      />
+      {selectedAppointment && (
+        <CreateAppointmentModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          defaultData={selectedAppointment}
+          veterinarians={veterinarians}
+          consultationTypes={consultationTypes}
+        />
+      )}
     </div>
   );
 };
