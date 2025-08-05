@@ -2,21 +2,28 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Crown } from "lucide-react";
+import { Building2, Crown, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useClinicAccess } from "@/hooks/useClinicAccess";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { ManualClinicCreationModal } from "@/components/admin/ManualClinicCreationModal";
 import { NoClinicAssigned } from "./NoClinicAssigned";
 
 export const ClinicSelector = () => {
-  const { clinicAccess, currentClinic, isLoading } = useClinicAccess();
+  const { clinicAccess, currentClinic, isLoading, refetch } = useClinicAccess();
   const { isAdmin: isGlobalAdmin } = useAdminAuth();
+
+  console.log('🏥 ClinicSelector - Current clinic:', currentClinic);
+  console.log('📋 ClinicSelector - Clinic access:', clinicAccess);
 
   if (isLoading) {
     return (
       <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
         <CardContent className="p-6">
-          <div className="text-center text-vet-brown">Chargement des informations de la clinique...</div>
+          <div className="flex items-center justify-center space-x-2 text-vet-brown">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            <span>Chargement des informations de la clinique...</span>
+          </div>
         </CardContent>
       </Card>
     );
@@ -32,9 +39,19 @@ export const ClinicSelector = () => {
               <Crown className="h-5 w-5 mr-2 text-amber-500" />
               Administrateur global
             </div>
-            <Badge variant="outline" className="border-amber-500 text-amber-600">
-              Admin AniNow
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="border-amber-500 text-amber-600">
+                Admin AniNow
+              </Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => refetch()}
+                className="text-vet-blue hover:bg-vet-blue/10"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -43,6 +60,11 @@ export const ClinicSelector = () => {
               <p className="text-vet-brown">
                 Vous êtes connecté en tant qu'administrateur global AniNow. Vous avez accès à tous les outils d'administration pour gérer les comptes cliniques.
               </p>
+              {clinicAccess.length > 0 && (
+                <p className="text-sm text-amber-600 mt-2">
+                  ⚠️ Problème de chargement des données de clinique détecté. Cliquez sur le bouton de rafraîchissement.
+                </p>
+              )}
             </div>
             
             <div className="flex items-center justify-end">
@@ -81,6 +103,14 @@ export const ClinicSelector = () => {
             >
               {isGlobalAdmin ? "Admin AniNow" : "Utilisateur"}
             </Badge>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => refetch()}
+              className="text-vet-blue hover:bg-vet-blue/10"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
           </div>
         </CardTitle>
       </CardHeader>
@@ -102,7 +132,7 @@ export const ClinicSelector = () => {
                   Vous avez accès à {clinicAccess.length} clinique{clinicAccess.length > 1 ? 's' : ''}
                 </p>
               )}
-              {isGlobalAdmin && !currentClinic && (
+              {isGlobalAdmin && currentClinic && (
                 <p className="text-sm text-vet-brown">
                   <Crown className="h-4 w-4 inline mr-1" />
                   Accès administrateur à toutes les fonctionnalités

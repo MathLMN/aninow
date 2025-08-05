@@ -16,7 +16,7 @@ interface UserClinicAccess {
     name: string;
     created_at: string;
     updated_at: string;
-  };
+  } | null;
 }
 
 export const useClinicAccess = () => {
@@ -36,7 +36,7 @@ export const useClinicAccess = () => {
         .from('user_clinic_access')
         .select(`
           *,
-          clinics (
+          clinics!inner (
             id,
             name,
             created_at,
@@ -52,6 +52,7 @@ export const useClinicAccess = () => {
       }
 
       console.log('✅ Clinic access loaded:', data?.length || 0, 'items');
+      console.log('📊 Raw data:', data);
       return (data || []) as UserClinicAccess[];
     },
     retry: 3,
@@ -63,6 +64,9 @@ export const useClinicAccess = () => {
   // Get the current clinic (first active one)
   const currentClinic = clinicAccess?.[0]?.clinics || null;
   const currentClinicId = currentClinic?.id || null;
+
+  console.log('🏥 Current clinic from hook:', currentClinic);
+  console.log('🆔 Current clinic ID from hook:', currentClinicId);
 
   return {
     clinicAccess: clinicAccess || [],
