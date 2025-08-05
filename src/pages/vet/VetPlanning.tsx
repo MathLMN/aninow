@@ -1,7 +1,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
+import { Settings, AlertCircle } from "lucide-react";
 import { useVetBookings } from "@/hooks/useVetBookings";
 import { useSlotManagement } from "@/hooks/useSlotManagement";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
@@ -14,6 +14,7 @@ import { CreateAppointmentModal } from "@/components/planning/CreateAppointmentM
 import { PlanningHeader } from "@/components/planning/PlanningHeader";
 import { WeeklyNavigation } from "@/components/planning/WeeklyNavigation";
 import { SlotAssignmentManager } from "@/components/planning/SlotAssignmentManager";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useEffect, useState } from "react";
 
 const VetPlanning = () => {
@@ -65,7 +66,8 @@ const VetPlanning = () => {
   const { 
     veterinarians = [], 
     isLoading: vetsLoading = false, 
-    error: vetsError 
+    error: vetsError,
+    refetch: refetchVeterinarians
   } = useClinicVeterinarians() || {};
 
   const { 
@@ -152,6 +154,9 @@ const VetPlanning = () => {
     );
   }
 
+  // Check if no veterinarians are loaded and show a helpful message
+  const canManageAssignments = veterinarians && veterinarians.length > 0;
+
   return (
     <div className="space-y-6">
       {/* En-tête */}
@@ -162,20 +167,44 @@ const VetPlanning = () => {
         />
         
         {viewMode === 'daily' && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowAssignmentManager(!showAssignmentManager)}
-            className="flex items-center gap-2"
-          >
-            <Settings className="h-4 w-4" />
-            {showAssignmentManager ? 'Masquer' : 'Gérer'} les attributions
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowAssignmentManager(!showAssignmentManager)}
+              className="flex items-center gap-2"
+              disabled={!canManageAssignments}
+            >
+              <Settings className="h-4 w-4" />
+              {showAssignmentManager ? 'Masquer' : 'Gérer'} les attributions
+            </Button>
+            {!canManageAssignments && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => refetchVeterinarians?.()}
+                className="flex items-center gap-2"
+              >
+                <AlertCircle className="h-4 w-4" />
+                Actualiser
+              </Button>
+            )}
+          </div>
         )}
       </div>
 
+      {/* Alert si aucun vétérinaire n'est disponible */}
+      {viewMode === 'daily' && !canManageAssignments && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Aucun vétérinaire actif n'a été trouvé. Veuillez ajouter des vétérinaires dans la section Paramètres pour pouvoir gérer les attributions de créneaux.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Gestionnaire d'attributions - visible uniquement en vue quotidienne */}
-      {viewMode === 'daily' && showAssignmentManager && (
+      {viewMode === 'daily' && showAssignmentManager && canManageAssignments && (
         <SlotAssignmentManager
           assignments={assignments}
           veterinarians={veterinarians}

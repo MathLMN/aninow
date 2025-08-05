@@ -2,23 +2,33 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useClinicAccess } from './useClinicAccess';
 
 export const useSlotAssignments = (selectedDate: Date) => {
   const [assignments, setAssignments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const { currentClinicId } = useClinicAccess();
 
   const fetchAssignments = async () => {
     try {
       setIsLoading(true);
       setError(null);
+      
+      if (!currentClinicId) {
+        console.log('❌ No clinic ID available for slot assignments');
+        setAssignments([]);
+        return;
+      }
+
       console.log('🔄 Fetching slot assignments for date:', selectedDate.toISOString().split('T')[0]);
       
       const { data, error: fetchError } = await supabase
         .from('slot_assignments')
         .select('*')
-        .eq('date', selectedDate.toISOString().split('T')[0]);
+        .eq('date', selectedDate.toISOString().split('T')[0])
+        .or(`clinic_id.eq.${currentClinicId},clinic_id.is.null`);
 
       if (fetchError) {
         console.error('❌ Error fetching slot assignments:', fetchError);
@@ -26,7 +36,7 @@ export const useSlotAssignments = (selectedDate: Date) => {
         throw fetchError;
       }
 
-      console.log('✅ Slot assignments loaded:', data);
+      console.log('✅ Slot assignments loaded:', data?.length || 0, 'items');
       setAssignments(data || []);
     } catch (err: any) {
       console.error('❌ Failed to fetch slot assignments:', err);
@@ -38,13 +48,18 @@ export const useSlotAssignments = (selectedDate: Date) => {
   };
 
   useEffect(() => {
-    if (selectedDate) {
+    if (selectedDate && currentClinicId) {
       fetchAssignments();
+    } else {
+      setAssignments([]);
+      setIsLoading(false);
     }
-  }, [selectedDate]);
+  }, [selectedDate, currentClinicId]);
 
   const refreshAssignments = () => {
-    fetchAssignments();
+    if (currentClinicId) {
+      fetchAssignments();
+    }
   };
 
   return {

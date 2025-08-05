@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -19,9 +18,16 @@ export const useClinicVeterinarians = () => {
     queryFn: async () => {
       console.log('🔄 Fetching clinic veterinarians for clinic:', currentClinicId);
       
+      if (!currentClinicId) {
+        console.log('❌ No clinic ID available');
+        return [];
+      }
+
       const { data, error } = await supabase
         .from('clinic_veterinarians')
         .select('*')
+        .eq('clinic_id', currentClinicId)
+        .eq('is_active', true)
         .order('name', { ascending: true });
 
       if (error) {
@@ -33,6 +39,8 @@ export const useClinicVeterinarians = () => {
       return data || [];
     },
     enabled: !!currentClinicId,
+    retry: 3,
+    staleTime: 30 * 1000, // 30 seconds
   });
 
   const addVeterinarianMutation = useMutation({
