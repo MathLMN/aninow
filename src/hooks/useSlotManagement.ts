@@ -19,54 +19,53 @@ export const useSlotManagement = () => {
 
   const fetchVeterinarians = async () => {
     try {
+      console.log('🔄 Fetching veterinarians...');
       const { data, error } = await supabase
         .from('clinic_veterinarians')
         .select('*')
         .eq('is_active', true)
         .order('name')
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Error fetching veterinarians:', error);
+        throw error;
+      }
+      console.log('✅ Veterinarians loaded:', data?.length || 0);
       setVeterinarians(data || [])
     } catch (err: any) {
-      console.error('Erreur lors du chargement des vétérinaires:', err)
+      console.error('❌ Failed to fetch veterinarians:', err)
       setError(err.message)
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les vétérinaires",
-        variant: "destructive"
-      })
+      // Don't show toast for this error, it's handled by the main component
     }
   }
 
   const fetchConsultationTypes = async () => {
     try {
+      console.log('🔄 Fetching consultation types...');
       const { data, error } = await supabase
         .from('consultation_types')
         .select('*')
         .order('name')
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Error fetching consultation types:', error);
+        throw error;
+      }
+      console.log('✅ Consultation types loaded:', data?.length || 0);
       setConsultationTypes(data || [])
     } catch (err: any) {
-      console.error('Erreur lors du chargement des types de consultation:', err)
+      console.error('❌ Failed to fetch consultation types:', err)
       setError(err.message)
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les types de consultation",
-        variant: "destructive"
-      })
+      // Don't show toast for this error, it's handled by the main component
     }
   }
 
   const fetchAvailableSlots = async (date?: string) => {
     try {
+      console.log('🔄 Fetching available slots...');
       let query = supabase
         .from('available_slots')
-        .select(`
-          *,
-          clinic_veterinarians(name),
-          consultation_types(name, duration_minutes, color)
-        `)
+        .select('*')
         .order('date')
         .order('start_time')
 
@@ -76,28 +75,33 @@ export const useSlotManagement = () => {
 
       const { data, error } = await query
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Error fetching slots:', error);
+        throw error;
+      }
+      console.log('✅ Available slots loaded:', data?.length || 0);
       setAvailableSlots(data || [])
     } catch (err: any) {
-      console.error('Erreur lors du chargement des créneaux:', err)
+      console.error('❌ Failed to fetch available slots:', err)
       setError(err.message)
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les créneaux",
-        variant: "destructive"
-      })
+      // Don't show toast for this error, it's handled by the main component
     }
   }
 
   const createSlot = async (slotData: Omit<SlotInsert, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      console.log('🔄 Creating slot:', slotData);
       const { data, error } = await supabase
         .from('available_slots')
         .insert([slotData])
         .select()
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Error creating slot:', error);
+        throw error;
+      }
 
+      console.log('✅ Slot created:', data);
       toast({
         title: "Créneau créé",
         description: "Le créneau a été ajouté avec succès",
@@ -107,7 +111,7 @@ export const useSlotManagement = () => {
       await fetchAvailableSlots()
       return true
     } catch (err: any) {
-      console.error('Erreur lors de la création du créneau:', err)
+      console.error('❌ Failed to create slot:', err)
       setError(err.message)
       toast({
         title: "Erreur",
@@ -120,13 +124,18 @@ export const useSlotManagement = () => {
 
   const deleteSlot = async (slotId: string) => {
     try {
+      console.log('🔄 Deleting slot:', slotId);
       const { error } = await supabase
         .from('available_slots')
         .delete()
         .eq('id', slotId)
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Error deleting slot:', error);
+        throw error;
+      }
 
+      console.log('✅ Slot deleted');
       toast({
         title: "Créneau supprimé",
         description: "Le créneau a été supprimé avec succès",
@@ -136,7 +145,7 @@ export const useSlotManagement = () => {
       await fetchAvailableSlots()
       return true
     } catch (err: any) {
-      console.error('Erreur lors de la suppression du créneau:', err)
+      console.error('❌ Failed to delete slot:', err)
       setError(err.message)
       toast({
         title: "Erreur",
@@ -149,14 +158,23 @@ export const useSlotManagement = () => {
 
   useEffect(() => {
     const loadData = async () => {
+      console.log('🔄 Loading slot management data...');
       setIsLoading(true)
       setError(null)
-      await Promise.all([
-        fetchVeterinarians(),
-        fetchConsultationTypes(),
-        fetchAvailableSlots()
-      ])
-      setIsLoading(false)
+      
+      try {
+        await Promise.all([
+          fetchVeterinarians(),
+          fetchConsultationTypes(),
+          fetchAvailableSlots()
+        ])
+        console.log('✅ All slot management data loaded successfully');
+      } catch (err: any) {
+        console.error('❌ Failed to load slot management data:', err);
+        setError(err.message || 'Erreur lors du chargement des données')
+      } finally {
+        setIsLoading(false)
+      }
     }
 
     loadData()
