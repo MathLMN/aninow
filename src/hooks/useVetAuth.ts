@@ -1,15 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-
-interface VeterinarianProfile {
-  id: string;
-  name: string;
-  specialty?: string;
-  email: string;
-  is_active: boolean;
-}
 
 interface AdminProfile {
   id: string;
@@ -19,11 +12,21 @@ interface AdminProfile {
   is_active: boolean;
 }
 
+interface ClinicAccess {
+  id: string;
+  user_id: string;
+  clinic_id: string;
+  role: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export const useVetAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [veterinarian, setVeterinarian] = useState<VeterinarianProfile | null>(null);
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
+  const [clinicAccess, setClinicAccess] = useState<ClinicAccess | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -44,8 +47,8 @@ export const useVetAuth = () => {
           }, 0);
         } else {
           console.log('🚪 User logged out, clearing profiles');
-          setVeterinarian(null);
           setAdminProfile(null);
+          setClinicAccess(null);
         }
       }
     );
@@ -73,56 +76,45 @@ export const useVetAuth = () => {
       console.log('🔄 Starting profile fetch for user:', userId);
       setIsLoading(true);
       
-      // First, try to get veterinarian profile
-      console.log('🩺 Checking for veterinarian profile...');
-      const { data: authLink, error: linkError } = await supabase
-        .from('veterinarian_auth_users')
-        .select(`
-          veterinarian:clinic_veterinarians(
-            id,
-            name,
-            specialty,
-            email,
-            is_active
-          )
-        `)
-        .eq('user_id', userId)
-        .single();
-
-      console.log('🩺 Veterinarian query result:', { authLink, linkError });
-
-      if (!linkError && authLink?.veterinarian) {
-        console.log('✅ Veterinarian profile found:', authLink.veterinarian);
-        setVeterinarian(authLink.veterinarian as VeterinarianProfile);
-        setIsLoading(false);
-        return;
-      }
-
-      // If no veterinarian profile, check for admin profile
-      console.log('👨‍💼 No veterinarian profile found, checking for admin profile...');
-      
+      // First, check for admin profile
+      console.log('👨‍💼 Checking for admin profile...');
       const { data: adminData, error: adminError } = await supabase
         .from('admin_users')
         .select('*')
         .eq('user_id', userId)
         .eq('is_active', true)
-        .single();
+        .maybeSingle();
 
       console.log('👨‍💼 Admin query result:', { adminData, adminError });
 
       if (!adminError && adminData) {
         console.log('✅ Admin profile found:', adminData);
         setAdminProfile(adminData);
+        setIsLoading(false);
+        return;
+      }
+
+      // If no admin profile, check for clinic access
+      console.log('🏥 No admin profile found, checking for clinic access...');
+      
+      const { data: clinicData, error: clinicError } = await supabase
+        .from('user_clinic_access')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      console.log('🏥 Clinic access query result:', { clinicData, clinicError });
+
+      if (!clinicError && clinicData) {
+        console.log('✅ Clinic access found:', clinicData);
+        setClinicAccess(clinicData);
       } else {
-        console.log('❌ No admin profile found');
+        console.log('❌ No clinic access found');
         console.log('🔍 Final status: No valid profile found for user ID:', userId);
-        console.log('🗃️ Available tables to check:');
-        console.log('   - veterinarian_auth_users (checked)');
-        console.log('   - admin_users (checked)');
-        
-        // Let's also check what tables exist and what data might be there
-        const { data: tables } = await supabase.rpc('get_table_info');
-        console.log('📋 Database tables info:', tables);
+        console.log('🗃️ User should have either:');
+        console.log('   - admin_users entry (for global admins)');
+        console.log('   - user_clinic_access entry (for clinic users)');
       }
       
       setIsLoading(false);
@@ -194,8 +186,8 @@ export const useVetAuth = () => {
       console.log('✅ Sign out successful');
       setUser(null);
       setSession(null);
-      setVeterinarian(null);
       setAdminProfile(null);
+      setClinicAccess(null);
       
       toast({
         title: "Déconnexion",
@@ -268,13 +260,13 @@ export const useVetAuth = () => {
     }
   };
 
-  // User is authenticated if they have either a veterinarian profile OR an admin profile
-  const isAuthenticated = !!user && (!!veterinarian || !!adminProfile);
+  // User is authenticated if they have either admin profile OR clinic access
+  const isAuthenticated = !!user && (!!adminProfile || !!clinicAccess);
 
   console.log('🎯 Current auth status:', {
     user: !!user,
-    veterinarian: !!veterinarian,
     adminProfile: !!adminProfile,
+    clinicAccess: !!clinicAccess,
     isAuthenticated,
     isLoading
   });
@@ -282,8 +274,9 @@ export const useVetAuth = () => {
   return {
     user,
     session,
-    veterinarian,
+    veterinarian: null, // Deprecated - kept for backward compatibility
     adminProfile,
+    clinicAccess,
     isAdmin: !!adminProfile,
     isLoading,
     isAuthenticated,
