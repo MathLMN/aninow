@@ -24,6 +24,7 @@ export type Database = {
           id: string
           password_changed: boolean | null
           provisional_password: string
+          updated_at: string
         }
         Insert: {
           admin_user_id: string
@@ -34,6 +35,7 @@ export type Database = {
           id?: string
           password_changed?: boolean | null
           provisional_password: string
+          updated_at?: string
         }
         Update: {
           admin_user_id?: string
@@ -44,8 +46,16 @@ export type Database = {
           id?: string
           password_changed?: boolean | null
           provisional_password?: string
+          updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "admin_clinic_creations_admin_user_id_fkey"
+            columns: ["admin_user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "admin_clinic_creations_clinic_id_fkey"
             columns: ["clinic_id"]
@@ -850,38 +860,6 @@ export type Database = {
             foreignKeyName: "veterinarian_absences_veterinarian_id_fkey"
             columns: ["veterinarian_id"]
             isOneToOne: false
-            referencedRelation: "clinic_veterinarians"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      veterinarian_auth_users: {
-        Row: {
-          created_at: string
-          id: string
-          updated_at: string
-          user_id: string
-          veterinarian_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          updated_at?: string
-          user_id: string
-          veterinarian_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          updated_at?: string
-          user_id?: string
-          veterinarian_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "veterinarian_auth_users_veterinarian_id_fkey"
-            columns: ["veterinarian_id"]
-            isOneToOne: true
             referencedRelation: "clinic_veterinarians"
             referencedColumns: ["id"]
           },
