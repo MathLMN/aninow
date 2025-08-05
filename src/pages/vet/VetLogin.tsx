@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ArrowLeft, Heart, Mail, Lock, Loader2, AlertCircle } from "lucide-react";
+import { ArrowLeft, Heart, Mail, Lock, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useVetAuth } from "@/hooks/useVetAuth";
 import { useFirstLoginStatus } from "@/hooks/useFirstLoginStatus";
@@ -17,6 +17,7 @@ const VetLogin = () => {
   const { needsFirstLogin, isLoading: firstLoginLoading } = useFirstLoginStatus();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [showResetForm, setShowResetForm] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
 
@@ -200,14 +201,22 @@ const VetLogin = () => {
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-vet-brown" />
                   <Input
                     id="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     placeholder="Votre mot de passe"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage"
+                    className="pl-10 pr-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage"
                     required
                     disabled={isLoading}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-vet-brown hover:text-vet-navy transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
                 </div>
               </div>
 
