@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,27 +21,40 @@ const VetLogin = () => {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      console.log('🔄 User is authenticated, redirecting...', { veterinarian, adminProfile });
+    console.log('🔄 VetLogin useEffect - checking auth status:', {
+      isAuthenticated,
+      veterinarian: !!veterinarian,
+      adminProfile: !!adminProfile,
+      isLoading
+    });
+
+    if (isAuthenticated && !isLoading) {
+      console.log('🚀 User is authenticated, starting redirection...');
       
       if (adminProfile) {
-        // Admin users go to settings page where they can access admin dashboard
+        console.log('👨‍💼 Admin user detected, redirecting to settings');
         navigate('/vet/settings');
       } else if (veterinarian) {
-        // Veterinarians go to dashboard
+        console.log('🩺 Veterinarian detected, redirecting to dashboard');
         navigate('/vet/dashboard');
+      } else {
+        console.log('⚠️ Authenticated but no profile found - this should not happen');
       }
+    } else {
+      console.log('❌ Not authenticated or still loading:', { isAuthenticated, isLoading });
     }
-  }, [isAuthenticated, veterinarian, adminProfile, navigate]);
+  }, [isAuthenticated, veterinarian, adminProfile, navigate, isLoading]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('🔄 Starting login process');
+    console.log('🔄 Starting login process for:', email);
     const { error } = await signIn(email, password);
     
     if (!error) {
       console.log('✅ Login successful, redirection will be handled by useEffect');
+    } else {
+      console.log('❌ Login failed:', error);
     }
   };
 
@@ -144,7 +156,7 @@ const VetLogin = () => {
                 <Alert className="mb-6 border-vet-blue/30 bg-vet-blue/10">
                   <AlertCircle className="h-4 w-4 text-vet-blue" />
                   <AlertDescription className="text-vet-navy text-sm">
-                    <strong>Nouveau système:</strong> Utilisez vos identifiants Supabase Auth pour vous connecter
+                    <strong>Diagnostic en cours:</strong> Vérification des profils utilisateur après connexion
                   </AlertDescription>
                 </Alert>
 

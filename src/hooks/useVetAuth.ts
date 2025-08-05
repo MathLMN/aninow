@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,15 +32,18 @@ export const useVetAuth = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log('🔄 Auth state change:', event, session?.user?.email);
+        console.log('📊 Full session object:', session);
         setSession(session);
         setUser(session?.user ?? null);
         
         // Fetch profile when user logs in
         if (session?.user) {
+          console.log('👤 User authenticated, fetching profile for user ID:', session.user.id);
           setTimeout(() => {
             fetchUserProfile(session.user.id);
           }, 0);
         } else {
+          console.log('🚪 User logged out, clearing profiles');
           setVeterinarian(null);
           setAdminProfile(null);
         }
@@ -50,13 +52,15 @@ export const useVetAuth = () => {
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('📄 Initial session:', session?.user?.email);
+      console.log('📄 Initial session check:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
+        console.log('👤 Found existing session, fetching profile for user ID:', session.user.id);
         fetchUserProfile(session.user.id);
       } else {
+        console.log('❌ No existing session found');
         setIsLoading(false);
       }
     });
@@ -66,9 +70,11 @@ export const useVetAuth = () => {
 
   const fetchUserProfile = async (userId: string) => {
     try {
-      console.log('🔄 Fetching user profile for user:', userId);
+      console.log('🔄 Starting profile fetch for user:', userId);
+      setIsLoading(true);
       
       // First, try to get veterinarian profile
+      console.log('🩺 Checking for veterinarian profile...');
       const { data: authLink, error: linkError } = await supabase
         .from('veterinarian_auth_users')
         .select(`
@@ -83,15 +89,17 @@ export const useVetAuth = () => {
         .eq('user_id', userId)
         .single();
 
+      console.log('🩺 Veterinarian query result:', { authLink, linkError });
+
       if (!linkError && authLink?.veterinarian) {
-        console.log('✅ Veterinarian profile loaded:', authLink.veterinarian);
+        console.log('✅ Veterinarian profile found:', authLink.veterinarian);
         setVeterinarian(authLink.veterinarian as VeterinarianProfile);
         setIsLoading(false);
         return;
       }
 
       // If no veterinarian profile, check for admin profile
-      console.log('🔄 No veterinarian profile found, checking for admin profile');
+      console.log('👨‍💼 No veterinarian profile found, checking for admin profile...');
       
       const { data: adminData, error: adminError } = await supabase
         .from('admin_users')
@@ -100,16 +108,27 @@ export const useVetAuth = () => {
         .eq('is_active', true)
         .single();
 
+      console.log('👨‍💼 Admin query result:', { adminData, adminError });
+
       if (!adminError && adminData) {
-        console.log('✅ Admin profile loaded:', adminData);
+        console.log('✅ Admin profile found:', adminData);
         setAdminProfile(adminData);
       } else {
-        console.log('❌ No valid profile found for user');
+        console.log('❌ No admin profile found');
+        console.log('🔍 Final status: No valid profile found for user ID:', userId);
+        console.log('🗃️ Available tables to check:');
+        console.log('   - veterinarian_auth_users (checked)');
+        console.log('   - admin_users (checked)');
+        
+        // Let's also check what tables exist and what data might be there
+        const { data: tables } = await supabase.rpc('get_table_info');
+        console.log('📋 Database tables info:', tables);
       }
       
       setIsLoading(false);
     } catch (error) {
       console.error('❌ Error in fetchUserProfile:', error);
+      console.error('🚨 This might be a database structure issue');
       setIsLoading(false);
     }
   };
@@ -136,7 +155,8 @@ export const useVetAuth = () => {
         return { error };
       }
 
-      console.log('✅ Sign in successful');
+      console.log('✅ Sign in successful for user:', data.user?.email);
+      console.log('🎯 User ID:', data.user?.id);
       toast({
         title: "Connexion réussie",
         description: "Bienvenue !",
@@ -152,7 +172,7 @@ export const useVetAuth = () => {
       });
       return { error };
     } finally {
-      setIsLoading(false);
+      // Don't set loading to false here, let the auth state change handle it
     }
   };
 
@@ -250,6 +270,14 @@ export const useVetAuth = () => {
 
   // User is authenticated if they have either a veterinarian profile OR an admin profile
   const isAuthenticated = !!user && (!!veterinarian || !!adminProfile);
+
+  console.log('🎯 Current auth status:', {
+    user: !!user,
+    veterinarian: !!veterinarian,
+    adminProfile: !!adminProfile,
+    isAuthenticated,
+    isLoading
+  });
 
   return {
     user,
