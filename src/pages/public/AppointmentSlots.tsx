@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -117,7 +116,7 @@ const AppointmentSlots = () => {
 
       <main className="container mx-auto px-3 sm:px-6 pt-20 sm:pt-24 pb-8">
         <div className="max-w-4xl mx-auto">
-          <ProgressBar value={100} />
+          <ProgressBar currentStep={7} totalSteps={7} />
 
           {/* Bouton retour cohérent avec les autres pages */}
           <div className="mb-4 sm:mb-6">

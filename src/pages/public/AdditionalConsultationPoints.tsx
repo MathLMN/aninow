@@ -86,7 +86,7 @@ const AdditionalConsultationPoints = () => {
 
       <main className="container mx-auto px-3 sm:px-6 pt-20 sm:pt-24 py-4 sm:py-6 pb-20">
         <div className="max-w-2xl mx-auto">
-          <ProgressBar value={71.4} />
+          <ProgressBar currentStep={5} totalSteps={7} />
           
           {/* Titre */}
           <div className="text-center mb-4 sm:mb-8 animate-fade-in">
