@@ -219,7 +219,7 @@ export type Database = {
           client_email: string
           client_name: string
           client_phone: string
-          clinic_id: string | null
+          clinic_id: string
           conditional_answers: Json | null
           consultation_reason: string
           consultation_type_id: string | null
@@ -274,7 +274,7 @@ export type Database = {
           client_email: string
           client_name: string
           client_phone: string
-          clinic_id?: string | null
+          clinic_id: string
           conditional_answers?: Json | null
           consultation_reason: string
           consultation_type_id?: string | null
@@ -329,7 +329,7 @@ export type Database = {
           client_email?: string
           client_name?: string
           client_phone?: string
-          clinic_id?: string | null
+          clinic_id?: string
           conditional_answers?: Json | null
           consultation_reason?: string
           consultation_type_id?: string | null
@@ -498,18 +498,21 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          slug: string
           updated_at: string
         }
         Insert: {
           created_at?: string
           id?: string
           name: string
+          slug: string
           updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
+          slug?: string
           updated_at?: string
         }
         Relationships: []
@@ -885,6 +888,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_clinic_by_slug: {
+        Args: { clinic_slug: string }
+        Returns: {
+          id: string
+          name: string
+          slug: string
+          created_at: string
+          updated_at: string
+        }[]
+      }
       get_user_clinic_id: {
         Args: Record<PropertyKey, never>
         Returns: string

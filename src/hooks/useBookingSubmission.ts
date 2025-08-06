@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
+import { useClinicContext } from '@/contexts/ClinicContext'
 import type { Database } from '@/integrations/supabase/types'
 
 type BookingInsert = Database['public']['Tables']['bookings']['Insert']
@@ -15,15 +16,22 @@ interface BookingSubmissionResult {
 export const useBookingSubmission = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
+  const { currentClinic } = useClinicContext()
 
   const submitBooking = async (bookingData: any): Promise<BookingSubmissionResult> => {
     setIsSubmitting(true)
     
     try {
       console.log('Submitting booking data:', bookingData)
+      console.log('Current clinic:', currentClinic)
+
+      if (!currentClinic) {
+        throw new Error('Aucune clinique sélectionnée')
+      }
       
-      // Préparer les données avec le bon mapping des colonnes
+      // Préparer les données avec le bon mapping des colonnes et l'ID de la clinique
       const bookingInsert: BookingInsert = {
+        clinic_id: currentClinic.id,
         animal_species: bookingData.animalSpecies || bookingData.animal_species,
         animal_name: bookingData.animalName || bookingData.animal_name || '',
         custom_species: bookingData.customSpecies || bookingData.custom_species,

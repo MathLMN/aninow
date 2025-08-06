@@ -10,13 +10,13 @@ import { useBookingFormLogic } from '../hooks/useBookingFormLogic';
 import { validateBookingForm } from '../utils/formValidation';
 import { FormData } from '../types/FormDataTypes';
 import { useBookingFormData } from '../hooks/useBookingFormData';
+import { useMultiTenantBookingNavigation } from '../hooks/useMultiTenantBookingNavigation';
+import { useLocation } from 'react-router-dom';
 
-const BookingForm = ({
-  onNext
-}: {
-  onNext: (data: FormData) => void;
-}) => {
+const BookingForm = () => {
+  const location = useLocation();
   const { bookingData, updateBookingData } = useBookingFormData();
+  const { navigateNext } = useMultiTenantBookingNavigation();
   
   const {
     formData,
@@ -54,7 +54,7 @@ const BookingForm = ({
       } : formData;
       
       updateBookingData(dataToSave);
-      onNext(dataToSave);
+      navigateNext(location.pathname);
     }
   };
 
