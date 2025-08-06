@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { ProgressBar } from '@/components/ProgressBar';
-import { Header } from '@/components/Header';
+import ProgressBar from '@/components/ProgressBar';
+import Header from '@/components/Header';
 import BookingForm from '@/components/BookingForm';
 
 const BookingStart = () => {
