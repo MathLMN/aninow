@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, Smartphone } from "lucide-react";
 import { Link } from "react-router-dom";
+import ClinicAppointmentButton from "./ClinicAppointmentButton";
 
 const HeroSection = () => {
   return (
@@ -36,20 +37,8 @@ const HeroSection = () => {
               </span>
             </p>
 
-            <div className="space-y-6 sm:space-y-8">
-              <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-4 justify-start">
-                <Link to="/booking">
-                  <Button size="lg" className="bg-[#1B1B3A] hover:bg-[#1B1B3A]/90 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg transition-all duration-200 transform hover:scale-105 text-sm sm:text-base">
-                    <Calendar className="mr-2 h-5 w-5" />
-                    Prendre rendez-vous
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-                <div className="flex items-center text-gray-600 text-sm sm:text-base">
-                  <Smartphone className="h-4 w-4 mr-2" />
-                  <span>Gratuit et sans inscription</span>
-                </div>
-              </div>
+            <div className="mt-8 sm:mt-10 flex flex-col items-start">
+              <ClinicAppointmentButton />
             </div>
           </div>
 

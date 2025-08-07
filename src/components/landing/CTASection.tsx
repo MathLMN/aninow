@@ -1,7 +1,6 @@
 
-import { Button } from "@/components/ui/button";
-import { Heart, ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Heart } from "lucide-react";
+import ClinicAppointmentButton from "./ClinicAppointmentButton";
 
 const CTASection = () => {
   return (
@@ -16,16 +15,9 @@ const CTASection = () => {
             votre créneau en moins de 3 minutes.
           </p>
           
-          <Link to="/booking">
-            <Button 
-              size="lg"
-              className="bg-vet-sage hover:bg-vet-sage/90 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
-            >
-              <Heart className="mr-2 h-5 w-5" />
-              Commencer maintenant
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
+          <div className="flex justify-center">
+            <ClinicAppointmentButton />
+          </div>
         </div>
       </div>
     </section>

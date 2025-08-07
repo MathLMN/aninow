@@ -6,6 +6,7 @@ export interface Database {
           id: string
           created_at: string
           updated_at: string
+          clinic_id: string
           animal_species: string
           animal_name: string
           custom_species?: string
@@ -57,6 +58,7 @@ export interface Database {
           id?: string
           created_at?: string
           updated_at?: string
+          clinic_id: string
           animal_species: string
           animal_name: string
           custom_species?: string
@@ -108,6 +110,7 @@ export interface Database {
           id?: string
           created_at?: string
           updated_at?: string
+          clinic_id?: string
           animal_species?: string
           animal_name?: string
           custom_species?: string
@@ -154,6 +157,29 @@ export interface Database {
           urgency_score?: number
           recommended_actions?: string[]
           veterinarian_id?: string
+        }
+      }
+      clinics: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          created_at?: string
+          updated_at?: string
         }
       }
       ai_analysis_logs: {
