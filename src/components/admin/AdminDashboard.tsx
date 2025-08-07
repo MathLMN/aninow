@@ -1,176 +1,94 @@
 
-import React from "react";
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  Building2, 
-  Users, 
-  Clock, 
-  CheckCircle, 
-  AlertTriangle,
-  TrendingUp,
-  Crown
-} from "lucide-react";
-import { useAdminStats } from "@/hooks/useAdminStats";
-import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { ManualClinicCreationModal } from "./ManualClinicCreationModal";
-import { ManuallyCreatedAccountsList } from "./ManuallyCreatedAccountsList";
+import { ManualClinicCreationModal } from './ManualClinicCreationModal';
+import { ManuallyCreatedAccountsList } from './ManuallyCreatedAccountsList';
+import ClinicsManagementSection from './ClinicsManagementSection';
+import { Building2, Users, UserPlus, BarChart3 } from "lucide-react";
 
-export const AdminDashboard = () => {
-  const { data: stats, isLoading } = useAdminStats();
-  const { isAdmin: isGlobalAdmin } = useAdminAuth();
-
-  // Vérification de sécurité : seuls les admins globaux peuvent accéder
-  if (!isGlobalAdmin) {
-    return (
-      <Alert className="border-red-300 bg-red-50">
-        <AlertTriangle className="h-4 w-4 text-red-600" />
-        <AlertDescription className="text-red-800">
-          <strong>Accès refusé:</strong> Cette section est réservée aux administrateurs globaux AniNow.
-        </AlertDescription>
-      </Alert>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="text-center py-8">
-          <div className="text-vet-brown">Chargement du tableau de bord administrateur...</div>
-        </div>
-      </div>
-    );
-  }
-
+const AdminDashboard = () => {
   return (
-    <div className="space-y-6">
-      {/* En-tête avec badge admin global */}
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Crown className="h-5 w-5 text-amber-500" />
-            <Badge variant="outline" className="border-amber-500 text-amber-600">
-              Administration globale AniNow
-            </Badge>
-          </div>
-          <h2 className="text-2xl font-bold text-vet-navy">Gestion des comptes cliniques</h2>
-          <p className="text-vet-brown">Création et suivi des comptes créés par l'équipe AniNow</p>
+    <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-vet-navy mb-2">
+            Tableau de bord administrateur
+          </h1>
+          <p className="text-vet-brown">
+            Gestion des cliniques et des comptes utilisateurs
+          </p>
         </div>
-        <ManualClinicCreationModal />
-      </div>
 
-      {/* Statistiques rapides */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Building2 className="h-5 w-5 text-vet-sage" />
-              <div>
-                <p className="text-sm text-vet-brown">Cliniques créées</p>
-                <p className="text-2xl font-bold text-vet-navy">
-                  {stats?.totalClinicsCreated || 0}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/20">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-vet-brown">Cliniques</CardTitle>
+              <Building2 className="h-4 w-4 text-vet-sage" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-vet-navy">-</div>
+              <p className="text-xs text-vet-brown/70">Cliniques actives</p>
+            </CardContent>
+          </Card>
 
-        <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Users className="h-5 w-5 text-vet-blue" />
-              <div>
-                <p className="text-sm text-vet-brown">Comptes actifs</p>
-                <p className="text-2xl font-bold text-vet-navy">
-                  {stats?.activeClinicAccounts || 0}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/20">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-vet-brown">Utilisateurs</CardTitle>
+              <Users className="h-4 w-4 text-vet-sage" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-vet-navy">-</div>
+              <p className="text-xs text-vet-brown/70">Comptes créés</p>
+            </CardContent>
+          </Card>
 
-        <Card className="bg-white/90 backdrop-blur-sm border-yellow-300">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Clock className="h-5 w-5 text-yellow-600" />
-              <div>
-                <p className="text-sm text-vet-brown">Mots de passe à changer</p>
-                <p className="text-2xl font-bold text-vet-navy">
-                  {stats?.pendingPasswordChanges || 0}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/20">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-vet-brown">Réservations</CardTitle>
+              <BarChart3 className="h-4 w-4 text-vet-sage" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-vet-navy">-</div>
+              <p className="text-xs text-vet-brown/70">Ce mois-ci</p>
+            </CardContent>
+          </Card>
+        </div>
 
-        <Card className="bg-white/90 backdrop-blur-sm border-green-300">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <TrendingUp className="h-5 w-5 text-green-600" />
-              <div>
-                <p className="text-sm text-vet-brown">Taux d'activation</p>
-                <p className="text-2xl font-bold text-vet-navy">
-                  {stats?.totalClinicsCreated && stats?.activeClinicAccounts
-                    ? Math.round((stats.activeClinicAccounts / stats.totalClinicsCreated) * 100)
-                    : 0}%
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Clinics Management */}
+          <div className="space-y-6">
+            <ClinicsManagementSection />
+          </div>
 
-      {/* Alertes et notifications */}
-      {stats?.pendingPasswordChanges && stats.pendingPasswordChanges > 0 && (
-        <Card className="bg-yellow-50 border-yellow-300">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-600" />
-              <div>
-                <p className="font-medium text-yellow-800">
-                  {stats.pendingPasswordChanges} clinique{stats.pendingPasswordChanges > 1 ? 's' : ''} n'ont pas encore changé leur mot de passe provisoire
-                </p>
-                <p className="text-sm text-yellow-700">
-                  Ces comptes nécessitent un suivi pour finaliser leur configuration.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Créations récentes */}
-      {stats?.recentCreations && stats.recentCreations.length > 0 && (
-        <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-          <CardHeader>
-            <CardTitle className="text-vet-navy flex items-center">
-              <CheckCircle className="h-5 w-5 mr-2" />
-              Créations récentes
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {stats.recentCreations.map((creation) => (
-                <div key={creation.id} className="flex items-center justify-between p-3 border border-vet-blue/20 rounded-lg">
-                  <div>
-                    <p className="font-medium text-vet-navy">{creation.clinic_name}</p>
-                    <p className="text-sm text-vet-brown">
-                      Créé le {new Date(creation.created_at).toLocaleDateString('fr-FR')}
-                    </p>
+          {/* Account Creation */}
+          <div className="space-y-6">
+            <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/20">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between text-vet-navy">
+                  <div className="flex items-center">
+                    <UserPlus className="h-5 w-5 mr-2" />
+                    Création de comptes
                   </div>
-                  <Badge variant="outline" className="border-vet-sage text-vet-sage">
-                    Nouveau
-                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <p className="text-vet-brown text-sm">
+                    Créez manuellement des comptes pour de nouvelles cliniques vétérinaires.
+                  </p>
+                  <ManualClinicCreationModal />
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+              </CardContent>
+            </Card>
 
-      {/* Liste complète des comptes */}
-      <ManuallyCreatedAccountsList />
+            <ManuallyCreatedAccountsList />
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
+
+export default AdminDashboard;

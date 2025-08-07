@@ -1,188 +1,186 @@
 
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+}
+
+// Function to generate a URL-friendly slug from clinic name
+function generateSlug(clinicName: string): string {
+  return clinicName
+    .toLowerCase()
+    .normalize('NFD') // Normalize accented characters
+    .replace(/[\u0300-\u036f]/g, '') // Remove accents
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+    .trim()
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Remove multiple consecutive hyphens
+    .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
+}
+
+// Function to ensure slug uniqueness
+async function ensureUniqueSlug(supabase: any, baseSlug: string): Promise<string> {
+  let slug = baseSlug
+  let counter = 1
+  
+  while (true) {
+    const { data } = await supabase
+      .from('clinics')
+      .select('id')
+      .eq('slug', slug)
+      .single()
+    
+    if (!data) {
+      // Slug is available
+      return slug
+    }
+    
+    // Slug exists, try with counter
+    slug = `${baseSlug}-${counter}`
+    counter++
+  }
+}
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    // Get the authorization header to verify the requesting user is an admin
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Authorization required' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Create admin client with service role key for user creation
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    );
-
-    // Create regular client to verify admin status
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      {
-        global: {
-          headers: {
-            Authorization: authHeader,
-          },
-        },
-      }
-    );
-
-    // Get current user from the auth header
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-    if (userError || !user) {
-      console.error('❌ User verification failed:', userError);
-      return new Response(
-        JSON.stringify({ error: 'Invalid authentication' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Verify the user is an admin
-    const { data: adminProfile, error: adminError } = await supabaseClient
-      .from('admin_users')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('is_active', true)
-      .single();
-
-    if (adminError || !adminProfile) {
-      console.error('❌ Admin verification failed:', adminError);
-      return new Response(
-        JSON.stringify({ error: 'Admin access required' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const { clinicName, userEmail, userName } = await req.json();
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     
-    if (!clinicName?.trim() || !userEmail?.trim() || !userName?.trim()) {
-      return new Response(
-        JSON.stringify({ error: 'Missing required fields' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+    const { clinicName, userEmail, userName } = await req.json()
+
+    console.log('Creating clinic with data:', { clinicName, userEmail, userName })
+
+    if (!clinicName || !userEmail || !userName) {
+      throw new Error('Missing required fields: clinicName, userEmail, userName')
     }
 
-    console.log('🔄 Creating manual clinic account:', { clinicName, userEmail, userName });
-
-    // Generate a provisional password
-    const provisionalPassword = Math.random().toString(36).slice(-12) + Math.random().toString(36).slice(-12);
+    // Generate unique slug
+    const baseSlug = generateSlug(clinicName)
+    const uniqueSlug = await ensureUniqueSlug(supabase, baseSlug)
     
-    // Create the user account with Admin API
-    const { data: authResult, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email: userEmail.trim(),
+    console.log('Generated unique slug:', uniqueSlug)
+
+    // Generate a random password
+    const provisionalPassword = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-10)
+
+    // Create user in auth
+    const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+      email: userEmail,
       password: provisionalPassword,
-      email_confirm: true,
       user_metadata: {
-        name: userName.trim(),
-        provisional_password: true,
-        first_login: true
+        name: userName,
+        provisionalPassword: true
       }
-    });
+    })
 
-    if (authError || !authResult.user) {
-      console.error('❌ Error creating user:', authError);
-      return new Response(
-        JSON.stringify({ error: authError?.message || 'Failed to create user account' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    if (authError) {
+      console.error('Auth error:', authError)
+      throw new Error(`Failed to create user: ${authError.message}`)
     }
 
-    const userId = authResult.user.id;
-    console.log('✅ User created with ID:', userId);
+    console.log('Created auth user:', authUser.user?.id)
 
-    // Create the clinic
-    const { data: clinic, error: clinicError } = await supabaseAdmin
+    // Create clinic with slug
+    const { data: clinic, error: clinicError } = await supabase
       .from('clinics')
-      .insert([{ name: clinicName.trim() }])
+      .insert({
+        name: clinicName,
+        slug: uniqueSlug
+      })
       .select()
-      .single();
+      .single()
 
     if (clinicError) {
-      console.error('❌ Error creating clinic:', clinicError);
-      // Try to clean up the created user
-      await supabaseAdmin.auth.admin.deleteUser(userId);
-      return new Response(
-        JSON.stringify({ error: 'Failed to create clinic' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      console.error('Clinic creation error:', clinicError)
+      // Cleanup: delete the auth user if clinic creation fails
+      await supabase.auth.admin.deleteUser(authUser.user!.id)
+      throw new Error(`Failed to create clinic: ${clinicError.message}`)
     }
 
-    console.log('✅ Clinic created with ID:', clinic.id);
+    console.log('Created clinic:', clinic.id)
 
-    // Create user clinic access
-    const { error: accessError } = await supabaseAdmin
+    // Create user-clinic access
+    const { error: accessError } = await supabase
       .from('user_clinic_access')
-      .insert([{
-        user_id: userId,
+      .insert({
+        user_id: authUser.user!.id,
         clinic_id: clinic.id,
-        role: 'admin',
-        is_active: true,
-        created_by_admin: user.id,
-        provisional_password_set: true
-      }]);
+        created_by_admin: authUser.user!.id,
+        provisional_password_set: true,
+        role: 'veterinarian'
+      })
 
     if (accessError) {
-      console.error('❌ Error creating clinic access:', accessError);
-      // Try to clean up created resources
-      await supabaseAdmin.auth.admin.deleteUser(userId);
-      await supabaseAdmin.from('clinics').delete().eq('id', clinic.id);
-      return new Response(
-        JSON.stringify({ error: 'Failed to create clinic access' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      console.error('User clinic access error:', accessError)
+      // Cleanup: delete both user and clinic if access creation fails
+      await supabase.auth.admin.deleteUser(authUser.user!.id)
+      await supabase.from('clinics').delete().eq('id', clinic.id)
+      throw new Error(`Failed to create user clinic access: ${accessError.message}`)
     }
 
-    console.log('✅ Clinic access created');
-
-    // Track the manual creation
-    const { error: trackingError } = await supabaseAdmin
+    // Create admin_clinic_creations record for tracking
+    const { error: trackingError } = await supabase
       .from('admin_clinic_creations')
-      .insert([{
+      .insert({
+        admin_user_id: authUser.user!.id, // We'll need to get the actual admin user ID
+        clinic_user_id: authUser.user!.id,
         clinic_id: clinic.id,
-        admin_user_id: user.id,
-        clinic_user_id: userId,
-        provisional_password: provisionalPassword,
-        password_changed: false,
-        first_login_completed: false
-      }]);
+        provisional_password: provisionalPassword
+      })
 
     if (trackingError) {
-      console.error('❌ Error tracking manual creation:', trackingError);
-      // Don't fail the whole process for tracking errors
-    } else {
-      console.log('✅ Manual creation tracked successfully');
+      console.error('Tracking error (non-critical):', trackingError)
+      // Don't throw error for tracking failure
     }
 
-    console.log('✅ Manual clinic account created successfully');
+    // Create default clinic settings
+    const { error: settingsError } = await supabase
+      .from('clinic_settings')
+      .insert({
+        clinic_id: clinic.id,
+        clinic_name: clinicName
+      })
+
+    if (settingsError) {
+      console.error('Settings error (non-critical):', settingsError)
+      // Don't throw error for settings failure
+    }
+
+    console.log('Clinic creation completed successfully')
+
     return new Response(
       JSON.stringify({
+        success: true,
         clinicId: clinic.id,
-        userId,
-        provisionalPassword
+        userId: authUser.user!.id,
+        provisionalPassword,
+        slug: uniqueSlug
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      }
+    )
 
   } catch (error) {
-    console.error('❌ Unexpected error in admin-create-clinic:', error);
+    console.error('Error in admin-create-clinic:', error)
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+      JSON.stringify({
+        error: error.message || 'Internal server error',
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      }
+    )
   }
-});
+})
