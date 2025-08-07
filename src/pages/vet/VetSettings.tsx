@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Shield, Building2, Settings } from "lucide-react";
 import { ClinicSettingsForm } from "@/components/settings/ClinicSettingsForm";
 import { ClinicSelector } from "@/components/clinic/ClinicSelector";
-import { AdminDashboard } from "@/components/admin/AdminDashboard";
+import AdminDashboard from "@/components/admin/AdminDashboard";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 const VetSettings = () => {
