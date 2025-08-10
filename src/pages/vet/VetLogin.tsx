@@ -1,11 +1,9 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ArrowLeft, Heart, Mail, Lock, Loader2, AlertCircle, Eye, EyeOff, CheckCircle, Users, Calendar, BarChart3 } from "lucide-react";
+import { ArrowLeft, Heart, Mail, Lock, Loader2, Eye, EyeOff, CheckCircle, Users, Calendar, BarChart3 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useVetAuth } from "@/hooks/useVetAuth";
 import { useFirstLoginStatus } from "@/hooks/useFirstLoginStatus";
@@ -171,14 +169,6 @@ const VetLogin = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {/* Infos de diagnostic */}
-              <Alert className="mb-6 border-vet-blue/30 bg-vet-blue/10">
-                <AlertCircle className="h-4 w-4 text-vet-blue" />
-                <AlertDescription className="text-vet-navy text-sm">
-                  <strong>Système mis à jour:</strong> Gestion complète des mots de passe provisoires avec validation renforcée
-                </AlertDescription>
-              </Alert>
-
               <form onSubmit={handleLogin} className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-vet-navy">Email *</Label>
