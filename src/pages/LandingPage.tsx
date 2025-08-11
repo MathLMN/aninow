@@ -8,7 +8,7 @@ import CTASection from "@/components/landing/CTASection";
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen font-poppins">
       <Header />
       <main className="pt-16 md:pt-20">
         <HeroSection />
