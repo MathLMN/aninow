@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, Smartphone } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -6,7 +5,7 @@ import ClinicAppointmentButton from "./ClinicAppointmentButton";
 
 const HeroSection = () => {
   return (
-    <section className="h-screen flex items-center justify-center bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36% px-4 sm:px-6 lg:px-8">
+    <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36% px-4 sm:px-6 lg:px-8 pt-16 md:pt-20">
       <div className="max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-center animate-fade-in">
           {/* Contenu textuel - 7 colonnes pour laisser plus de place au visuel */}
