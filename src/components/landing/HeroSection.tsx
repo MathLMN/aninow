@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, Smartphone } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -14,7 +13,6 @@ const HeroSection = () => {
             <div className="space-y-4">
               <h1 className="text-4xl sm:text-5xl lg:text-5xl xl:text-6xl font-bold text-[#1B1B3A] leading-tight">
                 Prenez rendez-vous chez votre vétérinaire{" "}
-                <br />
                 <span className="text-[#96C3CE]">en quelques clics</span>
               </h1>
               
