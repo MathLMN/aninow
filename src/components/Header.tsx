@@ -30,10 +30,7 @@ const Header = () => {
                   </Button>
                 </Link>
                 <Link to="/admin">
-                  <Button variant="ghost" className="text-vet-navy hover:bg-vet-beige/20 text-xs px-2 py-1 sm:text-sm sm:px-3 sm:py-2">
-                    <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                    <span className="hidden xs:inline">Admin</span>
-                  </Button>
+                  
                 </Link>
               </>}
             {isAdminPage && <Link to="/vet/login">
