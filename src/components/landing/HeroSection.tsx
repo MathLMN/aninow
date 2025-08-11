@@ -57,9 +57,9 @@ const HeroSection = () => {
           <div className="lg:col-span-5 flex items-center justify-center">
             <div className="relative w-full max-w-lg lg:max-w-full">
               <img 
-                src="/lovable-uploads/94e066e2-27ff-412b-b368-b54b94899f35.png" 
-                alt="Deux chiens - Nos compagnons fidèles" 
-                className="w-full h-auto object-contain animate-fade-in max-h-[500px] lg:max-h-[600px] xl:max-h-[700px]"
+                src="/lovable-uploads/56917d06-32af-4ca5-8fc7-ff88ec2733d6.png" 
+                alt="Deux lévriers - Nos compagnons fidèles" 
+                className="w-full h-auto object-contain animate-fade-in max-h-[400px] lg:max-h-[450px] xl:max-h-[500px]"
               />
             </div>
           </div>
