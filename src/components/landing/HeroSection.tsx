@@ -6,11 +6,11 @@ import ClinicAppointmentButton from "./ClinicAppointmentButton";
 
 const HeroSection = () => {
   return (
-    <section className="min-h-[calc(100vh-4rem)] md:min-h-[calc(100vh-5rem)] flex items-center justify-center bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36% px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <section className="min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-72px)] pt-[64px] md:pt-[72px] flex items-center justify-center bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36% px-4 sm:px-6 lg:px-8 overflow-hidden">
       <div className="max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-center animate-fade-in">
           {/* Contenu textuel - 7 colonnes pour laisser plus de place au visuel */}
-          <div className="lg:col-span-7 space-y-6">
+          <div className="lg:col-span-7 space-y-6 flex flex-col justify-center">
             <div className="space-y-4">
               <h1 className="text-3xl sm:text-4xl lg:text-4xl xl:text-5xl font-bold text-[#1B1B3A] leading-tight">
                 Prenez rendez-vous chez votre vétérinaire{" "}
@@ -54,12 +54,12 @@ const HeroSection = () => {
           </div>
 
           {/* Image - 5 colonnes pour un visuel plus grand et impactant */}
-          <div className="lg:col-span-5 flex items-start justify-center lg:justify-start lg:pl-8">
-            <div className="relative w-full max-w-2xl lg:max-w-full">
+          <div className="lg:col-span-5 flex items-center justify-center lg:justify-start lg:pl-8">
+            <div className="relative w-full max-w-4xl lg:max-w-full">
               <img 
                 src="/lovable-uploads/0a562930-d37b-48fc-8aa4-81a73f2a8978.png" 
                 alt="Deux lévriers - Nos compagnons fidèles" 
-                className="w-full h-auto object-contain animate-fade-in max-h-[500px] lg:max-h-[600px] xl:max-h-[700px]"
+                className="w-full h-auto object-contain animate-fade-in max-h-[60vh] lg:max-h-[70vh] xl:max-h-[75vh]"
               />
             </div>
           </div>

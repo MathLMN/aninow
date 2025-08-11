@@ -10,7 +10,7 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen font-poppins">
       <Header />
-      <main className="pt-16 md:pt-20">
+      <main>
         <HeroSection />
         <BenefitsSection />
         <HowItWorksSection />
