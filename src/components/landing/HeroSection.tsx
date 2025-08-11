@@ -9,10 +9,10 @@ const HeroSection = () => {
     <section className="h-screen flex items-center justify-center bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36% px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-center animate-fade-in">
-          {/* Contenu textuel - 8 colonnes pour plus d'espace au titre */}
-          <div className="lg:col-span-8 space-y-6">
+          {/* Contenu textuel - 7 colonnes pour laisser plus de place au visuel */}
+          <div className="lg:col-span-7 space-y-6">
             <div className="space-y-4">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-[#1B1B3A] leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-4xl xl:text-5xl font-bold text-[#1B1B3A] leading-tight">
                 Prenez rendez-vous chez votre vétérinaire{" "}
                 <span className="text-[#96C3CE]">en quelques clics</span>
               </h1>
@@ -53,13 +53,13 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Image - 4 colonnes pour plus d'impact visuel */}
-          <div className="lg:col-span-4 flex items-center justify-center">
-            <div className="relative w-full max-w-md lg:max-w-full">
+          {/* Image - 5 colonnes pour un visuel plus grand et impactant */}
+          <div className="lg:col-span-5 flex items-center justify-center">
+            <div className="relative w-full max-w-lg lg:max-w-full">
               <img 
-                src="/lovable-uploads/92924b51-6e30-4905-8315-50e8b2d9b9cf.png" 
-                alt="Chien et chat - Nos compagnons fidèles" 
-                className="w-full h-auto object-contain animate-fade-in max-h-[400px] lg:max-h-[500px]"
+                src="/lovable-uploads/94e066e2-27ff-412b-b368-b54b94899f35.png" 
+                alt="Deux chiens - Nos compagnons fidèles" 
+                className="w-full h-auto object-contain animate-fade-in max-h-[500px] lg:max-h-[600px] xl:max-h-[700px]"
               />
             </div>
           </div>
