@@ -6,7 +6,7 @@ const Header = () => {
   const isHomePage = location.pathname === '/';
   const isAdminPage = location.pathname === '/admin';
   return <header className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm z-50 border-b shadow-lg">
-      <div className="container mx-auto px-3 sm:px-6 sm:py-3 py-[16px]">
+      <div className="container mx-auto px-3 sm:px-6 py-2.5 sm:py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
@@ -30,7 +30,10 @@ const Header = () => {
                   </Button>
                 </Link>
                 <Link to="/admin">
-                  
+                  <Button variant="ghost" className="text-vet-navy hover:bg-vet-beige/20 text-xs px-2 py-1 sm:text-sm sm:px-3 sm:py-2">
+                    <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                    <span className="hidden xs:inline">Admin</span>
+                  </Button>
                 </Link>
               </>}
             {isAdminPage && <Link to="/vet/login">
