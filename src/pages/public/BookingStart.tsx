@@ -7,10 +7,10 @@ import BookingForm from '@/components/BookingForm';
 
 const BookingStart = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-vet-blue/5 via-white to-vet-sage/5">
+    <div className="min-h-screen bg-gradient-to-br from-vet-blue/5 via-vet-beige/20 to-vet-sage/5">
       <Header />
       <div className="container mx-auto px-4 py-6 sm:py-8 max-w-2xl">
-        <ProgressBar currentStep={1} totalSteps={8} />
+        <ProgressBar currentStep={1} totalSteps={7} />
         
         <div className="mt-6 sm:mt-8 space-y-6 sm:space-y-8">
           <div className="text-center space-y-3 sm:space-y-4">
