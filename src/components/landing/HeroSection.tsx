@@ -16,7 +16,7 @@ const HeroSection = () => {
               <span className="text-[#96C3CE]">en quelques clics</span>
             </h1>
             
-            <p className="mt-4 sm:mt-6 text-lg sm:text-xl max-w-3xl text-left text-[#1b1b3a] font-bold">
+            <p className="mt-4 sm:mt-6 text-lg max-w-3xl text-left text-[#1b1b3a] font-medium sm:text-lg">
               Notre système de prise de rendez-vous en ligne simplifie vos démarches 
               et améliore le suivi de la santé de vos animaux.
             </p>
