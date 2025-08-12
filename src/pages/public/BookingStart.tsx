@@ -1,23 +1,20 @@
-
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import ProgressBar from '@/components/ProgressBar';
 import Header from '@/components/Header';
 import BookingForm from '@/components/BookingForm';
-
 const BookingStart = () => {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-vet-blue/5 via-vet-beige/20 to-vet-sage/5">
+  return <div className="min-h-screen bg-gradient-to-br from-vet-blue/5 via-vet-beige/20 to-vet-sage/5">
       <Header />
       <div className="container mx-auto px-4 py-6 sm:py-8 max-w-2xl">
         <ProgressBar currentStep={1} totalSteps={7} />
         
         <div className="mt-6 sm:mt-8 space-y-6 sm:space-y-8">
           <div className="text-center space-y-3 sm:space-y-4">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-vet-navy leading-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold text-vet-navy leading-tight lg:text-3xl">
               Prenez rendez-vous pour votre animal
             </h1>
-            <p className="text-base sm:text-lg text-vet-brown/80 max-w-xl mx-auto leading-relaxed">
+            <p className="text-base text-vet-brown/80 max-w-xl mx-auto leading-relaxed sm:text-base">
               Commençons par quelques informations sur votre compagnon
             </p>
           </div>
@@ -29,8 +26,6 @@ const BookingStart = () => {
           </Card>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default BookingStart;
