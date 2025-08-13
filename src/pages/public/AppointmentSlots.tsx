@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,12 @@ import { VeterinarianPreference } from "@/components/slots/VeterinarianPreferenc
 import { DateSlotCard } from "@/components/slots/DateSlotCard";
 import { useClinicContext } from "@/contexts/ClinicContext";
 
+interface Veterinarian {
+  id: string;
+  name: string;
+  specialty?: string;
+}
+
 const AppointmentSlots = () => {
   const navigate = useNavigate();
   const { currentClinic } = useClinicContext();
@@ -24,7 +31,7 @@ const AppointmentSlots = () => {
   console.log('🏥 AppointmentSlots - Current clinic:', currentClinic);
   console.log('🏥 AppointmentSlots - Available slots:', availableSlots);
   console.log('🏥 AppointmentSlots - Veterinarians from useClinicVeterinarians:', veterinarians);
-  console.log('🏥 AppointmentSlots - Veterinarians count:', veterinarians?.length || 0);
+  console.log('🏥 AppointmentSlots - Veterinarians count:', Array.isArray(veterinarians) ? veterinarians.length : 0);
   console.log('🏥 AppointmentSlots - Veterinarians array:', JSON.stringify(veterinarians, null, 2));
   console.log('🏥 AppointmentSlots - Selected veterinarian:', selectedVeterinarian);
   console.log('🏥 AppointmentSlots - Is loading slots:', isLoading);
@@ -131,6 +138,9 @@ const AppointmentSlots = () => {
     );
   }
 
+  // S'assurer que veterinarians est un tableau
+  const vetsArray: Veterinarian[] = Array.isArray(veterinarians) ? veterinarians : [];
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
       <Header />
@@ -164,7 +174,7 @@ const AppointmentSlots = () => {
           {/* Section préférence de vétérinaire - Toujours afficher */}
           <div className="mb-6">
             <VeterinarianPreference
-              veterinarians={veterinarians || []}
+              veterinarians={vetsArray}
               selectedVeterinarian={selectedVeterinarian}
               onVeterinarianSelect={setSelectedVeterinarian}
             />
@@ -187,7 +197,7 @@ const AppointmentSlots = () => {
                     key={filteredSlots[0].date}
                     date={filteredSlots[0].date}
                     slots={filteredSlots[0].slots}
-                    veterinarians={veterinarians || []}
+                    veterinarians={vetsArray}
                     selectedSlot={selectedSlot}
                     onSlotSelect={handleSlotSelect}
                     isExpanded={true}
@@ -201,7 +211,7 @@ const AppointmentSlots = () => {
                     key={daySlots.date}
                     date={daySlots.date}
                     slots={daySlots.slots}
-                    veterinarians={veterinarians || []}
+                    veterinarians={vetsArray}
                     selectedSlot={selectedSlot}
                     onSlotSelect={handleSlotSelect}
                     isExpanded={false}
@@ -228,7 +238,7 @@ const AppointmentSlots = () => {
               <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/30 shadow-lg">
                 <CardContent className="text-center py-8 sm:py-12 px-3 sm:px-6">
                   <div className="text-vet-brown mb-4">
-                    {!veterinarians || veterinarians.length === 0 ? (
+                    {vetsArray.length === 0 ? (
                       <>
                         <p className="mb-2 text-sm sm:text-base">Cette clinique n'a pas encore configuré ses vétérinaires.</p>
                         <p className="text-xs sm:text-sm">Veuillez contacter directement la clinique pour prendre rendez-vous.</p>

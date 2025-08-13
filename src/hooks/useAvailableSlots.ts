@@ -17,6 +17,13 @@ interface DateSlots {
   slots: TimeSlot[]
 }
 
+interface Veterinarian {
+  id: string;
+  name: string;
+  specialty?: string;
+  is_active: boolean;
+}
+
 export const useAvailableSlots = () => {
   const [availableSlots, setAvailableSlots] = useState<DateSlots[]>([])
   const [blockedSlots, setBlockedSlots] = useState<any[]>([])
@@ -27,11 +34,13 @@ export const useAvailableSlots = () => {
 
   console.log('🔄 useAvailableSlots - Settings:', settings)
   console.log('🔄 useAvailableSlots - Veterinarians:', veterinarians)
-  console.log('🔄 useAvailableSlots - Veterinarians count:', veterinarians.length)
+  console.log('🔄 useAvailableSlots - Veterinarians count:', Array.isArray(veterinarians) ? veterinarians.length : 0)
 
   // Durées standard par vétérinaire
   const getVetDuration = (vetId: string) => {
-    const vet = veterinarians.find(v => v.id === vetId)
+    if (!Array.isArray(veterinarians)) return 20;
+    
+    const vet = veterinarians.find((v: Veterinarian) => v.id === vetId)
     if (vet?.name === "Dr. JeremIE MAURICE") {
       return 15 // 15 minutes pour Dr. Jérémie Maurice
     }
@@ -79,7 +88,9 @@ export const useAvailableSlots = () => {
       }
 
       // 2. Si pas d'attribution existante, calculer le vétérinaire le moins chargé
-      const activeVets = veterinarians.filter(vet => vet.is_active)
+      if (!Array.isArray(veterinarians)) return '';
+      
+      const activeVets = veterinarians.filter((vet: Veterinarian) => vet.is_active)
       if (activeVets.length === 0) return veterinarians[0]?.id || ''
 
       // Compter les attributions existantes pour cette date
@@ -126,7 +137,8 @@ export const useAvailableSlots = () => {
     } catch (error) {
       console.error('Erreur dans getOrAssignVeterinarianForSlot:', error)
       // Fallback: retourner le premier vétérinaire actif
-      return veterinarians.find(vet => vet.is_active)?.id || veterinarians[0]?.id || ''
+      if (!Array.isArray(veterinarians)) return '';
+      return veterinarians.find((vet: Veterinarian) => vet.is_active)?.id || veterinarians[0]?.id || ''
     }
   }
 
@@ -207,7 +219,7 @@ export const useAvailableSlots = () => {
   const generateAvailableSlots = async (daysAhead: number = 14) => {
     console.log('🔄 Début de generateAvailableSlots')
     console.log('🔄 Settings disponibles:', !!settings.daily_schedules)
-    console.log('🔄 Nombre de vétérinaires:', veterinarians.length)
+    console.log('🔄 Nombre de vétérinaires:', Array.isArray(veterinarians) ? veterinarians.length : 0)
     
     // Ne pas attendre que des vétérinaires soient configurés si la clinique n'en a pas
     // Générer des créneaux génériques si nécessaire
@@ -221,7 +233,7 @@ export const useAvailableSlots = () => {
     const slots: DateSlots[] = []
     
     // Si aucun vétérinaire configuré, créer des créneaux génériques
-    if (veterinarians.length === 0) {
+    if (!Array.isArray(veterinarians) || veterinarians.length === 0) {
       console.log('⚠️ Aucun vétérinaire configuré, création de créneaux génériques')
       
       for (let i = 0; i < daysAhead; i++) {
@@ -296,7 +308,9 @@ export const useAvailableSlots = () => {
       
       // Appliquer les vérifications de disponibilité
       const processedSlots = daySlots.map(slot => {
-        const vet = veterinarians.find(v => v.id === slot.veterinarian_id)
+        if (!Array.isArray(veterinarians)) return { ...slot, available: false };
+        
+        const vet = veterinarians.find((v: Veterinarian) => v.id === slot.veterinarian_id)
         if (!vet) return { ...slot, available: false }
         
         const vetDuration = getVetDuration(vet.id)
@@ -448,7 +462,7 @@ export const useAvailableSlots = () => {
   useEffect(() => {
     console.log('🔄 useAvailableSlots useEffect triggered')
     console.log('🔄 Settings:', settings)
-    console.log('🔄 Veterinarians:', veterinarians.length)
+    console.log('🔄 Veterinarians:', Array.isArray(veterinarians) ? veterinarians.length : 'not array')
     
     // Générer les créneaux dès que les paramètres sont disponibles
     // Ne plus attendre obligatoirement les vétérinaires

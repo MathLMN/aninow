@@ -1,8 +1,21 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useClinicAccess } from './useClinicAccess';
 import { useClinicContext } from '@/contexts/ClinicContext';
+
+interface Veterinarian {
+  id: string;
+  name: string;
+  specialty?: string;
+  is_active: boolean;
+  clinic_id: string;
+  created_at: string;
+  updated_at: string;
+  auth_migration_status?: string;
+  email?: string;
+}
 
 export const useClinicVeterinarians = () => {
   const { toast } = useToast();
@@ -30,7 +43,7 @@ export const useClinicVeterinarians = () => {
     refetch 
   } = useQuery({
     queryKey: ['clinic-veterinarians', currentClinicId],
-    queryFn: async () => {
+    queryFn: async (): Promise<Veterinarian[]> => {
       console.log('🔄 Fetching clinic veterinarians for clinic:', currentClinicId);
       
       if (!currentClinicId) {
@@ -38,7 +51,7 @@ export const useClinicVeterinarians = () => {
         return [];
       }
 
-      // Requête directe sans RLS pour les vétérinaires publics
+      // Requête directe avec RLS pour les vétérinaires
       const { data, error } = await supabase
         .from('clinic_veterinarians')
         .select('*')
@@ -48,25 +61,12 @@ export const useClinicVeterinarians = () => {
 
       if (error) {
         console.error('❌ Error fetching veterinarians:', error);
-        // Si l'erreur est liée aux RLS, essayons une approche différente
-        console.log('🔄 Trying alternative query approach...');
-        
-        // Essayer une requête sans restrictions RLS
-        const { data: alternativeData, error: altError } = await supabase
-          .rpc('get_clinic_veterinarians', { clinic_uuid: currentClinicId });
-        
-        if (altError) {
-          console.error('❌ Alternative query also failed:', altError);
-          throw error; // Throw original error
-        }
-        
-        console.log('✅ Alternative query succeeded:', alternativeData?.length || 0, 'items');
-        return alternativeData || [];
+        throw error;
       }
 
       console.log('✅ Veterinarians loaded:', data?.length || 0, 'items');
       console.log('📊 Veterinarians data:', data);
-      return data || [];
+      return (data || []) as Veterinarian[];
     },
     enabled: !!currentClinicId,
     retry: 3,
@@ -190,7 +190,7 @@ export const useClinicVeterinarians = () => {
   });
 
   return {
-    veterinarians,
+    veterinarians: veterinarians as Veterinarian[],
     isLoading,
     error: error?.message || null,
     refetch,
