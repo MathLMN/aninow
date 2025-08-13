@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, Smartphone } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -58,7 +57,7 @@ const HeroSection = () => {
               <img 
                 src="/lovable-uploads/0a562930-d37b-48fc-8aa4-81a73f2a8978.png" 
                 alt="Deux lévriers - Nos compagnons fidèles" 
-                className="w-full h-auto object-contain"
+                className="w-full max-w-none scale-110 h-auto object-contain"
               />
             </div>
           </div>
