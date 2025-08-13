@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,17 +17,19 @@ const AppointmentSlots = () => {
   const { currentClinic } = useClinicContext();
   const { availableSlots, isLoading } = useAvailableSlots();
   const { updateBookingData } = useBookingFormData();
-  const { veterinarians, isLoading: vetsLoading } = useClinicVeterinarians();
+  const { veterinarians, isLoading: vetsLoading, error: vetsError } = useClinicVeterinarians();
   const [selectedVeterinarian, setSelectedVeterinarian] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<{date: string, time: string, veterinarianId: string} | null>(null);
 
   console.log('🏥 AppointmentSlots - Current clinic:', currentClinic);
   console.log('🏥 AppointmentSlots - Available slots:', availableSlots);
   console.log('🏥 AppointmentSlots - Veterinarians from useClinicVeterinarians:', veterinarians);
-  console.log('🏥 AppointmentSlots - Veterinarians count:', veterinarians.length);
+  console.log('🏥 AppointmentSlots - Veterinarians count:', veterinarians?.length || 0);
+  console.log('🏥 AppointmentSlots - Veterinarians array:', JSON.stringify(veterinarians, null, 2));
   console.log('🏥 AppointmentSlots - Selected veterinarian:', selectedVeterinarian);
   console.log('🏥 AppointmentSlots - Is loading slots:', isLoading);
   console.log('🏥 AppointmentSlots - Is loading vets:', vetsLoading);
+  console.log('🏥 AppointmentSlots - Vets error:', vetsError);
 
   const handleBack = () => {
     navigate('/booking/contact-info');
@@ -106,6 +107,8 @@ const AppointmentSlots = () => {
     };
   }).filter(daySlots => daySlots.slots.length > 0);
 
+  console.log('🏥 AppointmentSlots - Filtered slots:', filteredSlots);
+
   if (isLoading || vetsLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
@@ -161,11 +164,18 @@ const AppointmentSlots = () => {
           {/* Section préférence de vétérinaire - Toujours afficher */}
           <div className="mb-6">
             <VeterinarianPreference
-              veterinarians={veterinarians}
+              veterinarians={veterinarians || []}
               selectedVeterinarian={selectedVeterinarian}
               onVeterinarianSelect={setSelectedVeterinarian}
             />
           </div>
+
+          {/* Debug info temporaire */}
+          {vetsError && (
+            <div className="mb-4 p-4 bg-red-100 border border-red-300 rounded-lg">
+              <p className="text-red-700">Erreur de chargement des vétérinaires: {vetsError}</p>
+            </div>
+          )}
 
           {/* Section créneaux disponibles */}
           <div className="space-y-3 sm:space-y-4">
@@ -177,7 +187,7 @@ const AppointmentSlots = () => {
                     key={filteredSlots[0].date}
                     date={filteredSlots[0].date}
                     slots={filteredSlots[0].slots}
-                    veterinarians={veterinarians}
+                    veterinarians={veterinarians || []}
                     selectedSlot={selectedSlot}
                     onSlotSelect={handleSlotSelect}
                     isExpanded={true}
@@ -191,7 +201,7 @@ const AppointmentSlots = () => {
                     key={daySlots.date}
                     date={daySlots.date}
                     slots={daySlots.slots}
-                    veterinarians={veterinarians}
+                    veterinarians={veterinarians || []}
                     selectedSlot={selectedSlot}
                     onSlotSelect={handleSlotSelect}
                     isExpanded={false}
@@ -218,7 +228,7 @@ const AppointmentSlots = () => {
               <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/30 shadow-lg">
                 <CardContent className="text-center py-8 sm:py-12 px-3 sm:px-6">
                   <div className="text-vet-brown mb-4">
-                    {veterinarians.length === 0 ? (
+                    {!veterinarians || veterinarians.length === 0 ? (
                       <>
                         <p className="mb-2 text-sm sm:text-base">Cette clinique n'a pas encore configuré ses vétérinaires.</p>
                         <p className="text-xs sm:text-sm">Veuillez contacter directement la clinique pour prendre rendez-vous.</p>

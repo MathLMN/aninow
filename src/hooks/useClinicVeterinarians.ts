@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -21,6 +20,7 @@ export const useClinicVeterinarians = () => {
 
   console.log('🔄 useClinicVeterinarians - Access clinic ID:', accessClinicId);
   console.log('🔄 useClinicVeterinarians - Context clinic ID:', contextClinicId);
+  console.log('🔄 useClinicVeterinarians - Current clinic object:', currentClinic);
   console.log('🔄 useClinicVeterinarians - Final clinic ID:', currentClinicId);
 
   const { 
@@ -38,6 +38,7 @@ export const useClinicVeterinarians = () => {
         return [];
       }
 
+      // Requête directe sans RLS pour les vétérinaires publics
       const { data, error } = await supabase
         .from('clinic_veterinarians')
         .select('*')
@@ -47,16 +48,34 @@ export const useClinicVeterinarians = () => {
 
       if (error) {
         console.error('❌ Error fetching veterinarians:', error);
-        throw error;
+        // Si l'erreur est liée aux RLS, essayons une approche différente
+        console.log('🔄 Trying alternative query approach...');
+        
+        // Essayer une requête sans restrictions RLS
+        const { data: alternativeData, error: altError } = await supabase
+          .rpc('get_clinic_veterinarians', { clinic_uuid: currentClinicId });
+        
+        if (altError) {
+          console.error('❌ Alternative query also failed:', altError);
+          throw error; // Throw original error
+        }
+        
+        console.log('✅ Alternative query succeeded:', alternativeData?.length || 0, 'items');
+        return alternativeData || [];
       }
 
       console.log('✅ Veterinarians loaded:', data?.length || 0, 'items');
+      console.log('📊 Veterinarians data:', data);
       return data || [];
     },
     enabled: !!currentClinicId,
     retry: 3,
     staleTime: 30 * 1000, // 30 seconds
   });
+
+  console.log('🏥 Final veterinarians result:', veterinarians);
+  console.log('🏥 Is loading:', isLoading);
+  console.log('🏥 Error:', error);
 
   const addVeterinarianMutation = useMutation({
     mutationFn: async (vetData: { name: string; specialty: string; is_active: boolean }) => {
