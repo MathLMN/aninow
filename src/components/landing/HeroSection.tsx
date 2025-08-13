@@ -1,9 +1,12 @@
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, Smartphone } from "lucide-react";
 import { Link } from "react-router-dom";
 import ClinicAppointmentButton from "./ClinicAppointmentButton";
+
 const HeroSection = () => {
-  return <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36% py-6 sm:py-10 lg:py-20 px-4 sm:px-6 lg:px-8">
+  return (
+    <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36% py-6 sm:py-10 lg:py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Contenu textuel */}
@@ -50,13 +53,17 @@ const HeroSection = () => {
           </div>
 
           {/* Image */}
-          <div className="hidden lg:flex items-end justify-center">
-            <img src="/lovable-uploads/0a562930-d37b-48fc-8aa4-81a73f2a8978.png" alt="Deux lévriers - Nos compagnons fidèles" className="w-full h-auto object-contain" style={{
-            transform: 'translateY(60px)'
-          }} />
+          <div className="hidden lg:flex items-center justify-center">
+            <img 
+              src="/lovable-uploads/0a562930-d37b-48fc-8aa4-81a73f2a8978.png" 
+              alt="Deux lévriers - Nos compagnons fidèles" 
+              className="w-full h-auto object-contain"
+            />
           </div>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export default HeroSection;
