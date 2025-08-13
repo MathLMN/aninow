@@ -7,7 +7,7 @@ import Header from "@/components/Header";
 import ProgressBar from "@/components/ProgressBar";
 import { useAvailableSlots } from "@/hooks/useAvailableSlots";
 import { useBookingFormData } from "@/hooks/useBookingFormData";
-import { useVeterinarianPreference } from "@/hooks/useVeterinarianPreference";
+import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { VeterinarianPreference } from "@/components/slots/VeterinarianPreference";
 import { DateSlotCard } from "@/components/slots/DateSlotCard";
 import { useClinicContext } from "@/contexts/ClinicContext";
@@ -17,12 +17,15 @@ const AppointmentSlots = () => {
   const { currentClinic } = useClinicContext();
   const { availableSlots, isLoading } = useAvailableSlots();
   const { updateBookingData } = useBookingFormData();
-  const { veterinarians, selectedVeterinarian, setSelectedVeterinarian, isLoading: vetsLoading } = useVeterinarianPreference();
+  const { veterinarians, isLoading: vetsLoading } = useClinicVeterinarians();
+  const [selectedVeterinarian, setSelectedVeterinarian] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<{date: string, time: string, veterinarianId: string} | null>(null);
 
   console.log('🏥 AppointmentSlots - Current clinic:', currentClinic);
   console.log('🏥 AppointmentSlots - Available slots:', availableSlots);
-  console.log('🏥 AppointmentSlots - Veterinarians:', veterinarians);
+  console.log('🏥 AppointmentSlots - Veterinarians from useClinicVeterinarians:', veterinarians);
+  console.log('🏥 AppointmentSlots - Veterinarians count:', veterinarians.length);
+  console.log('🏥 AppointmentSlots - Selected veterinarian:', selectedVeterinarian);
   console.log('🏥 AppointmentSlots - Is loading slots:', isLoading);
   console.log('🏥 AppointmentSlots - Is loading vets:', vetsLoading);
 
@@ -59,7 +62,6 @@ const AppointmentSlots = () => {
     });
   };
 
-  // Fonction pour regrouper les créneaux par heure quand pas de préférence
   const groupSlotsByTime = (slots: any[]) => {
     const groupedSlots = new Map();
     
@@ -83,7 +85,6 @@ const AppointmentSlots = () => {
     return Array.from(groupedSlots.values());
   };
 
-  // Filtrer les créneaux selon la préférence de vétérinaire
   const filteredSlots = availableSlots.map(daySlots => {
     let processedSlots;
     
@@ -123,6 +124,8 @@ const AppointmentSlots = () => {
             <div className="text-vet-brown">
               <p>Vétérinaires: {veterinarians.length} configurés</p>
               <p>Créneaux: {availableSlots.length} jours disponibles</p>
+              <p>Chargement vétérinaires: {vetsLoading ? 'En cours...' : 'Terminé'}</p>
+              <p>Chargement créneaux: {isLoading ? 'En cours...' : 'Terminé'}</p>
             </div>
           </div>
         </main>
@@ -160,14 +163,23 @@ const AppointmentSlots = () => {
             )}
           </div>
 
-          {/* Section préférence de vétérinaire */}
-          {veterinarians.length > 0 && (
+          {/* Section préférence de vétérinaire - Toujours afficher si des vétérinaires existent */}
+          {veterinarians && veterinarians.length > 0 && (
             <div className="mb-6">
               <VeterinarianPreference
                 veterinarians={veterinarians}
                 selectedVeterinarian={selectedVeterinarian}
                 onVeterinarianSelect={setSelectedVeterinarian}
               />
+            </div>
+          )}
+
+          {/* Debug info pour le développement */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mb-4 p-4 bg-gray-100 rounded text-xs">
+              <p>Debug: Vétérinaires chargés: {veterinarians.length}</p>
+              <p>Debug: Vétérinaire sélectionné: {selectedVeterinarian || 'Aucun'}</p>
+              <p>Debug: Créneaux filtrés: {filteredSlots.length} jours</p>
             </div>
           )}
 
