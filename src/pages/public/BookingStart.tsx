@@ -8,26 +8,26 @@ import BookingForm from '@/components/BookingForm';
 const BookingStart = () => {
   return <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
       <Header />
-      <div className="container mx-auto px-4 py-6 sm:py-8 max-w-2xl">
-        <ProgressBar currentStep={1} totalSteps={7} />
-        
-        <div className="mt-6 sm:mt-8 space-y-6 sm:space-y-8">
-          <div className="text-center space-y-3 sm:space-y-4">
-            <h1 className="text-2xl sm:text-3xl font-bold text-vet-navy leading-tight lg:text-3xl">
+      <main className="container mx-auto px-3 sm:px-6 pt-20 sm:pt-24 py-4 sm:py-6 pb-20">
+        <div className="max-w-2xl mx-auto">
+          <ProgressBar currentStep={1} totalSteps={7} />
+          
+          <div className="text-center mb-4 sm:mb-8 animate-fade-in">
+            <h1 className="text-xl sm:text-3xl font-bold text-vet-navy mb-2 px-2">
               Prenez rendez-vous pour votre animal
             </h1>
-            <p className="text-base text-vet-brown/80 max-w-xl mx-auto leading-relaxed sm:text-base">
+            <p className="text-sm sm:text-base text-vet-brown/80 max-w-xl mx-auto leading-relaxed px-2">
               Commençons par quelques informations sur votre compagnon
             </p>
           </div>
 
-          <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-            <CardContent className="p-4 sm:p-6 lg:p-8">
+          <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/20 shadow-lg">
+            <CardContent className="p-3 sm:p-6 lg:p-8">
               <BookingForm />
             </CardContent>
           </Card>
         </div>
-      </div>
+      </main>
     </div>;
 };
 
