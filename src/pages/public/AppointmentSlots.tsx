@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,13 +12,21 @@ import { useBookingFormData } from "@/hooks/useBookingFormData";
 import { useVeterinarianPreference } from "@/hooks/useVeterinarianPreference";
 import { VeterinarianPreference } from "@/components/slots/VeterinarianPreference";
 import { DateSlotCard } from "@/components/slots/DateSlotCard";
+import { useClinicContext } from "@/contexts/ClinicContext";
 
 const AppointmentSlots = () => {
   const navigate = useNavigate();
+  const { currentClinic } = useClinicContext();
   const { availableSlots, isLoading } = useAvailableSlots();
   const { updateBookingData } = useBookingFormData();
   const { veterinarians, selectedVeterinarian, setSelectedVeterinarian, isLoading: vetsLoading } = useVeterinarianPreference();
   const [selectedSlot, setSelectedSlot] = useState<{date: string, time: string, veterinarianId: string} | null>(null);
+
+  console.log('🏥 AppointmentSlots - Current clinic:', currentClinic);
+  console.log('🏥 AppointmentSlots - Available slots:', availableSlots);
+  console.log('🏥 AppointmentSlots - Veterinarians:', veterinarians);
+  console.log('🏥 AppointmentSlots - Is loading slots:', isLoading);
+  console.log('🏥 AppointmentSlots - Is loading vets:', vetsLoading);
 
   const handleBack = () => {
     navigate('/booking/contact-info');
@@ -103,7 +112,20 @@ const AppointmentSlots = () => {
         <Header />
         <main className="container mx-auto px-3 sm:px-6 pt-20 sm:pt-24 pb-8">
           <div className="max-w-2xl mx-auto text-center">
-            <p className="text-vet-brown">Chargement des créneaux disponibles...</p>
+            <div className="mb-4">
+              <h1 className="text-2xl sm:text-3xl font-bold text-vet-navy mb-2">
+                Chargement des créneaux disponibles...
+              </h1>
+              {currentClinic && (
+                <p className="text-vet-brown text-sm">
+                  Clinique : {currentClinic.name}
+                </p>
+              )}
+            </div>
+            <div className="text-vet-brown">
+              <p>Vétérinaires: {veterinarians.length} configurés</p>
+              <p>Créneaux: {availableSlots.length} jours disponibles</p>
+            </div>
           </div>
         </main>
       </div>
@@ -133,56 +155,63 @@ const AppointmentSlots = () => {
             <p className="text-vet-brown text-base sm:text-lg px-2">
               Sélectionnez votre préférence de vétérinaire et le créneau qui vous convient
             </p>
+            {currentClinic && (
+              <p className="text-vet-brown text-sm mt-2">
+                {currentClinic.name}
+              </p>
+            )}
           </div>
 
           {/* Section préférence de vétérinaire */}
-          <div className="mb-6">
-            <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/20 shadow-lg">
-              <CardHeader className="pb-3 sm:pb-4 px-3 sm:px-6 pt-3 sm:pt-6">
-                <div className="flex items-center">
-                  <UserCheck className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-vet-sage flex-shrink-0" />
-                  <div>
-                    <CardTitle className="text-vet-navy text-lg sm:text-xl text-sm sm:text-base">
-                      Préférence de vétérinaire
-                    </CardTitle>
-                    <CardDescription className="text-vet-brown text-xs sm:text-sm">
-                      Choisissez un vétérinaire spécifique ou laissez le choix à la clinique
-                    </CardDescription>
+          {veterinarians.length > 0 && (
+            <div className="mb-6">
+              <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/20 shadow-lg">
+                <CardHeader className="pb-3 sm:pb-4 px-3 sm:px-6 pt-3 sm:pt-6">
+                  <div className="flex items-center">
+                    <UserCheck className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-vet-sage flex-shrink-0" />
+                    <div>
+                      <CardTitle className="text-vet-navy text-lg sm:text-xl text-sm sm:text-base">
+                        Préférence de vétérinaire
+                      </CardTitle>
+                      <CardDescription className="text-vet-brown text-xs sm:text-sm">
+                        Choisissez un vétérinaire spécifique ou laissez le choix à la clinique
+                      </CardDescription>
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
-                <Select value={selectedVeterinarian || "no-preference"} onValueChange={(value) => {
-                  if (value === "no-preference") {
-                    setSelectedVeterinarian(null);
-                  } else {
-                    setSelectedVeterinarian(value);
-                  }
-                }}>
-                  <SelectTrigger className="w-full border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage/20">
-                    <SelectValue placeholder="Sélectionnez un vétérinaire..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border-vet-blue/30 shadow-lg">
-                    <SelectItem 
-                      value="no-preference"
-                      className="focus:bg-vet-sage/10 focus:text-vet-navy"
-                    >
-                      Pas de préférence
-                    </SelectItem>
-                    {veterinarians.map((vet) => (
+                </CardHeader>
+                <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+                  <Select value={selectedVeterinarian || "no-preference"} onValueChange={(value) => {
+                    if (value === "no-preference") {
+                      setSelectedVeterinarian(null);
+                    } else {
+                      setSelectedVeterinarian(value);
+                    }
+                  }}>
+                    <SelectTrigger className="w-full border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage/20">
+                      <SelectValue placeholder="Sélectionnez un vétérinaire..." />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-vet-blue/30 shadow-lg">
                       <SelectItem 
-                        key={vet.id} 
-                        value={vet.id}
+                        value="no-preference"
                         className="focus:bg-vet-sage/10 focus:text-vet-navy"
                       >
-                        {vet.name}
+                        Pas de préférence
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </CardContent>
-            </Card>
-          </div>
+                      {veterinarians.map((vet) => (
+                        <SelectItem 
+                          key={vet.id} 
+                          value={vet.id}
+                          className="focus:bg-vet-sage/10 focus:text-vet-navy"
+                        >
+                          {vet.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           {/* Section créneaux disponibles */}
           <div className="space-y-3 sm:space-y-4">
@@ -235,7 +264,12 @@ const AppointmentSlots = () => {
               <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/30 shadow-lg">
                 <CardContent className="text-center py-8 sm:py-12 px-3 sm:px-6">
                   <div className="text-vet-brown mb-4">
-                    {selectedVeterinarian ? (
+                    {veterinarians.length === 0 ? (
+                      <>
+                        <p className="mb-2 text-sm sm:text-base">Cette clinique n'a pas encore configuré ses vétérinaires.</p>
+                        <p className="text-xs sm:text-sm">Veuillez contacter directement la clinique pour prendre rendez-vous.</p>
+                      </>
+                    ) : selectedVeterinarian ? (
                       <>
                         <p className="mb-2 text-sm sm:text-base">Aucun créneau disponible pour le vétérinaire sélectionné.</p>
                         <p className="text-xs sm:text-sm">Essayez de sélectionner "Pas de préférence" ou un autre vétérinaire.</p>

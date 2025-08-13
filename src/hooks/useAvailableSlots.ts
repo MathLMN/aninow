@@ -25,6 +25,10 @@ export const useAvailableSlots = () => {
   const { settings } = useClinicSettings()
   const { veterinarians } = useClinicVeterinarians()
 
+  console.log('🔄 useAvailableSlots - Settings:', settings)
+  console.log('🔄 useAvailableSlots - Veterinarians:', veterinarians)
+  console.log('🔄 useAvailableSlots - Veterinarians count:', veterinarians.length)
+
   // Durées standard par vétérinaire
   const getVetDuration = (vetId: string) => {
     const vet = veterinarians.find(v => v.id === vetId)
@@ -201,11 +205,85 @@ export const useAvailableSlots = () => {
   }
 
   const generateAvailableSlots = async (daysAhead: number = 14) => {
-    if (!settings.daily_schedules || veterinarians.length === 0) return
+    console.log('🔄 Début de generateAvailableSlots')
+    console.log('🔄 Settings disponibles:', !!settings.daily_schedules)
+    console.log('🔄 Nombre de vétérinaires:', veterinarians.length)
+    
+    // Ne pas attendre que des vétérinaires soient configurés si la clinique n'en a pas
+    // Générer des créneaux génériques si nécessaire
+    if (!settings.daily_schedules) {
+      console.log('❌ Pas de planning configuré')
+      setIsLoading(false)
+      return
+    }
 
     setIsLoading(true)
     const slots: DateSlots[] = []
     
+    // Si aucun vétérinaire configuré, créer des créneaux génériques
+    if (veterinarians.length === 0) {
+      console.log('⚠️ Aucun vétérinaire configuré, création de créneaux génériques')
+      
+      for (let i = 0; i < daysAhead; i++) {
+        const date = new Date()
+        date.setDate(date.getDate() + i)
+        const dateStr = date.toISOString().split('T')[0]
+        
+        const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const
+        const dayOfWeek = dayNames[date.getDay()]
+        const daySchedule = settings.daily_schedules[dayOfWeek]
+        
+        if (!daySchedule.isOpen) continue
+        
+        const daySlots: TimeSlot[] = []
+        
+        // Créneaux du matin
+        if (daySchedule.morning.start && daySchedule.morning.end) {
+          const morningSlots = generateTimeSlots(daySchedule.morning.start, daySchedule.morning.end)
+          morningSlots.forEach(time => {
+            if (isSlotInFuture(dateStr, time)) {
+              daySlots.push({
+                time,
+                veterinarian_id: 'generic',
+                available: true,
+                blocked: false,
+                is_assigned: false
+              })
+            }
+          })
+        }
+        
+        // Créneaux de l'après-midi
+        if (daySchedule.afternoon.start && daySchedule.afternoon.end) {
+          const afternoonSlots = generateTimeSlots(daySchedule.afternoon.start, daySchedule.afternoon.end)
+          afternoonSlots.forEach(time => {
+            if (isSlotInFuture(dateStr, time)) {
+              daySlots.push({
+                time,
+                veterinarian_id: 'generic',
+                available: true,
+                blocked: false,
+                is_assigned: false
+              })
+            }
+          })
+        }
+        
+        if (daySlots.length > 0) {
+          slots.push({
+            date: dateStr,
+            slots: daySlots
+          })
+        }
+      }
+      
+      console.log('✅ Créneaux génériques générés:', slots.length, 'jours')
+      setAvailableSlots(slots)
+      setIsLoading(false)
+      return
+    }
+    
+    // Logique existante pour les vétérinaires configurés
     for (let i = 0; i < daysAhead; i++) {
       const date = new Date()
       date.setDate(date.getDate() + i)
@@ -263,6 +341,7 @@ export const useAvailableSlots = () => {
       }
     }
     
+    console.log('✅ Créneaux générés avec vétérinaires:', slots.length, 'jours')
     setAvailableSlots(slots)
     setIsLoading(false)
   }
@@ -367,8 +446,17 @@ export const useAvailableSlots = () => {
   }
 
   useEffect(() => {
-    if (settings.daily_schedules && veterinarians.length > 0) {
+    console.log('🔄 useAvailableSlots useEffect triggered')
+    console.log('🔄 Settings:', settings)
+    console.log('🔄 Veterinarians:', veterinarians.length)
+    
+    // Générer les créneaux dès que les paramètres sont disponibles
+    // Ne plus attendre obligatoirement les vétérinaires
+    if (settings.daily_schedules) {
+      console.log('✅ Génération des créneaux disponibles...')
       generateAvailableSlots()
+    } else {
+      console.log('⏳ En attente des paramètres de la clinique...')
     }
   }, [settings, veterinarians])
 
