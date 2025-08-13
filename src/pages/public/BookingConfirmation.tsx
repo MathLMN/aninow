@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -76,7 +75,7 @@ const BookingConfirmation = () => {
   // Affichage pendant le chargement
   if (isSubmitting) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20">
+      <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
         <Header />
         <main className="container mx-auto px-6 py-12">
           <div className="max-w-3xl mx-auto text-center">
@@ -109,7 +108,7 @@ const BookingConfirmation = () => {
   // Affichage en cas d'erreur
   if (submissionResult?.error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20">
+      <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
         <Header />
         <main className="container mx-auto px-6 py-12">
           <div className="max-w-2xl mx-auto text-center">
@@ -136,7 +135,7 @@ const BookingConfirmation = () => {
   const aiAnalysis = submissionResult?.aiAnalysis;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20">
+    <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
       <Header />
 
       <main className="container mx-auto px-6 py-12">

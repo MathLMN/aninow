@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
@@ -57,9 +56,7 @@ const ConditionalQuestions = () => {
   }
 
   return (
-    <div className="min-h-screen relative" style={{
-      background: 'linear-gradient(135deg, #EDE3DA 0%, #ffffff 100%)'
-    }}>
+    <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
       <Header />
 
       <main className="container mx-auto px-3 sm:px-6 pt-20 sm:pt-24 pb-20">

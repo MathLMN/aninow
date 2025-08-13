@@ -99,7 +99,7 @@ const AppointmentSlots = () => {
 
   if (isLoading || vetsLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20">
+      <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
         <Header />
         <main className="container mx-auto px-3 sm:px-6 pt-20 sm:pt-24 pb-8">
           <div className="max-w-2xl mx-auto text-center">
@@ -111,7 +111,7 @@ const AppointmentSlots = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20">
+    <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
       <Header />
 
       <main className="container mx-auto px-3 sm:px-6 pt-20 sm:pt-24 pb-8">
