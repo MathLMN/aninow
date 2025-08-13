@@ -7,6 +7,7 @@ import { useVeterinarianSchedules } from "@/hooks/useVeterinarianSchedules";
 import { useVeterinarianAbsences } from "@/hooks/useVeterinarianAbsences";
 import { VeterinarianWeeklySchedule } from "./VeterinarianWeeklySchedule";
 import { VeterinarianAbsenceManager } from "./VeterinarianAbsenceManager";
+import { Veterinarian } from "@/types/veterinarian.types";
 
 export const VeterinarianScheduleManager = () => {
   const {
@@ -30,7 +31,7 @@ export const VeterinarianScheduleManager = () => {
       </Card>;
   }
 
-  const activeVeterinarians = veterinarians.filter(vet => vet.is_active);
+  const activeVeterinarians: Veterinarian[] = veterinarians.filter((vet: Veterinarian) => vet.is_active);
 
   if (activeVeterinarians.length === 0) {
     return <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
@@ -66,7 +67,7 @@ export const VeterinarianScheduleManager = () => {
       </Card>
 
       {/* Weekly Schedules */}
-      {activeVeterinarians.map(veterinarian => (
+      {activeVeterinarians.map((veterinarian: Veterinarian) => (
         <VeterinarianWeeklySchedule
           key={veterinarian.id}
           veterinarian={veterinarian}

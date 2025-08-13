@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { useClinicSettings } from './useClinicSettings'
 import { useClinicVeterinarians } from './useClinicVeterinarians'
+import { Veterinarian } from '@/types/veterinarian.types'
 
 interface TimeSlot {
   time: string
@@ -15,13 +16,6 @@ interface TimeSlot {
 interface DateSlots {
   date: string
   slots: TimeSlot[]
-}
-
-interface Veterinarian {
-  id: string;
-  name: string;
-  specialty?: string;
-  is_active: boolean;
 }
 
 export const useAvailableSlots = () => {
@@ -38,8 +32,6 @@ export const useAvailableSlots = () => {
 
   // Durées standard par vétérinaire
   const getVetDuration = (vetId: string) => {
-    if (!Array.isArray(veterinarians)) return 20;
-    
     const vet = veterinarians.find((v: Veterinarian) => v.id === vetId)
     if (vet?.name === "Dr. JeremIE MAURICE") {
       return 15 // 15 minutes pour Dr. Jérémie Maurice
@@ -88,8 +80,6 @@ export const useAvailableSlots = () => {
       }
 
       // 2. Si pas d'attribution existante, calculer le vétérinaire le moins chargé
-      if (!Array.isArray(veterinarians)) return '';
-      
       const activeVets = veterinarians.filter((vet: Veterinarian) => vet.is_active)
       if (activeVets.length === 0) return veterinarians[0]?.id || ''
 
@@ -137,7 +127,6 @@ export const useAvailableSlots = () => {
     } catch (error) {
       console.error('Erreur dans getOrAssignVeterinarianForSlot:', error)
       // Fallback: retourner le premier vétérinaire actif
-      if (!Array.isArray(veterinarians)) return '';
       return veterinarians.find((vet: Veterinarian) => vet.is_active)?.id || veterinarians[0]?.id || ''
     }
   }
@@ -219,7 +208,7 @@ export const useAvailableSlots = () => {
   const generateAvailableSlots = async (daysAhead: number = 14) => {
     console.log('🔄 Début de generateAvailableSlots')
     console.log('🔄 Settings disponibles:', !!settings.daily_schedules)
-    console.log('🔄 Nombre de vétérinaires:', Array.isArray(veterinarians) ? veterinarians.length : 0)
+    console.log('🔄 Nombre de vétérinaires:', veterinarians.length)
     
     // Ne pas attendre que des vétérinaires soient configurés si la clinique n'en a pas
     // Générer des créneaux génériques si nécessaire
@@ -233,7 +222,7 @@ export const useAvailableSlots = () => {
     const slots: DateSlots[] = []
     
     // Si aucun vétérinaire configuré, créer des créneaux génériques
-    if (!Array.isArray(veterinarians) || veterinarians.length === 0) {
+    if (veterinarians.length === 0) {
       console.log('⚠️ Aucun vétérinaire configuré, création de créneaux génériques')
       
       for (let i = 0; i < daysAhead; i++) {
@@ -308,8 +297,6 @@ export const useAvailableSlots = () => {
       
       // Appliquer les vérifications de disponibilité
       const processedSlots = daySlots.map(slot => {
-        if (!Array.isArray(veterinarians)) return { ...slot, available: false };
-        
         const vet = veterinarians.find((v: Veterinarian) => v.id === slot.veterinarian_id)
         if (!vet) return { ...slot, available: false }
         
@@ -462,7 +449,7 @@ export const useAvailableSlots = () => {
   useEffect(() => {
     console.log('🔄 useAvailableSlots useEffect triggered')
     console.log('🔄 Settings:', settings)
-    console.log('🔄 Veterinarians:', Array.isArray(veterinarians) ? veterinarians.length : 'not array')
+    console.log('🔄 Veterinarians:', veterinarians.length)
     
     // Générer les créneaux dès que les paramètres sont disponibles
     // Ne plus attendre obligatoirement les vétérinaires

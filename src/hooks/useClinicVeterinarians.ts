@@ -1,21 +1,9 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useClinicAccess } from './useClinicAccess';
 import { useClinicContext } from '@/contexts/ClinicContext';
-
-interface Veterinarian {
-  id: string;
-  name: string;
-  specialty?: string;
-  is_active: boolean;
-  clinic_id: string;
-  created_at: string;
-  updated_at: string;
-  auth_migration_status?: string;
-  email?: string;
-}
+import { Veterinarian } from '@/types/veterinarian.types';
 
 export const useClinicVeterinarians = () => {
   const { toast } = useToast();
