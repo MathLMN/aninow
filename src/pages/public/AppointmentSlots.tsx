@@ -121,12 +121,6 @@ const AppointmentSlots = () => {
                 </p>
               )}
             </div>
-            <div className="text-vet-brown">
-              <p>Vétérinaires: {veterinarians.length} configurés</p>
-              <p>Créneaux: {availableSlots.length} jours disponibles</p>
-              <p>Chargement vétérinaires: {vetsLoading ? 'En cours...' : 'Terminé'}</p>
-              <p>Chargement créneaux: {isLoading ? 'En cours...' : 'Terminé'}</p>
-            </div>
           </div>
         </main>
       </div>
@@ -171,15 +165,6 @@ const AppointmentSlots = () => {
                 selectedVeterinarian={selectedVeterinarian}
                 onVeterinarianSelect={setSelectedVeterinarian}
               />
-            </div>
-          )}
-
-          {/* Debug info pour le développement */}
-          {process.env.NODE_ENV === 'development' && (
-            <div className="mb-4 p-4 bg-gray-100 rounded text-xs">
-              <p>Debug: Vétérinaires chargés: {veterinarians.length}</p>
-              <p>Debug: Vétérinaire sélectionné: {selectedVeterinarian || 'Aucun'}</p>
-              <p>Debug: Créneaux filtrés: {filteredSlots.length} jours</p>
             </div>
           )}
 

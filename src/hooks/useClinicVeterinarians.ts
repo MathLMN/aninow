@@ -1,12 +1,27 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useClinicAccess } from './useClinicAccess';
+import { useClinicContext } from '@/contexts/ClinicContext';
 
 export const useClinicVeterinarians = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { currentClinicId } = useClinicAccess();
+  
+  // Essayer d'abord le contexte d'accès (pour l'interface vétérinaire)
+  const { currentClinicId: accessClinicId } = useClinicAccess();
+  
+  // Puis le contexte public (pour l'interface de réservation)
+  const { currentClinic } = useClinicContext();
+  const contextClinicId = currentClinic?.id;
+  
+  // Utiliser l'ID de clinique disponible
+  const currentClinicId = accessClinicId || contextClinicId;
+
+  console.log('🔄 useClinicVeterinarians - Access clinic ID:', accessClinicId);
+  console.log('🔄 useClinicVeterinarians - Context clinic ID:', contextClinicId);
+  console.log('🔄 useClinicVeterinarians - Final clinic ID:', currentClinicId);
 
   const { 
     data: veterinarians = [], 
