@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -157,16 +158,14 @@ const AppointmentSlots = () => {
             )}
           </div>
 
-          {/* Section préférence de vétérinaire - Toujours afficher si des vétérinaires existent */}
-          {veterinarians && veterinarians.length > 0 && (
-            <div className="mb-6">
-              <VeterinarianPreference
-                veterinarians={veterinarians}
-                selectedVeterinarian={selectedVeterinarian}
-                onVeterinarianSelect={setSelectedVeterinarian}
-              />
-            </div>
-          )}
+          {/* Section préférence de vétérinaire - Toujours afficher */}
+          <div className="mb-6">
+            <VeterinarianPreference
+              veterinarians={veterinarians}
+              selectedVeterinarian={selectedVeterinarian}
+              onVeterinarianSelect={setSelectedVeterinarian}
+            />
+          </div>
 
           {/* Section créneaux disponibles */}
           <div className="space-y-3 sm:space-y-4">
