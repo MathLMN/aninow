@@ -12,14 +12,13 @@ import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { VeterinarianPreference } from "@/components/slots/VeterinarianPreference";
 import { DateSlotCard } from "@/components/slots/DateSlotCard";
 import { useClinicContext } from "@/contexts/ClinicContext";
-import { Veterinarian } from "@/types/veterinarian.types";
 
 const AppointmentSlots = () => {
   const navigate = useNavigate();
   const { currentClinic } = useClinicContext();
   const { availableSlots, isLoading } = useAvailableSlots();
   const { updateBookingData } = useBookingFormData();
-  const { veterinarians, isLoading: vetsLoading, error: vetsError } = useClinicVeterinarians();
+  const { veterinarians, isLoading: vetsLoading } = useClinicVeterinarians();
   const [selectedVeterinarian, setSelectedVeterinarian] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<{date: string, time: string, veterinarianId: string} | null>(null);
 
@@ -27,11 +26,9 @@ const AppointmentSlots = () => {
   console.log('🏥 AppointmentSlots - Available slots:', availableSlots);
   console.log('🏥 AppointmentSlots - Veterinarians from useClinicVeterinarians:', veterinarians);
   console.log('🏥 AppointmentSlots - Veterinarians count:', veterinarians.length);
-  console.log('🏥 AppointmentSlots - Veterinarians array:', JSON.stringify(veterinarians, null, 2));
   console.log('🏥 AppointmentSlots - Selected veterinarian:', selectedVeterinarian);
   console.log('🏥 AppointmentSlots - Is loading slots:', isLoading);
   console.log('🏥 AppointmentSlots - Is loading vets:', vetsLoading);
-  console.log('🏥 AppointmentSlots - Vets error:', vetsError);
 
   const handleBack = () => {
     navigate('/booking/contact-info');
@@ -109,8 +106,6 @@ const AppointmentSlots = () => {
     };
   }).filter(daySlots => daySlots.slots.length > 0);
 
-  console.log('🏥 AppointmentSlots - Filtered slots:', filteredSlots);
-
   if (isLoading || vetsLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
@@ -171,13 +166,6 @@ const AppointmentSlots = () => {
               onVeterinarianSelect={setSelectedVeterinarian}
             />
           </div>
-
-          {/* Debug info temporaire */}
-          {vetsError && (
-            <div className="mb-4 p-4 bg-red-100 border border-red-300 rounded-lg">
-              <p className="text-red-700">Erreur de chargement des vétérinaires: {vetsError}</p>
-            </div>
-          )}
 
           {/* Section créneaux disponibles */}
           <div className="space-y-3 sm:space-y-4">

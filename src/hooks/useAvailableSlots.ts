@@ -3,7 +3,6 @@ import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { useClinicSettings } from './useClinicSettings'
 import { useClinicVeterinarians } from './useClinicVeterinarians'
-import { Veterinarian } from '@/types/veterinarian.types'
 
 interface TimeSlot {
   time: string
@@ -28,11 +27,11 @@ export const useAvailableSlots = () => {
 
   console.log('🔄 useAvailableSlots - Settings:', settings)
   console.log('🔄 useAvailableSlots - Veterinarians:', veterinarians)
-  console.log('🔄 useAvailableSlots - Veterinarians count:', Array.isArray(veterinarians) ? veterinarians.length : 0)
+  console.log('🔄 useAvailableSlots - Veterinarians count:', veterinarians.length)
 
   // Durées standard par vétérinaire
   const getVetDuration = (vetId: string) => {
-    const vet = veterinarians.find((v: Veterinarian) => v.id === vetId)
+    const vet = veterinarians.find(v => v.id === vetId)
     if (vet?.name === "Dr. JeremIE MAURICE") {
       return 15 // 15 minutes pour Dr. Jérémie Maurice
     }
@@ -80,7 +79,7 @@ export const useAvailableSlots = () => {
       }
 
       // 2. Si pas d'attribution existante, calculer le vétérinaire le moins chargé
-      const activeVets = veterinarians.filter((vet: Veterinarian) => vet.is_active)
+      const activeVets = veterinarians.filter(vet => vet.is_active)
       if (activeVets.length === 0) return veterinarians[0]?.id || ''
 
       // Compter les attributions existantes pour cette date
@@ -127,7 +126,7 @@ export const useAvailableSlots = () => {
     } catch (error) {
       console.error('Erreur dans getOrAssignVeterinarianForSlot:', error)
       // Fallback: retourner le premier vétérinaire actif
-      return veterinarians.find((vet: Veterinarian) => vet.is_active)?.id || veterinarians[0]?.id || ''
+      return veterinarians.find(vet => vet.is_active)?.id || veterinarians[0]?.id || ''
     }
   }
 
@@ -297,7 +296,7 @@ export const useAvailableSlots = () => {
       
       // Appliquer les vérifications de disponibilité
       const processedSlots = daySlots.map(slot => {
-        const vet = veterinarians.find((v: Veterinarian) => v.id === slot.veterinarian_id)
+        const vet = veterinarians.find(v => v.id === slot.veterinarian_id)
         if (!vet) return { ...slot, available: false }
         
         const vetDuration = getVetDuration(vet.id)

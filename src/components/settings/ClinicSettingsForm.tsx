@@ -1,406 +1,544 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Clock, MapPin, Phone, Mail, Users, Plus, Edit, Trash2, Building2, Calendar, Settings } from "lucide-react";
 import { useClinicSettings } from "@/hooks/useClinicSettings";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { VeterinarianScheduleManager } from "./VeterinarianScheduleManager";
-import { DefaultScheduleForm } from "./DefaultScheduleForm";
-import { 
-  Building2, 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Globe, 
-  Users, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Clock,
-  CheckCircle,
-  X
-} from "lucide-react";
-import { Veterinarian } from "@/types/veterinarian.types";
-import { useClinicContext } from "@/contexts/ClinicContext";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { cn } from "@/lib/utils";
 
-interface ClinicSettingsFormProps {
-  clinicId?: string;
+interface ClinicSettings {
+  clinic_name: string;
+  clinic_phone: string;
+  clinic_email: string;
+  clinic_address_street: string;
+  clinic_address_city: string;
+  clinic_address_postal_code: string;
+  clinic_address_country: string;
+  asv_enabled: boolean;
+  default_slot_duration_minutes: number;
+}
+
+const defaultSettings: ClinicSettings = {
+  clinic_name: "Clinique Vétérinaire",
+  clinic_phone: "",
+  clinic_email: "",
+  clinic_address_street: "",
+  clinic_address_city: "",
+  clinic_address_postal_code: "",
+  clinic_address_country: "France",
+  asv_enabled: true,
+  default_slot_duration_minutes: 15
+};
+
+const formSchema = z.object({
+  clinicName: z.string().min(2, {
+    message: "Le nom de la clinique doit comporter au moins 2 caractères."
+  }),
+  clinicPhone: z.string().optional(),
+  clinicEmail: z.string().email({
+    message: "Veuillez entrer une adresse email valide."
+  }).optional(),
+  clinicAddressStreet: z.string().optional(),
+  clinicAddressCity: z.string().optional(),
+  clinicAddressPostalCode: z.string().optional(),
+  clinicAddressCountry: z.string().optional(),
+  asvEnabled: z.boolean().default(true),
+  defaultSlotDurationMinutes: z.number().min(5).max(60).default(15)
+});
+
+interface Veterinarian {
+  id: string;
+  name: string;
+  specialty: string;
+  is_active: boolean;
+}
+
+interface NewVeterinarian {
+  name: string;
+  specialty: string;
+  is_active: boolean;
 }
 
 export const ClinicSettingsForm = () => {
-  const { toast } = useToast();
-  const { currentClinic } = useClinicContext();
-  const { 
-    settings, 
-    isLoading, 
-    error, 
-    updateSettings 
+  const {
+    settings,
+    isLoading,
+    updateSettings
   } = useClinicSettings();
-  const { 
-    veterinarians, 
-    isLoading: isLoadingVets,
+  const {
+    veterinarians,
     addVeterinarian,
     updateVeterinarian,
     deleteVeterinarian
   } = useClinicVeterinarians();
-
-  const [name, setName] = useState('');
-  const [address, setAddress] = useState('');
-  const [city, setCity] = useState('');
-  const [province, setProvince] = useState('');
-  const [postalCode, setPostalCode] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [website, setWebsite] = useState('');
-  const [aboutUs, setAboutUs] = useState('');
-  const [isAddingVeterinarian, setIsAddingVeterinarian] = useState(false);
-  const [newVeterinarianData, setNewVeterinarianData] = useState({
+  const {
+    toast
+  } = useToast();
+  const [isVetDialogOpen, setIsVetDialogOpen] = useState(false);
+  const [newVeterinarian, setNewVeterinarian] = useState<NewVeterinarian>({
     name: '',
     specialty: '',
     is_active: true
   });
   const [editingVeterinarian, setEditingVeterinarian] = useState<Veterinarian | null>(null);
 
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      clinicName: settings?.clinic_name || defaultSettings.clinic_name,
+      clinicPhone: settings?.clinic_phone || defaultSettings.clinic_phone,
+      clinicEmail: settings?.clinic_email || defaultSettings.clinic_email,
+      clinicAddressStreet: settings?.clinic_address_street || defaultSettings.clinic_address_street,
+      clinicAddressCity: settings?.clinic_address_city || defaultSettings.clinic_address_city,
+      clinicAddressPostalCode: settings?.clinic_address_postal_code || defaultSettings.clinic_address_postal_code,
+      clinicAddressCountry: settings?.clinic_address_country || defaultSettings.clinic_address_country,
+      asvEnabled: settings?.asv_enabled || defaultSettings.asv_enabled,
+      defaultSlotDurationMinutes: settings?.default_slot_duration_minutes || defaultSettings.default_slot_duration_minutes
+    }
+  });
+
   useEffect(() => {
     if (settings) {
-      setName(settings.name || '');
-      setAddress(settings.address || '');
-      setCity(settings.city || '');
-      setProvince(settings.province || '');
-      setPostalCode(settings.postal_code || '');
-      setPhone(settings.phone || '');
-      setEmail(settings.email || '');
-      setWebsite(settings.website || '');
-      setAboutUs(settings.about_us || '');
+      form.reset({
+        clinicName: settings.clinic_name,
+        clinicPhone: settings.clinic_phone,
+        clinicEmail: settings.clinic_email,
+        clinicAddressStreet: settings.clinic_address_street,
+        clinicAddressCity: settings.clinic_address_city,
+        clinicAddressPostalCode: settings.clinic_address_postal_code,
+        clinicAddressCountry: settings.clinic_address_country,
+        asvEnabled: settings.asv_enabled,
+        defaultSlotDurationMinutes: settings.default_slot_duration_minutes
+      });
     }
-  }, [settings]);
+  }, [settings, form]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const success = await updateSettings({
+      clinic_name: values.clinicName,
+      clinic_phone: values.clinicPhone || '',
+      clinic_email: values.clinicEmail || '',
+      clinic_address_street: values.clinicAddressStreet || '',
+      clinic_address_city: values.clinicAddressCity || '',
+      clinic_address_postal_code: values.clinicAddressPostalCode || '',
+      clinic_address_country: values.clinicAddressCountry || 'France',
+      asv_enabled: values.asvEnabled,
+      default_slot_duration_minutes: values.defaultSlotDurationMinutes
+    });
 
-    const updatedSettings = {
-      name,
-      address,
-      city,
-      province,
-      postal_code: postalCode,
-      phone,
-      email,
-      website,
-      about_us: aboutUs,
-    };
-
-    try {
-      await updateSettings(updatedSettings);
+    if (success) {
       toast({
         title: "Paramètres mis à jour",
-        description: "Les paramètres de la clinique ont été mis à jour avec succès",
+        description: "Les paramètres de la clinique ont été mis à jour avec succès"
       });
-    } catch (error: any) {
+    } else {
       toast({
         title: "Erreur",
         description: "Impossible de mettre à jour les paramètres de la clinique",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
 
-  const handleAddVeterinarian = async () => {
-    try {
-      if (editingVeterinarian) {
-        // Update existing veterinarian
-        await updateVeterinarian(editingVeterinarian.id, newVeterinarianData);
-        toast({
-          title: "Vétérinaire mis à jour",
-          description: "Les informations du vétérinaire ont été mises à jour avec succès",
-        });
-      } else {
-        // Add new veterinarian
-        await addVeterinarian(newVeterinarianData);
-        toast({
-          title: "Vétérinaire ajouté",
-          description: "Le vétérinaire a été ajouté avec succès",
-        });
-      }
-      
-      setNewVeterinarianData({ name: '', specialty: '', is_active: true });
-      setIsAddingVeterinarian(false);
+  const handleVeterinarianSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newVeterinarian.name.trim() || !newVeterinarian.specialty.trim()) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez remplir tous les champs obligatoires",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const success = await (editingVeterinarian ? updateVeterinarian(editingVeterinarian.id, {
+      name: newVeterinarian.name,
+      specialty: newVeterinarian.specialty,
+      is_active: newVeterinarian.is_active
+    }) : addVeterinarian({
+      name: newVeterinarian.name,
+      specialty: newVeterinarian.specialty,
+      is_active: newVeterinarian.is_active
+    }));
+
+    if (success) {
+      setIsVetDialogOpen(false);
+      setNewVeterinarian({
+        name: '',
+        specialty: '',
+        is_active: true
+      });
       setEditingVeterinarian(null);
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: "Impossible d'ajouter/modifier le vétérinaire",
-        variant: "destructive",
-      });
     }
   };
-
-  const handleDeleteVeterinarian = async (id: string) => {
-    try {
-      await deleteVeterinarian(id);
-      toast({
-        title: "Vétérinaire supprimé",
-        description: "Le vétérinaire a été supprimé avec succès",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: "Impossible de supprimer le vétérinaire",
-        variant: "destructive",
-      });
-    }
-  };
-  
-  const handleEditVeterinarian = (vet: Veterinarian) => {
-    setEditingVeterinarian(vet);
-    setNewVeterinarianData({
-      name: vet.name,
-      specialty: vet.specialty || '',
-      is_active: vet.is_active
-    });
-    setIsAddingVeterinarian(true);
-  };
-
-  if (isLoading || isLoadingVets) {
-    return <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-      <CardContent className="p-8">
-        <div className="text-center text-vet-brown">Chargement des paramètres de la clinique...</div>
-      </CardContent>
-    </Card>;
-  }
-
-  if (error) {
-    return <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-      <CardContent className="p-8">
-        <div className="text-center text-vet-brown">Erreur lors du chargement des paramètres de la clinique.</div>
-      </CardContent>
-    </Card>;
-  }
 
   return (
-    <div className="space-y-6">
-      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
+    <div className="space-y-8">
+      {/* Informations générales */}
+      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
         <CardHeader>
-          <CardTitle className="text-2xl text-vet-navy flex items-center">
+          <CardTitle className="text-vet-navy flex items-center">
             <Building2 className="h-5 w-5 mr-2" />
-            Informations de la clinique
+            Informations générales
           </CardTitle>
-          <CardDescription className="text-vet-brown">
-            Mettez à jour les informations de votre clinique
+          <CardDescription>
+            Informations de base de votre clinique vétérinaire
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="grid gap-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="name">Nom de la clinique</Label>
-                <Input
-                  type="text"
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+        <CardContent className="space-y-4">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="clinicName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nom de la clinique *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Clinique Vétérinaire" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="clinicPhone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Téléphone</FormLabel>
+                      <FormControl>
+                        <Input placeholder="01 23 45 67 89" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-              <div>
-                <Label htmlFor="phone">Numéro de téléphone</Label>
-                <Input
-                  type="tel"
-                  id="phone"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
-              </div>
-            </div>
-            <Label htmlFor="address">Adresse</Label>
-            <Input
-              type="text"
-              id="address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-            />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="city">Ville</Label>
-                <Input
-                  type="text"
-                  id="city"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="province">Province</Label>
-                <Input
-                  type="text"
-                  id="province"
-                  value={province}
-                  onChange={(e) => setProvince(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="postalCode">Code postal</Label>
-                <Input
-                  type="text"
-                  id="postalCode"
-                  value={postalCode}
-                  onChange={(e) => setPostalCode(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="email">Adresse e-mail</Label>
-                <Input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="website">Site web</Label>
-                <Input
-                  type="url"
-                  id="website"
-                  value={website}
-                  onChange={(e) => setWebsite(e.target.value)}
-                />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="aboutUs">À propos de nous</Label>
-              <Textarea
-                id="aboutUs"
-                value={aboutUs}
-                onChange={(e) => setAboutUs(e.target.value)}
-                className="min-h-[80px]"
+
+              <FormField
+                control={form.control}
+                name="clinicEmail"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="contact@clinique.fr" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <Button type="submit" className="bg-vet-sage hover:bg-vet-sage/90 text-white">
-              <CheckCircle className="h-4 w-4 mr-2" />
-              Mettre à jour les informations
-            </Button>
-          </form>
+
+              <Separator />
+
+              <div className="grid md:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="clinicAddressStreet"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Adresse (rue)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="123 rue de la République" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="clinicAddressCity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Ville</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Paris" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="clinicAddressPostalCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Code Postal</FormLabel>
+                      <FormControl>
+                        <Input placeholder="75001" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="clinicAddressCountry"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Pays</FormLabel>
+                    <FormControl>
+                      <Input placeholder="France" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button type="submit" className="bg-vet-blue hover:bg-vet-blue/90 text-white">
+                Enregistrer les modifications
+              </Button>
+            </form>
+          </Form>
         </CardContent>
       </Card>
 
-      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
+      {/* Configuration du planning */}
+      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
         <CardHeader>
-          <CardTitle className="text-2xl text-vet-navy flex items-center">
+          <CardTitle className="text-vet-navy flex items-center">
+            <Settings className="h-5 w-5 mr-2" />
+            Configuration du planning
+          </CardTitle>
+          <CardDescription>
+            Paramètres de configuration pour votre planning de consultation
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="defaultSlotDurationMinutes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Durée par défaut d'un créneau (minutes)</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner la durée" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {[5, 10, 15, 20, 30, 45, 60].map(duration => (
+                          <SelectItem key={duration} value={duration.toString()}>
+                            {duration} minutes
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="asvEnabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel>Ajouter la colonne ASV dans votre planning</FormLabel>
+                      <FormDescription>
+                        Activez cette option pour créer une colonne dédiée uniquement aux ASV et fermée à la prise de rendez-vous en ligne.
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <Button type="submit" className="bg-vet-blue hover:bg-vet-blue/90 text-white">
+                Enregistrer les modifications
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      {/* Équipe vétérinaire */}
+      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
+        <CardHeader>
+          <CardTitle className="text-vet-navy flex items-center">
             <Users className="h-5 w-5 mr-2" />
             Équipe vétérinaire
           </CardTitle>
-          <CardDescription className="text-vet-brown">
-            Gérez les vétérinaires de votre clinique
+          <CardDescription>
+            Gérez votre équipe de vétérinaires
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="mb-4">
-            <Button onClick={() => {
-              setIsAddingVeterinarian(true);
-              setEditingVeterinarian(null);
-              setNewVeterinarianData({ name: '', specialty: '', is_active: true });
-            }} className="bg-vet-sage hover:bg-vet-sage/90 text-white">
-              <Plus className="h-4 w-4 mr-2" />
-              Ajouter un vétérinaire
-            </Button>
+        <CardContent className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-medium text-vet-navy">Vétérinaires</h3>
+            <Dialog open={isVetDialogOpen} onOpenChange={setIsVetDialogOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  onClick={() => {
+                    setEditingVeterinarian(null);
+                    setNewVeterinarian({
+                      name: '',
+                      specialty: '',
+                      is_active: true
+                    });
+                  }}
+                  className="bg-vet-blue hover:bg-vet-blue/90 text-white"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Ajouter un vétérinaire
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle className="text-vet-navy">
+                    {editingVeterinarian ? 'Modifier le vétérinaire' : 'Ajouter un vétérinaire'}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {editingVeterinarian ? 'Modifiez les informations du vétérinaire.' : 'Ajoutez un nouveau vétérinaire à votre équipe.'}
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleVeterinarianSubmit}>
+                  <div className="grid gap-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="vet-name">Nom complet *</Label>
+                      <Input
+                        id="vet-name"
+                        value={newVeterinarian.name}
+                        onChange={(e) => setNewVeterinarian(prev => ({
+                          ...prev,
+                          name: e.target.value
+                        }))}
+                        placeholder="Dr. Martin Dupont"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="vet-specialty">Spécialité *</Label>
+                      <Input
+                        id="vet-specialty"
+                        value={newVeterinarian.specialty}
+                        onChange={(e) => setNewVeterinarian(prev => ({
+                          ...prev,
+                          specialty: e.target.value
+                        }))}
+                        placeholder="Médecine générale, Chirurgie, etc."
+                        required
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="vet-active"
+                        checked={newVeterinarian.is_active}
+                        onCheckedChange={(checked) => setNewVeterinarian(prev => ({
+                          ...prev,
+                          is_active: checked
+                        }))}
+                      />
+                      <Label htmlFor="vet-active">Vétérinaire actif</Label>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => setIsVetDialogOpen(false)}>
+                      Annuler
+                    </Button>
+                    <Button type="submit" className="bg-vet-blue hover:bg-vet-blue/90 text-white">
+                      {editingVeterinarian ? 'Enregistrer les modifications' : 'Ajouter'}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
           </div>
 
-          {isAddingVeterinarian && (
-            <div className="mb-4 p-4 border border-vet-blue/30 rounded-lg">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="vetName">Nom du vétérinaire</Label>
-                  <Input
-                    type="text"
-                    id="vetName"
-                    value={newVeterinarianData.name}
-                    onChange={(e) => setNewVeterinarianData({ ...newVeterinarianData, name: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="vetSpecialty">Spécialité</Label>
-                  <Input
-                    type="text"
-                    id="vetSpecialty"
-                    value={newVeterinarianData.specialty}
-                    onChange={(e) => setNewVeterinarianData({ ...newVeterinarianData, specialty: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div className="mt-2 flex items-center space-x-2">
-                <Label htmlFor="vetIsActive">Actif</Label>
-                <Checkbox
-                  id="vetIsActive"
-                  checked={newVeterinarianData.is_active}
-                  onCheckedChange={(checked) => setNewVeterinarianData({ ...newVeterinarianData, is_active: !!checked })}
-                />
-              </div>
-              <div className="mt-4 flex justify-end space-x-2">
-                <Button variant="ghost" onClick={() => setIsAddingVeterinarian(false)}>
-                  Annuler
-                </Button>
-                <Button onClick={handleAddVeterinarian} className="bg-vet-sage hover:bg-vet-sage/90 text-white">
-                  {editingVeterinarian ? "Mettre à jour" : "Ajouter"}
-                </Button>
-              </div>
-            </div>
-          )}
-
-          <Separator />
-
-          <div className="space-y-2">
-            {veterinarians && veterinarians.length > 0 ? (
-              veterinarians.map((vet) => (
-                <div key={vet.id} className="flex items-center justify-between p-4 border border-vet-blue/30 rounded-lg">
-                  <div>
-                    <h3 className="font-semibold text-vet-navy">{vet.name}</h3>
-                    <p className="text-sm text-vet-brown">{vet.specialty || 'Non spécifié'}</p>
-                    <Badge variant={vet.is_active ? "default" : "secondary"}>
-                      {vet.is_active ? "Actif" : "Inactif"}
+          <div className="space-y-3">
+            {veterinarians.map(vet => (
+              <div key={vet.id} className="flex items-center justify-between p-4 bg-vet-beige/20 rounded-lg border border-vet-blue/20">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="font-medium text-vet-navy">{vet.name}</h4>
+                    <Badge variant={vet.is_active ? "default" : "secondary"} className={vet.is_active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}>
+                      {vet.is_active ? 'Actif' : 'Inactif'}
                     </Badge>
                   </div>
-                  <div className="flex space-x-2">
-                    <Button size="icon" variant="ghost" onClick={() => handleEditVeterinarian(vet)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button size="icon" variant="ghost" onClick={() => handleDeleteVeterinarian(vet.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <p className="text-sm text-vet-brown">{vet.specialty}</p>
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-4 text-vet-brown">
-                Aucun vétérinaire ajouté.
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setEditingVeterinarian(vet);
+                      setNewVeterinarian({
+                        name: vet.name,
+                        specialty: vet.specialty || '',
+                        is_active: vet.is_active
+                      });
+                      setIsVetDialogOpen(true);
+                    }}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Êtes-vous sûr de vouloir supprimer {vet.name} ? Cette action est irréversible.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => deleteVeterinarian(vet.id)}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Supprimer
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
+            ))}
+            
+            {veterinarians.length === 0 && (
+              <div className="text-center py-8 text-vet-brown bg-vet-beige/10 rounded-lg border border-vet-blue/20">
+                <Users className="h-8 w-8 mx-auto mb-2 text-vet-blue/60" />
+                <p>Aucun vétérinaire ajouté</p>
+                <p className="text-sm">Commencez par ajouter votre premier vétérinaire</p>
               </div>
             )}
           </div>
         </CardContent>
       </Card>
 
+      {/* Schedule Manager */}
       <VeterinarianScheduleManager />
-
-      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
-        <CardHeader>
-          <CardTitle className="text-2xl text-vet-navy flex items-center">
-            <Clock className="h-5 w-5 mr-2" />
-            Horaires par défaut
-          </CardTitle>
-          <CardDescription className="text-vet-brown">
-            Définissez les horaires par défaut de votre clinique
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <DefaultScheduleForm />
-        </CardContent>
-      </Card>
     </div>
   );
 };

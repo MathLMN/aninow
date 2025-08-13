@@ -1,9 +1,9 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useClinicAccess } from './useClinicAccess';
 import { useClinicContext } from '@/contexts/ClinicContext';
-import { Veterinarian } from '@/types/veterinarian.types';
 
 export const useClinicVeterinarians = () => {
   const { toast } = useToast();
@@ -21,7 +21,6 @@ export const useClinicVeterinarians = () => {
 
   console.log('🔄 useClinicVeterinarians - Access clinic ID:', accessClinicId);
   console.log('🔄 useClinicVeterinarians - Context clinic ID:', contextClinicId);
-  console.log('🔄 useClinicVeterinarians - Current clinic object:', currentClinic);
   console.log('🔄 useClinicVeterinarians - Final clinic ID:', currentClinicId);
 
   const { 
@@ -31,7 +30,7 @@ export const useClinicVeterinarians = () => {
     refetch 
   } = useQuery({
     queryKey: ['clinic-veterinarians', currentClinicId],
-    queryFn: async (): Promise<Veterinarian[]> => {
+    queryFn: async () => {
       console.log('🔄 Fetching clinic veterinarians for clinic:', currentClinicId);
       
       if (!currentClinicId) {
@@ -39,7 +38,6 @@ export const useClinicVeterinarians = () => {
         return [];
       }
 
-      // Requête directe avec RLS pour les vétérinaires
       const { data, error } = await supabase
         .from('clinic_veterinarians')
         .select('*')
@@ -53,17 +51,12 @@ export const useClinicVeterinarians = () => {
       }
 
       console.log('✅ Veterinarians loaded:', data?.length || 0, 'items');
-      console.log('📊 Veterinarians data:', data);
-      return (data || []) as Veterinarian[];
+      return data || [];
     },
     enabled: !!currentClinicId,
     retry: 3,
     staleTime: 30 * 1000, // 30 seconds
   });
-
-  console.log('🏥 Final veterinarians result:', veterinarians);
-  console.log('🏥 Is loading:', isLoading);
-  console.log('🏥 Error:', error);
 
   const addVeterinarianMutation = useMutation({
     mutationFn: async (vetData: { name: string; specialty: string; is_active: boolean }) => {
@@ -178,7 +171,7 @@ export const useClinicVeterinarians = () => {
   });
 
   return {
-    veterinarians: veterinarians as Veterinarian[],
+    veterinarians,
     isLoading,
     error: error?.message || null,
     refetch,
