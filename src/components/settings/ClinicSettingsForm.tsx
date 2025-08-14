@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,10 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Clock, MapPin, Phone, Mail, Users, Plus, Edit, Trash2, Building2, Calendar, Settings } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Clock, MapPin, Phone, Mail, Users, Plus, Edit, Trash2, Building2, Calendar, Settings, ChevronDown, ChevronRight } from "lucide-react";
 import { useClinicSettings } from "@/hooks/useClinicSettings";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
-import { VeterinarianScheduleManager } from "./VeterinarianScheduleManager";
+import { useVeterinarianSchedules } from "@/hooks/useVeterinarianSchedules";
+import { VeterinarianAbsenceManager } from "./VeterinarianAbsenceManager";
+import { VeterinarianWeeklySchedule } from "./VeterinarianWeeklySchedule";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -104,6 +106,7 @@ export const ClinicSettingsForm = () => {
     updateVeterinarian,
     deleteVeterinarian
   } = useClinicVeterinarians();
+  const { schedules } = useVeterinarianSchedules();
   const {
     toast
   } = useToast();
@@ -114,6 +117,7 @@ export const ClinicSettingsForm = () => {
     is_active: true
   });
   const [editingVeterinarian, setEditingVeterinarian] = useState<Veterinarian | null>(null);
+  const [openVeterinarianSchedules, setOpenVeterinarianSchedules] = useState<Set<string>>(new Set());
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -222,6 +226,16 @@ export const ClinicSettingsForm = () => {
       });
       setEditingVeterinarian(null);
     }
+  };
+
+  const toggleVeterinarianSchedule = (vetId: string) => {
+    const newOpenVets = new Set(openVeterinarianSchedules);
+    if (newOpenVets.has(vetId)) {
+      newOpenVets.delete(vetId);
+    } else {
+      newOpenVets.add(vetId);
+    }
+    setOpenVeterinarianSchedules(newOpenVets);
   };
 
   return (
@@ -546,7 +560,7 @@ export const ClinicSettingsForm = () => {
             Équipe vétérinaire
           </CardTitle>
           <CardDescription>
-            Gérez votre équipe de vétérinaires
+            Gérez votre équipe de vétérinaires et leurs horaires de travail
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -640,60 +654,96 @@ export const ClinicSettingsForm = () => {
           </div>
 
           <div className="space-y-3">
-            {veterinarians.map(vet => (
-              <div key={vet.id} className="flex items-center justify-between p-4 bg-vet-beige/20 rounded-lg border border-vet-blue/20">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-medium text-vet-navy">{vet.name}</h4>
-                    <Badge variant={vet.is_active ? "default" : "secondary"} className={vet.is_active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}>
-                      {vet.is_active ? 'Actif' : 'Inactif'}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-vet-brown">{vet.specialty}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setEditingVeterinarian(vet);
-                      setNewVeterinarian({
-                        name: vet.name,
-                        specialty: vet.specialty || '',
-                        is_active: vet.is_active
-                      });
-                      setIsVetDialogOpen(true);
-                    }}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
-                        <Trash2 className="h-4 w-4" />
+            {veterinarians.map(vet => {
+              const vetSchedules = schedules.filter(s => s.veterinarian_id === vet.id);
+              const isScheduleOpen = openVeterinarianSchedules.has(vet.id);
+              
+              return (
+                <div key={vet.id} className="border border-vet-blue/20 rounded-lg bg-vet-beige/10">
+                  <div className="flex items-center justify-between p-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-medium text-vet-navy">{vet.name}</h4>
+                        <Badge variant={vet.is_active ? "default" : "secondary"} className={vet.is_active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}>
+                          {vet.is_active ? 'Actif' : 'Inactif'}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-vet-brown">{vet.specialty}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Collapsible open={isScheduleOpen} onOpenChange={() => toggleVeterinarianSchedule(vet.id)}>
+                        <CollapsibleTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="flex items-center gap-1"
+                          >
+                            <Clock className="h-4 w-4" />
+                            {isScheduleOpen ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                            <span className="text-xs">Horaires</span>
+                          </Button>
+                        </CollapsibleTrigger>
+                      </Collapsible>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setEditingVeterinarian(vet);
+                          setNewVeterinarian({
+                            name: vet.name,
+                            specialty: vet.specialty || '',
+                            is_active: vet.is_active
+                          });
+                          setIsVetDialogOpen(true);
+                        }}
+                      >
+                        <Edit className="h-4 w-4" />
                       </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Êtes-vous sûr de vouloir supprimer {vet.name} ? Cette action est irréversible.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Annuler</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => deleteVeterinarian(vet.id)}
-                          className="bg-red-600 hover:bg-red-700"
-                        >
-                          Supprimer
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Êtes-vous sûr de vouloir supprimer {vet.name} ? Cette action est irréversible.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Annuler</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => deleteVeterinarian(vet.id)}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              Supprimer
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </div>
+                  
+                  <Collapsible open={isScheduleOpen} onOpenChange={() => toggleVeterinarianSchedule(vet.id)}>
+                    <CollapsibleContent>
+                      <div className="px-4 pb-4">
+                        <Separator className="mb-4" />
+                        <VeterinarianWeeklySchedule
+                          veterinarian={vet}
+                          schedules={vetSchedules}
+                        />
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
                 </div>
-              </div>
-            ))}
+              );
+            })}
             
             {veterinarians.length === 0 && (
               <div className="text-center py-8 text-vet-brown bg-vet-beige/10 rounded-lg border border-vet-blue/20">
@@ -706,8 +756,8 @@ export const ClinicSettingsForm = () => {
         </CardContent>
       </Card>
 
-      {/* Schedule Manager */}
-      <VeterinarianScheduleManager />
+      {/* Gestion des absences */}
+      <VeterinarianAbsenceManager veterinarians={veterinarians.filter(vet => vet.is_active)} />
     </div>
   );
 };
