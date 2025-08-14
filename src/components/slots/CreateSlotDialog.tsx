@@ -8,11 +8,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus } from "lucide-react"
 import type { Database } from '@/integrations/supabase/types'
 
-type ClinicVeterinarianRow = Database['public']['Tables']['clinic_veterinarians']['Row']
 type ConsultationTypeRow = Database['public']['Tables']['consultation_types']['Row']
 
+interface VeterinarianForSlot {
+  id: string;
+  name: string;
+  specialty?: string;
+  is_active: boolean;
+}
+
 interface CreateSlotDialogProps {
-  veterinarians: ClinicVeterinarianRow[]
+  veterinarians: VeterinarianForSlot[]
   consultationTypes: ConsultationTypeRow[]
   onCreateSlot: (slotData: {
     veterinarian_id: string

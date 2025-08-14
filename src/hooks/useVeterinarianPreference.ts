@@ -22,21 +22,20 @@ export const useVeterinarianPreference = () => {
     try {
       setIsLoading(true);
       
-      if (!currentClinic?.id) {
-        console.log('❌ No clinic ID available in context');
+      if (!currentClinic?.slug) {
+        console.log('❌ No clinic slug available in context');
         setVeterinarians([]);
         return;
       }
 
-      console.log('🔄 Fetching veterinarians for clinic:', currentClinic.id);
+      console.log('🔄 Fetching veterinarians for clinic:', currentClinic.slug);
       console.log('🔄 Clinic context:', currentClinic);
 
+      // Use the secure function instead of direct table access for public booking
       const { data, error } = await supabase
-        .from('clinic_veterinarians')
-        .select('id, name, specialty, is_active, clinic_id')
-        .eq('clinic_id', currentClinic.id)
-        .eq('is_active', true)
-        .order('name');
+        .rpc('get_clinic_veterinarians_for_booking', { 
+          clinic_slug: currentClinic.slug 
+        });
 
       if (error) {
         console.error('❌ Error fetching veterinarians:', error);
@@ -58,13 +57,11 @@ export const useVeterinarianPreference = () => {
           console.log(`🏥 Veterinarian ${index + 1}:`, {
             id: vet.id,
             name: vet.name,
-            specialty: vet.specialty,
-            is_active: vet.is_active,
-            clinic_id: vet.clinic_id
+            is_active: vet.is_active
           });
         });
       } else {
-        console.log('⚠️ No veterinarians found for clinic:', currentClinic.id);
+        console.log('⚠️ No veterinarians found for clinic:', currentClinic.slug);
       }
 
       setVeterinarians(data || []);
@@ -82,14 +79,14 @@ export const useVeterinarianPreference = () => {
   };
 
   useEffect(() => {
-    if (currentClinic?.id) {
+    if (currentClinic?.slug) {
       fetchVeterinarians();
     } else {
-      console.log('⚠️ No clinic ID available, skipping veterinarians fetch');
+      console.log('⚠️ No clinic slug available, skipping veterinarians fetch');
       setIsLoading(false);
       setVeterinarians([]);
     }
-  }, [currentClinic?.id]);
+  }, [currentClinic?.slug]);
 
   return {
     veterinarians,

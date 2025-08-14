@@ -10,34 +10,14 @@ type AvailableSlotRow = Database['public']['Tables']['available_slots']['Row']
 type SlotInsert = Database['public']['Tables']['available_slots']['Insert']
 
 export const useSlotManagement = () => {
-  const [veterinarians, setVeterinarians] = useState<ClinicVeterinarianRow[]>([])
   const [consultationTypes, setConsultationTypes] = useState<ConsultationTypeRow[]>([])
   const [availableSlots, setAvailableSlots] = useState<AvailableSlotRow[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
 
-  const fetchVeterinarians = async () => {
-    try {
-      console.log('🔄 Fetching veterinarians...');
-      const { data, error } = await supabase
-        .from('clinic_veterinarians')
-        .select('*')
-        .eq('is_active', true)
-        .order('name')
-
-      if (error) {
-        console.error('❌ Error fetching veterinarians:', error);
-        throw error;
-      }
-      console.log('✅ Veterinarians loaded:', data?.length || 0);
-      setVeterinarians(data || [])
-    } catch (err: any) {
-      console.error('❌ Failed to fetch veterinarians:', err)
-      setError(err.message)
-      // Don't show toast for this error, it's handled by the main component
-    }
-  }
+  // Note: Veterinarian fetching is now handled by useClinicVeterinarians hook
+  // This provides proper clinic-scoped access for authenticated users
 
   const fetchConsultationTypes = async () => {
     try {
@@ -164,7 +144,6 @@ export const useSlotManagement = () => {
       
       try {
         await Promise.all([
-          fetchVeterinarians(),
           fetchConsultationTypes(),
           fetchAvailableSlots()
         ])
@@ -181,7 +160,6 @@ export const useSlotManagement = () => {
   }, [])
 
   return {
-    veterinarians,
     consultationTypes,
     availableSlots,
     isLoading,

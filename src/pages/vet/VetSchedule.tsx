@@ -4,13 +4,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSlotManagement } from "@/hooks/useSlotManagement";
+import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { CreateSlotDialog } from "@/components/slots/CreateSlotDialog";
 import { SlotsList } from "@/components/slots/SlotsList";
 
 const VetSchedule = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const {
-    veterinarians,
     consultationTypes,
     availableSlots,
     isLoading,
@@ -18,6 +18,11 @@ const VetSchedule = () => {
     createSlot,
     deleteSlot
   } = useSlotManagement();
+  
+  const { 
+    veterinarians,
+    isLoading: vetsLoading 
+  } = useClinicVeterinarians();
 
   const navigateDate = (direction: 'prev' | 'next') => {
     const newDate = new Date(currentDate);

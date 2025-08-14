@@ -898,6 +898,14 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_clinic_veterinarians_for_booking: {
+        Args: { clinic_slug: string }
+        Returns: {
+          id: string
+          is_active: boolean
+          name: string
+        }[]
+      }
       get_user_clinic_id: {
         Args: Record<PropertyKey, never>
         Returns: string
