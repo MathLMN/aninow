@@ -7,12 +7,12 @@ export interface SlotAssignment {
   time_slot: string;
   veterinarian_id: string;
   assignment_type: 'auto' | 'manual';
-  clinic_id?: string;
+  clinic_id: string; // Make required to match RLS policies
   created_at: string;
   updated_at: string;
 }
 
-export const getSlotAssignments = async (date: string, clinicId?: string): Promise<SlotAssignment[]> => {
+export const getSlotAssignments = async (date: string, clinicId: string): Promise<SlotAssignment[]> => {
   try {
     if (!clinicId) {
       console.warn('⚠️ No clinic ID provided for slot assignments');
@@ -25,11 +25,12 @@ export const getSlotAssignments = async (date: string, clinicId?: string): Promi
       .from('slot_assignments')
       .select('*')
       .eq('date', date)
-      .or(`clinic_id.eq.${clinicId},clinic_id.is.null`);
+      .eq('clinic_id', clinicId); // Only fetch for specific clinic
 
     if (error) {
       console.error('❌ Error fetching slot assignments:', error);
-      throw error;
+      // Don't throw to prevent infinite loops
+      return [];
     }
 
     console.log('✅ Slot assignments loaded:', data?.length || 0);
@@ -69,7 +70,7 @@ export const createSlotAssignment = async (
 
     if (error) {
       console.error('❌ Error creating slot assignment:', error);
-      throw error;
+      return false; // Don't throw to prevent UI breaks
     }
 
     console.log('✅ Slot assignment created successfully');
@@ -80,7 +81,7 @@ export const createSlotAssignment = async (
   }
 };
 
-export const deleteSlotAssignment = async (date: string, timeSlot: string, clinicId?: string): Promise<boolean> => {
+export const deleteSlotAssignment = async (date: string, timeSlot: string, clinicId: string): Promise<boolean> => {
   try {
     if (!clinicId) {
       console.error('❌ Cannot delete slot assignment without clinic ID');
@@ -98,7 +99,7 @@ export const deleteSlotAssignment = async (date: string, timeSlot: string, clini
 
     if (error) {
       console.error('❌ Error deleting slot assignment:', error);
-      throw error;
+      return false; // Don't throw to prevent UI breaks
     }
 
     console.log('✅ Slot assignment deleted successfully');
@@ -109,7 +110,7 @@ export const deleteSlotAssignment = async (date: string, timeSlot: string, clini
   }
 };
 
-export const getAssignedVeterinarian = async (date: string, timeSlot: string, clinicId?: string): Promise<string | null> => {
+export const getAssignedVeterinarian = async (date: string, timeSlot: string, clinicId: string): Promise<string | null> => {
   try {
     if (!clinicId) {
       console.warn('⚠️ No clinic ID provided for getting assigned veterinarian');
@@ -121,13 +122,13 @@ export const getAssignedVeterinarian = async (date: string, timeSlot: string, cl
       .select('veterinarian_id')
       .eq('date', date)
       .eq('time_slot', timeSlot)
-      .or(`clinic_id.eq.${clinicId},clinic_id.is.null`)
+      .eq('clinic_id', clinicId)
       .order('created_at', { ascending: true })
       .limit(1);
 
     if (error) {
       console.error('❌ Error getting assigned veterinarian:', error);
-      throw error;
+      return null; // Don't throw to prevent UI breaks
     }
 
     return (data && data.length > 0) ? data[0].veterinarian_id : null;
@@ -165,7 +166,7 @@ export const reassignSlot = async (
 
     if (error) {
       console.error('❌ Error reassigning slot:', error);
-      throw error;
+      return false; // Don't throw to prevent UI breaks
     }
 
     console.log('✅ Slot reassigned successfully');

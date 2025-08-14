@@ -88,6 +88,12 @@ export const SlotAssignmentManager = ({
           description: `Créneau ${assignment.time_slot} réassigné avec succès`,
         });
         onAssignmentsChange();
+      } else {
+        toast({
+          title: "Erreur",
+          description: "Impossible de modifier l'attribution",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       console.error('❌ Error reassigning slot:', error);
@@ -114,6 +120,12 @@ export const SlotAssignmentManager = ({
           description: `Attribution du créneau ${assignment.time_slot} supprimée`,
         });
         onAssignmentsChange();
+      } else {
+        toast({
+          title: "Erreur",
+          description: "Impossible de supprimer l'attribution",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       console.error('❌ Error deleting assignment:', error);

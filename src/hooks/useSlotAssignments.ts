@@ -1,11 +1,11 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { getSlotAssignments, SlotAssignment } from '@/components/planning/utils/slotAssignmentUtils';
 import { useToast } from '@/hooks/use-toast';
 import { useClinicAccess } from './useClinicAccess';
 
 export const useSlotAssignments = (selectedDate: Date) => {
-  const [assignments, setAssignments] = useState([]);
+  const [assignments, setAssignments] = useState<SlotAssignment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -24,7 +24,7 @@ export const useSlotAssignments = (selectedDate: Date) => {
     const dateStr = selectedDate.toISOString().split('T')[0];
     const cacheKey = `${dateStr}-${currentClinicId}`;
     
-    // Éviter les appels répétitifs
+    // Prevent repetitive calls
     if (fetchingRef.current || lastFetchRef.current === cacheKey) {
       return;
     }
@@ -37,26 +37,23 @@ export const useSlotAssignments = (selectedDate: Date) => {
       
       console.log('🔄 Fetching slot assignments for date:', dateStr, 'clinic:', currentClinicId);
       
-      const { data, error: fetchError } = await supabase
-        .from('slot_assignments')
-        .select('*')
-        .eq('date', dateStr)
-        .or(`clinic_id.eq.${currentClinicId},clinic_id.is.null`);
+      // Use the updated utility function that requires clinicId
+      const data = await getSlotAssignments(dateStr, currentClinicId);
 
-      if (fetchError) {
-        console.error('❌ Error fetching slot assignments:', fetchError);
-        setError(fetchError.message);
-        // Ne pas lancer d'erreur pour éviter la boucle infinie
-        setAssignments([]);
-        return;
-      }
-
-      console.log('✅ Slot assignments loaded:', data?.length || 0, 'items');
-      setAssignments(data || []);
+      console.log('✅ Slot assignments loaded:', data.length, 'items');
+      setAssignments(data);
     } catch (err: any) {
       console.error('❌ Failed to fetch slot assignments:', err);
       setError(err.message || 'Erreur lors du chargement des attributions');
       setAssignments([]);
+      // Don't show toast for RLS errors to prevent spam
+      if (!err.message?.includes('row-level security')) {
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les attributions",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsLoading(false);
       fetchingRef.current = false;
@@ -73,7 +70,7 @@ export const useSlotAssignments = (selectedDate: Date) => {
   }, [selectedDate, currentClinicId]);
 
   const refreshAssignments = () => {
-    // Reset le cache pour forcer un nouveau fetch
+    // Reset cache to force new fetch
     lastFetchRef.current = '';
     if (currentClinicId && selectedDate) {
       fetchAssignments();
