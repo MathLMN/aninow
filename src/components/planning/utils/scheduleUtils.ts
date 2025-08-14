@@ -119,7 +119,8 @@ export const getBookingsForSlot = async (
   selectedDate: Date,
   veterinarians: any[] = [],
   settings: any = null,
-  absences: any[] = []
+  absences: any[] = [],
+  clinicId?: string
 ) => {
   const dateStr = selectedDate.toISOString().split('T')[0];
   
@@ -134,7 +135,7 @@ export const getBookingsForSlot = async (
   }
 
   // Vérifier s'il y a une attribution spécifique pour ce créneau
-  const assignedVetId = await getAssignedVeterinarian(dateStr, time);
+  const assignedVetId = clinicId ? await getAssignedVeterinarian(dateStr, time, clinicId) : null;
   
   // Traiter les bookings sans préférence de vétérinaire
   const processedBookings = bookings.map(booking => {

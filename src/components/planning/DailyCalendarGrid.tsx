@@ -1,9 +1,9 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { TimeSlotCell } from "./TimeSlotCell";
 import { generateAllTimeSlots, isTimeSlotOpen, getBookingsForSlot, isFullHour } from "./utils/scheduleUtils";
 import { useClinicSettings } from "@/hooks/useClinicSettings";
+import { useClinicAccess } from "@/hooks/useClinicAccess";
 import { useState, useEffect } from "react";
 
 interface DailyCalendarGridProps {
@@ -26,6 +26,7 @@ export const DailyCalendarGrid = ({
   veterinarians
 }: DailyCalendarGridProps) => {
   const { settings } = useClinicSettings();
+  const { currentClinicId } = useClinicAccess();
   const timeSlots = generateAllTimeSlots();
   const [slotBookings, setSlotBookings] = useState<Record<string, any[]>>({});
 
@@ -43,7 +44,9 @@ export const DailyCalendarGrid = ({
             bookings, 
             selectedDate, 
             veterinarians,
-            settings
+            settings,
+            [],
+            currentClinicId || undefined
           );
           newSlotBookings[key] = bookingsForSlot;
         }
@@ -53,7 +56,7 @@ export const DailyCalendarGrid = ({
     };
 
     loadSlotBookings();
-  }, [timeSlots, columns, bookings, selectedDate, veterinarians, settings]);
+  }, [timeSlots, columns, bookings, selectedDate, veterinarians, settings, currentClinicId]);
 
   return (
     <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
