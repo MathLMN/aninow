@@ -26,14 +26,14 @@ export const PendingBookingsNotification = () => {
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>
         <Button
-          variant="outline"
-          size="sm" 
-          className="relative bg-white/80 hover:bg-white border-vet-blue/30 hover:border-vet-sage/50"
+          variant="ghost"
+          size="icon"
+          className="relative h-10 w-10 rounded-full bg-vet-sage/10 hover:bg-vet-sage/20 border-2 border-transparent hover:border-vet-sage/30 transition-all duration-200"
         >
-          <Bell className="h-4 w-4" />
+          <Bell className="h-5 w-5 text-vet-sage" />
           {unreadCount > 0 && (
-            <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 bg-red-500 text-white text-xs flex items-center justify-center">
-              {unreadCount}
+            <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 bg-red-500 hover:bg-red-500 text-white text-xs flex items-center justify-center border-2 border-white shadow-lg animate-pulse">
+              {unreadCount > 9 ? '9+' : unreadCount}
             </Badge>
           )}
         </Button>
