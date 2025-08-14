@@ -2,6 +2,7 @@
 import { isWithinInterval } from 'date-fns';
 import { processBookingWithoutPreference } from './appointmentAssignment';
 import { getAssignedVeterinarian } from './slotAssignmentUtils';
+import { isVeterinarianAbsent } from './veterinarianAbsenceUtils';
 
 export const generateAllTimeSlots = () => {
   const timeSlots = [];
@@ -73,7 +74,12 @@ export const getScheduleInfo = (daySchedule: any) => {
   return { isOpen: true, message };
 };
 
-export const generateColumns = (veterinarians: any[], settings: any) => {
+export const generateColumns = (
+  veterinarians: any[], 
+  settings: any, 
+  selectedDate?: Date, 
+  absences: any[] = []
+) => {
   const columns = [];
 
   // Ajouter la colonne ASV en premier si elle est activée
@@ -81,16 +87,21 @@ export const generateColumns = (veterinarians: any[], settings: any) => {
     columns.push({
       id: 'asv',
       title: 'ASV',
-      type: 'asv'
+      type: 'asv',
+      isDisabled: false
     });
   }
 
   // Ajouter les colonnes des vétérinaires actifs
   veterinarians.filter(vet => vet.is_active).forEach(vet => {
+    const isAbsent = selectedDate ? isVeterinarianAbsent(vet.id, selectedDate, absences) : false;
+    
     columns.push({
       id: vet.id,
       title: vet.name,
-      type: 'veterinarian'
+      type: 'veterinarian',
+      isDisabled: isAbsent,
+      absenceInfo: isAbsent ? 'Absent' : null
     });
   });
 
@@ -107,12 +118,18 @@ export const getBookingsForSlot = async (
   bookings: any[], 
   selectedDate: Date,
   veterinarians: any[] = [],
-  settings: any = null
+  settings: any = null,
+  absences: any[] = []
 ) => {
   const dateStr = selectedDate.toISOString().split('T')[0];
   
   // Pour la colonne ASV : ne jamais afficher les rendez-vous clients
   if (columnId === 'asv') {
+    return [];
+  }
+
+  // Si le vétérinaire est absent, ne pas afficher les rendez-vous
+  if (isVeterinarianAbsent(columnId, selectedDate, absences)) {
     return [];
   }
 
@@ -142,4 +159,24 @@ export const getBookingsForSlot = async (
     // Pour les colonnes vétérinaires : afficher les rendez-vous assignés à ce vétérinaire
     return booking.veterinarian_id === columnId;
   });
+};
+
+export const isSlotDisabled = (
+  time: string,
+  columnId: string,
+  selectedDate: Date,
+  daySchedule: any,
+  absences: any[] = []
+): boolean => {
+  // Vérifier si la clinique est fermée
+  if (!isTimeSlotOpen(time, daySchedule)) {
+    return true;
+  }
+
+  // Pour les colonnes vétérinaires, vérifier les absences
+  if (columnId !== 'asv' && isVeterinarianAbsent(columnId, selectedDate, absences)) {
+    return true;
+  }
+
+  return false;
 };

@@ -94,6 +94,16 @@ const DAYS_OF_WEEK = [
   { key: 'sunday', label: 'Dimanche' }
 ];
 
+const getDefaultDailySchedules = () => ({
+  monday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+  tuesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+  wednesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+  thursday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+  friday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+  saturday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } },
+  sunday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } }
+});
+
 export const ClinicSettingsForm = () => {
   const {
     settings,
@@ -119,7 +129,7 @@ export const ClinicSettingsForm = () => {
   const [editingVeterinarian, setEditingVeterinarian] = useState<Veterinarian | null>(null);
   const [openVeterinarianSchedules, setOpenVeterinarianSchedules] = useState<Set<string>>(new Set());
   const [isClinicScheduleOpen, setIsClinicScheduleOpen] = useState(false);
-  const [tempDailySchedules, setTempDailySchedules] = useState(settings?.daily_schedules || {});
+  const [tempDailySchedules, setTempDailySchedules] = useState(getDefaultDailySchedules());
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -149,7 +159,7 @@ export const ClinicSettingsForm = () => {
         asvEnabled: settings.asv_enabled,
         defaultSlotDurationMinutes: settings.default_slot_duration_minutes
       });
-      setTempDailySchedules(settings.daily_schedules || {});
+      setTempDailySchedules(settings.daily_schedules || getDefaultDailySchedules());
     }
   }, [settings, form]);
 
@@ -595,23 +605,25 @@ export const ClinicSettingsForm = () => {
                   </CollapsibleContent>
                 </Collapsible>
               </div>
-
-              {/* Bouton de sauvegarde déplacé en bas de l'encadré */}
-              <div className="pt-4 border-t border-vet-blue/20">
-                <Button 
-                  type="button" 
-                  onClick={form.handleSubmit(onPlanningSubmit)}
-                  className="bg-vet-blue hover:bg-vet-blue/90 text-white w-full"
-                >
-                  Enregistrer la configuration du planning
-                </Button>
-                <p className="text-xs text-vet-brown/60 mt-2 text-center">
-                  Sauvegarde les créneaux, l'option ASV et les horaires d'ouverture
-                </p>
-              </div>
             </div>
           </Form>
         </CardContent>
+        
+        {/* Bouton de sauvegarde déplacé en bas de l'encadré */}
+        <div className="px-6 pb-6">
+          <div className="pt-4 border-t border-vet-blue/20">
+            <Button 
+              type="button" 
+              onClick={form.handleSubmit(onPlanningSubmit)}
+              className="bg-vet-blue hover:bg-vet-blue/90 text-white w-full"
+            >
+              Enregistrer la configuration du planning
+            </Button>
+            <p className="text-xs text-vet-brown/60 mt-2 text-center">
+              Sauvegarde les créneaux, l'option ASV et les horaires d'ouverture
+            </p>
+          </div>
+        </div>
       </Card>
 
       {/* Équipe vétérinaire */}
