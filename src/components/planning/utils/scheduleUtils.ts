@@ -1,5 +1,3 @@
-
-
 import { isWithinInterval } from 'date-fns';
 import { processBookingWithoutPreference } from './appointmentAssignment';
 import { getAssignedVeterinarian } from './slotAssignmentUtils';
@@ -39,12 +37,16 @@ export const isTimeSlotOpen = (time: string, daySchedule: any) => {
     const endTime = new Date();
     endTime.setHours(end[0], end[1], 0, 0);
 
-    return isWithinInterval(slotTime, { start: startTime, end: endTime });
+    // Utiliser une logique plus stricte : le créneau doit être strictement avant l'heure de fin
+    // Par exemple, si c'est ouvert de 8h à 12h, le créneau de 12h00 doit être fermé
+    return slotTime >= startTime && slotTime < endTime;
   };
 
   // Vérifier si le créneau est dans les heures du matin ou de l'après-midi
-  return (daySchedule.morning && isWithinSchedule(daySchedule.morning)) || 
-         (daySchedule.afternoon && isWithinSchedule(daySchedule.afternoon));
+  const inMorningSchedule = daySchedule.morning && isWithinSchedule(daySchedule.morning);
+  const inAfternoonSchedule = daySchedule.afternoon && isWithinSchedule(daySchedule.afternoon);
+  
+  return inMorningSchedule || inAfternoonSchedule;
 };
 
 export const getDaySchedule = (selectedDate: Date, settings: any) => {
@@ -189,4 +191,3 @@ export const isSlotDisabled = (
 
   return false;
 };
-
