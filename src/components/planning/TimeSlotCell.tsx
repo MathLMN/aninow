@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useAvailableSlots } from "@/hooks/useAvailableSlots";
 import { useToast } from "@/hooks/use-toast";
+import { TimeSlotContextMenu } from "./TimeSlotContextMenu";
 
 interface TimeSlotCellProps {
   time: string;
@@ -15,6 +16,12 @@ interface TimeSlotCellProps {
   onAppointmentClick: (appointment: any) => void;
   onBlockSlot?: (timeSlot: { date: string; time: string; veterinarian: string }) => void;
   selectedDate: Date;
+  // Nouvelles props pour les actions du menu contextuel
+  onValidateBooking?: (bookingId: string) => void;
+  onCancelBooking?: (bookingId: string) => void;
+  onDuplicateBooking?: (booking: any) => void;
+  onMoveBooking?: (booking: any) => void;
+  onDeleteBooking?: (bookingId: string) => void;
 }
 
 export const TimeSlotCell = ({
@@ -25,7 +32,13 @@ export const TimeSlotCell = ({
   canBook,
   onCreateAppointment,
   onAppointmentClick,
-  selectedDate
+  selectedDate,
+  onValidateBooking,
+  onCancelBooking,
+  onDuplicateBooking,
+  onMoveBooking,
+  onDeleteBooking,
+  onBlockSlot
 }: TimeSlotCellProps) => {
   const [showActions, setShowActions] = useState(false);
   const [isBlocking, setIsBlocking] = useState(false);
@@ -95,81 +108,96 @@ export const TimeSlotCell = ({
   };
 
   return (
-    <div
-      className={cn(
-        "border-l border-gray-200/30 relative transition-colors cursor-pointer",
-        "group hover:bg-blue-50/30",
-        "h-[30px]",
-        !isOpen && "bg-gray-50/30"
-      )}
-      onClick={handleCellClick}
-      onMouseEnter={() => setShowActions(true)}
-      onMouseLeave={() => setShowActions(false)}
+    <TimeSlotContextMenu
+      time={time}
+      columnId={columnId}
+      selectedDate={selectedDate}
+      bookings={bookings}
+      onCreateAppointment={onCreateAppointment}
+      onValidateBooking={onValidateBooking}
+      onCancelBooking={onCancelBooking}
+      onDuplicateBooking={onDuplicateBooking}
+      onMoveBooking={onMoveBooking}
+      onDeleteBooking={onDeleteBooking}
+      onBlockSlot={onBlockSlot}
+      hasBookings={bookings.length > 0}
     >
-      {bookings.map((booking) => (
-        <div
-          key={booking.id}
-          onClick={(e) => {
-            e.stopPropagation();
-            onAppointmentClick(booking);
-          }}
-          className={cn(
-            "absolute inset-x-0 top-0 p-1 rounded-sm border cursor-pointer hover:shadow-sm transition-shadow text-[10px] leading-tight",
-            getStatusColor(booking.status)
-          )}
-          style={{ 
-            height: `${getAppointmentHeight(booking)}px`,
-            zIndex: 10
-          }}
-        >
-          <div className="font-medium truncate text-[10px]">
-            {booking.client_name}
-          </div>
-          <div className="truncate text-[9px] opacity-80">
-            {booking.animal_name}
-          </div>
-          {booking.duration_minutes && booking.duration_minutes > 15 && (
-            <div className="text-[8px] opacity-70 mt-1">
-              {booking.duration_minutes} min
+      <div
+        className={cn(
+          "border-l border-gray-200/30 relative transition-colors cursor-pointer",
+          "group hover:bg-blue-50/30",
+          "h-[30px]",
+          !isOpen && "bg-gray-50/30"
+        )}
+        onClick={handleCellClick}
+        onMouseEnter={() => setShowActions(true)}
+        onMouseLeave={() => setShowActions(false)}
+      >
+        {bookings.map((booking) => (
+          <div
+            key={booking.id}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAppointmentClick(booking);
+            }}
+            className={cn(
+              "absolute inset-x-0 top-0 p-1 rounded-sm border cursor-pointer hover:shadow-sm transition-shadow text-[10px] leading-tight",
+              getStatusColor(booking.status)
+            )}
+            style={{ 
+              height: `${getAppointmentHeight(booking)}px`,
+              zIndex: 10
+            }}
+          >
+            <div className="font-medium truncate text-[10px]">
+              {booking.client_name}
             </div>
-          )}
-          {booking.status === 'pending' && (
-            <div className="text-[8px] opacity-70 font-medium">
-              En attente
+            <div className="truncate text-[9px] opacity-80">
+              {booking.animal_name}
             </div>
-          )}
-        </div>
-      ))}
-      
-      {/* Actions au survol - visibles uniquement au survol */}
-      {bookings.length === 0 && isOpen && showActions && (
-        <div className="absolute inset-0 flex items-center justify-center bg-blue-50/40 transition-opacity z-20">
-          <div className="flex items-center space-x-1">
-            <button
-              onClick={handleCellClick}
-              className="p-1 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-              title="Ajouter un rendez-vous"
-            >
-              <Plus className="h-3 w-3" />
-            </button>
-            {columnId !== 'asv' && (
-              <button
-                onClick={handleQuickBlock}
-                disabled={isBlocking}
-                className={cn(
-                  "p-1 rounded-full text-white transition-colors",
-                  isBlocking 
-                    ? "bg-gray-400 cursor-not-allowed" 
-                    : "bg-red-600 hover:bg-red-700"
-                )}
-                title="Bloquer ce créneau (30 min)"
-              >
-                <Ban className="h-3 w-3" />
-              </button>
+            {booking.duration_minutes && booking.duration_minutes > 15 && (
+              <div className="text-[8px] opacity-70 mt-1">
+                {booking.duration_minutes} min
+              </div>
+            )}
+            {booking.status === 'pending' && (
+              <div className="text-[8px] opacity-70 font-medium">
+                En attente
+              </div>
             )}
           </div>
-        </div>
-      )}
-    </div>
+        ))}
+        
+        {/* Actions au survol - visibles uniquement au survol */}
+        {bookings.length === 0 && isOpen && showActions && (
+          <div className="absolute inset-0 flex items-center justify-center bg-blue-50/40 transition-opacity z-20">
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={handleCellClick}
+                className="p-1 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                title="Ajouter un rendez-vous"
+              >
+                <Plus className="h-3 w-3" />
+              </button>
+              {columnId !== 'asv' && (
+                <button
+                  onClick={handleQuickBlock}
+                  disabled={isBlocking}
+                  className={cn(
+                    "p-1 rounded-full text-white transition-colors",
+                    isBlocking 
+                      ? "bg-gray-400 cursor-not-allowed" 
+                      : "bg-red-600 hover:bg-red-700"
+                  )}
+                  title="Bloquer ce créneau (30 min)"
+                >
+                  <Ban className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </TimeSlotContextMenu>
   );
 };

@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Settings, AlertCircle } from "lucide-react";
@@ -15,12 +14,16 @@ import { PlanningHeader } from "@/components/planning/PlanningHeader";
 import { WeeklyNavigation } from "@/components/planning/WeeklyNavigation";
 import { SlotAssignmentManager } from "@/components/planning/SlotAssignmentManager";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { MoveAppointmentModal } from "@/components/planning/MoveAppointmentModal";
+import { usePlanningActions } from "@/hooks/usePlanningActions";
 
 const VetPlanning = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [selectedBookingToMove, setSelectedBookingToMove] = useState<any>(null);
+  const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
 
   const {
     currentDate,
@@ -41,6 +44,15 @@ const VetPlanning = () => {
     navigateWeek,
     getWeekDates
   } = usePlanningLogic();
+
+  const {
+    validateBooking,
+    cancelBooking,
+    duplicateBooking,
+    moveAppointment,
+    deleteBooking,
+    handleBlockSlot
+  } = usePlanningActions();
 
   // Add error boundary logic
   useEffect(() => {
@@ -122,6 +134,40 @@ const VetPlanning = () => {
     } catch (error) {
       console.error('❌ Error updating booking status:', error);
       return false;
+    }
+  };
+
+  // Handlers pour les nouvelles actions du planning
+  const handleValidateBooking = async (bookingId: string) => {
+    await validateBooking(bookingId);
+    // Recharger les données si nécessaire
+  };
+
+  const handleCancelBooking = async (bookingId: string) => {
+    await cancelBooking(bookingId);
+  };
+
+  const handleDuplicateBooking = async (booking: any) => {
+    await duplicateBooking(booking);
+  };
+
+  const handleMoveBooking = (booking: any) => {
+    setSelectedBookingToMove(booking);
+    setIsMoveModalOpen(true);
+  };
+
+  const handleMoveAppointment = async (appointmentId: string, newDate: string, newTime: string, newVetId?: string) => {
+    const success = await moveAppointment(appointmentId, newDate, newTime, newVetId);
+    if (success) {
+      setIsMoveModalOpen(false);
+      setSelectedBookingToMove(null);
+    }
+    return success;
+  };
+
+  const handleDeleteBooking = async (bookingId: string) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer définitivement ce rendez-vous ?')) {
+      await deleteBooking(bookingId);
     }
   };
 
@@ -252,6 +298,12 @@ const VetPlanning = () => {
           veterinarians={veterinarians}
           onCreateAppointment={handleCreateAppointment}
           onAppointmentClick={handleAppointmentClick}
+          onValidateBooking={handleValidateBooking}
+          onCancelBooking={handleCancelBooking}
+          onDuplicateBooking={handleDuplicateBooking}
+          onMoveBooking={handleMoveBooking}
+          onDeleteBooking={handleDeleteBooking}
+          onBlockSlot={handleBlockSlot}
         />
       ) : (
         <WeeklyCalendarView
@@ -282,6 +334,20 @@ const VetPlanning = () => {
           defaultData={selectedAppointment}
           veterinarians={veterinarians}
           consultationTypes={consultationTypes}
+        />
+      )}
+
+      {/* Nouvelle modale pour déplacer un rendez-vous */}
+      {selectedBookingToMove && (
+        <MoveAppointmentModal
+          isOpen={isMoveModalOpen}
+          onClose={() => {
+            setIsMoveModalOpen(false);
+            setSelectedBookingToMove(null);
+          }}
+          appointment={selectedBookingToMove}
+          veterinarians={veterinarians}
+          onMoveAppointment={handleMoveAppointment}
         />
       )}
     </div>

@@ -12,6 +12,13 @@ interface DailyCalendarViewProps {
   veterinarians: any[];
   onCreateAppointment: (timeSlot: { date: string; time: string; veterinarian?: string }) => void;
   onAppointmentClick: (appointment: any) => void;
+  // Nouvelles props pour les actions du planning
+  onValidateBooking?: (bookingId: string) => void;
+  onCancelBooking?: (bookingId: string) => void;
+  onDuplicateBooking?: (booking: any) => void;
+  onMoveBooking?: (booking: any) => void;
+  onDeleteBooking?: (bookingId: string) => void;
+  onBlockSlot?: (timeSlot: { date: string; time: string; veterinarian: string }) => void;
 }
 
 export const DailyCalendarView = ({
@@ -20,7 +27,13 @@ export const DailyCalendarView = ({
   bookings,
   veterinarians,
   onCreateAppointment,
-  onAppointmentClick
+  onAppointmentClick,
+  onValidateBooking,
+  onCancelBooking,
+  onDuplicateBooking,
+  onMoveBooking,
+  onDeleteBooking,
+  onBlockSlot
 }: DailyCalendarViewProps) => {
   const { settings } = useClinicSettings();
 
@@ -71,6 +84,12 @@ export const DailyCalendarView = ({
         onCreateAppointment={onCreateAppointment}
         onAppointmentClick={onAppointmentClick}
         veterinarians={veterinarians}
+        onValidateBooking={onValidateBooking}
+        onCancelBooking={onCancelBooking}
+        onDuplicateBooking={onDuplicateBooking}
+        onMoveBooking={onMoveBooking}
+        onDeleteBooking={onDeleteBooking}
+        onBlockSlot={onBlockSlot}
       />
     </div>
   );

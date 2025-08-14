@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { TimeSlotCell } from "./TimeSlotCell";
@@ -14,6 +15,13 @@ interface DailyCalendarGridProps {
   onCreateAppointment: (timeSlot: { date: string; time: string; veterinarian?: string }) => void;
   onAppointmentClick: (appointment: any) => void;
   veterinarians: any[];
+  // Nouvelles props pour les actions du planning
+  onValidateBooking?: (bookingId: string) => void;
+  onCancelBooking?: (bookingId: string) => void;
+  onDuplicateBooking?: (booking: any) => void;
+  onMoveBooking?: (booking: any) => void;
+  onDeleteBooking?: (bookingId: string) => void;
+  onBlockSlot?: (timeSlot: { date: string; time: string; veterinarian: string }) => void;
 }
 
 export const DailyCalendarGrid = ({
@@ -23,7 +31,13 @@ export const DailyCalendarGrid = ({
   daySchedule,
   onCreateAppointment,
   onAppointmentClick,
-  veterinarians
+  veterinarians,
+  onValidateBooking,
+  onCancelBooking,
+  onDuplicateBooking,
+  onMoveBooking,
+  onDeleteBooking,
+  onBlockSlot
 }: DailyCalendarGridProps) => {
   const { settings } = useClinicSettings();
   const { currentClinicId } = useClinicAccess();
@@ -139,6 +153,12 @@ export const DailyCalendarGrid = ({
                           onCreateAppointment={onCreateAppointment}
                           onAppointmentClick={onAppointmentClick}
                           selectedDate={selectedDate}
+                          onValidateBooking={onValidateBooking}
+                          onCancelBooking={onCancelBooking}
+                          onDuplicateBooking={onDuplicateBooking}
+                          onMoveBooking={onMoveBooking}
+                          onDeleteBooking={onDeleteBooking}
+                          onBlockSlot={onBlockSlot}
                         />
                       );
                     })}
