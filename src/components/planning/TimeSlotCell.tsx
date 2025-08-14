@@ -219,15 +219,6 @@ export const TimeSlotCell = ({
             </div>
           </div>
         )}
-
-        {/* Indicateur visuel pour les états spéciaux */}
-        {(isVeterinarianAbsent || !isOpen || isBlocked) && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="text-xs text-gray-600 font-medium">
-              {isVeterinarianAbsent ? "Absent" : !isOpen ? "Fermé" : "Bloqué"}
-            </div>
-          </div>
-        )}
       </div>
     </TimeSlotContextMenu>
   );
