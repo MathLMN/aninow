@@ -1,4 +1,5 @@
 
+
 import { isWithinInterval } from 'date-fns';
 import { processBookingWithoutPreference } from './appointmentAssignment';
 import { getAssignedVeterinarian } from './slotAssignmentUtils';
@@ -115,6 +116,10 @@ export const generateColumns = (
   return columns;
 };
 
+export const isFullHour = (time: string) => {
+  return time.endsWith('00');
+};
+
 export const getBookingsForSlot = async (
   time: string, 
   columnId: string, 
@@ -184,3 +189,4 @@ export const isSlotDisabled = (
 
   return false;
 };
+
