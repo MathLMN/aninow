@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSymptomDetection } from "@/hooks/useSymptomDetection";
 import GeneralQuestionsSection from "@/components/conditional-questions/GeneralQuestionsSection";
 import LossOfAppetiteSection from "@/components/conditional-questions/LossOfAppetiteSection";
@@ -21,9 +21,16 @@ interface ConditionalQuestionsFormProps {
   customSymptom: string;
   onAnswersChange: (answers: any) => void;
   animalPrefix?: string;
+  initialAnswers?: {[key: string]: string | File};
 }
 
-const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersChange, animalPrefix = '' }: ConditionalQuestionsFormProps) => {
+const ConditionalQuestionsForm = ({ 
+  selectedSymptoms, 
+  customSymptom, 
+  onAnswersChange, 
+  animalPrefix = '',
+  initialAnswers = {}
+}: ConditionalQuestionsFormProps) => {
   const [answers, setAnswers] = useState<{[key: string]: string | File}>({});
 
   const {
@@ -43,6 +50,24 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     hasAggression
   } = useSymptomDetection(selectedSymptoms, customSymptom);
 
+  // Initialiser les réponses avec les données sauvegardées
+  useEffect(() => {
+    if (initialAnswers && Object.keys(initialAnswers).length > 0) {
+      console.log('ConditionalQuestionsForm: Loading initial answers:', initialAnswers);
+      
+      // Filtrer les réponses qui correspondent au préfixe de cet animal
+      const relevantAnswers: {[key: string]: string | File} = {};
+      Object.entries(initialAnswers).forEach(([key, value]) => {
+        if (key.startsWith(animalPrefix)) {
+          relevantAnswers[key] = value;
+        }
+      });
+      
+      console.log('ConditionalQuestionsForm: Relevant answers for prefix', animalPrefix, ':', relevantAnswers);
+      setAnswers(relevantAnswers);
+    }
+  }, [initialAnswers, animalPrefix]);
+
   if (!needsQuestions && !hasLossOfAppetite && !hasExcessiveThirst && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems && !hasEyeDischarge && !hasLameness && !hasBreathingDifficulties && !hasLump && !hasListlessness && !hasAggression) {
     return null;
   }
@@ -52,6 +77,7 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     const newAnswers = { ...answers, [prefixedKey]: value };
     setAnswers(newAnswers);
     onAnswersChange(newAnswers);
+    console.log('ConditionalQuestionsForm: Answer changed:', prefixedKey, '=', value);
   };
 
   const handleFileChange = (questionKey: string, file: File | null) => {
@@ -59,15 +85,11 @@ const ConditionalQuestionsForm = ({ selectedSymptoms, customSymptom, onAnswersCh
     const newAnswers = { ...answers, [prefixedKey]: file };
     setAnswers(newAnswers);
     onAnswersChange(newAnswers);
+    console.log('ConditionalQuestionsForm: File changed:', prefixedKey, '=', file?.name);
   };
 
   // Déterminer si on doit afficher les questions générales (sans perte d'appétit ni soif excessive ni abattement ni agressivité)
   const shouldShowGeneralQuestions = needsQuestions || hasEarProblems || hasEyeDischarge || hasLameness || hasBreathingDifficulties;
-
-  // Fonction pour obtenir la réponse avec le bon préfixe
-  const getAnswerWithPrefix = (key: string) => {
-    return answers[animalPrefix + key];
-  };
 
   return (
     <div className="space-y-8 sm:space-y-12">

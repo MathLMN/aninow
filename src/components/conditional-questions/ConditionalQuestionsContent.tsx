@@ -40,6 +40,14 @@ const ConditionalQuestionsContent = ({
   // Pour le deuxième animal, vérifier d'abord qu'il y a bien 2 animaux sélectionnés ET des motifs différents
   const hasSecondAnimalSymptoms = hasTwoAnimals && hasSecondAnimalDifferentReason && (Array.isArray(bookingData.secondAnimalSelectedSymptoms) && bookingData.secondAnimalSelectedSymptoms?.length > 0 || bookingData.secondAnimalCustomSymptom?.trim() !== '') && bookingData.secondAnimalConsultationReason === 'symptomes-anomalie';
 
+  // Gestionnaire centralisé pour les changements de réponses
+  const handleAnswersChange = (newAnswers: any) => {
+    console.log('ConditionalQuestionsContent: Received answers update:', newAnswers);
+    // Fusionner avec les réponses existantes pour préserver toutes les réponses
+    const mergedAnswers = { ...answers, ...newAnswers };
+    onAnswersChange(mergedAnswers);
+  };
+
   return (
     <>
       {/* Formulaire */}
@@ -67,8 +75,9 @@ const ConditionalQuestionsContent = ({
                 <ConditionalQuestionsForm 
                   selectedSymptoms={bookingData.selectedSymptoms || []} 
                   customSymptom={bookingData.customSymptom || ''} 
-                  onAnswersChange={onAnswersChange} 
-                  animalPrefix="animal1_" 
+                  onAnswersChange={handleAnswersChange} 
+                  animalPrefix="animal1_"
+                  initialAnswers={answers}
                 />
               </div>
             )}
@@ -82,8 +91,9 @@ const ConditionalQuestionsContent = ({
                 <ConditionalQuestionsForm 
                   selectedSymptoms={bookingData.secondAnimalSelectedSymptoms || []} 
                   customSymptom={bookingData.secondAnimalCustomSymptom || ''} 
-                  onAnswersChange={onAnswersChange} 
-                  animalPrefix="animal2_" 
+                  onAnswersChange={handleAnswersChange} 
+                  animalPrefix="animal2_"
+                  initialAnswers={answers}
                 />
               </div>
             )}

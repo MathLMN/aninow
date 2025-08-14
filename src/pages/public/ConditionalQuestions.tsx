@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
@@ -26,13 +27,22 @@ const ConditionalQuestions = () => {
       return;
     }
 
-    // Charger les réponses existantes
-    if (bookingData?.conditionalAnswers) {
+    // Charger les réponses existantes depuis bookingData
+    if (bookingData?.conditionalAnswers && Object.keys(bookingData.conditionalAnswers).length > 0) {
+      console.log('ConditionalQuestions: Loading existing conditional answers:', bookingData.conditionalAnswers);
       setAnswers(bookingData.conditionalAnswers);
+    } else {
+      console.log('ConditionalQuestions: No existing conditional answers found');
+      setAnswers({});
     }
   }, [navigate, bookingData]);
 
   const handleBack = () => {
+    // Sauvegarder les réponses actuelles avant de revenir en arrière
+    updateBookingData({
+      conditionalAnswers: answers
+    });
+    console.log('ConditionalQuestions: Saving answers before going back:', answers);
     navigateBack('/booking/conditional-questions');
   };
 
@@ -46,7 +56,13 @@ const ConditionalQuestions = () => {
   };
 
   const handleAnswersChange = (newAnswers: any) => {
+    console.log('ConditionalQuestions: Updating answers:', newAnswers);
     setAnswers(newAnswers);
+    
+    // Sauvegarder immédiatement dans le localStorage pour la persistance
+    updateBookingData({
+      conditionalAnswers: newAnswers
+    });
   };
 
   const validation = useConditionalQuestionsValidation({ bookingData, answers });
