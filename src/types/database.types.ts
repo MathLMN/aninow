@@ -48,6 +48,9 @@ export interface Database {
           preferred_contact_method: string
           appointment_date?: string
           appointment_time?: string
+          appointment_end_time?: string
+          duration_minutes?: number
+          is_blocked?: boolean
           status: 'pending' | 'confirmed' | 'cancelled' | 'completed'
           ai_analysis?: Record<string, any>
           urgency_score?: number
@@ -100,6 +103,9 @@ export interface Database {
           preferred_contact_method: string
           appointment_date?: string
           appointment_time?: string
+          appointment_end_time?: string
+          duration_minutes?: number
+          is_blocked?: boolean
           status?: 'pending' | 'confirmed' | 'cancelled' | 'completed'
           ai_analysis?: Record<string, any>
           urgency_score?: number
@@ -152,6 +158,9 @@ export interface Database {
           preferred_contact_method?: string
           appointment_date?: string
           appointment_time?: string
+          appointment_end_time?: string
+          duration_minutes?: number
+          is_blocked?: boolean
           status?: 'pending' | 'confirmed' | 'cancelled' | 'completed'
           ai_analysis?: Record<string, any>
           urgency_score?: number

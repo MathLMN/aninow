@@ -11,6 +11,19 @@ export const useAvailableSlots = () => {
   const queryClient = useQueryClient();
   const { currentClinicId } = useClinicAccess();
 
+  // Récupérer les créneaux disponibles
+  const { data: availableSlots = [], isLoading: slotsLoading } = useQuery({
+    queryKey: ['available-slots', currentClinicId],
+    queryFn: async () => {
+      if (!currentClinicId) return [];
+      
+      // Logique pour récupérer les créneaux disponibles
+      // Cette fonction doit être implémentée selon votre logique métier
+      return [];
+    },
+    enabled: !!currentClinicId
+  });
+
   const blockTimeSlot = useCallback(async (
     date: string,
     startTime: string,
@@ -31,6 +44,11 @@ export const useAvailableSlots = () => {
     try {
       console.log('🔄 Blocking time slot:', { date, startTime, endTime, veterinarianId, currentClinicId });
 
+      // Calculer la durée en minutes
+      const startDate = new Date(`2000-01-01T${startTime}:00`);
+      const endDate = new Date(`2000-01-01T${endTime}:00`);
+      const durationMinutes = Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60));
+
       // Créer un booking de type "bloqué" au lieu d'utiliser available_slots
       const { error } = await supabase
         .from('bookings')
@@ -49,7 +67,7 @@ export const useAvailableSlots = () => {
           consultation_reason: 'Créneau bloqué',
           status: 'confirmed',
           is_blocked: true,
-          duration_minutes: Math.round((new Date(`2000-01-01T${endTime}`) - new Date(`2000-01-01T${startTime}`)) / (1000 * 60))
+          duration_minutes: durationMinutes
         });
 
       if (error) {
@@ -83,7 +101,8 @@ export const useAvailableSlots = () => {
   }, [currentClinicId, toast, queryClient]);
 
   return {
+    availableSlots,
     blockTimeSlot,
-    isLoading
+    isLoading: isLoading || slotsLoading
   };
 };
