@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { TimeSlotCell } from "./TimeSlotCell";
@@ -102,11 +101,10 @@ export const DailyCalendarGrid = ({
               })}
             </div>
 
-            {/* Grille horaire 8h-19h avec affichage de toutes les heures */}
+            {/* Grille horaire 7h-21h avec lignes fines uniformes */}
             <div className="relative">
               {timeSlots.map((time, timeIndex) => {
                 const isOpen = isTimeSlotOpen(time, daySchedule);
-                const isHourMark = isFullHour(time);
                 
                 return (
                   <div 
@@ -115,10 +113,8 @@ export const DailyCalendarGrid = ({
                       `grid relative`,
                       // Hauteur identique pour tous les créneaux
                       "h-[30px]",
-                      // Lignes épaisses sur les heures pleines, fines sur les 15 min intermédiaires
-                      isHourMark 
-                        ? "border-b-2 border-gray-400" 
-                        : "border-b border-gray-200/50"
+                      // Lignes fines uniformes pour tous les créneaux
+                      "border-b border-gray-200/50"
                     )} 
                     style={{gridTemplateColumns: `100px repeat(${columns.length}, 1fr)`}}
                   >
@@ -127,7 +123,7 @@ export const DailyCalendarGrid = ({
                       "text-xs text-center font-medium border-r flex items-center justify-center px-1",
                       isOpen 
                         ? "bg-white text-gray-700 border-gray-300" 
-                        : "bg-gray-300/80 text-gray-600 border-gray-400", // Gris plus voyant pour les heures fermées
+                        : "bg-gray-300/80 text-gray-600 border-gray-400",
                       // Police et style pour une meilleure lisibilité
                       "text-[11px] font-medium leading-none"
                     )}>

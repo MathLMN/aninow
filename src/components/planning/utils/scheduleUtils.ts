@@ -108,8 +108,7 @@ export const generateColumns = (
 };
 
 export const isFullHour = (time: string) => {
-  const [hours] = time.split(':').map(Number);
-  return time.endsWith('00') && hours >= 8;
+  return time.endsWith('00');
 };
 
 export const getBookingsForSlot = async (
