@@ -118,6 +118,7 @@ export const ClinicSettingsForm = () => {
   });
   const [editingVeterinarian, setEditingVeterinarian] = useState<Veterinarian | null>(null);
   const [openVeterinarianSchedules, setOpenVeterinarianSchedules] = useState<Set<string>>(new Set());
+  const [isClinicScheduleOpen, setIsClinicScheduleOpen] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -428,127 +429,145 @@ export const ClinicSettingsForm = () => {
 
           <Separator />
 
-          {/* Horaires d'ouverture */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-vet-sage" />
-              <h3 className="text-lg font-medium text-vet-navy">Horaires d'ouverture</h3>
+          {/* Horaires d'ouverture - Accordéon */}
+          <Collapsible open={isClinicScheduleOpen} onOpenChange={setIsClinicScheduleOpen}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-vet-sage" />
+                <h3 className="text-lg font-medium text-vet-navy">Horaires d'ouverture</h3>
+              </div>
+              <CollapsibleTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-0 h-auto hover:bg-transparent"
+                >
+                  {isClinicScheduleOpen ? (
+                    <ChevronDown className="h-4 w-4 text-vet-brown" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-vet-brown" />
+                  )}
+                </Button>
+              </CollapsibleTrigger>
             </div>
-            <p className="text-sm text-vet-brown mb-4">
-              Configurez les horaires d'ouverture de votre clinique. Les clients pourront prendre rendez-vous uniquement pendant ces créneaux.
-            </p>
             
-            <div className="space-y-3">
-              {DAYS_OF_WEEK.map(day => {
-                const daySchedule = settings?.daily_schedules?.[day.key] || {
-                  isOpen: day.key !== 'saturday' && day.key !== 'sunday',
-                  morning: { start: '08:00', end: '12:00' },
-                  afternoon: { start: '14:00', end: '18:00' }
-                };
+            <CollapsibleContent className="space-y-4">
+              <p className="text-sm text-vet-brown">
+                Configurez les horaires d'ouverture de votre clinique. Les clients pourront prendre rendez-vous uniquement pendant ces créneaux.
+              </p>
+              
+              <div className="space-y-3">
+                {DAYS_OF_WEEK.map(day => {
+                  const daySchedule = settings?.daily_schedules?.[day.key] || {
+                    isOpen: day.key !== 'saturday' && day.key !== 'sunday',
+                    morning: { start: '08:00', end: '12:00' },
+                    afternoon: { start: '14:00', end: '18:00' }
+                  };
 
-                return (
-                  <div key={day.key} className="flex items-center gap-4 p-3 border border-vet-blue/20 rounded-lg bg-vet-beige/10">
-                    <div className="w-20 text-sm font-medium text-vet-navy">
-                      {day.label}
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={daySchedule.isOpen}
-                        onCheckedChange={(checked) => {
-                          const updatedSchedules = {
-                            ...settings?.daily_schedules,
-                            [day.key]: {
-                              ...daySchedule,
-                              isOpen: checked
-                            }
-                          };
-                          handleScheduleUpdate(updatedSchedules);
-                        }}
-                      />
-                      <span className="text-xs text-vet-brown w-16">
-                        {daySchedule.isOpen ? 'Ouvert' : 'Fermé'}
-                      </span>
-                    </div>
-
-                    {daySchedule.isOpen && (
-                      <div className="flex items-center gap-2 flex-1">
-                        <div className="flex items-center gap-1">
-                          <Input
-                            type="time"
-                            value={daySchedule.morning.start}
-                            onChange={(e) => {
-                              const updatedSchedules = {
-                                ...settings?.daily_schedules,
-                                [day.key]: {
-                                  ...daySchedule,
-                                  morning: { ...daySchedule.morning, start: e.target.value }
-                                }
-                              };
-                              handleScheduleUpdate(updatedSchedules);
-                            }}
-                            className="w-20 text-xs"
-                          />
-                          <span className="text-xs text-vet-brown">-</span>
-                          <Input
-                            type="time"
-                            value={daySchedule.morning.end}
-                            onChange={(e) => {
-                              const updatedSchedules = {
-                                ...settings?.daily_schedules,
-                                [day.key]: {
-                                  ...daySchedule,
-                                  morning: { ...daySchedule.morning, end: e.target.value }
-                                }
-                              };
-                              handleScheduleUpdate(updatedSchedules);
-                            }}
-                            className="w-20 text-xs"
-                          />
-                        </div>
-                        
-                        <span className="text-xs text-vet-brown px-2">/</span>
-                        
-                        <div className="flex items-center gap-1">
-                          <Input
-                            type="time"
-                            value={daySchedule.afternoon.start}
-                            onChange={(e) => {
-                              const updatedSchedules = {
-                                ...settings?.daily_schedules,
-                                [day.key]: {
-                                  ...daySchedule,
-                                  afternoon: { ...daySchedule.afternoon, start: e.target.value }
-                                }
-                              };
-                              handleScheduleUpdate(updatedSchedules);
-                            }}
-                            className="w-20 text-xs"
-                          />
-                          <span className="text-xs text-vet-brown">-</span>
-                          <Input
-                            type="time"
-                            value={daySchedule.afternoon.end}
-                            onChange={(e) => {
-                              const updatedSchedules = {
-                                ...settings?.daily_schedules,
-                                [day.key]: {
-                                  ...daySchedule,
-                                  afternoon: { ...daySchedule.afternoon, end: e.target.value }
-                                }
-                              };
-                              handleScheduleUpdate(updatedSchedules);
-                            }}
-                            className="w-20 text-xs"
-                          />
-                        </div>
+                  return (
+                    <div key={day.key} className="flex items-center gap-4 p-3 border border-vet-blue/20 rounded-lg bg-vet-beige/10">
+                      <div className="w-20 text-sm font-medium text-vet-navy">
+                        {day.label}
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={daySchedule.isOpen}
+                          onCheckedChange={(checked) => {
+                            const updatedSchedules = {
+                              ...settings?.daily_schedules,
+                              [day.key]: {
+                                ...daySchedule,
+                                isOpen: checked
+                              }
+                            };
+                            handleScheduleUpdate(updatedSchedules);
+                          }}
+                        />
+                        <span className="text-xs text-vet-brown w-16">
+                          {daySchedule.isOpen ? 'Ouvert' : 'Fermé'}
+                        </span>
+                      </div>
+
+                      {daySchedule.isOpen && (
+                        <div className="flex items-center gap-2 flex-1">
+                          <div className="flex items-center gap-1">
+                            <Input
+                              type="time"
+                              value={daySchedule.morning.start}
+                              onChange={(e) => {
+                                const updatedSchedules = {
+                                  ...settings?.daily_schedules,
+                                  [day.key]: {
+                                    ...daySchedule,
+                                    morning: { ...daySchedule.morning, start: e.target.value }
+                                  }
+                                };
+                                handleScheduleUpdate(updatedSchedules);
+                              }}
+                              className="w-20 text-xs"
+                            />
+                            <span className="text-xs text-vet-brown">-</span>
+                            <Input
+                              type="time"
+                              value={daySchedule.morning.end}
+                              onChange={(e) => {
+                                const updatedSchedules = {
+                                  ...settings?.daily_schedules,
+                                  [day.key]: {
+                                    ...daySchedule,
+                                    morning: { ...daySchedule.morning, end: e.target.value }
+                                  }
+                                };
+                                handleScheduleUpdate(updatedSchedules);
+                              }}
+                              className="w-20 text-xs"
+                            />
+                          </div>
+                          
+                          <span className="text-xs text-vet-brown px-2">/</span>
+                          
+                          <div className="flex items-center gap-1">
+                            <Input
+                              type="time"
+                              value={daySchedule.afternoon.start}
+                              onChange={(e) => {
+                                const updatedSchedules = {
+                                  ...settings?.daily_schedules,
+                                  [day.key]: {
+                                    ...daySchedule,
+                                    afternoon: { ...daySchedule.afternoon, start: e.target.value }
+                                  }
+                                };
+                                handleScheduleUpdate(updatedSchedules);
+                              }}
+                              className="w-20 text-xs"
+                            />
+                            <span className="text-xs text-vet-brown">-</span>
+                            <Input
+                              type="time"
+                              value={daySchedule.afternoon.end}
+                              onChange={(e) => {
+                                const updatedSchedules = {
+                                  ...settings?.daily_schedules,
+                                  [day.key]: {
+                                    ...daySchedule,
+                                    afternoon: { ...daySchedule.afternoon, end: e.target.value }
+                                  }
+                                };
+                                handleScheduleUpdate(updatedSchedules);
+                              }}
+                              className="w-20 text-xs"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         </CardContent>
       </Card>
 
