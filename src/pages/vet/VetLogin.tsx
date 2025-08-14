@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -84,29 +85,29 @@ const VetLogin = () => {
 
   if (showResetForm) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20 flex items-center justify-center">
-        <div className="w-full max-w-md mx-auto p-6">
+      <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20 flex items-center justify-center p-4">
+        <div className="w-full max-w-md mx-auto">
           <div className="text-center mb-8">
             <Link to="/" className="inline-flex items-center space-x-3 hover:opacity-80 transition-opacity">
-              <Heart className="h-10 w-10 text-vet-sage" />
-              <span className="text-2xl font-bold text-vet-navy">AniNow</span>
+              <Heart className="h-8 w-8 sm:h-10 sm:w-10 text-vet-sage" />
+              <span className="text-xl sm:text-2xl font-bold text-vet-navy">AniNow</span>
             </Link>
-            <p className="text-vet-brown mt-2">Réinitialisation du mot de passe</p>
+            <p className="text-vet-brown mt-2 text-sm sm:text-base">Réinitialisation du mot de passe</p>
           </div>
 
           <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl text-vet-navy">
+            <CardHeader className="text-center px-4 sm:px-6">
+              <CardTitle className="text-xl sm:text-2xl text-vet-navy">
                 Mot de passe oublié ?
               </CardTitle>
-              <CardDescription className="text-vet-brown">
+              <CardDescription className="text-vet-brown text-sm sm:text-base">
                 Entrez votre email pour recevoir un lien de réinitialisation
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handlePasswordReset} className="space-y-6">
+            <CardContent className="px-4 sm:px-6">
+              <form onSubmit={handlePasswordReset} className="space-y-4 sm:space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="resetEmail" className="text-vet-navy">Email *</Label>
+                  <Label htmlFor="resetEmail" className="text-vet-navy text-sm sm:text-base">Email *</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-vet-brown" />
                     <Input
@@ -115,7 +116,7 @@ const VetLogin = () => {
                       placeholder="votre@email.com"
                       value={resetEmail}
                       onChange={(e) => setResetEmail(e.target.value)}
-                      className="pl-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage"
+                      className="pl-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage text-sm sm:text-base"
                       required
                     />
                   </div>
@@ -123,7 +124,7 @@ const VetLogin = () => {
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-vet-sage hover:bg-vet-sage/90 text-white"
+                  className="w-full bg-vet-sage hover:bg-vet-sage/90 text-white text-sm sm:text-base py-2 sm:py-3"
                 >
                   Envoyer le lien de réinitialisation
                 </Button>
@@ -131,7 +132,7 @@ const VetLogin = () => {
                 <Button 
                   type="button"
                   variant="ghost"
-                  className="w-full text-vet-brown hover:text-vet-navy"
+                  className="w-full text-vet-brown hover:text-vet-navy text-sm sm:text-base"
                   onClick={() => setShowResetForm(false)}
                 >
                   Retour à la connexion
@@ -145,33 +146,44 @@ const VetLogin = () => {
   }
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-col lg:flex-row">
+      {/* Mobile Header - Only visible on small screens */}
+      <div className="lg:hidden bg-gradient-to-r from-vet-navy to-vet-blue p-4">
+        <div className="text-center">
+          <Link to="/" className="inline-flex items-center space-x-3 hover:opacity-80 transition-opacity">
+            <Heart className="h-8 w-8 text-vet-sage" />
+            <span className="text-xl font-bold text-white">AniNow</span>
+          </Link>
+          <p className="text-white/90 mt-2 text-sm">Espace Vétérinaire</p>
+        </div>
+      </div>
+
       {/* Left Side - Login Form */}
-      <div className="flex-1 bg-gradient-to-br from-vet-beige via-background to-vet-blue/20 flex items-center justify-center">
-        <div className="w-full max-w-md mx-auto p-6">
-          {/* Logo */}
-          <div className="text-center mb-8">
+      <div className="flex-1 bg-gradient-to-br from-vet-beige via-background to-vet-blue/20 flex items-center justify-center p-4 lg:p-6">
+        <div className="w-full max-w-md mx-auto">
+          {/* Logo - Hidden on mobile (shown in header instead) */}
+          <div className="text-center mb-6 sm:mb-8 hidden lg:block">
             <Link to="/" className="inline-flex items-center space-x-3 hover:opacity-80 transition-opacity">
-              <Heart className="h-10 w-10 text-vet-sage" />
-              <span className="text-2xl font-bold text-vet-navy">AniNow</span>
+              <Heart className="h-8 w-8 sm:h-10 sm:w-10 text-vet-sage" />
+              <span className="text-xl sm:text-2xl font-bold text-vet-navy">AniNow</span>
             </Link>
-            <p className="text-vet-brown mt-2">Espace Vétérinaire</p>
+            <p className="text-vet-brown mt-2 text-sm sm:text-base">Espace Vétérinaire</p>
           </div>
 
           {/* Formulaire */}
           <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl text-vet-navy">
+            <CardHeader className="text-center px-4 sm:px-6">
+              <CardTitle className="text-xl sm:text-2xl text-vet-navy">
                 Connexion
               </CardTitle>
-              <CardDescription className="text-vet-brown">
+              <CardDescription className="text-vet-brown text-sm sm:text-base">
                 Accédez à votre dashboard de gestion des rendez-vous
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleLogin} className="space-y-6">
+            <CardContent className="px-4 sm:px-6">
+              <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-vet-navy">Email *</Label>
+                  <Label htmlFor="email" className="text-vet-navy text-sm sm:text-base">Email *</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-vet-brown" />
                     <Input
@@ -180,7 +192,7 @@ const VetLogin = () => {
                       placeholder="votre@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage"
+                      className="pl-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage text-sm sm:text-base"
                       required
                       disabled={isLoading}
                     />
@@ -188,7 +200,7 @@ const VetLogin = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-vet-navy">Mot de passe *</Label>
+                  <Label htmlFor="password" className="text-vet-navy text-sm sm:text-base">Mot de passe *</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-vet-brown" />
                     <Input
@@ -197,7 +209,7 @@ const VetLogin = () => {
                       placeholder="Votre mot de passe"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage"
+                      className="pl-10 pr-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage text-sm sm:text-base"
                       required
                       disabled={isLoading}
                     />
@@ -216,7 +228,7 @@ const VetLogin = () => {
                   <button
                     type="button"
                     onClick={() => setShowResetForm(true)}
-                    className="text-sm text-vet-sage hover:text-vet-sage/80 underline"
+                    className="text-xs sm:text-sm text-vet-sage hover:text-vet-sage/80 underline"
                   >
                     Mot de passe oublié ?
                   </button>
@@ -224,7 +236,7 @@ const VetLogin = () => {
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-vet-sage hover:bg-vet-sage/90 text-white disabled:opacity-50"
+                  className="w-full bg-vet-sage hover:bg-vet-sage/90 text-white disabled:opacity-50 text-sm sm:text-base py-2 sm:py-3"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -238,8 +250,8 @@ const VetLogin = () => {
                 </Button>
               </form>
 
-              <div className="mt-6 text-center">
-                <p className="text-sm text-vet-brown">
+              <div className="mt-4 sm:mt-6 text-center">
+                <p className="text-xs sm:text-sm text-vet-brown">
                   Nos solutions vous intéressent ?{" "}
                   <button 
                     onClick={() => {
@@ -255,9 +267,9 @@ const VetLogin = () => {
           </Card>
 
           {/* Retour */}
-          <div className="text-center mt-6">
+          <div className="text-center mt-4 sm:mt-6">
             <Link to="/">
-              <Button variant="ghost" className="text-vet-brown hover:text-vet-navy">
+              <Button variant="ghost" className="text-vet-brown hover:text-vet-navy text-sm sm:text-base">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Retour à l'accueil
               </Button>
@@ -266,44 +278,44 @@ const VetLogin = () => {
         </div>
       </div>
 
-      {/* Right Side - Commercial Section */}
-      <div className="flex-1 bg-gradient-to-br from-vet-navy to-vet-blue flex items-center justify-center p-8">
-        <div className="max-w-lg text-center text-white space-y-8">
+      {/* Right Side - Commercial Section - Hidden on mobile, shown on large screens */}
+      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-vet-navy to-vet-blue items-center justify-center p-8 relative">
+        <div className="max-w-lg text-center text-white space-y-6 lg:space-y-8">
           <div>
-            <h1 className="text-4xl font-bold mb-4 leading-tight">
+            <h1 className="text-2xl lg:text-4xl font-bold mb-4 leading-tight">
               La nouvelle génération de solutions pour les vétérinaires
             </h1>
-            <p className="text-xl text-white/90">
+            <p className="text-lg lg:text-xl text-white/90">
               Équipez-vous d'AniNow et gagnez du temps au quotidien
             </p>
           </div>
 
-          <div className="space-y-6 text-left">
+          <div className="space-y-4 lg:space-y-6 text-left">
             <div className="flex items-start space-x-4">
-              <CheckCircle className="h-6 w-6 text-vet-sage mt-1 flex-shrink-0" />
+              <CheckCircle className="h-5 w-5 lg:h-6 lg:w-6 text-vet-sage mt-1 flex-shrink-0" />
               <div>
-                <p className="text-lg font-medium">Plus de 150 cliniques vétérinaires utilisent AniNow</p>
+                <p className="text-base lg:text-lg font-medium">Plus de 150 cliniques vétérinaires utilisent AniNow</p>
               </div>
             </div>
 
             <div className="flex items-start space-x-4">
-              <Users className="h-6 w-6 text-vet-sage mt-1 flex-shrink-0" />
+              <Users className="h-5 w-5 lg:h-6 lg:w-6 text-vet-sage mt-1 flex-shrink-0" />
               <div>
-                <p className="text-lg font-medium">Plus de 5 000 clients gèrent leurs rendez-vous avec AniNow</p>
+                <p className="text-base lg:text-lg font-medium">Plus de 5 000 clients gèrent leurs rendez-vous avec AniNow</p>
               </div>
             </div>
 
             <div className="flex items-start space-x-4">
-              <Calendar className="h-6 w-6 text-vet-sage mt-1 flex-shrink-0" />
+              <Calendar className="h-5 w-5 lg:h-6 lg:w-6 text-vet-sage mt-1 flex-shrink-0" />
               <div>
-                <p className="text-lg font-medium">Planification intelligente et automatisée des créneaux</p>
+                <p className="text-base lg:text-lg font-medium">Planification intelligente et automatisée des créneaux</p>
               </div>
             </div>
 
             <div className="flex items-start space-x-4">
-              <BarChart3 className="h-6 w-6 text-vet-sage mt-1 flex-shrink-0" />
+              <BarChart3 className="h-5 w-5 lg:h-6 lg:w-6 text-vet-sage mt-1 flex-shrink-0" />
               <div>
-                <p className="text-lg font-medium">Analyses prédictives pour optimiser votre activité</p>
+                <p className="text-base lg:text-lg font-medium">Analyses prédictives pour optimiser votre activité</p>
               </div>
             </div>
           </div>
@@ -311,16 +323,16 @@ const VetLogin = () => {
           <div className="pt-4">
             <Button 
               onClick={() => window.open('https://aninow.fr/', '_blank')}
-              className="bg-vet-sage hover:bg-vet-sage/90 text-white px-8 py-3 text-lg font-medium"
+              className="bg-vet-sage hover:bg-vet-sage/90 text-white px-6 lg:px-8 py-2 lg:py-3 text-base lg:text-lg font-medium"
             >
               En savoir plus
             </Button>
           </div>
+        </div>
 
-          {/* Decorative element */}
-          <div className="absolute bottom-8 right-8 opacity-20">
-            <Heart className="h-32 w-32 text-vet-sage" />
-          </div>
+        {/* Decorative element */}
+        <div className="absolute bottom-8 right-8 opacity-20">
+          <Heart className="h-24 w-24 lg:h-32 lg:w-32 text-vet-sage" />
         </div>
       </div>
     </div>
