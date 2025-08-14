@@ -24,7 +24,7 @@ interface VeterinarianAbsence {
   veterinarian_id: string;
   start_date: string;
   end_date: string;
-  absence_type: string;
+  absence_type: 'vacation' | 'sick_leave' | 'training' | 'other';
   reason?: string;
   is_recurring: boolean;
 }
@@ -35,10 +35,10 @@ interface VeterinarianAbsenceCalendarProps {
 }
 
 const ABSENCE_TYPES = [
-  { value: "vacation", label: "Congés" },
-  { value: "sick", label: "Maladie" },
-  { value: "training", label: "Formation" },
-  { value: "other", label: "Autre" }
+  { value: "vacation" as const, label: "Congés" },
+  { value: "sick_leave" as const, label: "Maladie" },
+  { value: "training" as const, label: "Formation" },
+  { value: "other" as const, label: "Autre" }
 ];
 
 export const VeterinarianAbsenceCalendar: React.FC<VeterinarianAbsenceCalendarProps> = ({
@@ -50,7 +50,7 @@ export const VeterinarianAbsenceCalendar: React.FC<VeterinarianAbsenceCalendarPr
   const [newAbsence, setNewAbsence] = useState({
     start_date: "",
     end_date: "",
-    absence_type: "",
+    absence_type: "vacation" as 'vacation' | 'sick_leave' | 'training' | 'other',
     reason: ""
   });
 
@@ -75,7 +75,7 @@ export const VeterinarianAbsenceCalendar: React.FC<VeterinarianAbsenceCalendarPr
       setNewAbsence({
         start_date: "",
         end_date: "",
-        absence_type: "",
+        absence_type: "vacation",
         reason: ""
       });
     }
@@ -137,7 +137,9 @@ export const VeterinarianAbsenceCalendar: React.FC<VeterinarianAbsenceCalendarPr
                   <Label htmlFor="absence-type">Type d'absence</Label>
                   <Select
                     value={newAbsence.absence_type}
-                    onValueChange={(value) => setNewAbsence(prev => ({ ...prev, absence_type: value }))}
+                    onValueChange={(value: 'vacation' | 'sick_leave' | 'training' | 'other') => 
+                      setNewAbsence(prev => ({ ...prev, absence_type: value }))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Sélectionner le type" />

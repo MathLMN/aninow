@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { CalendarDays, Plus, Edit, Trash2, AlertCircle } from "lucide-react";
 import { useVeterinarianAbsences } from "@/hooks/useVeterinarianAbsences";
 import { useToast } from "@/hooks/use-toast";
+import { useClinicAccess } from "@/hooks/useClinicAccess";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -25,23 +27,25 @@ interface VeterinarianAbsenceManagerProps {
 }
 
 const ABSENCE_TYPES = [
-  { value: 'vacation', label: 'Congés' },
-  { value: 'sick_leave', label: 'Arrêt maladie' },
-  { value: 'training', label: 'Formation' },
-  { value: 'other', label: 'Autre' }
+  { value: 'vacation' as const, label: 'Congés' },
+  { value: 'sick_leave' as const, label: 'Arrêt maladie' },
+  { value: 'training' as const, label: 'Formation' },
+  { value: 'other' as const, label: 'Autre' }
 ];
 
 export const VeterinarianAbsenceManager = ({ veterinarians }: VeterinarianAbsenceManagerProps) => {
   const { absences, addAbsence, updateAbsence, deleteAbsence, isLoading } = useVeterinarianAbsences();
   const { toast } = useToast();
+  const { currentClinicId } = useClinicAccess();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAbsence, setEditingAbsence] = useState<any>(null);
   const [formData, setFormData] = useState({
     veterinarian_id: '',
-    absence_type: 'vacation',
+    absence_type: 'vacation' as 'vacation' | 'sick_leave' | 'training' | 'other',
     start_date: '',
     end_date: '',
-    is_recurring: false
+    is_recurring: false,
+    reason: ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -65,9 +69,28 @@ export const VeterinarianAbsenceManager = ({ veterinarians }: VeterinarianAbsenc
       return;
     }
 
+    if (!currentClinicId) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de déterminer la clinique",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const absenceData = {
+      veterinarian_id: formData.veterinarian_id,
+      absence_type: formData.absence_type,
+      start_date: formData.start_date,
+      end_date: formData.end_date,
+      is_recurring: formData.is_recurring,
+      reason: formData.reason || '',
+      clinic_id: currentClinicId
+    };
+
     const success = editingAbsence 
-      ? await updateAbsence(editingAbsence.id, formData)
-      : await addAbsence(formData);
+      ? await updateAbsence(editingAbsence.id, absenceData)
+      : await addAbsence(absenceData);
 
     if (success) {
       setIsDialogOpen(false);
@@ -77,7 +100,8 @@ export const VeterinarianAbsenceManager = ({ veterinarians }: VeterinarianAbsenc
         absence_type: 'vacation',
         start_date: '',
         end_date: '',
-        is_recurring: false
+        is_recurring: false,
+        reason: ''
       });
     }
   };
@@ -89,7 +113,8 @@ export const VeterinarianAbsenceManager = ({ veterinarians }: VeterinarianAbsenc
       absence_type: absence.absence_type,
       start_date: absence.start_date,
       end_date: absence.end_date,
-      is_recurring: absence.is_recurring
+      is_recurring: absence.is_recurring,
+      reason: absence.reason || ''
     });
     setIsDialogOpen(true);
   };
@@ -128,7 +153,8 @@ export const VeterinarianAbsenceManager = ({ veterinarians }: VeterinarianAbsenc
                     absence_type: 'vacation',
                     start_date: '',
                     end_date: '',
-                    is_recurring: false
+                    is_recurring: false,
+                    reason: ''
                   });
                 }}
                 className="bg-vet-blue hover:bg-vet-blue/90 text-white"
@@ -171,7 +197,9 @@ export const VeterinarianAbsenceManager = ({ veterinarians }: VeterinarianAbsenc
                     <Label htmlFor="absence-type">Type d'absence *</Label>
                     <Select
                       value={formData.absence_type}
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, absence_type: value }))}
+                      onValueChange={(value: 'vacation' | 'sick_leave' | 'training' | 'other') => 
+                        setFormData(prev => ({ ...prev, absence_type: value }))
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Sélectionnez le type d'absence" />
@@ -207,6 +235,16 @@ export const VeterinarianAbsenceManager = ({ veterinarians }: VeterinarianAbsenc
                         required
                       />
                     </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="reason">Raison (optionnel)</Label>
+                    <Input
+                      id="reason"
+                      value={formData.reason}
+                      onChange={(e) => setFormData(prev => ({ ...prev, reason: e.target.value }))}
+                      placeholder="Précisez la raison si nécessaire"
+                    />
                   </div>
                 </div>
                 <DialogFooter>
@@ -249,6 +287,11 @@ export const VeterinarianAbsenceManager = ({ veterinarians }: VeterinarianAbsenc
                       <p>
                         <strong>Au :</strong> {format(parseISO(absence.end_date), 'dd MMMM yyyy', { locale: fr })}
                       </p>
+                      {absence.reason && (
+                        <p>
+                          <strong>Raison :</strong> {absence.reason}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
