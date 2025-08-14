@@ -77,11 +77,10 @@ export const DailyCalendarGrid = ({
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <div className="min-w-full">
-            {/* En-tête des colonnes */}
+            {/* En-tête des colonnes - sans la colonne "Horaires" */}
             <div className={`grid border-b border-vet-blue/20 bg-vet-beige/30`} style={{gridTemplateColumns: `100px repeat(${columns.length}, 1fr)`}}>
-              <div className="p-2 font-semibold text-vet-navy text-center border-r border-vet-blue/20 text-sm">
-                Horaires
-              </div>
+              {/* Espace vide pour aligner avec la colonne des horaires */}
+              <div className="p-2 border-r border-vet-blue/20"></div>
               {columns.map((column) => {
                 // Compter le total des RDV pour cette colonne pour toute la journée
                 const totalBookings = timeSlots.reduce((total, time) => {
@@ -134,7 +133,7 @@ export const DailyCalendarGrid = ({
                       "text-[11px] font-medium leading-none"
                     )}>
                       {/* Afficher toutes les heures pour un alignement parfait */}
-                      <span className="block">{time}</span>
+                      {time}
                     </div>
                     
                     {/* Colonnes par vétérinaire et ASV */}
