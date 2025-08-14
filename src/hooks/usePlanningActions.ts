@@ -2,12 +2,10 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useAvailableSlots } from '@/hooks/useAvailableSlots';
 
 export const usePlanningActions = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { blockTimeSlot } = useAvailableSlots();
 
   const validateBooking = async (bookingId: string): Promise<boolean> => {
     setIsLoading(true);
@@ -165,35 +163,11 @@ export const usePlanningActions = () => {
     }
   };
 
+  // Fonction simplifiée pour ouvrir la modale de blocage
   const handleBlockSlot = async (timeSlot: { date: string; time: string; veterinarian: string }): Promise<boolean> => {
-    setIsLoading(true);
-    try {
-      // Calculer l'heure de fin (30 minutes plus tard par défaut)
-      const [hours, minutes] = timeSlot.time.split(':').map(Number);
-      const endTime = new Date();
-      endTime.setHours(hours, minutes + 30);
-      const endTimeStr = endTime.toTimeString().slice(0, 5);
-
-      const success = await blockTimeSlot(timeSlot.date, timeSlot.time, endTimeStr, timeSlot.veterinarian);
-      
-      if (success) {
-        toast({
-          title: "Créneau bloqué",
-          description: `Créneau de ${timeSlot.time} à ${endTimeStr} bloqué avec succès`,
-        });
-      }
-      return success;
-    } catch (error) {
-      console.error('Erreur lors du blocage:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de bloquer le créneau",
-        variant: "destructive"
-      });
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
+    // Cette fonction ne fait que retourner true pour indiquer que la modale doit s'ouvrir
+    // Le blocage réel se fera dans la modale BlockSlotModal
+    return true;
   };
 
   return {

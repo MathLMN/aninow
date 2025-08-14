@@ -1,8 +1,7 @@
+
 import { Plus, Ban, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { useAvailableSlots } from "@/hooks/useAvailableSlots";
-import { useToast } from "@/hooks/use-toast";
 import { TimeSlotContextMenu } from "./TimeSlotContextMenu";
 
 interface TimeSlotCellProps {
@@ -43,9 +42,6 @@ export const TimeSlotCell = ({
   isVeterinarianAbsent = false
 }: TimeSlotCellProps) => {
   const [showActions, setShowActions] = useState(false);
-  const [isBlocking, setIsBlocking] = useState(false);
-  const { blockTimeSlot } = useAvailableSlots();
-  const { toast } = useToast();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -84,37 +80,17 @@ export const TimeSlotCell = ({
     });
   };
 
-  const handleQuickBlock = async (e: React.MouseEvent) => {
+  const handleQuickBlock = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (columnId === 'asv' || isBlocking || isVeterinarianAbsent) return;
+    if (columnId === 'asv' || isVeterinarianAbsent) return;
 
-    setIsBlocking(true);
-    
-    try {
-      const dateStr = selectedDate.toISOString().split('T')[0];
-      // Calculer l'heure de fin (30 minutes plus tard par défaut)
-      const [hours, minutes] = time.split(':').map(Number);
-      const endTime = new Date();
-      endTime.setHours(hours, minutes + 30);
-      const endTimeStr = endTime.toTimeString().slice(0, 5);
-
-      const success = await blockTimeSlot(dateStr, time, endTimeStr, columnId);
-      
-      if (success) {
-        toast({
-          title: "Créneau bloqué",
-          description: `Créneau de ${time} à ${endTimeStr} bloqué avec succès`,
-        });
-      }
-    } catch (error) {
-      console.error('Erreur lors du blocage rapide:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de bloquer le créneau",
-        variant: "destructive"
+    // Appeler directement la fonction onBlockSlot pour ouvrir la modale
+    if (onBlockSlot) {
+      onBlockSlot({
+        date: selectedDate.toISOString().split('T')[0],
+        time: time,
+        veterinarian: columnId
       });
-    } finally {
-      setIsBlocking(false);
     }
   };
 
@@ -124,19 +100,19 @@ export const TimeSlotCell = ({
   // Styles pour les différents états
   const getCellBackground = () => {
     if (isVeterinarianAbsent) {
-      return "bg-gray-300/80"; // Gris plus voyant pour les absences
+      return "bg-gray-300/80";
     }
     if (!isOpen) {
-      return "bg-gray-300/80"; // Gris plus voyant pour les heures fermées
+      return "bg-gray-300/80";
     }
     if (isBlocked) {
-      return "bg-gray-300/80"; // Gris plus voyant pour les créneaux bloqués
+      return "bg-gray-300/80";
     }
-    return ""; // Fond normal
+    return "";
   };
 
   const canInteract = isOpen && !isVeterinarianAbsent && !isBlocked;
-  const canCreateTask = !isVeterinarianAbsent && !isBlocked; // Peut créer une tâche même si fermé
+  const canCreateTask = !isVeterinarianAbsent && !isBlocked;
 
   return (
     <TimeSlotContextMenu
@@ -214,14 +190,8 @@ export const TimeSlotCell = ({
               {columnId !== 'asv' && (
                 <button
                   onClick={handleQuickBlock}
-                  disabled={isBlocking}
-                  className={cn(
-                    "p-1 rounded-full text-white transition-colors",
-                    isBlocking 
-                      ? "bg-gray-400 cursor-not-allowed" 
-                      : "bg-red-600 hover:bg-red-700"
-                  )}
-                  title="Bloquer ce créneau (30 min)"
+                  className="p-1 rounded-full bg-red-600 hover:bg-red-700 text-white transition-colors"
+                  title="Bloquer ce créneau"
                 >
                   <Ban className="h-3 w-3" />
                 </button>
