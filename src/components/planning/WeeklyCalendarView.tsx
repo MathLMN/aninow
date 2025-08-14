@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,9 +23,9 @@ export const WeeklyCalendarView = ({
   onAppointmentClick,
   onCreateAppointment
 }: WeeklyCalendarViewProps) => {
-  // Heures de consultation (8h à 19h par créneaux de 15min)
+  // Heures de consultation (7h à 21h par créneaux de 15min)
   const timeSlots = [];
-  for (let hour = 8; hour < 19; hour++) {
+  for (let hour = 7; hour < 21; hour++) {
     for (let minute = 0; minute < 60; minute += 15) {
       const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
       timeSlots.push(time);

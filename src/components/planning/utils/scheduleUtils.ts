@@ -1,4 +1,3 @@
-
 import { isWithinInterval } from 'date-fns';
 import { processBookingWithoutPreference } from './appointmentAssignment';
 import { getAssignedVeterinarian } from './slotAssignmentUtils';
@@ -6,7 +5,7 @@ import { isVeterinarianAbsent } from './veterinarianAbsenceUtils';
 
 export const generateAllTimeSlots = () => {
   const timeSlots = [];
-  for (let hour = 8; hour <= 19; hour++) {
+  for (let hour = 7; hour <= 21; hour++) {
     for (let minute = 0; minute < 60; minute += 15) {
       const time = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
       timeSlots.push(time);
@@ -109,7 +108,8 @@ export const generateColumns = (
 };
 
 export const isFullHour = (time: string) => {
-  return time.endsWith('00');
+  const [hours] = time.split(':').map(Number);
+  return time.endsWith('00') && hours >= 8;
 };
 
 export const getBookingsForSlot = async (

@@ -1,5 +1,4 @@
-
-import { Plus, Ban } from "lucide-react";
+import { Plus, Ban, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useAvailableSlots } from "@/hooks/useAvailableSlots";
@@ -76,6 +75,15 @@ export const TimeSlotCell = ({
     }
   };
 
+  const handleCreateTask = () => {
+    // Créer une tâche même sur les créneaux fermés
+    onCreateAppointment({
+      date: selectedDate.toISOString().split('T')[0],
+      time: time,
+      veterinarian: columnId !== 'asv' ? columnId : undefined
+    });
+  };
+
   const handleQuickBlock = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (columnId === 'asv' || isBlocking || isVeterinarianAbsent) return;
@@ -128,6 +136,7 @@ export const TimeSlotCell = ({
   };
 
   const canInteract = isOpen && !isVeterinarianAbsent && !isBlocked;
+  const canCreateTask = !isVeterinarianAbsent && !isBlocked; // Peut créer une tâche même si fermé
 
   return (
     <TimeSlotContextMenu
@@ -149,10 +158,11 @@ export const TimeSlotCell = ({
           "border-l border-gray-200/30 relative transition-colors",
           "h-[30px]",
           getCellBackground(),
-          canInteract && "cursor-pointer group hover:bg-blue-50/30"
+          canInteract && "cursor-pointer group hover:bg-blue-50/30",
+          !canInteract && canCreateTask && "group hover:bg-yellow-50/30"
         )}
         onClick={handleCellClick}
-        onMouseEnter={() => canInteract && setShowActions(true)}
+        onMouseEnter={() => (canInteract || canCreateTask) && setShowActions(true)}
         onMouseLeave={() => setShowActions(false)}
       >
         {bookings.map((booking) => (
@@ -190,7 +200,7 @@ export const TimeSlotCell = ({
           </div>
         ))}
         
-        {/* Actions au survol - visibles uniquement au survol et si interaction possible */}
+        {/* Actions au survol pour créneaux ouverts */}
         {bookings.length === 0 && canInteract && showActions && (
           <div className="absolute inset-0 flex items-center justify-center bg-blue-50/40 transition-opacity z-20">
             <div className="flex items-center space-x-1">
@@ -217,6 +227,19 @@ export const TimeSlotCell = ({
                 </button>
               )}
             </div>
+          </div>
+        )}
+
+        {/* Actions au survol pour créneaux fermés - création de tâches */}
+        {bookings.length === 0 && !canInteract && canCreateTask && showActions && (
+          <div className="absolute inset-0 flex items-center justify-center bg-yellow-50/40 transition-opacity z-20">
+            <button
+              onClick={handleCreateTask}
+              className="p-1 rounded-full bg-yellow-600 text-white hover:bg-yellow-700 transition-colors"
+              title="Créer une tâche / note"
+            >
+              <FileText className="h-3 w-3" />
+            </button>
           </div>
         )}
       </div>
