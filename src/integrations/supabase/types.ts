@@ -230,6 +230,7 @@ export type Database = {
           custom_text: string | null
           duration_minutes: number | null
           id: string
+          is_blocked: boolean | null
           multiple_animals: string[] | null
           preferred_contact_method: string
           recommended_actions: string[] | null
@@ -285,6 +286,7 @@ export type Database = {
           custom_text?: string | null
           duration_minutes?: number | null
           id?: string
+          is_blocked?: boolean | null
           multiple_animals?: string[] | null
           preferred_contact_method: string
           recommended_actions?: string[] | null
@@ -340,6 +342,7 @@ export type Database = {
           custom_text?: string | null
           duration_minutes?: number | null
           id?: string
+          is_blocked?: boolean | null
           multiple_animals?: string[] | null
           preferred_contact_method?: string
           recommended_actions?: string[] | null
