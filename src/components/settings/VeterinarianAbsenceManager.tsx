@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,7 +35,7 @@ export const VeterinarianAbsenceManager = ({ veterinarians }: VeterinarianAbsenc
   const { absences, addAbsence, updateAbsence, deleteAbsence, isLoading } = useVeterinarianAbsences();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingAbsence, setEditingAbsence] = useState(null);
+  const [editingAbsence, setEditingAbsence] = useState<any>(null);
   const [formData, setFormData] = useState({
     veterinarian_id: '',
     absence_type: 'vacation',

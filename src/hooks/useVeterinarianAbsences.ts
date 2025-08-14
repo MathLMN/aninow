@@ -91,6 +91,42 @@ export const useVeterinarianAbsences = () => {
     },
   });
 
+  const updateAbsenceMutation = useMutation({
+    mutationFn: async ({ id, absence }: { id: string; absence: Omit<VeterinarianAbsence, 'id'> }) => {
+      console.log('🔄 Updating absence:', id, absence);
+      
+      const { data, error } = await supabase
+        .from('veterinarian_absences')
+        .update(absence)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ Error updating absence:', error);
+        throw error;
+      }
+
+      console.log('✅ Absence updated:', data);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['veterinarian-absences'] });
+      toast({
+        title: "Absence modifiée",
+        description: "L'absence a été modifiée avec succès",
+      });
+    },
+    onError: (error: any) => {
+      console.error('❌ Failed to update absence:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de modifier l'absence",
+        variant: "destructive",
+      });
+    },
+  });
+
   const deleteAbsenceMutation = useMutation({
     mutationFn: async (id: string) => {
       console.log('🔄 Deleting absence:', id);
@@ -133,6 +169,14 @@ export const useVeterinarianAbsences = () => {
     addAbsence: async (absence: Omit<VeterinarianAbsence, 'id'>) => {
       try {
         await addAbsenceMutation.mutateAsync(absence);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    updateAbsence: async (id: string, absence: Omit<VeterinarianAbsence, 'id'>) => {
+      try {
+        await updateAbsenceMutation.mutateAsync({ id, absence });
         return true;
       } catch {
         return false;
