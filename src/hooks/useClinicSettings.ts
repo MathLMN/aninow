@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { useClinicAccess } from './useClinicAccess'
@@ -112,18 +112,20 @@ const getDefaultSettings = (): ClinicSettings => ({
 export const useClinicSettings = () => {
   const [settings, setSettings] = useState<ClinicSettings>(getDefaultSettings());
   const [isLoading, setIsLoading] = useState(true);
+  const [hasAttemptedFetch, setHasAttemptedFetch] = useState(false);
   const { toast } = useToast();
   const { currentClinicId, refetch: refetchClinicAccess } = useClinicAccess();
 
-  const fetchSettings = async () => {
-    if (!currentClinicId) {
-      console.log('⏳ No clinic ID available, skipping settings fetch');
+  const fetchSettings = useCallback(async () => {
+    if (!currentClinicId || hasAttemptedFetch) {
+      console.log('⏳ Skipping settings fetch - no clinic ID or already attempted');
       setIsLoading(false);
       return;
     }
 
     try {
       setIsLoading(true);
+      setHasAttemptedFetch(true);
       console.log('🔍 Fetching clinic settings for clinic:', currentClinicId);
       
       const { data, error } = await supabase
@@ -135,7 +137,15 @@ export const useClinicSettings = () => {
 
       if (error) {
         console.error('❌ Error fetching settings:', error);
-        throw error;
+        // Don't throw error, just log it and show toast once
+        if (!hasAttemptedFetch) {
+          toast({
+            title: "Avertissement",
+            description: "Paramètres par défaut utilisés",
+            variant: "default"
+          });
+        }
+        return;
       }
 
       if (data) {
@@ -157,15 +167,18 @@ export const useClinicSettings = () => {
       }
     } catch (err) {
       console.error('❌ Erreur lors du chargement des paramètres:', err);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les paramètres",
-        variant: "destructive"
-      });
+      // Only show toast once
+      if (!hasAttemptedFetch) {
+        toast({
+          title: "Avertissement",
+          description: "Paramètres par défaut utilisés",
+          variant: "default"
+        });
+      }
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentClinicId, hasAttemptedFetch, toast]);
 
   const updateSettings = async (newSettings: Partial<ClinicSettings>) => {
     if (!currentClinicId) {
@@ -273,16 +286,11 @@ export const useClinicSettings = () => {
   };
 
   useEffect(() => {
-    fetchSettings();
-  }, [currentClinicId]);
-
-  // Force refetch when clinic access changes
-  useEffect(() => {
-    if (currentClinicId) {
-      console.log('🔄 Clinic ID changed, refetching settings...');
+    if (currentClinicId && !hasAttemptedFetch) {
+      console.log('🔄 Clinic ID available, attempting to fetch settings...');
       fetchSettings();
     }
-  }, [currentClinicId]);
+  }, [currentClinicId, fetchSettings, hasAttemptedFetch]);
 
   return {
     settings,

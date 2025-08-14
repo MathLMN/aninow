@@ -76,28 +76,37 @@ const VetPlanning = () => {
     error: assignmentsError 
   } = useSlotAssignments(currentDate) || {};
 
-  // Log any errors from the hooks
+  // Log any critical errors from the hooks (only once per error type)
   useEffect(() => {
-    if (bookingsError) {
+    let hasNewError = false;
+    let newErrorMessage = '';
+
+    if (bookingsError && !hasError) {
       console.error('❌ Error loading bookings:', bookingsError);
-      setHasError(true);
-      setErrorMessage('Erreur lors du chargement des rendez-vous');
+      hasNewError = true;
+      newErrorMessage = 'Erreur lors du chargement des rendez-vous';
     }
-    if (slotsError) {
+    if (slotsError && !hasError) {
       console.error('❌ Error loading slots:', slotsError);
-      setHasError(true);
-      setErrorMessage('Erreur lors du chargement des créneaux');
+      hasNewError = true;
+      newErrorMessage = 'Erreur lors du chargement des créneaux';
     }
-    if (vetsError) {
+    if (vetsError && !hasError) {
       console.error('❌ Error loading veterinarians:', vetsError);
+      hasNewError = true;
+      newErrorMessage = 'Erreur lors du chargement des vétérinaires';
+    }
+
+    if (hasNewError) {
       setHasError(true);
-      setErrorMessage('Erreur lors du chargement des vétérinaires');
+      setErrorMessage(newErrorMessage);
     }
+
+    // Log assignments error but don't treat it as critical
     if (assignmentsError) {
-      console.error('❌ Error loading assignments:', assignmentsError);
-      // Assignments error is not critical, don't set hasError
+      console.warn('⚠️ Warning loading assignments:', assignmentsError);
     }
-  }, [bookingsError, slotsError, vetsError, assignmentsError]);
+  }, [bookingsError, slotsError, vetsError, assignmentsError, hasError]);
 
   const allLoading = isLoading || bookingsLoading || slotsLoading || vetsLoading;
   const weekDates = getWeekDates();
@@ -144,7 +153,11 @@ const VetPlanning = () => {
             {errorMessage || 'Une erreur s\'est produite lors du chargement des données du planning.'}
           </p>
           <Button 
-            onClick={() => window.location.reload()} 
+            onClick={() => {
+              setHasError(false);
+              setErrorMessage('');
+              window.location.reload();
+            }} 
             variant="outline"
           >
             Actualiser la page
