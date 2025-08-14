@@ -6,8 +6,6 @@ import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { DailyCalendarGrid } from "./DailyCalendarGrid";
-import { DailyCalendarHeader } from "./DailyCalendarHeader";
-import { PendingBookingsNotification } from "./PendingBookingsNotification";
 import { BlockSlotModal } from "./BlockSlotModal";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 
@@ -94,15 +92,8 @@ export const DailyCalendarView = ({
     }
   };
 
-  const pendingBookings = bookings.filter(booking => booking.status === 'pending');
-
   return (
     <div className="space-y-6">
-      {/* Notification des RDV en attente */}
-      {pendingBookings.length > 0 && (
-        <PendingBookingsNotification />
-      )}
-
       {/* Navigation quotidienne */}
       <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
         <CardContent className="p-4">
@@ -148,13 +139,6 @@ export const DailyCalendarView = ({
           </div>
         </CardContent>
       </Card>
-
-      {/* En-tête du planning */}
-      <DailyCalendarHeader 
-        selectedDate={selectedDate}
-        onDateChange={onDateChange}
-        scheduleInfo="Ouvert 8h-12h / 14h-19h"
-      />
 
       {/* Grille du planning */}
       <DailyCalendarGrid
