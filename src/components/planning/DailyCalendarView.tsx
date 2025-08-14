@@ -94,12 +94,7 @@ export const DailyCalendarView = ({
     <div className="space-y-6">
       {/* Notification des RDV en attente */}
       {pendingBookings.length > 0 && (
-        <PendingBookingsNotification 
-          count={pendingBookings.length}
-          onViewBookings={() => {
-            // Logique pour afficher les RDV en attente
-          }}
-        />
+        <PendingBookingsNotification />
       )}
 
       {/* Navigation quotidienne */}
@@ -151,8 +146,8 @@ export const DailyCalendarView = ({
       {/* En-tête du planning */}
       <DailyCalendarHeader 
         selectedDate={selectedDate}
-        bookings={bookings}
-        columns={columns}
+        onDateChange={onDateChange}
+        scheduleInfo={`Ouvert ${daySchedule.openTime} - ${daySchedule.closeTime}`}
       />
 
       {/* Grille du planning */}
