@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useVeterinarianAbsences } from "@/hooks/useVeterinarianAbsences";
+import { useClinicAccess } from "@/hooks/useClinicAccess";
 import { CalendarDays, Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -46,6 +47,7 @@ export const VeterinarianAbsenceCalendar: React.FC<VeterinarianAbsenceCalendarPr
   absences
 }) => {
   const { addAbsence, deleteAbsence } = useVeterinarianAbsences();
+  const { currentClinicId } = useClinicAccess();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newAbsence, setNewAbsence] = useState({
     start_date: "",
@@ -57,7 +59,7 @@ export const VeterinarianAbsenceCalendar: React.FC<VeterinarianAbsenceCalendarPr
   const handleAddAbsence = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!newAbsence.start_date || !newAbsence.end_date || !newAbsence.absence_type) {
+    if (!newAbsence.start_date || !newAbsence.end_date || !newAbsence.absence_type || !currentClinicId) {
       return;
     }
 
@@ -66,8 +68,9 @@ export const VeterinarianAbsenceCalendar: React.FC<VeterinarianAbsenceCalendarPr
       start_date: newAbsence.start_date,
       end_date: newAbsence.end_date,
       absence_type: newAbsence.absence_type,
-      reason: newAbsence.reason || undefined,
-      is_recurring: false
+      reason: newAbsence.reason || "",
+      is_recurring: false,
+      clinic_id: currentClinicId
     });
 
     if (success) {
