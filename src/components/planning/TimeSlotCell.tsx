@@ -43,7 +43,11 @@ export const TimeSlotCell = ({
 }: TimeSlotCellProps) => {
   const [showActions, setShowActions] = useState(false);
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string, isBlockedSlot: boolean = false) => {
+    if (isBlockedSlot) {
+      return 'bg-gray-400 text-gray-800 border-gray-500';
+    }
+    
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-300 border-dashed';
       case 'confirmed': return 'bg-green-100 text-green-800 border-green-300';
@@ -95,7 +99,11 @@ export const TimeSlotCell = ({
   };
 
   // Déterminer si le créneau est bloqué (par un créneau de blocage)
-  const isBlocked = bookings.some(booking => booking.consultation_reason === 'Créneau bloqué' || booking.is_blocked);
+  const isBlocked = bookings.some(booking => 
+    booking.consultation_reason === 'Créneau bloqué' || 
+    booking.is_blocked || 
+    booking.client_name === 'CRÉNEAU BLOQUÉ'
+  );
 
   // Styles pour les différents états
   const getCellBackground = () => {
@@ -141,40 +149,57 @@ export const TimeSlotCell = ({
         onMouseEnter={() => (canInteract || canCreateTask) && setShowActions(true)}
         onMouseLeave={() => setShowActions(false)}
       >
-        {bookings.map((booking) => (
-          <div
-            key={booking.id}
-            onClick={(e) => {
-              e.stopPropagation();
-              onAppointmentClick(booking);
-            }}
-            className={cn(
-              "absolute inset-x-0 top-0 p-1 rounded-sm border cursor-pointer hover:shadow-sm transition-shadow text-[10px] leading-tight",
-              getStatusColor(booking.status)
-            )}
-            style={{ 
-              height: `${getAppointmentHeight(booking)}px`,
-              zIndex: 10
-            }}
-          >
-            <div className="font-medium truncate text-[10px]">
-              {booking.client_name}
+        {bookings.map((booking) => {
+          const isBlockedSlot = booking.consultation_reason === 'Créneau bloqué' || 
+                               booking.is_blocked || 
+                               booking.client_name === 'CRÉNEAU BLOQUÉ';
+          
+          return (
+            <div
+              key={booking.id}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!isBlockedSlot) {
+                  onAppointmentClick(booking);
+                }
+              }}
+              className={cn(
+                "absolute inset-x-0 top-0 p-1 rounded-sm border transition-shadow text-[10px] leading-tight",
+                getStatusColor(booking.status, isBlockedSlot),
+                !isBlockedSlot && "cursor-pointer hover:shadow-sm"
+              )}
+              style={{ 
+                height: `${getAppointmentHeight(booking)}px`,
+                zIndex: 10
+              }}
+            >
+              {isBlockedSlot ? (
+                <div className="font-medium truncate text-[10px] text-center">
+                  BLOQUÉ
+                </div>
+              ) : (
+                <>
+                  <div className="font-medium truncate text-[10px]">
+                    {booking.client_name}
+                  </div>
+                  <div className="truncate text-[9px] opacity-80">
+                    {booking.animal_name}
+                  </div>
+                  {booking.duration_minutes && booking.duration_minutes > 15 && (
+                    <div className="text-[8px] opacity-70 mt-1">
+                      {booking.duration_minutes} min
+                    </div>
+                  )}
+                  {booking.status === 'pending' && (
+                    <div className="text-[8px] opacity-70 font-medium">
+                      En attente
+                    </div>
+                  )}
+                </>
+              )}
             </div>
-            <div className="truncate text-[9px] opacity-80">
-              {booking.animal_name}
-            </div>
-            {booking.duration_minutes && booking.duration_minutes > 15 && (
-              <div className="text-[8px] opacity-70 mt-1">
-                {booking.duration_minutes} min
-              </div>
-            )}
-            {booking.status === 'pending' && (
-              <div className="text-[8px] opacity-70 font-medium">
-                En attente
-              </div>
-            )}
-          </div>
-        ))}
+          );
+        })}
         
         {/* Actions au survol pour créneaux ouverts */}
         {bookings.length === 0 && canInteract && showActions && (

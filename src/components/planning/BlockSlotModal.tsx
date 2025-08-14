@@ -37,9 +37,16 @@ export const BlockSlotModal = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.date || !formData.startTime || !formData.endTime || !formData.veterinarianId) {
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
+      console.log('🔄 Submitting block slot form:', formData);
+      
       const success = await blockTimeSlot(
         formData.date,
         formData.startTime,
@@ -48,6 +55,7 @@ export const BlockSlotModal = ({
       );
 
       if (success) {
+        console.log('✅ Slot blocked successfully, closing modal');
         onClose();
         // Réinitialiser le formulaire
         setFormData({
@@ -59,7 +67,7 @@ export const BlockSlotModal = ({
         });
       }
     } catch (error) {
-      console.error('Erreur lors du blocage:', error);
+      console.error('❌ Error in handleSubmit:', error);
     } finally {
       setIsSubmitting(false);
     }
