@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -38,19 +37,49 @@ export const useClinicVeterinarians = () => {
         return [];
       }
 
-      const { data, error } = await supabase
+      // Construire la requête en fonction du contexte
+      let query = supabase
         .from('clinic_veterinarians')
-        .select('*')
-        .eq('clinic_id', currentClinicId)
+        .select('id, name, specialty, is_active, clinic_id')
         .eq('is_active', true)
         .order('name', { ascending: true });
 
+      // Si on a un clinic_id, filtrer par clinique
+      if (currentClinicId) {
+        query = query.eq('clinic_id', currentClinicId);
+      }
+
+      console.log('🔄 Executing query with clinic_id filter:', currentClinicId);
+
+      const { data, error } = await query;
+
       if (error) {
         console.error('❌ Error fetching veterinarians:', error);
+        console.error('❌ Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         throw error;
       }
 
+      console.log('✅ Raw veterinarians data:', data);
       console.log('✅ Veterinarians loaded:', data?.length || 0, 'items');
+      
+      // Log chaque vétérinaire pour debug
+      if (data && data.length > 0) {
+        data.forEach((vet, index) => {
+          console.log(`🏥 Veterinarian ${index + 1}:`, {
+            id: vet.id,
+            name: vet.name,
+            specialty: vet.specialty,
+            is_active: vet.is_active,
+            clinic_id: vet.clinic_id
+          });
+        });
+      }
+
       return data || [];
     },
     enabled: !!currentClinicId,

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,7 @@ import Header from "@/components/Header";
 import ProgressBar from "@/components/ProgressBar";
 import { useAvailableSlots } from "@/hooks/useAvailableSlots";
 import { useBookingFormData } from "@/hooks/useBookingFormData";
-import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
+import { useVeterinarianPreference } from "@/hooks/useVeterinarianPreference";
 import { VeterinarianPreference } from "@/components/slots/VeterinarianPreference";
 import { DateSlotCard } from "@/components/slots/DateSlotCard";
 import { useClinicContext } from "@/contexts/ClinicContext";
@@ -18,13 +17,12 @@ const AppointmentSlots = () => {
   const { currentClinic } = useClinicContext();
   const { availableSlots, isLoading } = useAvailableSlots();
   const { updateBookingData } = useBookingFormData();
-  const { veterinarians, isLoading: vetsLoading } = useClinicVeterinarians();
-  const [selectedVeterinarian, setSelectedVeterinarian] = useState<string | null>(null);
+  const { veterinarians, selectedVeterinarian, setSelectedVeterinarian, isLoading: vetsLoading } = useVeterinarianPreference();
   const [selectedSlot, setSelectedSlot] = useState<{date: string, time: string, veterinarianId: string} | null>(null);
 
   console.log('🏥 AppointmentSlots - Current clinic:', currentClinic);
   console.log('🏥 AppointmentSlots - Available slots:', availableSlots);
-  console.log('🏥 AppointmentSlots - Veterinarians from useClinicVeterinarians:', veterinarians);
+  console.log('🏥 AppointmentSlots - Veterinarians from useVeterinarianPreference:', veterinarians);
   console.log('🏥 AppointmentSlots - Veterinarians count:', veterinarians.length);
   console.log('🏥 AppointmentSlots - Selected veterinarian:', selectedVeterinarian);
   console.log('🏥 AppointmentSlots - Is loading slots:', isLoading);
