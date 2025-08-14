@@ -17,18 +17,6 @@ interface BlockSlotModalProps {
   veterinarians: any[];
 }
 
-const DURATION_OPTIONS = [
-  { value: '15', label: '15 minutes' },
-  { value: '30', label: '30 minutes' },
-  { value: '45', label: '45 minutes' },
-  { value: '60', label: '1 heure' },
-  { value: '90', label: '1h30' },
-  { value: '120', label: '2 heures' },
-  { value: '180', label: '3 heures' },
-  { value: '240', label: '4 heures' },
-  { value: 'custom', label: 'Durée personnalisée' }
-];
-
 const TIME_SLOTS = [
   '08:00', '08:15', '08:30', '08:45',
   '09:00', '09:15', '09:30', '09:45',
@@ -59,8 +47,6 @@ export const BlockSlotModal = ({
     veterinarianId: defaultVeterinarian || '',
     reason: ''
   });
-  const [selectedDuration, setSelectedDuration] = useState('30');
-  const [showCustomTime, setShowCustomTime] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { blockTimeSlot } = useAvailableSlots();
 
@@ -94,42 +80,11 @@ export const BlockSlotModal = ({
           veterinarianId: '',
           reason: ''
         });
-        setSelectedDuration('30');
-        setShowCustomTime(false);
       }
     } catch (error) {
       console.error('❌ Error in handleSubmit:', error);
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const calculateEndTime = (startTime: string, duration: number) => {
-    if (!startTime) return '';
-    
-    const [hours, minutes] = startTime.split(':').map(Number);
-    const totalMinutes = hours * 60 + minutes + duration;
-    const endHours = Math.floor(totalMinutes / 60);
-    const endMins = totalMinutes % 60;
-    
-    return `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
-  };
-
-  const handleStartTimeChange = (startTime: string) => {
-    setFormData(prev => ({ 
-      ...prev, 
-      startTime,
-      endTime: selectedDuration !== 'custom' ? calculateEndTime(startTime, parseInt(selectedDuration)) : prev.endTime
-    }));
-  };
-
-  const handleDurationChange = (duration: string) => {
-    setSelectedDuration(duration);
-    setShowCustomTime(duration === 'custom');
-    
-    if (duration !== 'custom' && formData.startTime) {
-      const endTime = calculateEndTime(formData.startTime, parseInt(duration));
-      setFormData(prev => ({ ...prev, endTime }));
     }
   };
 
@@ -176,7 +131,7 @@ export const BlockSlotModal = ({
 
           <div className="space-y-2">
             <Label htmlFor="startTime">Heure de début</Label>
-            <Select value={formData.startTime} onValueChange={handleStartTimeChange}>
+            <Select value={formData.startTime} onValueChange={(value) => setFormData(prev => ({ ...prev, startTime: value }))}>
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez l'heure de début" />
               </SelectTrigger>
@@ -191,40 +146,22 @@ export const BlockSlotModal = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="duration">Durée du blocage</Label>
-            <Select value={selectedDuration} onValueChange={handleDurationChange}>
+            <Label htmlFor="endTime">Heure de fin</Label>
+            <Select value={formData.endTime} onValueChange={(value) => setFormData(prev => ({ ...prev, endTime: value }))}>
               <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez la durée" />
+                <SelectValue placeholder="Sélectionnez l'heure de fin" />
               </SelectTrigger>
-              <SelectContent>
-                {DURATION_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
+              <SelectContent className="max-h-[200px]">
+                {TIME_SLOTS.filter(time => time > formData.startTime).map((time) => (
+                  <SelectItem key={time} value={time}>
+                    {time}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
-          {showCustomTime && (
-            <div className="space-y-2">
-              <Label htmlFor="endTime">Heure de fin personnalisée</Label>
-              <Select value={formData.endTime} onValueChange={(value) => setFormData(prev => ({ ...prev, endTime: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionnez l'heure de fin" />
-                </SelectTrigger>
-                <SelectContent className="max-h-[200px]">
-                  {TIME_SLOTS.filter(time => time > formData.startTime).map((time) => (
-                    <SelectItem key={time} value={time}>
-                      {time}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {!showCustomTime && formData.endTime && (
+          {formData.startTime && formData.endTime && (
             <div className="p-3 bg-blue-50 rounded-md border border-blue-200">
               <p className="text-sm text-blue-800">
                 <strong>Créneau bloqué :</strong> de {formData.startTime} à {formData.endTime}
