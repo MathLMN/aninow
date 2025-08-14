@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Settings, AlertCircle } from "lucide-react";
@@ -174,7 +175,7 @@ const VetPlanning = () => {
   // Show loading state
   if (allLoading) {
     return (
-      <div className="space-y-6">
+      <div className="container mx-auto py-6 space-y-6">
         <div className="text-center py-8">
           <h2 className="text-xl font-semibold text-vet-navy mb-2">
             Chargement du planning...
@@ -190,7 +191,7 @@ const VetPlanning = () => {
   // Show error state if any critical data fails to load
   if (hasError) {
     return (
-      <div className="space-y-6">
+      <div className="container mx-auto py-6 space-y-6">
         <div className="text-center py-8">
           <h2 className="text-xl font-semibold text-red-600 mb-2">
             Erreur de chargement
@@ -217,7 +218,7 @@ const VetPlanning = () => {
   const canManageAssignments = veterinarians && veterinarians.length > 0;
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto py-6 space-y-6">
       {/* En-tête */}
       <div className="flex items-center justify-between">
         <PlanningHeader 

@@ -19,7 +19,7 @@ const VetDashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="container mx-auto py-6 space-y-6">
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-vet-sage mx-auto"></div>
           <p className="text-vet-brown mt-4">Chargement des données...</p>
@@ -29,7 +29,7 @@ const VetDashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto py-6 space-y-6">
       {/* En-tête */}
       <div className="flex items-center justify-between">
         <div>
