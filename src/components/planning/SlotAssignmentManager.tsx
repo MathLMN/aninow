@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, RefreshCw, User, AlertCircle } from 'lucide-react';
+import { Trash2, User, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { reassignSlot, deleteSlotAssignment, SlotAssignment } from './utils/slotAssignmentUtils';
+import { useClinicAccess } from '@/hooks/useClinicAccess';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface SlotAssignmentManagerProps {
@@ -24,8 +25,30 @@ export const SlotAssignmentManager = ({
 }: SlotAssignmentManagerProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { currentClinicId } = useClinicAccess();
 
-  // Error handling for empty veterinarians array
+  // Error handling for missing requirements
+  if (!currentClinicId) {
+    return (
+      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
+        <CardHeader>
+          <CardTitle className="text-vet-navy flex items-center gap-2">
+            <User className="h-5 w-5" />
+            Attributions des créneaux
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Accès clinique requis pour gérer les attributions.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (!veterinarians || veterinarians.length === 0) {
     return (
       <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
@@ -48,14 +71,15 @@ export const SlotAssignmentManager = ({
   }
 
   const handleReassign = async (assignment: SlotAssignment, newVetId: string) => {
-    if (isLoading) return;
+    if (isLoading || !currentClinicId) return;
     
     setIsLoading(true);
     try {
       const success = await reassignSlot(
         assignment.date,
         assignment.time_slot,
-        newVetId
+        newVetId,
+        currentClinicId
       );
 
       if (success) {
@@ -78,11 +102,11 @@ export const SlotAssignmentManager = ({
   };
 
   const handleDelete = async (assignment: SlotAssignment) => {
-    if (isLoading) return;
+    if (isLoading || !currentClinicId) return;
     
     setIsLoading(true);
     try {
-      const success = await deleteSlotAssignment(assignment.date, assignment.time_slot);
+      const success = await deleteSlotAssignment(assignment.date, assignment.time_slot, currentClinicId);
 
       if (success) {
         toast({
