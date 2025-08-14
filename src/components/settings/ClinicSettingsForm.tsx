@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -74,6 +73,14 @@ interface NewVeterinarian {
   is_active: boolean;
 }
 
+const SPECIALTY_OPTIONS = [
+  "Médecine générale",
+  "Ophtalmologie", 
+  "Dermatologie",
+  "Chirurgie",
+  "Imagerie médicale"
+];
+
 export const ClinicSettingsForm = () => {
   const {
     settings,
@@ -91,7 +98,7 @@ export const ClinicSettingsForm = () => {
   } = useToast();
   const [isVetDialogOpen, setIsVetDialogOpen] = useState(false);
   const [newVeterinarian, setNewVeterinarian] = useState<NewVeterinarian>({
-    name: '',
+    name: 'Dr. ',
     specialty: '',
     is_active: true
   });
@@ -157,7 +164,7 @@ export const ClinicSettingsForm = () => {
 
   const handleVeterinarianSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newVeterinarian.name.trim() || !newVeterinarian.specialty.trim()) {
+    if (!newVeterinarian.name.trim() || newVeterinarian.name.trim() === 'Dr.' || !newVeterinarian.specialty.trim()) {
       toast({
         title: "Erreur",
         description: "Veuillez remplir tous les champs obligatoires",
@@ -179,7 +186,7 @@ export const ClinicSettingsForm = () => {
     if (success) {
       setIsVetDialogOpen(false);
       setNewVeterinarian({
-        name: '',
+        name: 'Dr. ',
         specialty: '',
         is_active: true
       });
@@ -397,7 +404,7 @@ export const ClinicSettingsForm = () => {
                   onClick={() => {
                     setEditingVeterinarian(null);
                     setNewVeterinarian({
-                      name: '',
+                      name: 'Dr. ',
                       specialty: '',
                       is_active: true
                     });
@@ -434,16 +441,24 @@ export const ClinicSettingsForm = () => {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="vet-specialty">Spécialité *</Label>
-                      <Input
-                        id="vet-specialty"
+                      <Select
                         value={newVeterinarian.specialty}
-                        onChange={(e) => setNewVeterinarian(prev => ({
+                        onValueChange={(value) => setNewVeterinarian(prev => ({
                           ...prev,
-                          specialty: e.target.value
+                          specialty: value
                         }))}
-                        placeholder="Médecine générale, Chirurgie, etc."
-                        required
-                      />
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionnez une spécialité" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SPECIALTY_OPTIONS.map((specialty) => (
+                            <SelectItem key={specialty} value={specialty}>
+                              {specialty}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Switch
