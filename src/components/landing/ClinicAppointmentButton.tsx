@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -7,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from "@/components/ui/input";
 import { useToast } from '@/hooks/use-toast';
+import { useClinicContext } from '@/contexts/ClinicContext';
 
 interface Clinic {
   id: string;
@@ -22,6 +22,7 @@ const ClinicAppointmentButton = () => {
   const [hasSingleClinic, setHasSingleClinic] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { setCurrentClinicBySlug } = useClinicContext();
 
   useEffect(() => {
     fetchClinics();
@@ -63,6 +64,23 @@ const ClinicAppointmentButton = () => {
     clinic.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleClinicSelection = async (clinicId: string) => {
+    console.log('🏥 Clinic selected:', clinicId);
+    setSelectedClinic(clinicId);
+    
+    // Synchroniser immédiatement le contexte avec la clinique sélectionnée
+    const clinic = clinics.find(c => c.id === clinicId);
+    if (clinic) {
+      console.log('🔄 Pre-loading clinic context for:', clinic.slug);
+      try {
+        await setCurrentClinicBySlug(clinic.slug);
+        console.log('✅ Clinic context synchronized');
+      } catch (error) {
+        console.error('❌ Error synchronizing clinic context:', error);
+      }
+    }
+  };
+
   const handleBookAppointment = () => {
     if (!selectedClinic) {
       toast({
@@ -75,6 +93,7 @@ const ClinicAppointmentButton = () => {
 
     const clinic = clinics.find(c => c.id === selectedClinic);
     if (clinic) {
+      console.log('🚀 Navigating to booking for clinic:', clinic.slug);
       navigate(`/${clinic.slug}/booking`);
     }
   };
@@ -112,7 +131,7 @@ const ClinicAppointmentButton = () => {
           <label className="text-sm font-medium text-vet-navy">
             Choisir votre clinique vétérinaire
           </label>
-          <Select value={selectedClinic} onValueChange={setSelectedClinic}>
+          <Select value={selectedClinic} onValueChange={handleClinicSelection}>
             <SelectTrigger className="w-full bg-white border-gray-300 focus:border-vet-sage">
               <MapPin className="h-4 w-4 mr-2 text-vet-sage" />
               <SelectValue placeholder="Sélectionnez votre clinique..." />
