@@ -1,3 +1,4 @@
+
 import { isWithinInterval } from 'date-fns';
 import { processBookingWithoutPreference } from './appointmentAssignment';
 import { getAssignedVeterinarian } from './slotAssignmentUtils';
@@ -40,12 +41,19 @@ export const isTimeSlotOpen = (time: string, daySchedule: any) => {
     return isWithinInterval(slotTime, { start: startTime, end: endTime });
   };
 
-  return isWithinSchedule(daySchedule.morning) || isWithinSchedule(daySchedule.afternoon);
+  // Vérifier si le créneau est dans les heures du matin ou de l'après-midi
+  return (daySchedule.morning && isWithinSchedule(daySchedule.morning)) || 
+         (daySchedule.afternoon && isWithinSchedule(daySchedule.afternoon));
 };
 
 export const getDaySchedule = (selectedDate: Date, settings: any) => {
   if (!settings || !settings.daily_schedules) {
-    return null;
+    // Retourner un horaire par défaut si pas de paramètres
+    return {
+      isOpen: true,
+      morning: { start: "08:00", end: "12:00" },
+      afternoon: { start: "14:00", end: "19:00" }
+    };
   }
 
   const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const;
@@ -105,10 +113,6 @@ export const generateColumns = (
   });
 
   return columns;
-};
-
-export const isFullHour = (time: string) => {
-  return time.endsWith('00');
 };
 
 export const getBookingsForSlot = async (

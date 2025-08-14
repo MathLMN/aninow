@@ -81,11 +81,17 @@ export const DailyCalendarView = ({
       }))
   ];
 
-  // Configuration des horaires par défaut (sera remplacée par les données de la clinique)
+  // Configuration des horaires simplifiée - horaires ouverts de 8h à 19h
   const daySchedule = {
     isOpen: true,
-    openTime: "08:00",
-    closeTime: "19:00"
+    morning: {
+      start: "08:00",
+      end: "12:00"
+    },
+    afternoon: {
+      start: "14:00", 
+      end: "19:00"
+    }
   };
 
   const pendingBookings = bookings.filter(booking => booking.status === 'pending');
@@ -126,7 +132,7 @@ export const DailyCalendarView = ({
                   {format(selectedDate, 'EEEE d MMMM yyyy', { locale: fr })}
                 </h2>
                 <p className="text-sm text-vet-brown">
-                  Ouvert {daySchedule.openTime} - {daySchedule.closeTime}
+                  Ouvert 8h-12h / 14h-19h
                 </p>
               </div>
             </div>
@@ -147,7 +153,7 @@ export const DailyCalendarView = ({
       <DailyCalendarHeader 
         selectedDate={selectedDate}
         onDateChange={onDateChange}
-        scheduleInfo={`Ouvert ${daySchedule.openTime} - ${daySchedule.closeTime}`}
+        scheduleInfo="Ouvert 8h-12h / 14h-19h"
       />
 
       {/* Grille du planning */}
