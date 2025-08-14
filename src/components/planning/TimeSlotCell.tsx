@@ -22,6 +22,8 @@ interface TimeSlotCellProps {
   onDuplicateBooking?: (booking: any) => void;
   onMoveBooking?: (booking: any) => void;
   onDeleteBooking?: (bookingId: string) => void;
+  // Nouvelle prop pour indiquer si le vétérinaire est absent
+  isVeterinarianAbsent?: boolean;
 }
 
 export const TimeSlotCell = ({
@@ -38,7 +40,8 @@ export const TimeSlotCell = ({
   onDuplicateBooking,
   onMoveBooking,
   onDeleteBooking,
-  onBlockSlot
+  onBlockSlot,
+  isVeterinarianAbsent = false
 }: TimeSlotCellProps) => {
   const [showActions, setShowActions] = useState(false);
   const [isBlocking, setIsBlocking] = useState(false);
@@ -64,7 +67,7 @@ export const TimeSlotCell = ({
   };
 
   const handleCellClick = () => {
-    if (bookings.length === 0) {
+    if (bookings.length === 0 && isOpen && !isVeterinarianAbsent) {
       onCreateAppointment({
         date: selectedDate.toISOString().split('T')[0],
         time: time,
@@ -75,7 +78,7 @@ export const TimeSlotCell = ({
 
   const handleQuickBlock = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (columnId === 'asv' || isBlocking) return;
+    if (columnId === 'asv' || isBlocking || isVeterinarianAbsent) return;
 
     setIsBlocking(true);
     
@@ -107,6 +110,25 @@ export const TimeSlotCell = ({
     }
   };
 
+  // Déterminer si le créneau est bloqué (par un créneau de blocage)
+  const isBlocked = bookings.some(booking => booking.consultation_reason === 'Créneau bloqué' || booking.is_blocked);
+
+  // Styles pour les différents états
+  const getCellBackground = () => {
+    if (isVeterinarianAbsent) {
+      return "bg-gray-300/80"; // Gris plus voyant pour les absences
+    }
+    if (!isOpen) {
+      return "bg-gray-300/80"; // Gris plus voyant pour les heures fermées
+    }
+    if (isBlocked) {
+      return "bg-gray-300/80"; // Gris plus voyant pour les créneaux bloqués
+    }
+    return ""; // Fond normal
+  };
+
+  const canInteract = isOpen && !isVeterinarianAbsent && !isBlocked;
+
   return (
     <TimeSlotContextMenu
       time={time}
@@ -124,13 +146,13 @@ export const TimeSlotCell = ({
     >
       <div
         className={cn(
-          "border-l border-gray-200/30 relative transition-colors cursor-pointer",
-          "group hover:bg-blue-50/30",
+          "border-l border-gray-200/30 relative transition-colors",
           "h-[30px]",
-          !isOpen && "bg-gray-50/30"
+          getCellBackground(),
+          canInteract && "cursor-pointer group hover:bg-blue-50/30"
         )}
         onClick={handleCellClick}
-        onMouseEnter={() => setShowActions(true)}
+        onMouseEnter={() => canInteract && setShowActions(true)}
         onMouseLeave={() => setShowActions(false)}
       >
         {bookings.map((booking) => (
@@ -168,8 +190,8 @@ export const TimeSlotCell = ({
           </div>
         ))}
         
-        {/* Actions au survol - visibles uniquement au survol */}
-        {bookings.length === 0 && isOpen && showActions && (
+        {/* Actions au survol - visibles uniquement au survol et si interaction possible */}
+        {bookings.length === 0 && canInteract && showActions && (
           <div className="absolute inset-0 flex items-center justify-center bg-blue-50/40 transition-opacity z-20">
             <div className="flex items-center space-x-1">
               <button
@@ -194,6 +216,15 @@ export const TimeSlotCell = ({
                   <Ban className="h-3 w-3" />
                 </button>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Indicateur visuel pour les états spéciaux */}
+        {(isVeterinarianAbsent || !isOpen || isBlocked) && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="text-xs text-gray-600 font-medium">
+              {isVeterinarianAbsent ? "Absent" : !isOpen ? "Fermé" : "Bloqué"}
             </div>
           </div>
         )}

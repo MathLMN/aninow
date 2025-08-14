@@ -1,7 +1,10 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { TimeSlotCell } from "./TimeSlotCell";
 import { generateAllTimeSlots, isTimeSlotOpen, getBookingsForSlot, isFullHour } from "./utils/scheduleUtils";
+import { isVeterinarianAbsent } from "./utils/veterinarianAbsenceUtils";
+import { useVeterinarianAbsences } from "@/hooks/useVeterinarianAbsences";
 import { useClinicSettings } from "@/hooks/useClinicSettings";
 import { useClinicAccess } from "@/hooks/useClinicAccess";
 import { useState, useEffect } from "react";
@@ -40,6 +43,7 @@ export const DailyCalendarGrid = ({
 }: DailyCalendarGridProps) => {
   const { settings } = useClinicSettings();
   const { currentClinicId } = useClinicAccess();
+  const { absences } = useVeterinarianAbsences();
   const timeSlots = generateAllTimeSlots();
   const [slotBookings, setSlotBookings] = useState<Record<string, any[]>>({});
 
@@ -114,9 +118,7 @@ export const DailyCalendarGrid = ({
                       // Lignes épaisses sur les heures pleines, fines sur les 15 min intermédiaires
                       isHourMark 
                         ? "border-b-2 border-gray-400" 
-                        : "border-b border-gray-200/50",
-                      // Fond gris pour les heures fermées
-                      !isOpen && "bg-gray-50/30"
+                        : "border-b border-gray-200/50"
                     )} 
                     style={{gridTemplateColumns: `100px repeat(${columns.length}, 1fr)`}}
                   >
@@ -125,7 +127,7 @@ export const DailyCalendarGrid = ({
                       "text-xs text-center font-medium border-r flex items-center justify-center px-1",
                       isOpen 
                         ? "bg-white text-gray-700 border-gray-300" 
-                        : "bg-gray-100/80 text-gray-500 border-gray-200/30",
+                        : "bg-gray-300/80 text-gray-600 border-gray-400", // Gris plus voyant pour les heures fermées
                       // Police et style pour une meilleure lisibilité
                       "text-[11px] font-medium leading-none"
                     )}>
@@ -137,6 +139,9 @@ export const DailyCalendarGrid = ({
                     {columns.map((column) => {
                       const key = `${time}-${column.id}`;
                       const slotBookingsForCell = slotBookings[key] || [];
+                      
+                      // Vérifier si le vétérinaire est absent (seulement pour les colonnes vétérinaire, pas ASV)
+                      const isVetAbsent = column.id !== 'asv' && isVeterinarianAbsent(column.id, selectedDate, absences);
                       
                       return (
                         <TimeSlotCell
@@ -155,6 +160,7 @@ export const DailyCalendarGrid = ({
                           onMoveBooking={onMoveBooking}
                           onDeleteBooking={onDeleteBooking}
                           onBlockSlot={onBlockSlot}
+                          isVeterinarianAbsent={isVetAbsent}
                         />
                       );
                     })}
