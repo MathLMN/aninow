@@ -18,6 +18,7 @@ export const useAppointmentForm = (onClose: () => void) => {
     duration_minutes: 15,
     
     // Informations client
+    client_status: '',
     client_name: '',
     client_phone: '',
     client_email: '',
@@ -86,6 +87,7 @@ export const useAppointmentForm = (onClose: () => void) => {
         animal_age: formData.animal_age,
         animal_weight: formData.animal_weight ? parseFloat(formData.animal_weight) : null,
         animal_sex: formData.animal_sex,
+        client_status: formData.client_status,
         client_name: formData.client_name,
         client_email: formData.client_email,
         client_phone: formData.client_phone,
@@ -123,6 +125,7 @@ export const useAppointmentForm = (onClose: () => void) => {
         veterinarian_id: '',
         consultation_type_id: '',
         duration_minutes: 15,
+        client_status: '',
         client_name: '',
         client_phone: '',
         client_email: '',

@@ -2,6 +2,7 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { User } from "lucide-react";
 
 interface ClientSectionProps {
@@ -18,6 +19,24 @@ export const ClientSection = ({ formData, onFieldUpdate }: ClientSectionProps) =
       </div>
       
       <div className="space-y-3">
+        <div>
+          <Label className="text-xs font-medium text-gray-700">Statut du client *</Label>
+          <RadioGroup 
+            value={formData.client_status} 
+            onValueChange={(value) => onFieldUpdate('client_status', value)}
+            className="flex space-x-4 mt-1"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="existing" id="existing" />
+              <Label htmlFor="existing" className="text-xs">Déjà client</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="new" id="new" />
+              <Label htmlFor="new" className="text-xs">Nouveau client</Label>
+            </div>
+          </RadioGroup>
+        </div>
+
         <div>
           <Label htmlFor="client_name" className="text-xs font-medium text-gray-700">Nom complet *</Label>
           <Input
