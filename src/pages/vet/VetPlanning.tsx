@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { DailyCalendarView } from "@/components/planning/DailyCalendarView";
 import { WeeklyCalendarView } from "@/components/planning/WeeklyCalendarView";
@@ -20,25 +21,25 @@ export default function VetPlanning() {
   const { consultationTypes } = useConsultationTypes();
 
   const {
-    onValidateBooking,
-    onCancelBooking,
-    onDuplicateBooking,
-    onMoveBooking,
-    onDeleteBooking,
-    onBlockSlot
+    validateBooking,
+    cancelBooking,
+    duplicateBooking,
+    moveAppointment,
+    deleteBooking,
+    handleBlockSlot
   } = usePlanningActions();
 
   const handleCreateAppointment = (timeSlot: { date: string; time: string; veterinarian?: string }) => {
     console.log('🎯 Opening create modal with time slot:', timeSlot);
     setCreateModalDefaultData(timeSlot);
-    setAppointmentToEdit(null); // S'assurer qu'on est en mode création
+    setAppointmentToEdit(null);
     setIsCreateModalOpen(true);
   };
 
   const handleAppointmentClick = (appointment: any) => {
     console.log('🎯 Opening edit modal for appointment:', appointment);
     setAppointmentToEdit(appointment);
-    setCreateModalDefaultData(null); // S'assurer qu'on est en mode édition
+    setCreateModalDefaultData(null);
     setIsCreateModalOpen(true);
   };
 
@@ -46,11 +47,10 @@ export default function VetPlanning() {
     setIsCreateModalOpen(false);
     setCreateModalDefaultData(null);
     setAppointmentToEdit(null);
-    // Rafraîchir les données après fermeture du modal
     refreshBookings();
   };
 
-  // Filtrer les réservations pour la date sélectionnée (vue quotidienne)
+  // Filter bookings for selected date (daily view)
   const todayBookings = bookings.filter(booking => {
     if (viewMode === 'daily') {
       const bookingDate = new Date(booking.appointment_date);
@@ -59,12 +59,28 @@ export default function VetPlanning() {
     return true;
   });
 
+  // Get week dates for weekly view
+  const getWeekDates = (date: Date) => {
+    const week = [];
+    const startOfWeek = new Date(date);
+    const day = startOfWeek.getDay();
+    const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1); // Monday as first day
+    startOfWeek.setDate(diff);
+
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(startOfWeek);
+      day.setDate(startOfWeek.getDate() + i);
+      week.push(day);
+    }
+    return week;
+  };
+
+  const weekDates = getWeekDates(selectedDate);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-vet-blue/5 via-white to-vet-sage/5">
       <div className="container mx-auto p-6 space-y-6">
         <PlanningHeader
-          selectedDate={selectedDate}
-          onDateChange={setSelectedDate}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
         />
@@ -77,19 +93,20 @@ export default function VetPlanning() {
             veterinarians={veterinarians}
             onCreateAppointment={handleCreateAppointment}
             onAppointmentClick={handleAppointmentClick}
-            onValidateBooking={onValidateBooking}
-            onCancelBooking={onCancelBooking}
-            onDuplicateBooking={onDuplicateBooking}
-            onMoveBooking={onMoveBooking}
-            onDeleteBooking={onDeleteBooking}
-            onBlockSlot={onBlockSlot}
+            onValidateBooking={validateBooking}
+            onCancelBooking={cancelBooking}
+            onDuplicateBooking={duplicateBooking}
+            onMoveBooking={moveAppointment}
+            onDeleteBooking={deleteBooking}
+            onBlockSlot={handleBlockSlot}
           />
         ) : (
           <WeeklyCalendarView
-            selectedDate={selectedDate}
-            onDateChange={setSelectedDate}
+            weekDates={weekDates}
             bookings={bookings}
             veterinarians={veterinarians}
+            filters={{ veterinarian: 'all', status: 'all' }}
+            isLoading={false}
             onCreateAppointment={handleCreateAppointment}
             onAppointmentClick={handleAppointmentClick}
           />

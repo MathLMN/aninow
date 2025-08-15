@@ -66,7 +66,6 @@ export const usePlanningActions = () => {
   const duplicateBooking = async (booking: any): Promise<boolean> => {
     setIsLoading(true);
     try {
-      // Créer une copie du booking sans l'ID et avec un status pending
       const { id, created_at, updated_at, ...bookingData } = booking;
       const duplicatedBooking = {
         ...bookingData,
@@ -163,10 +162,7 @@ export const usePlanningActions = () => {
     }
   };
 
-  // Fonction simplifiée pour ouvrir la modale de blocage
   const handleBlockSlot = async (timeSlot: { date: string; time: string; veterinarian: string }): Promise<boolean> => {
-    // Cette fonction ne fait que retourner true pour indiquer que la modale doit s'ouvrir
-    // Le blocage réel se fera dans la modale BlockSlotModal
     return true;
   };
 
