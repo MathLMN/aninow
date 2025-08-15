@@ -1,157 +1,155 @@
-import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useClinicContext } from "@/contexts/ClinicContext";
+
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useClinicAccess } from '@/hooks/useClinicAccess';
+
+interface FormData {
+  // Rendez-vous
+  appointmentDate: string;
+  appointmentTime: string;
+  appointmentEndTime: string;
+  veterinarianId: string;
+  consultationTypeId: string;
+  duration: number;
+  
+  // Client
+  clientName: string;
+  clientEmail: string;
+  clientPhone: string;
+  preferredContactMethod: string;
+  clientStatus: string;
+  
+  // Animal
+  animalName: string;
+  animalSpecies: string;
+  animalBreed: string | null;
+  animalAge: string | null;
+  animalWeight: number | null;
+  animalSex: string | null;
+  animalSterilized: boolean | null;
+  animalVaccinesUpToDate: boolean | null;
+  
+  // Consultation
+  consultationReason: string;
+  clientComment: string | null;
+}
 
 export const useAppointmentForm = (onClose: () => void) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const { currentClinic } = useClinicContext();
-
-  const [formData, setFormData] = useState({
-    // Informations RDV
-    appointment_date: '',
-    appointment_time: '',
-    veterinarian_id: '',
-    consultation_type_id: '',
-    duration_minutes: 15,
-    arrival_time: '',
-    
-    // Informations client
-    client_status: '',
-    client_name: '',
-    client_phone: '',
-    client_email: '',
-    preferred_contact_method: 'phone',
-    
-    // Informations animal
-    animal_name: '',
-    animal_species: '',
-    animal_breed: '',
-    animal_age: '',
-    animal_weight: '',
-    animal_sex: '',
-    
-    // Consultation
-    consultation_reason: '',
-    client_comment: '',
-    
-    // Source du RDV
-    booking_source: 'phone'
+  const { currentClinicId } = useClinicAccess();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const [formData, setFormData] = useState<FormData>({
+    appointmentDate: '',
+    appointmentTime: '',
+    appointmentEndTime: '',
+    veterinarianId: '',
+    consultationTypeId: '',
+    duration: 30,
+    clientName: '',
+    clientEmail: '',
+    clientPhone: '',
+    preferredContactMethod: 'phone',
+    clientStatus: 'existing',
+    animalName: '',
+    animalSpecies: 'chien',
+    animalBreed: null,
+    animalAge: null,
+    animalWeight: null,
+    animalSex: null,
+    animalSterilized: null,
+    animalVaccinesUpToDate: null,
+    consultationReason: '',
+    clientComment: null,
   });
 
-  const calculateEndTime = (startTime: string, duration: number) => {
-    if (!startTime || !duration) return '';
-    
-    const [hours, minutes] = startTime.split(':').map(Number);
-    const startInMinutes = hours * 60 + minutes;
-    const endInMinutes = startInMinutes + duration;
-    
-    const endHours = Math.floor(endInMinutes / 60);
-    const endMins = endInMinutes % 60;
-    
-    return `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
-  };
-
-  const updateField = (field: string, value: string | number) => {
+  const updateField = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleConsultationTypeChange = (consultationTypeId: string, consultationTypes: any[]) => {
     const selectedType = consultationTypes.find(type => type.id === consultationTypeId);
     if (selectedType) {
-      setFormData(prev => ({
-        ...prev,
-        consultation_type_id: consultationTypeId,
-        duration_minutes: selectedType.duration_minutes
-      }));
+      const duration = selectedType.duration_minutes;
+      updateField('consultationTypeId', consultationTypeId);
+      updateField('duration', duration);
+      
+      // Recalculer l'heure de fin
+      if (formData.appointmentTime) {
+        const endTime = calculateEndTime(formData.appointmentTime, duration);
+        updateField('appointmentEndTime', endTime);
+      }
+    }
+  };
+
+  const calculateEndTime = (startTime: string, durationMinutes: number): string => {
+    if (!startTime) return '';
+    
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const startDate = new Date();
+    startDate.setHours(hours, minutes, 0, 0);
+    
+    const endDate = new Date(startDate.getTime() + durationMinutes * 60000);
+    
+    return endDate.toTimeString().slice(0, 5);
+  };
+
+  const initializeFormData = (defaultData: any) => {
+    console.log('🔄 Initializing form with data:', defaultData);
+    
+    if (defaultData.date && defaultData.time) {
+      updateField('appointmentDate', defaultData.date);
+      updateField('appointmentTime', defaultData.time);
+      
+      // Si on a un vétérinaire pré-sélectionné
+      if (defaultData.veterinarian && defaultData.veterinarian !== 'asv') {
+        updateField('veterinarianId', defaultData.veterinarian);
+      }
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!currentClinicId) {
+      toast({
+        title: "Erreur",
+        description: "Aucune clinique sélectionnée",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
-
+    
     try {
-      console.log('🔄 Starting appointment creation...');
-      console.log('Current clinic:', currentClinic);
-      console.log('Form data:', formData);
+      console.log('📝 Creating appointment with clinic ID:', currentClinicId);
+      console.log('📋 Form data:', formData);
       
-      // Validation des champs obligatoires
-      if (!formData.appointment_date) {
-        throw new Error('La date du rendez-vous est obligatoire');
-      }
-      
-      if (!formData.appointment_time) {
-        throw new Error('L\'heure du rendez-vous est obligatoire');
-      }
-      
-      if (!formData.client_name) {
-        throw new Error('Le nom du client est obligatoire');
-      }
-      
-      if (!formData.animal_name) {
-        throw new Error('Le nom de l\'animal est obligatoire');
-      }
-      
-      if (!formData.animal_species) {
-        throw new Error('L\'espèce de l\'animal est obligatoire');
-      }
-
-      // Vérification plus robuste de la clinique
-      let clinicId = currentClinic?.id;
-      
-      if (!clinicId) {
-        console.warn('⚠️ No clinic from context, trying to get default clinic...');
-        // Essayer de récupérer une clinique par défaut
-        const { data: clinics, error: clinicError } = await supabase
-          .from('clinics')
-          .select('id')
-          .limit(1);
-          
-        if (clinicError) {
-          console.error('Error fetching clinics:', clinicError);
-          throw new Error('Erreur lors de la récupération des cliniques');
-        }
-        
-        if (!clinics || clinics.length === 0) {
-          throw new Error('Aucune clinique disponible dans le système');
-        }
-        
-        clinicId = clinics[0].id;
-        console.log('✅ Using default clinic:', clinicId);
-      }
-
-      const appointmentEndTime = calculateEndTime(formData.appointment_time, formData.duration_minutes);
-      
-      const bookingData = {
-        clinic_id: clinicId,
-        // Informations animal (obligatoires)
-        animal_name: formData.animal_name || 'Non spécifié',
-        animal_species: formData.animal_species || 'Non spécifié',
-        animal_breed: formData.animal_breed || null,
-        animal_age: formData.animal_age || null,
-        animal_weight: formData.animal_weight ? parseFloat(formData.animal_weight) : null,
-        animal_sex: formData.animal_sex || null,
-        // Informations client (obligatoires)
-        client_name: formData.client_name,
-        client_email: formData.client_email || 'non-renseigne@example.com',
-        client_phone: formData.client_phone || '0000000000',
-        preferred_contact_method: formData.preferred_contact_method,
-        client_status: formData.client_status || null,
-        // Consultation (obligatoire)
-        consultation_reason: formData.consultation_reason || 'Consultation générale',
-        client_comment: formData.client_comment || null,
-        // Informations RDV
-        appointment_date: formData.appointment_date,
-        appointment_time: formData.appointment_time,
-        appointment_end_time: appointmentEndTime,
-        veterinarian_id: formData.veterinarian_id || null,
-        consultation_type_id: formData.consultation_type_id || null,
-        duration_minutes: formData.duration_minutes,
-        arrival_time: formData.arrival_time || null,
+      const appointmentData = {
+        clinic_id: currentClinicId, // Utiliser l'ID de la clinique courante
+        animal_name: formData.animalName,
+        animal_species: formData.animalSpecies,
+        animal_breed: formData.animalBreed,
+        animal_age: formData.animalAge,
+        animal_weight: formData.animalWeight,
+        animal_sex: formData.animalSex,
+        client_name: formData.clientName,
+        client_email: formData.clientEmail,
+        client_phone: formData.clientPhone,
+        preferred_contact_method: formData.preferredContactMethod,
+        client_status: formData.clientStatus,
+        consultation_reason: formData.consultationReason,
+        client_comment: formData.clientComment,
+        appointment_date: formData.appointmentDate,
+        appointment_time: formData.appointmentTime,
+        appointment_end_time: formData.appointmentEndTime,
+        veterinarian_id: formData.veterinarianId || null,
+        consultation_type_id: formData.consultationTypeId,
+        duration_minutes: formData.duration,
+        arrival_time: null,
         status: 'confirmed',
-        // Champs par défaut pour éviter les erreurs
         selected_symptoms: [],
         convenience_options: [],
         multiple_animals: [],
@@ -177,83 +175,44 @@ export const useAppointmentForm = (onClose: () => void) => {
         second_animal_sex: null,
         second_animal_sterilized: null,
         second_animal_vaccines_up_to_date: null,
-        animal_sterilized: null,
-        animal_vaccines_up_to_date: null,
+        animal_sterilized: formData.animalSterilized,
+        animal_vaccines_up_to_date: formData.animalVaccinesUpToDate,
         ai_analysis: null,
         urgency_score: null,
         recommended_actions: [],
         is_blocked: false
       };
 
-      console.log('📤 Submitting booking data (no select on insert):', bookingData);
+      console.log('📤 Sending appointment data:', appointmentData);
 
-      // IMPORTANT: on retire .select() pour éviter un échec RLS en lecture après insert
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('bookings')
-        .insert([bookingData]);
+        .insert([appointmentData])
+        .select();
 
       if (error) {
-        // Logs plus détaillés pour débogage RLS/schéma
-        const anyErr = error as unknown as { code?: string; details?: string; hint?: string; message: string };
-        console.error('❌ Database error on insert:', anyErr);
-        console.error('Error code:', anyErr.code);
-        console.error('Error details:', anyErr.details);
-        console.error('Error hint:', anyErr.hint);
-        throw new Error(`Erreur base de données: ${error.message}`);
+        console.error('❌ Error creating appointment:', error);
+        throw error;
       }
 
-      console.log('✅ Booking inserted successfully (no select).');
+      console.log('✅ Appointment created successfully:', data);
 
       toast({
         title: "Rendez-vous créé",
-        description: "Le rendez-vous a été ajouté au planning avec succès",
+        description: `Le rendez-vous pour ${formData.animalName} a été créé avec succès`,
       });
 
       onClose();
-      // Réinitialiser le formulaire
-      setFormData({
-        appointment_date: '',
-        appointment_time: '',
-        veterinarian_id: '',
-        consultation_type_id: '',
-        duration_minutes: 15,
-        arrival_time: '',
-        client_status: '',
-        client_name: '',
-        client_phone: '',
-        client_email: '',
-        preferred_contact_method: 'phone',
-        animal_name: '',
-        animal_species: '',
-        animal_breed: '',
-        animal_age: '',
-        animal_weight: '',
-        animal_sex: '',
-        consultation_reason: '',
-        client_comment: '',
-        booking_source: 'phone'
-      });
-
-    } catch (err) {
-      console.error('❌ Erreur lors de la création du RDV:', err);
+      
+    } catch (error: any) {
+      console.error('❌ Error in handleSubmit:', error);
       toast({
         title: "Erreur",
-        description: err instanceof Error ? err.message : "Impossible de créer le rendez-vous",
+        description: error.message || "Impossible de créer le rendez-vous",
         variant: "destructive"
       });
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const initializeFormData = (defaultData: any) => {
-    if (defaultData) {
-      setFormData(prev => ({
-        ...prev,
-        appointment_date: defaultData.date || '',
-        appointment_time: defaultData.time || '',
-        veterinarian_id: defaultData.veterinarian || ''
-      }));
     }
   };
 
