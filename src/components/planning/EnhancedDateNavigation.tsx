@@ -37,15 +37,16 @@ export const EnhancedDateNavigation = ({
 
   return (
     <div className="flex items-center gap-2">
-      {/* Navigation rapide */}
+      {/* Navigation rapide avec flèches */}
       <div className="flex items-center gap-1">
         <Button
           variant="outline"
           size="sm"
           onClick={goToYesterday}
-          className="text-xs px-2"
+          className="h-8 w-8 p-0"
+          title="Jour précédent"
         >
-          Hier
+          <ChevronLeft className="h-4 w-4" />
         </Button>
         
         <Button
@@ -61,9 +62,10 @@ export const EnhancedDateNavigation = ({
           variant="outline"
           size="sm"
           onClick={goToTomorrow}
-          className="text-xs px-2"
+          className="h-8 w-8 p-0"
+          title="Jour suivant"
         >
-          Demain
+          <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
 
