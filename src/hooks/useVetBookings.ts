@@ -13,8 +13,8 @@ export const useVetBookings = () => {
   const { currentClinicId } = useClinicAccess();
   const { generateRecurringBlocksForDate, recurringBlocks } = useRecurringSlotBlocks();
 
-  // Récupérer tous les rendez-vous
-  const { data: rawBookings = [], isLoading, error } = useQuery({
+  // Récupérer tous les rendez-vous avec invalidation forcée après création
+  const { data: rawBookings = [], isLoading, error, refetch } = useQuery({
     queryKey: ['vet-bookings', currentClinicId],
     queryFn: async () => {
       if (!currentClinicId) return [];
@@ -25,7 +25,8 @@ export const useVetBookings = () => {
         .from('bookings')
         .select('*')
         .eq('clinic_id', currentClinicId)
-        .order('appointment_date', { ascending: true });
+        .order('appointment_date', { ascending: true })
+        .order('appointment_time', { ascending: true });
 
       if (error) {
         console.error('❌ Error fetching bookings:', error);
@@ -33,9 +34,13 @@ export const useVetBookings = () => {
       }
 
       console.log('✅ Bookings fetched:', data?.length || 0, 'records');
+      console.log('📋 Sample bookings:', data?.slice(0, 3));
       return data || [];
     },
-    enabled: !!currentClinicId
+    enabled: !!currentClinicId,
+    // Réduire le temps de cache pour s'assurer que les nouveaux RDV apparaissent rapidement
+    staleTime: 30000, // 30 secondes
+    refetchOnWindowFocus: true
   });
 
   // Combiner les bookings avec les blocages récurrents générés
@@ -104,20 +109,19 @@ export const useVetBookings = () => {
     };
   }, [rawBookings]);
 
-  // Mettre à jour le statut d'un rendez-vous
+  // Mettre à jour le statut d'un rendez-vous avec invalidation du cache
   const updateBookingStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const { data, error } = await supabase
         .from('bookings')
         .update({ status })
-        .eq('id', id)
-        .select()
-        .single();
+        .eq('id', id);
 
       if (error) throw error;
       return data;
     },
     onSuccess: () => {
+      // Invalider et recharger les données
       queryClient.invalidateQueries({ queryKey: ['vet-bookings'] });
       toast({
         title: "Statut modifié",
@@ -133,6 +137,12 @@ export const useVetBookings = () => {
       });
     }
   });
+
+  // Fonction pour forcer le rechargement des données
+  const refreshBookings = async () => {
+    console.log('🔄 Force refreshing bookings...');
+    await refetch();
+  };
   
   return {
     bookings,
@@ -140,6 +150,7 @@ export const useVetBookings = () => {
     error,
     stats,
     updateBookingStatus: updateBookingStatus.mutate,
-    isUpdating: updateBookingStatus.isPending
+    isUpdating: updateBookingStatus.isPending,
+    refreshBookings
   };
 };

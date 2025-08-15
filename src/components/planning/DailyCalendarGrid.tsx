@@ -50,33 +50,49 @@ export const DailyCalendarGrid = ({
   // Optimiser le calcul des bookings par slot avec useMemo pour éviter les recalculs
   const slotBookings = useMemo(() => {
     const newSlotBookings: Record<string, any[]> = {};
+    const dateStr = formatDateLocal(selectedDate);
     
-    console.log('🔄 Calculating slot bookings for date:', formatDateLocal(selectedDate));
+    console.log('🔄 Calculating slot bookings for date:', dateStr);
     console.log('📊 Total bookings available:', bookings.length);
+    console.log('📋 Sample bookings for today:', bookings.filter(b => b.appointment_date === dateStr).slice(0, 3));
     
     for (const time of timeSlots) {
       for (const column of columns) {
         const key = `${time}-${column.id}`;
         
         // Filtrer directement les bookings pour ce créneau et cette colonne
-        const dateStr = formatDateLocal(selectedDate);
         let bookingsForSlot = [];
         
         if (column.id === 'asv') {
           // Pour la colonne ASV : ne jamais afficher les blocages récurrents
           bookingsForSlot = bookings.filter(booking => {
-            return booking.appointment_date === dateStr && 
-                   booking.appointment_time === time &&
-                   !booking.recurring_block_id && // Exclure les blocages récurrents
-                   !booking.is_blocked && // Exclure tous les blocages
-                   !booking.veterinarian_id; // Seulement les RDV sans vétérinaire assigné
+            const matchesDate = booking.appointment_date === dateStr;
+            const matchesTime = booking.appointment_time === time;
+            const isNotBlocked = !booking.recurring_block_id && !booking.is_blocked;
+            const hasNoVet = !booking.veterinarian_id;
+            
+            const matches = matchesDate && matchesTime && isNotBlocked && hasNoVet;
+            
+            if (matches) {
+              console.log('📍 ASV booking found:', booking.client_name, time);
+            }
+            
+            return matches;
           });
         } else {
           // Pour les colonnes vétérinaires : inclure tous les bookings assignés à ce vétérinaire
           bookingsForSlot = bookings.filter(booking => {
-            return booking.appointment_date === dateStr && 
-                   booking.appointment_time === time &&
-                   booking.veterinarian_id === column.id;
+            const matchesDate = booking.appointment_date === dateStr;
+            const matchesTime = booking.appointment_time === time;
+            const matchesVet = booking.veterinarian_id === column.id;
+            
+            const matches = matchesDate && matchesTime && matchesVet;
+            
+            if (matches) {
+              console.log('👨‍⚕️ Vet booking found:', booking.client_name, column.title, time);
+            }
+            
+            return matches;
           });
         }
         

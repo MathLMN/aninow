@@ -67,7 +67,8 @@ const VetPlanning = () => {
     bookings = [], 
     isLoading: bookingsLoading = false, 
     updateBookingStatus, 
-    error: bookingsError 
+    error: bookingsError,
+    refreshBookings
   } = useVetBookings() || {};
 
   const { 
@@ -141,15 +142,26 @@ const VetPlanning = () => {
   // Handlers pour les nouvelles actions du planning
   const handleValidateBooking = async (bookingId: string) => {
     await validateBooking(bookingId);
-    // Recharger les données si nécessaire
+    // Recharger les données
+    if (refreshBookings) {
+      await refreshBookings();
+    }
   };
 
   const handleCancelBooking = async (bookingId: string) => {
     await cancelBooking(bookingId);
+    // Recharger les données
+    if (refreshBookings) {
+      await refreshBookings();
+    }
   };
 
   const handleDuplicateBooking = async (booking: any) => {
     await duplicateBooking(booking);
+    // Recharger les données
+    if (refreshBookings) {
+      await refreshBookings();
+    }
   };
 
   const handleMoveBooking = (booking: any) => {
@@ -162,6 +174,10 @@ const VetPlanning = () => {
     if (success) {
       setIsMoveModalOpen(false);
       setSelectedBookingToMove(null);
+      // Recharger les données
+      if (refreshBookings) {
+        await refreshBookings();
+      }
     }
     return success;
   };
@@ -169,6 +185,20 @@ const VetPlanning = () => {
   const handleDeleteBooking = async (bookingId: string) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer définitivement ce rendez-vous ?')) {
       await deleteBooking(bookingId);
+      // Recharger les données
+      if (refreshBookings) {
+        await refreshBookings();
+      }
+    }
+  };
+
+  // Gestionnaire personnalisé pour la fermeture de la modale de création avec rechargement
+  const handleCloseCreateModal = async () => {
+    setIsCreateModalOpen(false);
+    // Forcer le rechargement des données pour afficher le nouveau RDV
+    console.log('🔄 Refreshing bookings after appointment creation...');
+    if (refreshBookings) {
+      await refreshBookings();
     }
   };
 
@@ -329,7 +359,7 @@ const VetPlanning = () => {
       {selectedAppointment && (
         <CreateAppointmentModal
           isOpen={isCreateModalOpen}
-          onClose={() => setIsCreateModalOpen(false)}
+          onClose={handleCloseCreateModal}
           defaultData={selectedAppointment}
           veterinarians={veterinarians}
           consultationTypes={consultationTypes}
