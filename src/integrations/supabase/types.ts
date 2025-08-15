@@ -215,6 +215,7 @@ export type Database = {
           appointment_date: string | null
           appointment_end_time: string | null
           appointment_time: string | null
+          arrival_time: string | null
           client_comment: string | null
           client_email: string
           client_name: string
@@ -271,6 +272,7 @@ export type Database = {
           appointment_date?: string | null
           appointment_end_time?: string | null
           appointment_time?: string | null
+          arrival_time?: string | null
           client_comment?: string | null
           client_email: string
           client_name: string
@@ -327,6 +329,7 @@ export type Database = {
           appointment_date?: string | null
           appointment_end_time?: string | null
           appointment_time?: string | null
+          arrival_time?: string | null
           client_comment?: string | null
           client_email?: string
           client_name?: string

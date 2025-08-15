@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -125,7 +124,6 @@ export const useAppointmentForm = (onClose: () => void) => {
 
       const appointmentEndTime = calculateEndTime(formData.appointment_time, formData.duration_minutes);
       
-      // Préparer les données avec les champs obligatoires et la structure correcte
       const bookingData = {
         clinic_id: clinicId,
         // Informations animal (obligatoires)
@@ -187,19 +185,24 @@ export const useAppointmentForm = (onClose: () => void) => {
         is_blocked: false
       };
 
-      console.log('📤 Submitting booking data:', bookingData);
+      console.log('📤 Submitting booking data (no select on insert):', bookingData);
 
-      const { data, error } = await supabase
+      // IMPORTANT: on retire .select() pour éviter un échec RLS en lecture après insert
+      const { error } = await supabase
         .from('bookings')
-        .insert([bookingData])
-        .select();
+        .insert([bookingData]);
 
       if (error) {
-        console.error('❌ Database error:', error);
+        // Logs plus détaillés pour débogage RLS/schéma
+        const anyErr = error as unknown as { code?: string; details?: string; hint?: string; message: string };
+        console.error('❌ Database error on insert:', anyErr);
+        console.error('Error code:', anyErr.code);
+        console.error('Error details:', anyErr.details);
+        console.error('Error hint:', anyErr.hint);
         throw new Error(`Erreur base de données: ${error.message}`);
       }
 
-      console.log('✅ Booking created successfully:', data);
+      console.log('✅ Booking inserted successfully (no select).');
 
       toast({
         title: "Rendez-vous créé",
