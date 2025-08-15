@@ -65,19 +65,24 @@ export const useAppointmentForm = (onClose: () => void) => {
   });
 
   const updateField = (field: keyof FormData, value: any) => {
+    console.log(`🔄 Updating field ${field} with value:`, value);
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleConsultationTypeChange = (consultationTypeId: string, consultationTypes: any[]) => {
+    console.log('🔄 Consultation type changed:', consultationTypeId);
     const selectedType = consultationTypes.find(type => type.id === consultationTypeId);
     if (selectedType) {
       const duration = selectedType.duration_minutes;
+      console.log('📊 Selected consultation type:', selectedType.name, 'Duration:', duration);
+      
       updateField('consultationTypeId', consultationTypeId);
       updateField('duration', duration);
       
-      // Recalculer l'heure de fin
+      // Recalculer l'heure de fin si on a une heure de début
       if (formData.appointmentTime) {
         const endTime = calculateEndTime(formData.appointmentTime, duration);
+        console.log('⏰ Calculated end time:', endTime);
         updateField('appointmentEndTime', endTime);
       }
     }
@@ -99,13 +104,37 @@ export const useAppointmentForm = (onClose: () => void) => {
     console.log('🔄 Initializing form with data:', defaultData);
     
     if (defaultData.date && defaultData.time) {
+      console.log('📅 Setting appointment date:', defaultData.date);
+      console.log('⏰ Setting appointment time:', defaultData.time);
+      
       updateField('appointmentDate', defaultData.date);
       updateField('appointmentTime', defaultData.time);
       
       // Si on a un vétérinaire pré-sélectionné
       if (defaultData.veterinarian && defaultData.veterinarian !== 'asv') {
+        console.log('👨‍⚕️ Setting veterinarian:', defaultData.veterinarian);
         updateField('veterinarianId', defaultData.veterinarian);
       }
+      
+      // Si on a une durée par défaut, calculer l'heure de fin
+      if (defaultData.time && formData.duration) {
+        const endTime = calculateEndTime(defaultData.time, formData.duration);
+        console.log('⏰ Initial end time calculation:', endTime);
+        updateField('appointmentEndTime', endTime);
+      }
+    }
+  };
+
+  // Nouvelle fonction pour recalculer l'heure de fin quand l'heure de début change
+  const handleTimeChange = (time: string) => {
+    console.log('⏰ Time changed to:', time);
+    updateField('appointmentTime', time);
+    
+    // Recalculer l'heure de fin avec la durée actuelle
+    if (time && formData.duration) {
+      const endTime = calculateEndTime(time, formData.duration);
+      console.log('⏰ Recalculated end time:', endTime);
+      updateField('appointmentEndTime', endTime);
     }
   };
 
@@ -128,7 +157,7 @@ export const useAppointmentForm = (onClose: () => void) => {
       console.log('📋 Form data:', formData);
       
       const appointmentData = {
-        clinic_id: currentClinicId, // Utiliser l'ID de la clinique courante
+        clinic_id: currentClinicId,
         animal_name: formData.animalName,
         animal_species: formData.animalSpecies,
         animal_breed: formData.animalBreed,
@@ -223,6 +252,7 @@ export const useAppointmentForm = (onClose: () => void) => {
     handleConsultationTypeChange,
     handleSubmit,
     calculateEndTime,
-    initializeFormData
+    initializeFormData,
+    handleTimeChange
   };
 };

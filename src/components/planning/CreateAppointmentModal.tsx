@@ -31,12 +31,14 @@ export const CreateAppointmentModal = ({
     handleConsultationTypeChange,
     handleSubmit,
     calculateEndTime,
-    initializeFormData
+    initializeFormData,
+    handleTimeChange
   } = useAppointmentForm(onClose);
 
   // Initialize form data when modal opens with default data
   useEffect(() => {
     if (isOpen && defaultData) {
+      console.log('🚀 Modal opened with default data:', defaultData);
       initializeFormData(defaultData);
     }
   }, [isOpen, defaultData]);
@@ -66,6 +68,7 @@ export const CreateAppointmentModal = ({
                   consultationTypes={consultationTypes}
                   onFieldUpdate={updateField}
                   onConsultationTypeChange={onConsultationTypeChange}
+                  onTimeChange={handleTimeChange}
                   calculateEndTime={calculateEndTime}
                 />
               </div>

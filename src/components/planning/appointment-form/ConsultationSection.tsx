@@ -19,22 +19,22 @@ export const ConsultationSection = ({ formData, onFieldUpdate }: ConsultationSec
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="consultation_reason" className="text-xs font-medium text-gray-700">Raison de la consultation *</Label>
+          <Label htmlFor="consultationReason" className="text-xs font-medium text-gray-700">Raison de la consultation *</Label>
           <Input
-            id="consultation_reason"
-            value={formData.consultation_reason}
-            onChange={(e) => onFieldUpdate('consultation_reason', e.target.value)}
+            id="consultationReason"
+            value={formData.consultationReason}
+            onChange={(e) => onFieldUpdate('consultationReason', e.target.value)}
             placeholder="ex: Consultation de routine, Problème de peau..."
             required
             className="h-9 text-sm"
           />
         </div>
         <div>
-          <Label htmlFor="client_comment" className="text-xs font-medium text-gray-700">Commentaire / Notes</Label>
+          <Label htmlFor="clientComment" className="text-xs font-medium text-gray-700">Commentaire / Notes</Label>
           <Textarea
-            id="client_comment"
-            value={formData.client_comment}
-            onChange={(e) => onFieldUpdate('client_comment', e.target.value)}
+            id="clientComment"
+            value={formData.clientComment || ''}
+            onChange={(e) => onFieldUpdate('clientComment', e.target.value)}
             placeholder="Informations supplémentaires..."
             rows={2}
             className="text-sm resize-none"

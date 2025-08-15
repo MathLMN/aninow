@@ -11,6 +11,7 @@ interface AppointmentSectionProps {
   consultationTypes: any[];
   onFieldUpdate: (field: string, value: string | number) => void;
   onConsultationTypeChange: (consultationTypeId: string) => void;
+  onTimeChange: (time: string) => void;
   calculateEndTime: (startTime: string, duration: number) => string;
 }
 
@@ -20,6 +21,7 @@ export const AppointmentSection = ({
   consultationTypes,
   onFieldUpdate,
   onConsultationTypeChange,
+  onTimeChange,
   calculateEndTime
 }: AppointmentSectionProps) => {
   const handleMarkArrival = () => {
@@ -38,23 +40,23 @@ export const AppointmentSection = ({
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <Label htmlFor="appointment_date" className="text-xs font-medium text-gray-700">Date *</Label>
+            <Label htmlFor="appointmentDate" className="text-xs font-medium text-gray-700">Date *</Label>
             <Input
-              id="appointment_date"
+              id="appointmentDate"
               type="date"
-              value={formData.appointment_date}
-              onChange={(e) => onFieldUpdate('appointment_date', e.target.value)}
+              value={formData.appointmentDate}
+              onChange={(e) => onFieldUpdate('appointmentDate', e.target.value)}
               required
               className="h-8 text-sm"
             />
           </div>
           <div>
-            <Label htmlFor="appointment_time" className="text-xs font-medium text-gray-700">Heure *</Label>
+            <Label htmlFor="appointmentTime" className="text-xs font-medium text-gray-700">Heure *</Label>
             <Input
-              id="appointment_time"
+              id="appointmentTime"
               type="time"
-              value={formData.appointment_time}
-              onChange={(e) => onFieldUpdate('appointment_time', e.target.value)}
+              value={formData.appointmentTime}
+              onChange={(e) => onTimeChange(e.target.value)}
               required
               className="h-8 text-sm"
             />
@@ -62,8 +64,8 @@ export const AppointmentSection = ({
         </div>
 
         <div>
-          <Label htmlFor="veterinarian_id" className="text-xs font-medium text-gray-700">Vétérinaire</Label>
-          <Select value={formData.veterinarian_id} onValueChange={(value) => onFieldUpdate('veterinarian_id', value)}>
+          <Label htmlFor="veterinarianId" className="text-xs font-medium text-gray-700">Vétérinaire</Label>
+          <Select value={formData.veterinarianId} onValueChange={(value) => onFieldUpdate('veterinarianId', value)}>
             <SelectTrigger className="h-8 text-sm">
               <SelectValue placeholder="Sélectionnez..." />
             </SelectTrigger>
@@ -78,8 +80,8 @@ export const AppointmentSection = ({
         </div>
 
         <div>
-          <Label htmlFor="consultation_type_id" className="text-xs font-medium text-gray-700">Type de consultation</Label>
-          <Select value={formData.consultation_type_id} onValueChange={onConsultationTypeChange}>
+          <Label htmlFor="consultationTypeId" className="text-xs font-medium text-gray-700">Type de consultation</Label>
+          <Select value={formData.consultationTypeId} onValueChange={onConsultationTypeChange}>
             <SelectTrigger className="h-8 text-sm">
               <SelectValue placeholder="Sélectionnez..." />
             </SelectTrigger>
@@ -95,14 +97,14 @@ export const AppointmentSection = ({
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <Label htmlFor="duration_minutes" className="text-xs font-medium text-gray-700">Durée (min)</Label>
+            <Label htmlFor="duration" className="text-xs font-medium text-gray-700">Durée (min)</Label>
             <Input
-              id="duration_minutes"
+              id="duration"
               type="number"
               min="5"
               step="5"
-              value={formData.duration_minutes}
-              onChange={(e) => onFieldUpdate('duration_minutes', parseInt(e.target.value) || 15)}
+              value={formData.duration}
+              onChange={(e) => onFieldUpdate('duration', parseInt(e.target.value) || 15)}
               className="h-8 text-sm"
             />
           </div>
@@ -110,7 +112,7 @@ export const AppointmentSection = ({
             <Label className="text-xs font-medium text-gray-700">Heure de fin</Label>
             <div className="flex items-center text-xs text-blue-700 bg-blue-50 p-2 rounded border h-8">
               <Clock className="h-3 w-3 mr-1" />
-              {calculateEndTime(formData.appointment_time, formData.duration_minutes) || '--:--'}
+              {formData.appointmentEndTime || '--:--'}
             </div>
           </div>
         </div>
@@ -142,7 +144,7 @@ export const AppointmentSection = ({
 
         <div>
           <Label htmlFor="booking_source" className="text-xs font-medium text-gray-700">Source</Label>
-          <Select value={formData.booking_source} onValueChange={(value) => onFieldUpdate('booking_source', value)}>
+          <Select value={formData.booking_source || 'phone'} onValueChange={(value) => onFieldUpdate('booking_source', value)}>
             <SelectTrigger className="h-8 text-sm">
               <SelectValue />
             </SelectTrigger>
