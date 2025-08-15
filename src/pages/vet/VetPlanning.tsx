@@ -7,7 +7,6 @@ import { CreateAppointmentModal } from "@/components/planning/CreateAppointmentM
 import { useVetBookings } from "@/hooks/useVetBookings";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { usePlanningActions } from "@/hooks/usePlanningActions";
-import { useConsultationTypes } from "@/hooks/useConsultationTypes";
 
 export default function VetPlanning() {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -18,7 +17,6 @@ export default function VetPlanning() {
 
   const { bookings, refreshBookings } = useVetBookings();
   const { veterinarians } = useClinicVeterinarians();
-  const { consultationTypes } = useConsultationTypes();
 
   const {
     validateBooking,
@@ -153,7 +151,7 @@ export default function VetPlanning() {
           defaultData={createModalDefaultData}
           appointmentToEdit={appointmentToEdit}
           veterinarians={veterinarians}
-          consultationTypes={consultationTypes}
+          consultationTypes={[]}
         />
       </div>
     </div>
