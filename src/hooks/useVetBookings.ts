@@ -1,3 +1,4 @@
+
 import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -66,6 +67,29 @@ export const useVetBookings = () => {
     return [...rawBookings, ...uniqueRecurringBlocks];
   }, [rawBookings, generateRecurringBlocksForDate]);
 
+  // Calculer les statistiques
+  const stats = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Filtrer seulement les vrais rendez-vous (pas les blocages récurrents)
+    const realBookings = rawBookings.filter(booking => !booking.is_recurring_block);
+    
+    const todayBookings = realBookings.filter(booking => 
+      booking.appointment_date === today || booking.created_at.split('T')[0] === today
+    ).length;
+    
+    const total = realBookings.length;
+    const pending = realBookings.filter(booking => booking.status === 'pending').length;
+    const highUrgency = realBookings.filter(booking => booking.urgency_score && booking.urgency_score >= 7).length;
+    
+    return {
+      todayBookings,
+      total,
+      pending,
+      highUrgency
+    };
+  }, [rawBookings]);
+
   // Mettre à jour le statut d'un rendez-vous
   const updateBookingStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
@@ -100,6 +124,7 @@ export const useVetBookings = () => {
     bookings,
     isLoading,
     error,
+    stats,
     updateBookingStatus: updateBookingStatus.mutate,
     isUpdating: updateBookingStatus.isPending
   };
