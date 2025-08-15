@@ -1,9 +1,9 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useClinicAccess } from './useClinicAccess';
+import { formatDateLocal } from '@/utils/date';
 
 export interface RecurringSlotBlock {
   id: string;
@@ -168,7 +168,7 @@ export const useRecurringSlotBlocks = () => {
 
   // Fonction pour vérifier si une date est dans la plage de validité du blocage
   const isDateInBlockRange = (date: Date, block: RecurringSlotBlock) => {
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = formatDateLocal(date);
     
     // Si pas de date de début, le blocage est valide depuis toujours
     if (block.start_date && dateStr < block.start_date) {
@@ -190,7 +190,7 @@ export const useRecurringSlotBlocks = () => {
     }
 
     const dayOfWeek = date.getDay();
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = formatDateLocal(date);
     
     console.log(`🔍 Checking recurring blocks for ${dateStr} (day ${dayOfWeek})`);
     

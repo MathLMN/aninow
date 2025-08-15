@@ -3,6 +3,7 @@ import { Plus, Ban, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { TimeSlotContextMenu } from "./TimeSlotContextMenu";
+import { formatDateLocal } from "@/utils/date";
 
 interface TimeSlotCellProps {
   time: string;
@@ -68,7 +69,7 @@ export const TimeSlotCell = ({
   const handleCellClick = () => {
     if (bookings.length === 0 && isOpen && !isVeterinarianAbsent && !isBlocked) {
       onCreateAppointment({
-        date: selectedDate.toISOString().split('T')[0],
+        date: formatDateLocal(selectedDate),
         time: time,
         veterinarian: columnId !== 'asv' ? columnId : undefined
       });
@@ -78,7 +79,7 @@ export const TimeSlotCell = ({
   const handleCreateTask = () => {
     // Créer une tâche même sur les créneaux fermés
     onCreateAppointment({
-      date: selectedDate.toISOString().split('T')[0],
+      date: formatDateLocal(selectedDate),
       time: time,
       veterinarian: columnId !== 'asv' ? columnId : undefined
     });
@@ -91,7 +92,7 @@ export const TimeSlotCell = ({
     // Appeler directement la fonction onBlockSlot pour ouvrir la modale
     if (onBlockSlot) {
       onBlockSlot({
-        date: selectedDate.toISOString().split('T')[0],
+        date: formatDateLocal(selectedDate),
         time: time,
         veterinarian: columnId
       });

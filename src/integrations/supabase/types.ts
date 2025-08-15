@@ -689,9 +689,11 @@ export type Database = {
           created_at: string
           day_of_week: number
           description: string | null
+          end_date: string | null
           end_time: string
           id: string
           is_active: boolean
+          start_date: string | null
           start_time: string
           title: string
           updated_at: string
@@ -702,9 +704,11 @@ export type Database = {
           created_at?: string
           day_of_week: number
           description?: string | null
+          end_date?: string | null
           end_time: string
           id?: string
           is_active?: boolean
+          start_date?: string | null
           start_time: string
           title: string
           updated_at?: string
@@ -715,9 +719,11 @@ export type Database = {
           created_at?: string
           day_of_week?: number
           description?: string | null
+          end_date?: string | null
           end_time?: string
           id?: string
           is_active?: boolean
+          start_date?: string | null
           start_time?: string
           title?: string
           updated_at?: string

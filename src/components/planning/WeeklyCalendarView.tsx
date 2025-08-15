@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, User, Plus } from "lucide-react";
+import { formatDateLocal } from "@/utils/date";
 
 interface WeeklyCalendarViewProps {
   weekDates: Date[];
@@ -33,7 +34,7 @@ export const WeeklyCalendarView = ({
   }
 
   const getBookingsForDateAndVet = (date: Date, veterinarianId?: string) => {
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = formatDateLocal(date);
     return bookings.filter(booking => {
       const matchesDate = booking.appointment_date === dateStr;
       const matchesVet = !veterinarianId || booking.veterinarian_id === veterinarianId;

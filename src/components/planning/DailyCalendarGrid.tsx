@@ -8,6 +8,7 @@ import { useVeterinarianAbsences } from "@/hooks/useVeterinarianAbsences";
 import { useClinicSettings } from "@/hooks/useClinicSettings";
 import { useClinicAccess } from "@/hooks/useClinicAccess";
 import { useState, useEffect, useMemo } from "react";
+import { formatDateLocal } from "@/utils/date";
 
 interface DailyCalendarGridProps {
   selectedDate: Date;
@@ -50,7 +51,7 @@ export const DailyCalendarGrid = ({
   const slotBookings = useMemo(() => {
     const newSlotBookings: Record<string, any[]> = {};
     
-    console.log('🔄 Calculating slot bookings for date:', selectedDate.toISOString().split('T')[0]);
+    console.log('🔄 Calculating slot bookings for date:', formatDateLocal(selectedDate));
     console.log('📊 Total bookings available:', bookings.length);
     
     for (const time of timeSlots) {
@@ -58,7 +59,7 @@ export const DailyCalendarGrid = ({
         const key = `${time}-${column.id}`;
         
         // Filtrer directement les bookings pour ce créneau et cette colonne
-        const dateStr = selectedDate.toISOString().split('T')[0];
+        const dateStr = formatDateLocal(selectedDate);
         let bookingsForSlot = [];
         
         if (column.id === 'asv') {

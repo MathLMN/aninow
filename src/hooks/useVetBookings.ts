@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useClinicAccess } from './useClinicAccess';
 import { useRecurringSlotBlocks } from './useRecurringSlotBlocks';
+import { formatDateLocal } from '@/utils/date';
 
 export const useVetBookings = () => {
   const { toast } = useToast();
@@ -84,7 +85,7 @@ export const useVetBookings = () => {
 
   // Calculer les statistiques basées uniquement sur les vrais rendez-vous (rawBookings)
   const stats = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = formatDateLocal(new Date());
     
     // rawBookings contient seulement les vrais rendez-vous de la base de données
     const todayBookings = rawBookings.filter(booking => 
