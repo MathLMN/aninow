@@ -12,6 +12,7 @@ interface FormData {
   veterinarianId: string;
   consultationTypeId: string;
   duration: number;
+  arrival_time: string | null;
   
   // Client
   clientName: string;
@@ -35,7 +36,7 @@ interface FormData {
   clientComment: string | null;
 }
 
-export const useAppointmentForm = (onClose: () => void) => {
+export const useAppointmentForm = (onClose: () => void, appointmentId?: string) => {
   const { toast } = useToast();
   const { currentClinicId } = useClinicAccess();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,6 +48,7 @@ export const useAppointmentForm = (onClose: () => void) => {
     veterinarianId: '',
     consultationTypeId: '',
     duration: 30,
+    arrival_time: null,
     clientName: '',
     clientEmail: '',
     clientPhone: '',
@@ -103,29 +105,72 @@ export const useAppointmentForm = (onClose: () => void) => {
   const initializeFormData = (defaultData: any) => {
     console.log('🔄 Initializing form with data:', defaultData);
     
-    if (defaultData.date && defaultData.time) {
-      console.log('📅 Setting appointment date:', defaultData.date);
-      console.log('⏰ Setting appointment time:', defaultData.time);
-      
-      updateField('appointmentDate', defaultData.date);
-      updateField('appointmentTime', defaultData.time);
-      
-      // Si on a un vétérinaire pré-sélectionné
-      if (defaultData.veterinarian && defaultData.veterinarian !== 'asv') {
-        console.log('👨‍⚕️ Setting veterinarian:', defaultData.veterinarian);
-        updateField('veterinarianId', defaultData.veterinarian);
-      }
-      
-      // Si on a une durée par défaut, calculer l'heure de fin
-      if (defaultData.time && formData.duration) {
-        const endTime = calculateEndTime(defaultData.time, formData.duration);
-        console.log('⏰ Initial end time calculation:', endTime);
-        updateField('appointmentEndTime', endTime);
-      }
+    // Mise à jour des champs un par un pour déclencher les recalculs
+    if (defaultData.appointmentDate || defaultData.date) {
+      const date = defaultData.appointmentDate || defaultData.date;
+      console.log('📅 Setting appointment date:', date);
+      updateField('appointmentDate', date);
+    }
+    
+    if (defaultData.appointmentTime || defaultData.time) {
+      const time = defaultData.appointmentTime || defaultData.time;
+      console.log('⏰ Setting appointment time:', time);
+      updateField('appointmentTime', time);
+    }
+    
+    if (defaultData.appointmentEndTime) {
+      updateField('appointmentEndTime', defaultData.appointmentEndTime);
+    }
+    
+    if (defaultData.veterinarianId || (defaultData.veterinarian && defaultData.veterinarian !== 'asv')) {
+      const vetId = defaultData.veterinarianId || defaultData.veterinarian;
+      console.log('👨‍⚕️ Setting veterinarian:', vetId);
+      updateField('veterinarianId', vetId);
+    }
+    
+    if (defaultData.consultationTypeId) {
+      updateField('consultationTypeId', defaultData.consultationTypeId);
+    }
+    
+    if (defaultData.duration) {
+      updateField('duration', defaultData.duration);
+    }
+    
+    if (defaultData.arrival_time) {
+      updateField('arrival_time', defaultData.arrival_time);
+    }
+    
+    // Données client
+    if (defaultData.clientName) updateField('clientName', defaultData.clientName);
+    if (defaultData.clientEmail) updateField('clientEmail', defaultData.clientEmail);
+    if (defaultData.clientPhone) updateField('clientPhone', defaultData.clientPhone);
+    if (defaultData.preferredContactMethod) updateField('preferredContactMethod', defaultData.preferredContactMethod);
+    if (defaultData.clientStatus) updateField('clientStatus', defaultData.clientStatus);
+    
+    // Données animal
+    if (defaultData.animalName) updateField('animalName', defaultData.animalName);
+    if (defaultData.animalSpecies) updateField('animalSpecies', defaultData.animalSpecies);
+    if (defaultData.animalBreed) updateField('animalBreed', defaultData.animalBreed);
+    if (defaultData.animalAge) updateField('animalAge', defaultData.animalAge);
+    if (defaultData.animalWeight) updateField('animalWeight', defaultData.animalWeight);
+    if (defaultData.animalSex) updateField('animalSex', defaultData.animalSex);
+    if (defaultData.animalSterilized !== undefined) updateField('animalSterilized', defaultData.animalSterilized);
+    if (defaultData.animalVaccinesUpToDate !== undefined) updateField('animalVaccinesUpToDate', defaultData.animalVaccinesUpToDate);
+    
+    // Consultation
+    if (defaultData.consultationReason) updateField('consultationReason', defaultData.consultationReason);
+    if (defaultData.clientComment) updateField('clientComment', defaultData.clientComment);
+    
+    // Recalculer l'heure de fin si on a time et duration
+    const time = defaultData.appointmentTime || defaultData.time;
+    const duration = defaultData.duration || formData.duration;
+    if (time && duration && !defaultData.appointmentEndTime) {
+      const endTime = calculateEndTime(time, duration);
+      console.log('⏰ Initial end time calculation:', endTime);
+      updateField('appointmentEndTime', endTime);
     }
   };
 
-  // Nouvelle fonction pour recalculer l'heure de fin quand l'heure de début change
   const handleTimeChange = (time: string) => {
     console.log('⏰ Time changed to:', time);
     updateField('appointmentTime', time);
@@ -153,9 +198,6 @@ export const useAppointmentForm = (onClose: () => void) => {
     setIsSubmitting(true);
     
     try {
-      console.log('📝 Creating appointment with clinic ID:', currentClinicId);
-      console.log('📋 Form data:', formData);
-      
       const appointmentData = {
         clinic_id: currentClinicId,
         animal_name: formData.animalName,
@@ -177,7 +219,7 @@ export const useAppointmentForm = (onClose: () => void) => {
         veterinarian_id: formData.veterinarianId || null,
         consultation_type_id: formData.consultationTypeId,
         duration_minutes: formData.duration,
-        arrival_time: null,
+        arrival_time: formData.arrival_time,
         status: 'confirmed',
         selected_symptoms: [],
         convenience_options: [],
@@ -214,21 +256,36 @@ export const useAppointmentForm = (onClose: () => void) => {
 
       console.log('📤 Sending appointment data:', appointmentData);
 
-      const { data, error } = await supabase
-        .from('bookings')
-        .insert([appointmentData])
-        .select();
+      let result;
+      if (appointmentId) {
+        // Mode édition
+        console.log('✏️ Updating appointment:', appointmentId);
+        result = await supabase
+          .from('bookings')
+          .update(appointmentData)
+          .eq('id', appointmentId)
+          .select();
+      } else {
+        // Mode création
+        console.log('➕ Creating new appointment');
+        result = await supabase
+          .from('bookings')
+          .insert([appointmentData])
+          .select();
+      }
+
+      const { data, error } = result;
 
       if (error) {
-        console.error('❌ Error creating appointment:', error);
+        console.error('❌ Error saving appointment:', error);
         throw error;
       }
 
-      console.log('✅ Appointment created successfully:', data);
+      console.log('✅ Appointment saved successfully:', data);
 
       toast({
-        title: "Rendez-vous créé",
-        description: `Le rendez-vous pour ${formData.animalName} a été créé avec succès`,
+        title: appointmentId ? "Rendez-vous modifié" : "Rendez-vous créé",
+        description: `Le rendez-vous pour ${formData.animalName} a été ${appointmentId ? 'modifié' : 'créé'} avec succès`,
       });
 
       onClose();
@@ -237,7 +294,7 @@ export const useAppointmentForm = (onClose: () => void) => {
       console.error('❌ Error in handleSubmit:', error);
       toast({
         title: "Erreur",
-        description: error.message || "Impossible de créer le rendez-vous",
+        description: error.message || `Impossible de ${appointmentId ? 'modifier' : 'créer'} le rendez-vous`,
         variant: "destructive"
       });
     } finally {

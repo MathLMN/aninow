@@ -13,6 +13,7 @@ interface CreateAppointmentModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultData?: any;
+  appointmentToEdit?: any; // Nouveau: rendez-vous à éditer
   veterinarians: any[];
   consultationTypes: any[];
 }
@@ -21,6 +22,7 @@ export const CreateAppointmentModal = ({
   isOpen,
   onClose,
   defaultData,
+  appointmentToEdit,
   veterinarians,
   consultationTypes
 }: CreateAppointmentModalProps) => {
@@ -33,27 +35,71 @@ export const CreateAppointmentModal = ({
     calculateEndTime,
     initializeFormData,
     handleTimeChange
-  } = useAppointmentForm(onClose);
+  } = useAppointmentForm(onClose, appointmentToEdit?.id);
 
-  // Initialize form data when modal opens with default data
+  // Initialize form data when modal opens
   useEffect(() => {
-    if (isOpen && defaultData) {
-      console.log('🚀 Modal opened with default data:', defaultData);
-      initializeFormData(defaultData);
+    if (isOpen) {
+      if (appointmentToEdit) {
+        console.log('🔄 Modal opened for editing appointment:', appointmentToEdit);
+        // Mode édition: pré-remplir avec les données du rendez-vous
+        initializeFormData({
+          // Données du rendez-vous
+          appointmentDate: appointmentToEdit.appointment_date,
+          appointmentTime: appointmentToEdit.appointment_time,
+          appointmentEndTime: appointmentToEdit.appointment_end_time,
+          veterinarianId: appointmentToEdit.veterinarian_id,
+          consultationTypeId: appointmentToEdit.consultation_type_id,
+          duration: appointmentToEdit.duration_minutes,
+          arrival_time: appointmentToEdit.arrival_time,
+          
+          // Données client
+          clientName: appointmentToEdit.client_name,
+          clientEmail: appointmentToEdit.client_email,
+          clientPhone: appointmentToEdit.client_phone,
+          preferredContactMethod: appointmentToEdit.preferred_contact_method,
+          clientStatus: appointmentToEdit.client_status,
+          
+          // Données animal
+          animalName: appointmentToEdit.animal_name,
+          animalSpecies: appointmentToEdit.animal_species,
+          animalBreed: appointmentToEdit.animal_breed,
+          animalAge: appointmentToEdit.animal_age,
+          animalWeight: appointmentToEdit.animal_weight,
+          animalSex: appointmentToEdit.animal_sex,
+          animalSterilized: appointmentToEdit.animal_sterilized,
+          animalVaccinesUpToDate: appointmentToEdit.animal_vaccines_up_to_date,
+          
+          // Consultation
+          consultationReason: appointmentToEdit.consultation_reason,
+          clientComment: appointmentToEdit.client_comment,
+        });
+      } else if (defaultData) {
+        console.log('🔄 Modal opened for creating with default data:', defaultData);
+        // Mode création: pré-remplir avec les données du créneau sélectionné
+        initializeFormData(defaultData);
+      }
     }
-  }, [isOpen, defaultData]);
+  }, [isOpen, defaultData, appointmentToEdit]);
 
   const onConsultationTypeChange = (consultationTypeId: string) => {
     handleConsultationTypeChange(consultationTypeId, consultationTypes);
   };
 
+  const isEditMode = !!appointmentToEdit;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl max-h-[95vh] p-0">
         <DialogHeader className="px-6 py-4 border-b bg-gradient-to-r from-vet-navy/5 to-vet-sage/5">
-          <DialogTitle className="text-xl font-bold text-vet-navy">Créer un nouveau rendez-vous</DialogTitle>
+          <DialogTitle className="text-xl font-bold text-vet-navy">
+            {isEditMode ? 'Modifier le rendez-vous' : 'Créer un nouveau rendez-vous'}
+          </DialogTitle>
           <DialogDescription className="text-sm text-vet-brown">
-            Saisir les informations pour un rendez-vous pris par téléphone ou sur place
+            {isEditMode 
+              ? 'Modifier les informations du rendez-vous et marquer l\'arrivée du client'
+              : 'Saisir les informations pour un rendez-vous pris par téléphone ou sur place'
+            }
           </DialogDescription>
         </DialogHeader>
 
@@ -111,7 +157,10 @@ export const CreateAppointmentModal = ({
             className="bg-vet-sage hover:bg-vet-sage/90 text-white px-6"
             onClick={handleSubmit}
           >
-            {isSubmitting ? 'Création...' : 'Créer le rendez-vous'}
+            {isSubmitting 
+              ? (isEditMode ? 'Modification...' : 'Création...') 
+              : (isEditMode ? 'Modifier le rendez-vous' : 'Créer le rendez-vous')
+            }
           </Button>
         </div>
       </DialogContent>
