@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { TimeSlotCell } from "./TimeSlotCell";
@@ -79,8 +80,16 @@ export const DailyCalendarGrid = ({
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <div className="min-w-full">
-            {/* En-tête des colonnes */}
-            <div className={`grid border-b border-vet-blue/20 bg-vet-beige/30`} style={{gridTemplateColumns: `repeat(${columns.length}, 1fr)`}}>
+            {/* En-tête des colonnes avec alignement correct */}
+            <div className={`grid border-b border-vet-blue/20 bg-vet-beige/30`} style={{gridTemplateColumns: `100px repeat(${columns.length}, 1fr)`}}>
+              {/* Colonne vide pour aligner avec la colonne horaire */}
+              <div className="p-2 border-r border-vet-blue/20">
+                <div className="text-xs text-vet-brown text-center font-medium">
+                  Horaires
+                </div>
+              </div>
+              
+              {/* Colonnes des vétérinaires */}
               {columns.map((column) => {
                 // Compter le total des RDV pour cette colonne pour toute la journée
                 const totalBookings = timeSlots.reduce((total, time) => {
