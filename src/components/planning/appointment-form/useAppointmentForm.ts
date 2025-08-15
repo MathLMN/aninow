@@ -74,68 +74,132 @@ export const useAppointmentForm = (onClose: () => void) => {
     setIsSubmitting(true);
 
     try {
-      console.log('Current clinic in form submission:', currentClinic);
+      console.log('🔄 Starting appointment creation...');
+      console.log('Current clinic:', currentClinic);
+      console.log('Form data:', formData);
       
+      // Validation des champs obligatoires
+      if (!formData.appointment_date) {
+        throw new Error('La date du rendez-vous est obligatoire');
+      }
+      
+      if (!formData.appointment_time) {
+        throw new Error('L\'heure du rendez-vous est obligatoire');
+      }
+      
+      if (!formData.client_name) {
+        throw new Error('Le nom du client est obligatoire');
+      }
+      
+      if (!formData.animal_name) {
+        throw new Error('Le nom de l\'animal est obligatoire');
+      }
+      
+      if (!formData.animal_species) {
+        throw new Error('L\'espèce de l\'animal est obligatoire');
+      }
+
       // Vérification plus robuste de la clinique
       let clinicId = currentClinic?.id;
       
       if (!clinicId) {
-        console.log('No clinic from context, trying to get default clinic...');
+        console.warn('⚠️ No clinic from context, trying to get default clinic...');
         // Essayer de récupérer une clinique par défaut
         const { data: clinics, error: clinicError } = await supabase
           .from('clinics')
           .select('id')
-          .limit(1)
-          .single();
+          .limit(1);
           
-        if (clinicError || !clinics) {
+        if (clinicError) {
+          console.error('Error fetching clinics:', clinicError);
+          throw new Error('Erreur lors de la récupération des cliniques');
+        }
+        
+        if (!clinics || clinics.length === 0) {
           throw new Error('Aucune clinique disponible dans le système');
         }
         
-        clinicId = clinics.id;
-        console.log('Using default clinic:', clinicId);
+        clinicId = clinics[0].id;
+        console.log('✅ Using default clinic:', clinicId);
       }
 
       const appointmentEndTime = calculateEndTime(formData.appointment_time, formData.duration_minutes);
       
+      // Préparer les données avec les champs obligatoires et la structure correcte
       const bookingData = {
         clinic_id: clinicId,
-        animal_name: formData.animal_name,
-        animal_species: formData.animal_species,
-        animal_breed: formData.animal_breed,
-        animal_age: formData.animal_age,
+        // Informations animal (obligatoires)
+        animal_name: formData.animal_name || 'Non spécifié',
+        animal_species: formData.animal_species || 'Non spécifié',
+        animal_breed: formData.animal_breed || null,
+        animal_age: formData.animal_age || null,
         animal_weight: formData.animal_weight ? parseFloat(formData.animal_weight) : null,
-        animal_sex: formData.animal_sex,
-        client_status: formData.client_status,
+        animal_sex: formData.animal_sex || null,
+        // Informations client (obligatoires)
         client_name: formData.client_name,
-        client_email: formData.client_email,
-        client_phone: formData.client_phone,
+        client_email: formData.client_email || 'non-renseigne@example.com',
+        client_phone: formData.client_phone || '0000000000',
         preferred_contact_method: formData.preferred_contact_method,
-        consultation_reason: formData.consultation_reason,
-        client_comment: formData.client_comment,
+        client_status: formData.client_status || null,
+        // Consultation (obligatoire)
+        consultation_reason: formData.consultation_reason || 'Consultation générale',
+        client_comment: formData.client_comment || null,
+        // Informations RDV
         appointment_date: formData.appointment_date,
         appointment_time: formData.appointment_time,
         appointment_end_time: appointmentEndTime,
-        veterinarian_id: formData.veterinarian_id,
-        consultation_type_id: formData.consultation_type_id,
+        veterinarian_id: formData.veterinarian_id || null,
+        consultation_type_id: formData.consultation_type_id || null,
         duration_minutes: formData.duration_minutes,
         arrival_time: formData.arrival_time || null,
         status: 'confirmed',
+        // Champs par défaut pour éviter les erreurs
         selected_symptoms: [],
         convenience_options: [],
-        multiple_animals: []
+        multiple_animals: [],
+        custom_species: null,
+        second_animal_species: null,
+        second_animal_name: null,
+        second_custom_species: null,
+        vaccination_type: null,
+        custom_text: null,
+        custom_symptom: null,
+        second_animal_different_reason: false,
+        second_animal_consultation_reason: null,
+        second_animal_convenience_options: [],
+        second_animal_custom_text: null,
+        second_animal_selected_symptoms: [],
+        second_animal_custom_symptom: null,
+        conditional_answers: null,
+        symptom_duration: null,
+        additional_points: [],
+        second_animal_age: null,
+        second_animal_breed: null,
+        second_animal_weight: null,
+        second_animal_sex: null,
+        second_animal_sterilized: null,
+        second_animal_vaccines_up_to_date: null,
+        animal_sterilized: null,
+        animal_vaccines_up_to_date: null,
+        ai_analysis: null,
+        urgency_score: null,
+        recommended_actions: [],
+        is_blocked: false
       };
 
-      console.log('Submitting booking data:', bookingData);
+      console.log('📤 Submitting booking data:', bookingData);
 
       const { data, error } = await supabase
         .from('bookings')
-        .insert([bookingData]);
+        .insert([bookingData])
+        .select();
 
       if (error) {
-        console.error('Database error:', error);
-        throw error;
+        console.error('❌ Database error:', error);
+        throw new Error(`Erreur base de données: ${error.message}`);
       }
+
+      console.log('✅ Booking created successfully:', data);
 
       toast({
         title: "Rendez-vous créé",
@@ -168,7 +232,7 @@ export const useAppointmentForm = (onClose: () => void) => {
       });
 
     } catch (err) {
-      console.error('Erreur lors de la création du RDV:', err);
+      console.error('❌ Erreur lors de la création du RDV:', err);
       toast({
         title: "Erreur",
         description: err instanceof Error ? err.message : "Impossible de créer le rendez-vous",
