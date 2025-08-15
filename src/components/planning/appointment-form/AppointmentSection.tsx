@@ -2,7 +2,8 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar, Clock, UserCheck } from "lucide-react";
 
 interface AppointmentSectionProps {
   formData: any;
@@ -21,6 +22,12 @@ export const AppointmentSection = ({
   onConsultationTypeChange,
   calculateEndTime
 }: AppointmentSectionProps) => {
+  const handleMarkArrival = () => {
+    const now = new Date();
+    const timeString = now.toTimeString().slice(0, 5); // Format HH:MM
+    onFieldUpdate('arrival_time', timeString);
+  };
+
   return (
     <div className="space-y-3">
       <div className="flex items-center mb-3">
@@ -105,6 +112,31 @@ export const AppointmentSection = ({
               <Clock className="h-3 w-3 mr-1" />
               {calculateEndTime(formData.appointment_time, formData.duration_minutes) || '--:--'}
             </div>
+          </div>
+        </div>
+
+        {/* Section Arrivée du client */}
+        <div className="bg-green-50/50 border border-green-200 rounded-lg p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <UserCheck className="h-4 w-4 mr-2 text-green-600" />
+              <Label className="text-xs font-medium text-gray-700">Arrivée du client</Label>
+            </div>
+            {!formData.arrival_time ? (
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleMarkArrival}
+                className="bg-green-600 hover:bg-green-700 text-white h-7 px-3 text-xs"
+              >
+                Client arrivé
+              </Button>
+            ) : (
+              <div className="flex items-center text-xs">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                <span className="text-green-700 font-medium">Arrivé à {formData.arrival_time}</span>
+              </div>
+            )}
           </div>
         </div>
 

@@ -16,6 +16,7 @@ export const useAppointmentForm = (onClose: () => void) => {
     veterinarian_id: '',
     consultation_type_id: '',
     duration_minutes: 15,
+    arrival_time: '', // Nouvelle propriété
     
     // Informations client
     client_status: '',
@@ -100,6 +101,7 @@ export const useAppointmentForm = (onClose: () => void) => {
         veterinarian_id: formData.veterinarian_id,
         consultation_type_id: formData.consultation_type_id,
         duration_minutes: formData.duration_minutes,
+        arrival_time: formData.arrival_time || null, // Inclure l'heure d'arrivée
         status: 'confirmed',
         selected_symptoms: [],
         convenience_options: [],
@@ -125,6 +127,7 @@ export const useAppointmentForm = (onClose: () => void) => {
         veterinarian_id: '',
         consultation_type_id: '',
         duration_minutes: 15,
+        arrival_time: '',
         client_status: '',
         client_name: '',
         client_phone: '',

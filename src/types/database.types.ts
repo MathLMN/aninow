@@ -56,6 +56,8 @@ export interface Database {
           urgency_score?: number
           recommended_actions?: string[]
           veterinarian_id?: string
+          client_status?: string
+          arrival_time?: string
         }
         Insert: {
           id?: string
@@ -111,6 +113,8 @@ export interface Database {
           urgency_score?: number
           recommended_actions?: string[]
           veterinarian_id?: string
+          client_status?: string
+          arrival_time?: string
         }
         Update: {
           id?: string
@@ -166,6 +170,8 @@ export interface Database {
           urgency_score?: number
           recommended_actions?: string[]
           veterinarian_id?: string
+          client_status?: string
+          arrival_time?: string
         }
       }
       clinics: {

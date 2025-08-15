@@ -194,6 +194,11 @@ export const TimeSlotCell = ({
               zIndex: 10
             }}
           >
+            {/* Indicateur d'arrivée - Point rouge en haut à droite */}
+            {booking.arrival_time && (
+              <div className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white z-20" title={`Client arrivé à ${booking.arrival_time}`}></div>
+            )}
+            
             <div className="font-medium truncate text-[10px]">
               {booking.client_name}
             </div>
