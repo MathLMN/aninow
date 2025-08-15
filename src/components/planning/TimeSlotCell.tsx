@@ -23,6 +23,9 @@ interface TimeSlotCellProps {
   onDeleteBooking?: (bookingId: string) => void;
   // Nouvelle prop pour indiquer si le vétérinaire est absent
   isVeterinarianAbsent?: boolean;
+  // Nouvelles props pour gérer l'affichage des blocages
+  isFirstBlockedSlot?: boolean;
+  blockedSlotsCount?: number;
 }
 
 export const TimeSlotCell = ({
@@ -40,7 +43,9 @@ export const TimeSlotCell = ({
   onMoveBooking,
   onDeleteBooking,
   onBlockSlot,
-  isVeterinarianAbsent = false
+  isVeterinarianAbsent = false,
+  isFirstBlockedSlot = false,
+  blockedSlotsCount = 1
 }: TimeSlotCellProps) => {
   const [showActions, setShowActions] = useState(false);
 
@@ -154,9 +159,15 @@ export const TimeSlotCell = ({
         onMouseEnter={() => (canInteract || canCreateTask) && setShowActions(true)}
         onMouseLeave={() => setShowActions(false)}
       >
-        {/* Affichage spécial pour les créneaux bloqués récurrents */}
-        {isBlocked && recurringBlock && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-400/60 text-gray-800 text-[10px] font-medium">
+        {/* Affichage spécial pour les créneaux bloqués récurrents - seulement sur le premier créneau */}
+        {isBlocked && recurringBlock && isFirstBlockedSlot && (
+          <div 
+            className="absolute inset-0 flex items-center justify-center bg-gray-400/60 text-gray-800 text-[10px] font-medium z-10"
+            style={{ 
+              height: `${blockedSlotsCount * 30}px`,
+              minHeight: '30px'
+            }}
+          >
             <div className="text-center px-1">
               <div className="truncate">BLOQUÉ</div>
               <div className="truncate text-[9px] opacity-80">

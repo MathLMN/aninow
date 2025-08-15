@@ -92,6 +92,75 @@ export const DailyCalendarGrid = ({
     return newSlotBookings;
   }, [timeSlots, columns, bookings, selectedDate]);
 
+  // Fonction pour déterminer les plages de blocage continues
+  const getBlockedSlotInfo = useMemo(() => {
+    const blockedSlotInfo: Record<string, { isFirst: boolean; count: number }> = {};
+    
+    for (const column of columns) {
+      let currentBlockStart = -1;
+      let currentBlockCount = 0;
+      let currentBlockId: string | null = null;
+      
+      for (let i = 0; i < timeSlots.length; i++) {
+        const time = timeSlots[i];
+        const key = `${time}-${column.id}`;
+        const bookingsForSlot = slotBookings[key] || [];
+        
+        const isBlocked = bookingsForSlot.some(booking => 
+          booking.consultation_reason === 'Créneau bloqué' || 
+          booking.is_blocked || 
+          booking.client_name === 'CRÉNEAU BLOQUÉ' ||
+          booking.recurring_block_id
+        );
+        
+        const recurringBlock = bookingsForSlot.find(booking => booking.recurring_block_id);
+        const blockId = recurringBlock?.recurring_block_id || 'manual';
+        
+        if (isBlocked && (currentBlockStart === -1 || blockId === currentBlockId)) {
+          // Début d'un nouveau bloc ou continuation du bloc actuel
+          if (currentBlockStart === -1) {
+            currentBlockStart = i;
+            currentBlockCount = 1;
+            currentBlockId = blockId;
+          } else {
+            currentBlockCount++;
+          }
+        } else {
+          // Fin du bloc actuel, enregistrer les infos
+          if (currentBlockStart !== -1) {
+            for (let j = currentBlockStart; j < currentBlockStart + currentBlockCount; j++) {
+              const blockTime = timeSlots[j];
+              const blockKey = `${blockTime}-${column.id}`;
+              blockedSlotInfo[blockKey] = {
+                isFirst: j === currentBlockStart,
+                count: currentBlockCount
+              };
+            }
+          }
+          
+          // Reset pour le prochain bloc
+          currentBlockStart = isBlocked ? i : -1;
+          currentBlockCount = isBlocked ? 1 : 0;
+          currentBlockId = isBlocked ? blockId : null;
+        }
+      }
+      
+      // Traiter le dernier bloc s'il se termine à la fin
+      if (currentBlockStart !== -1) {
+        for (let j = currentBlockStart; j < currentBlockStart + currentBlockCount; j++) {
+          const blockTime = timeSlots[j];
+          const blockKey = `${blockTime}-${column.id}`;
+          blockedSlotInfo[blockKey] = {
+            isFirst: j === currentBlockStart,
+            count: currentBlockCount
+          };
+        }
+      }
+    }
+    
+    return blockedSlotInfo;
+  }, [timeSlots, columns, slotBookings]);
+
   return (
     <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
       <CardContent className="p-0">
@@ -163,6 +232,7 @@ export const DailyCalendarGrid = ({
                     {columns.map((column) => {
                       const key = `${time}-${column.id}`;
                       const slotBookingsForCell = slotBookings[key] || [];
+                      const blockInfo = getBlockedSlotInfo[key];
                       
                       // Vérifier si le vétérinaire est absent (seulement pour les colonnes vétérinaire, pas ASV)
                       const isVetAbsent = column.id !== 'asv' && isVeterinarianAbsent(column.id, selectedDate, absences);
@@ -185,6 +255,8 @@ export const DailyCalendarGrid = ({
                           onDeleteBooking={onDeleteBooking}
                           onBlockSlot={onBlockSlot}
                           isVeterinarianAbsent={isVetAbsent}
+                          isFirstBlockedSlot={blockInfo?.isFirst || false}
+                          blockedSlotsCount={blockInfo?.count || 1}
                         />
                       );
                     })}
