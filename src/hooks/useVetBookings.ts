@@ -41,20 +41,25 @@ export const useVetBookings = () => {
   const bookings = useMemo(() => {
     if (!rawBookings || !recurringBlocks) return rawBookings || [];
     
-    console.log('🔄 Generating recurring blocks...');
+    console.log('🔄 Generating recurring blocks for extended date range...');
+    console.log('📋 Available recurring blocks:', recurringBlocks.length);
     
-    // Générer les dates pour les 60 prochains jours (étendu pour plus de stabilité)
+    // Générer les dates pour une plage plus étendue (6 mois dans le passé et 2 ans dans le futur)
     const today = new Date();
     const generatedBlocks = [];
     
-    for (let i = -30; i <= 60; i++) { // Inclure aussi 30 jours dans le passé
+    // Étendre la plage pour assurer la visibilité sur tous les calendriers
+    for (let i = -180; i <= 730; i++) { // 6 mois passé, 2 ans futur
       const date = new Date(today);
       date.setDate(today.getDate() + i);
-      const recurringBlocks = generateRecurringBlocksForDate(date);
-      generatedBlocks.push(...recurringBlocks);
+      const recurringBlocksForDate = generateRecurringBlocksForDate(date);
+      if (recurringBlocksForDate.length > 0) {
+        console.log(`📅 Adding ${recurringBlocksForDate.length} blocks for ${date.toISOString().split('T')[0]}`);
+      }
+      generatedBlocks.push(...recurringBlocksForDate);
     }
     
-    console.log('📅 Generated recurring blocks:', generatedBlocks.length);
+    console.log('📊 Total generated recurring blocks:', generatedBlocks.length);
     
     // Combiner les bookings existants avec les blocages récurrents générés
     // Éviter les doublons en vérifiant si un booking réel existe déjà pour le même créneau
@@ -72,7 +77,7 @@ export const useVetBookings = () => {
     console.log('🎯 Unique recurring blocks added:', uniqueRecurringBlocks.length);
     
     const combinedBookings = [...rawBookings, ...uniqueRecurringBlocks];
-    console.log('📊 Total bookings (real + recurring):', combinedBookings.length);
+    console.log('📋 Total bookings (real + recurring):', combinedBookings.length);
     
     return combinedBookings;
   }, [rawBookings, generateRecurringBlocksForDate, recurringBlocks]);

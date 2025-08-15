@@ -170,13 +170,17 @@ export const useRecurringSlotBlocks = () => {
   const isDateInBlockRange = (date: Date, block: RecurringSlotBlock) => {
     const dateStr = date.toISOString().split('T')[0];
     
-    // Si pas de date de début, commencer à partir d'aujourd'hui
-    const startDate = block.start_date || new Date().toISOString().split('T')[0];
+    // Si pas de date de début, le blocage est valide depuis toujours
+    if (block.start_date && dateStr < block.start_date) {
+      return false;
+    }
     
-    // Si pas de date de fin, arrêter dans 1 an par défaut
-    const endDate = block.end_date || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    // Si pas de date de fin, le blocage est valide pour toujours
+    if (block.end_date && dateStr > block.end_date) {
+      return false;
+    }
     
-    return dateStr >= startDate && dateStr <= endDate;
+    return true;
   };
 
   // Fonction stable pour générer les blocages récurrents pour une date donnée
@@ -188,10 +192,19 @@ export const useRecurringSlotBlocks = () => {
     const dayOfWeek = date.getDay();
     const dateStr = date.toISOString().split('T')[0];
     
+    console.log(`🔍 Checking recurring blocks for ${dateStr} (day ${dayOfWeek})`);
+    
     // Filtrer les blocages pour ce jour ET dans la plage de dates valide
-    const blocksForDay = recurringBlocks.filter(block => 
-      block.day_of_week === dayOfWeek && isDateInBlockRange(date, block)
-    );
+    const blocksForDay = recurringBlocks.filter(block => {
+      const matchesDay = block.day_of_week === dayOfWeek;
+      const inRange = isDateInBlockRange(date, block);
+      
+      console.log(`Block ${block.id}: day_of_week=${block.day_of_week}, matches=${matchesDay}, inRange=${inRange}, start_date=${block.start_date}, end_date=${block.end_date}`);
+      
+      return matchesDay && inRange;
+    });
+    
+    console.log(`📅 Found ${blocksForDay.length} matching blocks for ${dateStr}`);
     
     if (blocksForDay.length === 0) {
       return [];
@@ -200,6 +213,8 @@ export const useRecurringSlotBlocks = () => {
     const generatedBlocks = blocksForDay.flatMap(block => {
       // Générer un blocage pour chaque créneau de 15 minutes dans la plage
       const timeSlots = generateTimeSlots(block.start_time, block.end_time);
+      
+      console.log(`⏰ Generating ${timeSlots.length} time slots for block ${block.title}: ${block.start_time} - ${block.end_time}`);
       
       return timeSlots.map((timeSlot) => ({
         id: `recurring-${block.id}-${dateStr}-${timeSlot}`,
@@ -211,11 +226,11 @@ export const useRecurringSlotBlocks = () => {
         client_name: 'CRÉNEAU BLOQUÉ',
         client_email: 'blocked@clinic.internal',
         client_phone: '0000000000',
-        preferred_contact_method: 'email',
+        preferred_contact_method: 'email' as const,
         animal_species: 'N/A',
         animal_name: 'N/A',
         consultation_reason: block.title,
-        status: 'confirmed',
+        status: 'confirmed' as const,
         is_blocked: true,
         duration_minutes: 15,
         created_at: new Date().toISOString(),
@@ -227,7 +242,7 @@ export const useRecurringSlotBlocks = () => {
       }));
     });
     
-    console.log(`📅 Generated ${generatedBlocks.length} recurring blocks for ${dateStr} (day ${dayOfWeek})`);
+    console.log(`📊 Generated ${generatedBlocks.length} recurring blocks for ${dateStr} (day ${dayOfWeek})`);
     return generatedBlocks;
   };
 
