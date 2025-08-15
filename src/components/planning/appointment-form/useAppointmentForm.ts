@@ -16,7 +16,7 @@ export const useAppointmentForm = (onClose: () => void) => {
     veterinarian_id: '',
     consultation_type_id: '',
     duration_minutes: 15,
-    arrival_time: '', // Nouvelle propriété
+    arrival_time: '',
     
     // Informations client
     client_status: '',
@@ -74,14 +74,32 @@ export const useAppointmentForm = (onClose: () => void) => {
     setIsSubmitting(true);
 
     try {
-      if (!currentClinic) {
-        throw new Error('Aucune clinique sélectionnée');
+      console.log('Current clinic in form submission:', currentClinic);
+      
+      // Vérification plus robuste de la clinique
+      let clinicId = currentClinic?.id;
+      
+      if (!clinicId) {
+        console.log('No clinic from context, trying to get default clinic...');
+        // Essayer de récupérer une clinique par défaut
+        const { data: clinics, error: clinicError } = await supabase
+          .from('clinics')
+          .select('id')
+          .limit(1)
+          .single();
+          
+        if (clinicError || !clinics) {
+          throw new Error('Aucune clinique disponible dans le système');
+        }
+        
+        clinicId = clinics.id;
+        console.log('Using default clinic:', clinicId);
       }
 
       const appointmentEndTime = calculateEndTime(formData.appointment_time, formData.duration_minutes);
       
       const bookingData = {
-        clinic_id: currentClinic.id,
+        clinic_id: clinicId,
         animal_name: formData.animal_name,
         animal_species: formData.animal_species,
         animal_breed: formData.animal_breed,
@@ -101,18 +119,23 @@ export const useAppointmentForm = (onClose: () => void) => {
         veterinarian_id: formData.veterinarian_id,
         consultation_type_id: formData.consultation_type_id,
         duration_minutes: formData.duration_minutes,
-        arrival_time: formData.arrival_time || null, // Inclure l'heure d'arrivée
+        arrival_time: formData.arrival_time || null,
         status: 'confirmed',
         selected_symptoms: [],
         convenience_options: [],
         multiple_animals: []
       };
 
+      console.log('Submitting booking data:', bookingData);
+
       const { data, error } = await supabase
         .from('bookings')
         .insert([bookingData]);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
 
       toast({
         title: "Rendez-vous créé",
@@ -148,7 +171,7 @@ export const useAppointmentForm = (onClose: () => void) => {
       console.error('Erreur lors de la création du RDV:', err);
       toast({
         title: "Erreur",
-        description: "Impossible de créer le rendez-vous",
+        description: err instanceof Error ? err.message : "Impossible de créer le rendez-vous",
         variant: "destructive"
       });
     } finally {
