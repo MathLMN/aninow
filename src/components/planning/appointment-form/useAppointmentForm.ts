@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -15,8 +16,6 @@ export const useAppointmentForm = (onClose: () => void) => {
     veterinarian_id: '',
     consultation_type_id: '',
     duration_minutes: 15,
-    appointment_reason: '',
-    arrival_time: '',
     
     // Informations client
     client_name: '',
@@ -99,8 +98,6 @@ export const useAppointmentForm = (onClose: () => void) => {
         veterinarian_id: formData.veterinarian_id,
         consultation_type_id: formData.consultation_type_id,
         duration_minutes: formData.duration_minutes,
-        appointment_reason: formData.appointment_reason,
-        arrival_time: formData.arrival_time,
         status: 'confirmed',
         selected_symptoms: [],
         convenience_options: [],
@@ -126,8 +123,6 @@ export const useAppointmentForm = (onClose: () => void) => {
         veterinarian_id: '',
         consultation_type_id: '',
         duration_minutes: 15,
-        appointment_reason: '',
-        arrival_time: '',
         client_name: '',
         client_phone: '',
         client_email: '',

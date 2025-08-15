@@ -2,8 +2,7 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { CalendarDays, Clock } from "lucide-react";
+import { Calendar, Clock } from "lucide-react";
 
 interface AppointmentSectionProps {
   formData: any;
@@ -22,54 +21,49 @@ export const AppointmentSection = ({
   onConsultationTypeChange,
   calculateEndTime
 }: AppointmentSectionProps) => {
-  const handleSetArrivalTime = () => {
-    const now = new Date();
-    const timeString = now.toTimeString().slice(0, 5); // Format HH:MM
-    onFieldUpdate('arrival_time', timeString);
-  };
-
   return (
     <div className="space-y-3">
       <div className="flex items-center mb-3">
-        <CalendarDays className="h-5 w-5 mr-2 text-blue-600" />
+        <Calendar className="h-5 w-5 mr-2 text-blue-600" />
         <h3 className="font-semibold text-blue-900 text-lg">Rendez-vous</h3>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div>
-          <Label htmlFor="appointment_date" className="text-xs font-medium text-gray-700">Date *</Label>
-          <Input
-            type="date"
-            id="appointment_date"
-            value={formData.appointment_date}
-            onChange={(e) => onFieldUpdate('appointment_date', e.target.value)}
-            required
-            className="h-9 text-sm"
-          />
-        </div>
-        
-        <div>
-          <Label htmlFor="appointment_time" className="text-xs font-medium text-gray-700">Heure de début *</Label>
-          <Input
-            type="time"
-            id="appointment_time"
-            value={formData.appointment_time}
-            onChange={(e) => onFieldUpdate('appointment_time', e.target.value)}
-            required
-            className="h-9 text-sm"
-          />
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label htmlFor="appointment_date" className="text-xs font-medium text-gray-700">Date *</Label>
+            <Input
+              id="appointment_date"
+              type="date"
+              value={formData.appointment_date}
+              onChange={(e) => onFieldUpdate('appointment_date', e.target.value)}
+              required
+              className="h-8 text-sm"
+            />
+          </div>
+          <div>
+            <Label htmlFor="appointment_time" className="text-xs font-medium text-gray-700">Heure *</Label>
+            <Input
+              id="appointment_time"
+              type="time"
+              value={formData.appointment_time}
+              onChange={(e) => onFieldUpdate('appointment_time', e.target.value)}
+              required
+              className="h-8 text-sm"
+            />
+          </div>
         </div>
 
         <div>
-          <Label htmlFor="veterinarian_id" className="text-xs font-medium text-gray-700">Vétérinaire *</Label>
+          <Label htmlFor="veterinarian_id" className="text-xs font-medium text-gray-700">Vétérinaire</Label>
           <Select value={formData.veterinarian_id} onValueChange={(value) => onFieldUpdate('veterinarian_id', value)}>
-            <SelectTrigger className="h-9 text-sm">
-              <SelectValue placeholder="Sélectionner un vétérinaire" />
+            <SelectTrigger className="h-8 text-sm">
+              <SelectValue placeholder="Sélectionnez..." />
             </SelectTrigger>
             <SelectContent>
               {veterinarians.map((vet) => (
-                <SelectItem key={vet.id} value={vet.id}>
-                  {vet.name}
+                <SelectItem key={vet.id} value={vet.id} className="text-sm">
+                  {vet.name} - {vet.specialty}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -77,61 +71,57 @@ export const AppointmentSection = ({
         </div>
 
         <div>
-          <Label htmlFor="consultation_type_id" className="text-xs font-medium text-gray-700">Type de consultation *</Label>
+          <Label htmlFor="consultation_type_id" className="text-xs font-medium text-gray-700">Type de consultation</Label>
           <Select value={formData.consultation_type_id} onValueChange={onConsultationTypeChange}>
-            <SelectTrigger className="h-9 text-sm">
-              <SelectValue placeholder="Sélectionner un type" />
+            <SelectTrigger className="h-8 text-sm">
+              <SelectValue placeholder="Sélectionnez..." />
             </SelectTrigger>
             <SelectContent>
               {consultationTypes.map((type) => (
-                <SelectItem key={type.id} value={type.id}>
-                  {type.name} ({type.duration_minutes}min)
+                <SelectItem key={type.id} value={type.id} className="text-sm">
+                  {type.name} ({type.duration_minutes} min)
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
-        <div>
-          <Label htmlFor="appointment_reason" className="text-xs font-medium text-gray-700">Motif du rendez-vous</Label>
-          <Input
-            id="appointment_reason"
-            value={formData.appointment_reason || ''}
-            onChange={(e) => onFieldUpdate('appointment_reason', e.target.value)}
-            placeholder="ex: Vaccination, Consultation de routine..."
-            className="h-9 text-sm"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="arrival_time" className="text-xs font-medium text-gray-700">Heure d'arrivée</Label>
-          <div className="flex gap-2">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label htmlFor="duration_minutes" className="text-xs font-medium text-gray-700">Durée (min)</Label>
             <Input
-              type="time"
-              id="arrival_time"
-              value={formData.arrival_time || ''}
-              onChange={(e) => onFieldUpdate('arrival_time', e.target.value)}
-              className="h-9 text-sm flex-1"
+              id="duration_minutes"
+              type="number"
+              min="5"
+              step="5"
+              value={formData.duration_minutes}
+              onChange={(e) => onFieldUpdate('duration_minutes', parseInt(e.target.value) || 15)}
+              className="h-8 text-sm"
             />
-            <Button
-              type="button"
-              onClick={handleSetArrivalTime}
-              size="sm"
-              variant="outline"
-              className="h-9 px-3 whitespace-nowrap"
-            >
-              <Clock className="h-4 w-4 mr-1" />
-              Maintenant
-            </Button>
+          </div>
+          <div>
+            <Label className="text-xs font-medium text-gray-700">Heure de fin</Label>
+            <div className="flex items-center text-xs text-blue-700 bg-blue-50 p-2 rounded border h-8">
+              <Clock className="h-3 w-3 mr-1" />
+              {calculateEndTime(formData.appointment_time, formData.duration_minutes) || '--:--'}
+            </div>
           </div>
         </div>
-      </div>
 
-      {formData.appointment_time && formData.duration_minutes && (
-        <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
-          <strong>Heure de fin calculée:</strong> {calculateEndTime(formData.appointment_time, formData.duration_minutes)}
+        <div>
+          <Label htmlFor="booking_source" className="text-xs font-medium text-gray-700">Source</Label>
+          <Select value={formData.booking_source} onValueChange={(value) => onFieldUpdate('booking_source', value)}>
+            <SelectTrigger className="h-8 text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="phone">Téléphone</SelectItem>
+              <SelectItem value="walk-in">Sur place</SelectItem>
+              <SelectItem value="online">En ligne</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-      )}
+      </div>
     </div>
   );
 };
