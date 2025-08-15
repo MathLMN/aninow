@@ -10,7 +10,7 @@ export const useVetBookings = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { currentClinicId } = useClinicAccess();
-  const { generateRecurringBlocksForDate } = useRecurringSlotBlocks();
+  const { generateRecurringBlocksForDate, recurringBlocks } = useRecurringSlotBlocks();
 
   // Récupérer tous les rendez-vous
   const { data: rawBookings = [], isLoading, error } = useQuery({
@@ -39,18 +39,22 @@ export const useVetBookings = () => {
 
   // Combiner les bookings avec les blocages récurrents générés
   const bookings = useMemo(() => {
-    if (!rawBookings) return [];
+    if (!rawBookings || !recurringBlocks) return rawBookings || [];
     
-    // Générer les dates pour les 30 prochains jours
+    console.log('🔄 Generating recurring blocks...');
+    
+    // Générer les dates pour les 60 prochains jours (étendu pour plus de stabilité)
     const today = new Date();
     const generatedBlocks = [];
     
-    for (let i = 0; i < 30; i++) {
+    for (let i = -30; i <= 60; i++) { // Inclure aussi 30 jours dans le passé
       const date = new Date(today);
       date.setDate(today.getDate() + i);
       const recurringBlocks = generateRecurringBlocksForDate(date);
       generatedBlocks.push(...recurringBlocks);
     }
+    
+    console.log('📅 Generated recurring blocks:', generatedBlocks.length);
     
     // Combiner les bookings existants avec les blocages récurrents générés
     // Éviter les doublons en vérifiant si un booking réel existe déjà pour le même créneau
@@ -60,12 +64,18 @@ export const useVetBookings = () => {
       )
     );
     
-    const uniqueRecurringBlocks = generatedBlocks.filter(block => 
-      !existingBookingKeys.has(`${block.appointment_date}-${block.appointment_time}-${block.veterinarian_id}`)
-    );
+    const uniqueRecurringBlocks = generatedBlocks.filter(block => {
+      const key = `${block.appointment_date}-${block.appointment_time}-${block.veterinarian_id}`;
+      return !existingBookingKeys.has(key);
+    });
     
-    return [...rawBookings, ...uniqueRecurringBlocks];
-  }, [rawBookings, generateRecurringBlocksForDate]);
+    console.log('🎯 Unique recurring blocks added:', uniqueRecurringBlocks.length);
+    
+    const combinedBookings = [...rawBookings, ...uniqueRecurringBlocks];
+    console.log('📊 Total bookings (real + recurring):', combinedBookings.length);
+    
+    return combinedBookings;
+  }, [rawBookings, generateRecurringBlocksForDate, recurringBlocks]);
 
   // Calculer les statistiques basées uniquement sur les vrais rendez-vous (rawBookings)
   const stats = useMemo(() => {

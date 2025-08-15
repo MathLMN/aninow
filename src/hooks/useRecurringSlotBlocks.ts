@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,11 +25,13 @@ export const useRecurringSlotBlocks = () => {
   const queryClient = useQueryClient();
   const { currentClinicId } = useClinicAccess();
 
-  // Récupérer tous les blocages récurrents
+  // Récupérer tous les blocages récurrents avec cache stable
   const { data: recurringBlocks = [], isLoading: blocksLoading } = useQuery({
     queryKey: ['recurring-slot-blocks', currentClinicId],
     queryFn: async () => {
       if (!currentClinicId) return [];
+      
+      console.log('🔄 Fetching recurring blocks for clinic:', currentClinicId);
       
       const { data, error } = await supabase
         .from('recurring_slot_blocks')
@@ -37,10 +40,17 @@ export const useRecurringSlotBlocks = () => {
         .eq('is_active', true)
         .order('day_of_week', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error fetching recurring blocks:', error);
+        throw error;
+      }
+      
+      console.log('✅ Recurring blocks loaded:', data?.length || 0);
       return data as RecurringSlotBlock[];
     },
-    enabled: !!currentClinicId
+    enabled: !!currentClinicId,
+    staleTime: 5 * 60 * 1000, // Cache pendant 5 minutes pour plus de stabilité
+    refetchOnWindowFocus: false, // Éviter les refetch intempestifs
   });
 
   // Créer un nouveau blocage récurrent
@@ -154,41 +164,53 @@ export const useRecurringSlotBlocks = () => {
     return slots;
   };
 
-  // Fonction pour générer les blocages récurrents pour une date donnée
+  // Fonction stable pour générer les blocages récurrents pour une date donnée
   const generateRecurringBlocksForDate = (date: Date) => {
+    if (!recurringBlocks || recurringBlocks.length === 0) {
+      return [];
+    }
+
     const dayOfWeek = date.getDay();
     const dateStr = date.toISOString().split('T')[0];
     
-    return recurringBlocks
-      .filter(block => block.day_of_week === dayOfWeek)
-      .flatMap(block => {
-        // Générer un blocage pour chaque créneau de 15 minutes dans la plage
-        const timeSlots = generateTimeSlots(block.start_time, block.end_time);
-        
-        return timeSlots.map((timeSlot, index) => ({
-          id: `recurring-${block.id}-${dateStr}-${timeSlot}`,
-          clinic_id: block.clinic_id,
-          veterinarian_id: block.veterinarian_id,
-          appointment_date: dateStr,
-          appointment_time: timeSlot,
-          appointment_end_time: index === timeSlots.length - 1 ? block.end_time : timeSlot,
-          client_name: 'CRÉNEAU BLOQUÉ',
-          client_email: 'blocked@clinic.internal',
-          client_phone: '0000000000',
-          preferred_contact_method: 'email',
-          animal_species: 'N/A',
-          animal_name: 'N/A',
-          consultation_reason: block.title,
-          status: 'confirmed',
-          is_blocked: true,
-          duration_minutes: 15,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          // Ajouter des métadonnées pour identifier les blocages récurrents
-          recurring_block_id: block.id,
-          recurring_block_title: block.title
-        }));
-      });
+    const blocksForDay = recurringBlocks.filter(block => block.day_of_week === dayOfWeek);
+    
+    if (blocksForDay.length === 0) {
+      return [];
+    }
+    
+    const generatedBlocks = blocksForDay.flatMap(block => {
+      // Générer un blocage pour chaque créneau de 15 minutes dans la plage
+      const timeSlots = generateTimeSlots(block.start_time, block.end_time);
+      
+      return timeSlots.map((timeSlot) => ({
+        id: `recurring-${block.id}-${dateStr}-${timeSlot}`,
+        clinic_id: block.clinic_id,
+        veterinarian_id: block.veterinarian_id,
+        appointment_date: dateStr,
+        appointment_time: timeSlot,
+        appointment_end_time: timeSlot, // Chaque slot dure 15 minutes
+        client_name: 'CRÉNEAU BLOQUÉ',
+        client_email: 'blocked@clinic.internal',
+        client_phone: '0000000000',
+        preferred_contact_method: 'email',
+        animal_species: 'N/A',
+        animal_name: 'N/A',
+        consultation_reason: block.title,
+        status: 'confirmed',
+        is_blocked: true,
+        duration_minutes: 15,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        // Métadonnées pour identifier les blocages récurrents
+        recurring_block_id: block.id,
+        recurring_block_title: block.title,
+        recurring_block_description: block.description
+      }));
+    });
+    
+    console.log(`📅 Generated ${generatedBlocks.length} recurring blocks for ${dateStr} (day ${dayOfWeek})`);
+    return generatedBlocks;
   };
 
   // Fonction utilitaire pour calculer la durée en minutes

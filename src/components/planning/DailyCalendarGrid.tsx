@@ -7,7 +7,7 @@ import { isVeterinarianAbsent } from "./utils/veterinarianAbsenceUtils";
 import { useVeterinarianAbsences } from "@/hooks/useVeterinarianAbsences";
 import { useClinicSettings } from "@/hooks/useClinicSettings";
 import { useClinicAccess } from "@/hooks/useClinicAccess";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 interface DailyCalendarGridProps {
   selectedDate: Date;
@@ -45,35 +45,37 @@ export const DailyCalendarGrid = ({
   const { currentClinicId } = useClinicAccess();
   const { absences } = useVeterinarianAbsences();
   const timeSlots = generateAllTimeSlots();
-  const [slotBookings, setSlotBookings] = useState<Record<string, any[]>>({});
 
-  // Charger les réservations pour chaque créneau de manière asynchrone
-  useEffect(() => {
-    const loadSlotBookings = async () => {
-      const newSlotBookings: Record<string, any[]> = {};
-      
-      for (const time of timeSlots) {
-        for (const column of columns) {
-          const key = `${time}-${column.id}`;
-          const bookingsForSlot = await getBookingsForSlot(
-            time, 
-            column.id, 
-            bookings, 
-            selectedDate, 
-            veterinarians,
-            settings,
-            [],
-            currentClinicId || undefined
-          );
-          newSlotBookings[key] = bookingsForSlot;
+  // Optimiser le calcul des bookings par slot avec useMemo pour éviter les recalculs
+  const slotBookings = useMemo(() => {
+    const newSlotBookings: Record<string, any[]> = {};
+    
+    console.log('🔄 Calculating slot bookings for date:', selectedDate.toISOString().split('T')[0]);
+    console.log('📊 Total bookings available:', bookings.length);
+    
+    for (const time of timeSlots) {
+      for (const column of columns) {
+        const key = `${time}-${column.id}`;
+        
+        // Filtrer directement les bookings pour ce créneau et cette colonne
+        const dateStr = selectedDate.toISOString().split('T')[0];
+        const bookingsForSlot = bookings.filter(booking => {
+          return booking.appointment_date === dateStr && 
+                 booking.appointment_time === time &&
+                 (column.id === 'asv' || booking.veterinarian_id === column.id);
+        });
+        
+        newSlotBookings[key] = bookingsForSlot;
+        
+        // Log pour les créneaux bloqués récurrents
+        if (bookingsForSlot.some(b => b.recurring_block_id)) {
+          console.log('🔒 Recurring block found for:', key, bookingsForSlot.filter(b => b.recurring_block_id));
         }
       }
-      
-      setSlotBookings(newSlotBookings);
-    };
-
-    loadSlotBookings();
-  }, [timeSlots, columns, bookings, selectedDate, veterinarians, settings, currentClinicId]);
+    }
+    
+    return newSlotBookings;
+  }, [timeSlots, columns, bookings, selectedDate]);
 
   return (
     <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
@@ -94,7 +96,9 @@ export const DailyCalendarGrid = ({
                 // Compter le total des RDV pour cette colonne pour toute la journée
                 const totalBookings = timeSlots.reduce((total, time) => {
                   const key = `${time}-${column.id}`;
-                  return total + (slotBookings[key]?.length || 0);
+                  const bookingsForSlot = slotBookings[key] || [];
+                  // Ne compter que les vrais rendez-vous, pas les blocages
+                  return total + bookingsForSlot.filter(b => !b.is_blocked && !b.recurring_block_id).length;
                 }, 0);
 
                 return (
