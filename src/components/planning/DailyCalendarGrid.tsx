@@ -59,11 +59,25 @@ export const DailyCalendarGrid = ({
         
         // Filtrer directement les bookings pour ce créneau et cette colonne
         const dateStr = selectedDate.toISOString().split('T')[0];
-        const bookingsForSlot = bookings.filter(booking => {
-          return booking.appointment_date === dateStr && 
-                 booking.appointment_time === time &&
-                 (column.id === 'asv' || booking.veterinarian_id === column.id);
-        });
+        let bookingsForSlot = [];
+        
+        if (column.id === 'asv') {
+          // Pour la colonne ASV : ne jamais afficher les blocages récurrents
+          bookingsForSlot = bookings.filter(booking => {
+            return booking.appointment_date === dateStr && 
+                   booking.appointment_time === time &&
+                   !booking.recurring_block_id && // Exclure les blocages récurrents
+                   !booking.is_blocked && // Exclure tous les blocages
+                   !booking.veterinarian_id; // Seulement les RDV sans vétérinaire assigné
+          });
+        } else {
+          // Pour les colonnes vétérinaires : inclure tous les bookings assignés à ce vétérinaire
+          bookingsForSlot = bookings.filter(booking => {
+            return booking.appointment_date === dateStr && 
+                   booking.appointment_time === time &&
+                   booking.veterinarian_id === column.id;
+          });
+        }
         
         newSlotBookings[key] = bookingsForSlot;
         

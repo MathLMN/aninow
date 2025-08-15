@@ -50,7 +50,9 @@ export const RecurringBlockModal = ({
     veterinarian_id: '',
     day_of_week: '',
     start_time: '',
-    end_time: ''
+    end_time: '',
+    start_date: new Date().toISOString().split('T')[0], // Date d'aujourd'hui par défaut
+    end_date: '' // Optionnel
   });
 
   const { createRecurringBlock, isCreating } = useRecurringSlotBlocks();
@@ -59,7 +61,7 @@ export const RecurringBlockModal = ({
     e.preventDefault();
     
     if (!formData.title || !formData.veterinarian_id || !formData.day_of_week || 
-        !formData.start_time || !formData.end_time) {
+        !formData.start_time || !formData.end_time || !formData.start_date) {
       return;
     }
 
@@ -71,6 +73,8 @@ export const RecurringBlockModal = ({
         day_of_week: parseInt(formData.day_of_week),
         start_time: formData.start_time,
         end_time: formData.end_time,
+        start_date: formData.start_date,
+        end_date: formData.end_date || undefined,
         is_active: true
       });
 
@@ -81,7 +85,9 @@ export const RecurringBlockModal = ({
         veterinarian_id: '',
         day_of_week: '',
         start_time: '',
-        end_time: ''
+        end_time: '',
+        start_date: new Date().toISOString().split('T')[0],
+        end_date: ''
       });
       onClose();
     } catch (error) {
@@ -112,11 +118,11 @@ export const RecurringBlockModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
           <DialogTitle className="text-vet-navy">Créer un blocage récurrent</DialogTitle>
           <DialogDescription className="text-vet-brown">
-            Configurez un blocage automatique qui se répète chaque semaine (ex: chirurgie tous les vendredis matin)
+            Configurez un blocage automatique qui se répète chaque semaine pendant une période donnée
           </DialogDescription>
         </DialogHeader>
         
@@ -217,7 +223,34 @@ export const RecurringBlockModal = ({
             </div>
           </div>
 
-          {formData.start_time && formData.end_time && formData.day_of_week && (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="startDate">Date de début *</Label>
+              <Input
+                id="startDate"
+                type="date"
+                value={formData.start_date}
+                onChange={(e) => setFormData(prev => ({ ...prev, start_date: e.target.value }))}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="endDate">Date de fin (optionnel)</Label>
+              <Input
+                id="endDate"
+                type="date"
+                value={formData.end_date}
+                onChange={(e) => setFormData(prev => ({ ...prev, end_date: e.target.value }))}
+                min={formData.start_date}
+              />
+              <p className="text-xs text-vet-brown/70">
+                Si vide, le blocage sera actif indéfiniment
+              </p>
+            </div>
+          </div>
+
+          {formData.start_time && formData.end_time && formData.day_of_week && formData.start_date && (
             <div className="p-4 bg-vet-beige/20 rounded-md border border-vet-blue/20">
               <p className="text-sm text-vet-navy font-medium">
                 Récapitulatif du blocage :
@@ -229,8 +262,12 @@ export const RecurringBlockModal = ({
                   <span className="text-vet-sage"> ({getDurationText()})</span>
                 )}
               </p>
-              <p className="text-xs text-vet-brown/80 mt-1">
-                Ce blocage sera appliqué automatiquement chaque semaine
+              <p className="text-xs text-vet-brown mt-1">
+                Du <strong>{new Date(formData.start_date).toLocaleDateString('fr-FR')}</strong>
+                {formData.end_date && (
+                  <span> au <strong>{new Date(formData.end_date).toLocaleDateString('fr-FR')}</strong></span>
+                )}
+                {!formData.end_date && <span> (sans limite)</span>}
               </p>
             </div>
           )}

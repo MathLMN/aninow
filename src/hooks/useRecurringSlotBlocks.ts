@@ -14,6 +14,8 @@ export interface RecurringSlotBlock {
   day_of_week: number;
   start_time: string;
   end_time: string;
+  start_date?: string;
+  end_date?: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -49,8 +51,8 @@ export const useRecurringSlotBlocks = () => {
       return data as RecurringSlotBlock[];
     },
     enabled: !!currentClinicId,
-    staleTime: 5 * 60 * 1000, // Cache pendant 5 minutes pour plus de stabilité
-    refetchOnWindowFocus: false, // Éviter les refetch intempestifs
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   // Créer un nouveau blocage récurrent
@@ -164,6 +166,19 @@ export const useRecurringSlotBlocks = () => {
     return slots;
   };
 
+  // Fonction pour vérifier si une date est dans la plage de validité du blocage
+  const isDateInBlockRange = (date: Date, block: RecurringSlotBlock) => {
+    const dateStr = date.toISOString().split('T')[0];
+    
+    // Si pas de date de début, commencer à partir d'aujourd'hui
+    const startDate = block.start_date || new Date().toISOString().split('T')[0];
+    
+    // Si pas de date de fin, arrêter dans 1 an par défaut
+    const endDate = block.end_date || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    
+    return dateStr >= startDate && dateStr <= endDate;
+  };
+
   // Fonction stable pour générer les blocages récurrents pour une date donnée
   const generateRecurringBlocksForDate = (date: Date) => {
     if (!recurringBlocks || recurringBlocks.length === 0) {
@@ -173,7 +188,10 @@ export const useRecurringSlotBlocks = () => {
     const dayOfWeek = date.getDay();
     const dateStr = date.toISOString().split('T')[0];
     
-    const blocksForDay = recurringBlocks.filter(block => block.day_of_week === dayOfWeek);
+    // Filtrer les blocages pour ce jour ET dans la plage de dates valide
+    const blocksForDay = recurringBlocks.filter(block => 
+      block.day_of_week === dayOfWeek && isDateInBlockRange(date, block)
+    );
     
     if (blocksForDay.length === 0) {
       return [];
@@ -189,7 +207,7 @@ export const useRecurringSlotBlocks = () => {
         veterinarian_id: block.veterinarian_id,
         appointment_date: dateStr,
         appointment_time: timeSlot,
-        appointment_end_time: timeSlot, // Chaque slot dure 15 minutes
+        appointment_end_time: timeSlot,
         client_name: 'CRÉNEAU BLOQUÉ',
         client_email: 'blocked@clinic.internal',
         client_phone: '0000000000',
