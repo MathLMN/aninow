@@ -13,7 +13,7 @@ import { CreateAppointmentModal } from "@/components/planning/CreateAppointmentM
 import { PlanningHeader } from "@/components/planning/PlanningHeader";
 import { WeeklyNavigation } from "@/components/planning/WeeklyNavigation";
 import { SlotAssignmentManager } from "@/components/planning/SlotAssignmentManager";
-import { RecurringBlocksManager } from "@/components/planning/RecurringBlocksManager";
+import { RecurringBlocksModal } from "@/components/planning/RecurringBlocksModal";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState, useEffect } from "react";
 import { MoveAppointmentModal } from "@/components/planning/MoveAppointmentModal";
@@ -25,7 +25,7 @@ const VetPlanning = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [selectedBookingToMove, setSelectedBookingToMove] = useState<any>(null);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
-  const [showRecurringBlocks, setShowRecurringBlocks] = useState(false);
+  const [isRecurringBlocksModalOpen, setIsRecurringBlocksModalOpen] = useState(false);
 
   const {
     currentDate,
@@ -232,7 +232,7 @@ const VetPlanning = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setShowRecurringBlocks(!showRecurringBlocks)}
+              onClick={() => setIsRecurringBlocksModalOpen(true)}
               className="flex items-center gap-2"
             >
               <Calendar className="h-4 w-4" />
@@ -271,11 +271,6 @@ const VetPlanning = () => {
             Aucun vétérinaire actif n'a été trouvé. Veuillez ajouter des vétérinaires dans la section Paramètres pour pouvoir gérer les attributions de créneaux.
           </AlertDescription>
         </Alert>
-      )}
-
-      {/* Gestionnaire de blocages récurrents */}
-      {viewMode === 'daily' && showRecurringBlocks && canManageAssignments && (
-        <RecurringBlocksManager veterinarians={veterinarians} />
       )}
 
       {/* Gestionnaire d'attributions - visible uniquement en vue quotidienne */}
@@ -366,6 +361,13 @@ const VetPlanning = () => {
           onMoveAppointment={handleMoveAppointment}
         />
       )}
+
+      {/* Modale des blocages récurrents */}
+      <RecurringBlocksModal
+        isOpen={isRecurringBlocksModalOpen}
+        onClose={() => setIsRecurringBlocksModalOpen(false)}
+        veterinarians={veterinarians}
+      />
     </div>
   );
 };

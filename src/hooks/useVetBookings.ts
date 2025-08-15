@@ -1,97 +1,106 @@
-
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useMemo } from "react";
+import { useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useClinicAccess } from './useClinicAccess';
+import { useRecurringSlotBlocks } from './useRecurringSlotBlocks';
 
 export const useVetBookings = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { currentClinicId } = useClinicAccess();
+  const { generateRecurringBlocksForDate } = useRecurringSlotBlocks();
 
-  const { 
-    data: bookings = [], 
-    isLoading, 
-    error,
-    refetch 
-  } = useQuery({
-    queryKey: ["vet-bookings"],
+  // Récupérer tous les rendez-vous
+  const { data: rawBookings = [], isLoading, error } = useQuery({
+    queryKey: ['vet-bookings', currentClinicId],
     queryFn: async () => {
-      console.log('🔄 Fetching vet bookings...');
+      if (!currentClinicId) return [];
+      
+      console.log('🔄 Fetching bookings for clinic:', currentClinicId);
       
       const { data, error } = await supabase
-        .from("bookings")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .from('bookings')
+        .select('*')
+        .eq('clinic_id', currentClinicId)
+        .order('appointment_date', { ascending: true });
 
       if (error) {
         console.error('❌ Error fetching bookings:', error);
         throw error;
       }
 
-      console.log('✅ Bookings loaded:', data?.length || 0, 'items');
+      console.log('✅ Bookings fetched:', data?.length || 0, 'records');
       return data || [];
     },
+    enabled: !!currentClinicId
   });
 
-  const stats = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
+  // Combiner les bookings avec les blocages récurrents générés
+  const bookings = useMemo(() => {
+    if (!rawBookings) return [];
     
-    return {
-      total: bookings.length,
-      pending: bookings.filter(b => b.status === 'pending').length,
-      confirmed: bookings.filter(b => b.status === 'confirmed').length,
-      completed: bookings.filter(b => b.status === 'completed').length,
-      cancelled: bookings.filter(b => b.status === 'cancelled').length,
-      todayBookings: bookings.filter(b => 
-        b.appointment_date === today || 
-        b.created_at.split('T')[0] === today
-      ).length,
-      highUrgency: bookings.filter(b => b.urgency_score && b.urgency_score >= 7).length
-    };
-  }, [bookings]);
+    // Générer les dates pour les 30 prochains jours
+    const today = new Date();
+    const generatedBlocks = [];
+    
+    for (let i = 0; i < 30; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      const recurringBlocks = generateRecurringBlocksForDate(date);
+      generatedBlocks.push(...recurringBlocks);
+    }
+    
+    // Combiner les bookings existants avec les blocages récurrents générés
+    // Éviter les doublons en vérifiant si un booking réel existe déjà pour le même créneau
+    const existingBookingKeys = new Set(
+      rawBookings.map(booking => 
+        `${booking.appointment_date}-${booking.appointment_time}-${booking.veterinarian_id}`
+      )
+    );
+    
+    const uniqueRecurringBlocks = generatedBlocks.filter(block => 
+      !existingBookingKeys.has(`${block.appointment_date}-${block.appointment_time}-${block.veterinarian_id}`)
+    );
+    
+    return [...rawBookings, ...uniqueRecurringBlocks];
+  }, [rawBookings, generateRecurringBlocksForDate]);
 
-  const updateBookingStatusMutation = useMutation({
+  // Mettre à jour le statut d'un rendez-vous
+  const updateBookingStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      console.log('🔄 Updating booking status:', { id, status });
-      
       const { data, error } = await supabase
-        .from("bookings")
+        .from('bookings')
         .update({ status })
-        .eq("id", id)
+        .eq('id', id)
         .select()
         .single();
 
-      if (error) {
-        console.error('❌ Error updating booking status:', error);
-        throw error;
-      }
-
-      console.log('✅ Booking status updated:', data);
+      if (error) throw error;
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["vet-bookings"] });
+      queryClient.invalidateQueries({ queryKey: ['vet-bookings'] });
       toast({
-        title: "Statut mis à jour",
+        title: "Statut modifié",
         description: "Le statut du rendez-vous a été modifié avec succès",
       });
     },
     onError: (error: any) => {
-      console.error('❌ Failed to update booking status:', error);
+      console.error('Error updating booking status:', error);
       toast({
         title: "Erreur",
-        description: "Impossible de mettre à jour le statut du rendez-vous",
-        variant: "destructive",
+        description: error.message || "Impossible de modifier le statut du rendez-vous",
+        variant: "destructive"
       });
-    },
+    }
   });
-
+  
   return {
     bookings,
     isLoading,
-    error: error?.message || null,
-    stats,
-    refetch,
-    updateBookingStatus: updateBookingStatusMutation.mutate,
+    error,
+    updateBookingStatus: updateBookingStatus.mutate,
+    isUpdating: updateBookingStatus.isPending
   };
 };

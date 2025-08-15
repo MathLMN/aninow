@@ -63,6 +63,7 @@ export const useRecurringSlotBlocks = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recurring-slot-blocks'] });
+      queryClient.invalidateQueries({ queryKey: ['vet-bookings'] });
       toast({
         title: "Blocage récurrent créé",
         description: "Le blocage récurrent a été créé avec succès",
@@ -93,6 +94,7 @@ export const useRecurringSlotBlocks = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recurring-slot-blocks'] });
+      queryClient.invalidateQueries({ queryKey: ['vet-bookings'] });
       toast({
         title: "Blocage récurrent modifié",
         description: "Le blocage récurrent a été modifié avec succès",
@@ -120,6 +122,7 @@ export const useRecurringSlotBlocks = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recurring-slot-blocks'] });
+      queryClient.invalidateQueries({ queryKey: ['vet-bookings'] });
       toast({
         title: "Blocage récurrent supprimé",
         description: "Le blocage récurrent a été supprimé avec succès",
@@ -135,8 +138,43 @@ export const useRecurringSlotBlocks = () => {
     }
   });
 
+  // Fonction pour générer les blocages récurrents pour une date donnée
+  const generateRecurringBlocksForDate = (date: Date) => {
+    const dayOfWeek = date.getDay();
+    return recurringBlocks
+      .filter(block => block.day_of_week === dayOfWeek)
+      .map(block => ({
+        id: `recurring-${block.id}-${date.toISOString().split('T')[0]}`,
+        clinic_id: block.clinic_id,
+        veterinarian_id: block.veterinarian_id,
+        appointment_date: date.toISOString().split('T')[0],
+        appointment_time: block.start_time,
+        appointment_end_time: block.end_time,
+        client_name: 'CRÉNEAU BLOQUÉ',
+        client_email: 'blocked@clinic.internal',
+        client_phone: '0000000000',
+        preferred_contact_method: 'email',
+        animal_species: 'N/A',
+        animal_name: 'N/A',
+        consultation_reason: block.title,
+        status: 'confirmed',
+        is_blocked: true,
+        duration_minutes: calculateDurationMinutes(block.start_time, block.end_time),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }));
+  };
+
+  // Fonction utilitaire pour calculer la durée en minutes
+  const calculateDurationMinutes = (startTime: string, endTime: string) => {
+    const start = new Date(`2000-01-01T${startTime}`);
+    const end = new Date(`2000-01-01T${endTime}`);
+    return Math.round((end.getTime() - start.getTime()) / (1000 * 60));
+  };
+
   return {
     recurringBlocks,
+    generateRecurringBlocksForDate,
     isLoading: isLoading || blocksLoading,
     createRecurringBlock: createRecurringBlock.mutateAsync,
     updateRecurringBlock: updateRecurringBlock.mutateAsync,
