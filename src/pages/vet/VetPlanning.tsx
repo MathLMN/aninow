@@ -50,6 +50,41 @@ export default function VetPlanning() {
     refreshBookings();
   };
 
+  // Wrapper functions to match expected signatures
+  const handleValidateBooking = async (bookingId: string) => {
+    const success = await validateBooking(bookingId);
+    if (success) {
+      refreshBookings();
+    }
+  };
+
+  const handleCancelBooking = async (bookingId: string) => {
+    const success = await cancelBooking(bookingId);
+    if (success) {
+      refreshBookings();
+    }
+  };
+
+  const handleDuplicateBooking = async (booking: any) => {
+    const success = await duplicateBooking(booking);
+    if (success) {
+      refreshBookings();
+    }
+  };
+
+  const handleMoveBooking = async (booking: any) => {
+    // For now, we'll handle move through the edit modal
+    // This could be enhanced later with a dedicated move interface
+    handleAppointmentClick(booking);
+  };
+
+  const handleDeleteBooking = async (bookingId: string) => {
+    const success = await deleteBooking(bookingId);
+    if (success) {
+      refreshBookings();
+    }
+  };
+
   // Filter bookings for selected date (daily view)
   const todayBookings = bookings.filter(booking => {
     if (viewMode === 'daily') {
@@ -93,11 +128,11 @@ export default function VetPlanning() {
             veterinarians={veterinarians}
             onCreateAppointment={handleCreateAppointment}
             onAppointmentClick={handleAppointmentClick}
-            onValidateBooking={validateBooking}
-            onCancelBooking={cancelBooking}
-            onDuplicateBooking={duplicateBooking}
-            onMoveBooking={moveAppointment}
-            onDeleteBooking={deleteBooking}
+            onValidateBooking={handleValidateBooking}
+            onCancelBooking={handleCancelBooking}
+            onDuplicateBooking={handleDuplicateBooking}
+            onMoveBooking={handleMoveBooking}
+            onDeleteBooking={handleDeleteBooking}
             onBlockSlot={handleBlockSlot}
           />
         ) : (
