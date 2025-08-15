@@ -683,6 +683,48 @@ export type Database = {
         }
         Relationships: []
       }
+      recurring_slot_blocks: {
+        Row: {
+          clinic_id: string
+          created_at: string
+          day_of_week: number
+          description: string | null
+          end_time: string
+          id: string
+          is_active: boolean
+          start_time: string
+          title: string
+          updated_at: string
+          veterinarian_id: string
+        }
+        Insert: {
+          clinic_id: string
+          created_at?: string
+          day_of_week: number
+          description?: string | null
+          end_time: string
+          id?: string
+          is_active?: boolean
+          start_time: string
+          title: string
+          updated_at?: string
+          veterinarian_id: string
+        }
+        Update: {
+          clinic_id?: string
+          created_at?: string
+          day_of_week?: number
+          description?: string | null
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          start_time?: string
+          title?: string
+          updated_at?: string
+          veterinarian_id?: string
+        }
+        Relationships: []
+      }
       slot_assignments: {
         Row: {
           assignment_type: string

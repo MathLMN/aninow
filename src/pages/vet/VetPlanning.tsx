@@ -1,7 +1,6 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Settings, AlertCircle } from "lucide-react";
+import { Settings, AlertCircle, Calendar } from "lucide-react";
 import { useVetBookings } from "@/hooks/useVetBookings";
 import { useSlotManagement } from "@/hooks/useSlotManagement";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
@@ -14,6 +13,7 @@ import { CreateAppointmentModal } from "@/components/planning/CreateAppointmentM
 import { PlanningHeader } from "@/components/planning/PlanningHeader";
 import { WeeklyNavigation } from "@/components/planning/WeeklyNavigation";
 import { SlotAssignmentManager } from "@/components/planning/SlotAssignmentManager";
+import { RecurringBlocksManager } from "@/components/planning/RecurringBlocksManager";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState, useEffect } from "react";
 import { MoveAppointmentModal } from "@/components/planning/MoveAppointmentModal";
@@ -25,6 +25,7 @@ const VetPlanning = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [selectedBookingToMove, setSelectedBookingToMove] = useState<any>(null);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
+  const [showRecurringBlocks, setShowRecurringBlocks] = useState(false);
 
   const {
     currentDate,
@@ -231,6 +232,15 @@ const VetPlanning = () => {
             <Button
               variant="outline"
               size="sm"
+              onClick={() => setShowRecurringBlocks(!showRecurringBlocks)}
+              className="flex items-center gap-2"
+            >
+              <Calendar className="h-4 w-4" />
+              Blocages récurrents
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setShowAssignmentManager(!showAssignmentManager)}
               className="flex items-center gap-2"
               disabled={!canManageAssignments}
@@ -261,6 +271,11 @@ const VetPlanning = () => {
             Aucun vétérinaire actif n'a été trouvé. Veuillez ajouter des vétérinaires dans la section Paramètres pour pouvoir gérer les attributions de créneaux.
           </AlertDescription>
         </Alert>
+      )}
+
+      {/* Gestionnaire de blocages récurrents */}
+      {viewMode === 'daily' && showRecurringBlocks && canManageAssignments && (
+        <RecurringBlocksManager veterinarians={veterinarians} />
       )}
 
       {/* Gestionnaire d'attributions - visible uniquement en vue quotidienne */}
