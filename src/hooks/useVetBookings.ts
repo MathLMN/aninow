@@ -67,20 +67,18 @@ export const useVetBookings = () => {
     return [...rawBookings, ...uniqueRecurringBlocks];
   }, [rawBookings, generateRecurringBlocksForDate]);
 
-  // Calculer les statistiques
+  // Calculer les statistiques basées uniquement sur les vrais rendez-vous (rawBookings)
   const stats = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
     
-    // Filtrer seulement les vrais rendez-vous (pas les blocages récurrents)
-    const realBookings = rawBookings.filter(booking => !booking.is_recurring_block);
-    
-    const todayBookings = realBookings.filter(booking => 
+    // rawBookings contient seulement les vrais rendez-vous de la base de données
+    const todayBookings = rawBookings.filter(booking => 
       booking.appointment_date === today || booking.created_at.split('T')[0] === today
     ).length;
     
-    const total = realBookings.length;
-    const pending = realBookings.filter(booking => booking.status === 'pending').length;
-    const highUrgency = realBookings.filter(booking => booking.urgency_score && booking.urgency_score >= 7).length;
+    const total = rawBookings.length;
+    const pending = rawBookings.filter(booking => booking.status === 'pending').length;
+    const highUrgency = rawBookings.filter(booking => booking.urgency_score && booking.urgency_score >= 7).length;
     
     return {
       todayBookings,
