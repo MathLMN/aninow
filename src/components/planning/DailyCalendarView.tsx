@@ -1,12 +1,12 @@
-
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { DailyCalendarGrid } from "./DailyCalendarGrid";
 import { BlockSlotModal } from "./BlockSlotModal";
+import { EnhancedDateNavigation } from "./EnhancedDateNavigation";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 
 interface DailyCalendarViewProps {
@@ -52,10 +52,6 @@ export const DailyCalendarView = ({
     const newDate = new Date(selectedDate);
     newDate.setDate(selectedDate.getDate() + (direction === 'next' ? 1 : -1));
     onDateChange(newDate);
-  };
-
-  const goToToday = () => {
-    onDateChange(new Date());
   };
 
   const handleBlockSlot = (timeSlot: { date: string; time: string; veterinarian: string }) => {
@@ -128,14 +124,10 @@ export const DailyCalendarView = ({
               </div>
             </div>
 
-            <Button
-              variant="outline"
-              onClick={goToToday}
-              className="flex items-center gap-2"
-            >
-              <Calendar className="h-4 w-4" />
-              Aujourd'hui
-            </Button>
+            <EnhancedDateNavigation
+              selectedDate={selectedDate}
+              onDateChange={onDateChange}
+            />
           </div>
         </CardContent>
       </Card>
