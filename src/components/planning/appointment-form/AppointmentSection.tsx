@@ -22,84 +22,96 @@ export const AppointmentSection = ({
   calculateEndTime
 }: AppointmentSectionProps) => {
   return (
-    <div className="space-y-4">
-      <h3 className="font-semibold text-vet-navy flex items-center">
-        <Calendar className="h-4 w-4 mr-2" />
-        Informations du rendez-vous
-      </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="appointment_date">Date</Label>
-          <Input
-            id="appointment_date"
-            type="date"
-            value={formData.appointment_date}
-            onChange={(e) => onFieldUpdate('appointment_date', e.target.value)}
-            required
-          />
+    <div className="space-y-3">
+      <div className="flex items-center mb-3">
+        <Calendar className="h-5 w-5 mr-2 text-blue-600" />
+        <h3 className="font-semibold text-blue-900 text-lg">Rendez-vous</h3>
+      </div>
+      
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label htmlFor="appointment_date" className="text-xs font-medium text-gray-700">Date *</Label>
+            <Input
+              id="appointment_date"
+              type="date"
+              value={formData.appointment_date}
+              onChange={(e) => onFieldUpdate('appointment_date', e.target.value)}
+              required
+              className="h-8 text-sm"
+            />
+          </div>
+          <div>
+            <Label htmlFor="appointment_time" className="text-xs font-medium text-gray-700">Heure *</Label>
+            <Input
+              id="appointment_time"
+              type="time"
+              value={formData.appointment_time}
+              onChange={(e) => onFieldUpdate('appointment_time', e.target.value)}
+              required
+              className="h-8 text-sm"
+            />
+          </div>
         </div>
+
         <div>
-          <Label htmlFor="appointment_time">Heure</Label>
-          <Input
-            id="appointment_time"
-            type="time"
-            value={formData.appointment_time}
-            onChange={(e) => onFieldUpdate('appointment_time', e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="veterinarian_id">Vétérinaire</Label>
+          <Label htmlFor="veterinarian_id" className="text-xs font-medium text-gray-700">Vétérinaire</Label>
           <Select value={formData.veterinarian_id} onValueChange={(value) => onFieldUpdate('veterinarian_id', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Sélectionnez un vétérinaire" />
+            <SelectTrigger className="h-8 text-sm">
+              <SelectValue placeholder="Sélectionnez..." />
             </SelectTrigger>
             <SelectContent>
               {veterinarians.map((vet) => (
-                <SelectItem key={vet.id} value={vet.id}>
+                <SelectItem key={vet.id} value={vet.id} className="text-sm">
                   {vet.name} - {vet.specialty}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
+
         <div>
-          <Label htmlFor="consultation_type_id">Type de consultation</Label>
+          <Label htmlFor="consultation_type_id" className="text-xs font-medium text-gray-700">Type de consultation</Label>
           <Select value={formData.consultation_type_id} onValueChange={onConsultationTypeChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Sélectionnez un type" />
+            <SelectTrigger className="h-8 text-sm">
+              <SelectValue placeholder="Sélectionnez..." />
             </SelectTrigger>
             <SelectContent>
               {consultationTypes.map((type) => (
-                <SelectItem key={type.id} value={type.id}>
+                <SelectItem key={type.id} value={type.id} className="text-sm">
                   {type.name} ({type.duration_minutes} min)
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-        <div>
-          <Label htmlFor="duration_minutes">Durée (minutes)</Label>
-          <Input
-            id="duration_minutes"
-            type="number"
-            min="5"
-            step="5"
-            value={formData.duration_minutes}
-            onChange={(e) => onFieldUpdate('duration_minutes', parseInt(e.target.value) || 15)}
-          />
-        </div>
-        <div>
-          <Label>Heure de fin</Label>
-          <div className="flex items-center text-sm text-vet-brown bg-gray-50 p-2 rounded">
-            <Clock className="h-4 w-4 mr-1" />
-            {calculateEndTime(formData.appointment_time, formData.duration_minutes) || '--:--'}
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label htmlFor="duration_minutes" className="text-xs font-medium text-gray-700">Durée (min)</Label>
+            <Input
+              id="duration_minutes"
+              type="number"
+              min="5"
+              step="5"
+              value={formData.duration_minutes}
+              onChange={(e) => onFieldUpdate('duration_minutes', parseInt(e.target.value) || 15)}
+              className="h-8 text-sm"
+            />
+          </div>
+          <div>
+            <Label className="text-xs font-medium text-gray-700">Heure de fin</Label>
+            <div className="flex items-center text-xs text-blue-700 bg-blue-50 p-2 rounded border h-8">
+              <Clock className="h-3 w-3 mr-1" />
+              {calculateEndTime(formData.appointment_time, formData.duration_minutes) || '--:--'}
+            </div>
           </div>
         </div>
+
         <div>
-          <Label htmlFor="booking_source">Source du RDV</Label>
+          <Label htmlFor="booking_source" className="text-xs font-medium text-gray-700">Source</Label>
           <Select value={formData.booking_source} onValueChange={(value) => onFieldUpdate('booking_source', value)}>
-            <SelectTrigger>
+            <SelectTrigger className="h-8 text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

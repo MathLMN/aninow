@@ -7,6 +7,7 @@ import { ClientSection } from "./appointment-form/ClientSection";
 import { AnimalSection } from "./appointment-form/AnimalSection";
 import { ConsultationSection } from "./appointment-form/ConsultationSection";
 import { useAppointmentForm } from "./appointment-form/useAppointmentForm";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface CreateAppointmentModalProps {
   isOpen: boolean;
@@ -46,52 +47,70 @@ export const CreateAppointmentModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-vet-navy">Créer un nouveau rendez-vous</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="max-w-5xl max-h-[95vh] p-0">
+        <DialogHeader className="px-6 py-4 border-b bg-gradient-to-r from-vet-navy/5 to-vet-sage/5">
+          <DialogTitle className="text-xl font-bold text-vet-navy">Créer un nouveau rendez-vous</DialogTitle>
+          <DialogDescription className="text-sm text-vet-brown">
             Saisir les informations pour un rendez-vous pris par téléphone ou sur place
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <AppointmentSection
-            formData={formData}
-            veterinarians={veterinarians}
-            consultationTypes={consultationTypes}
-            onFieldUpdate={updateField}
-            onConsultationTypeChange={onConsultationTypeChange}
-            calculateEndTime={calculateEndTime}
-          />
+        <ScrollArea className="max-h-[calc(95vh-140px)]">
+          <form onSubmit={handleSubmit} className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Section Rendez-vous */}
+              <div className="bg-blue-50/50 border border-blue-200 rounded-lg p-4">
+                <AppointmentSection
+                  formData={formData}
+                  veterinarians={veterinarians}
+                  consultationTypes={consultationTypes}
+                  onFieldUpdate={updateField}
+                  onConsultationTypeChange={onConsultationTypeChange}
+                  calculateEndTime={calculateEndTime}
+                />
+              </div>
 
-          <ClientSection
-            formData={formData}
-            onFieldUpdate={updateField}
-          />
+              {/* Section Client */}
+              <div className="bg-green-50/50 border border-green-200 rounded-lg p-4">
+                <ClientSection
+                  formData={formData}
+                  onFieldUpdate={updateField}
+                />
+              </div>
 
-          <AnimalSection
-            formData={formData}
-            onFieldUpdate={updateField}
-          />
+              {/* Section Animal */}
+              <div className="bg-amber-50/50 border border-amber-200 rounded-lg p-4">
+                <AnimalSection
+                  formData={formData}
+                  onFieldUpdate={updateField}
+                />
+              </div>
+            </div>
 
-          <ConsultationSection
-            formData={formData}
-            onFieldUpdate={updateField}
-          />
+            {/* Section Consultation - pleine largeur */}
+            <div className="mt-6 bg-purple-50/50 border border-purple-200 rounded-lg p-4">
+              <ConsultationSection
+                formData={formData}
+                onFieldUpdate={updateField}
+              />
+            </div>
+          </form>
+        </ScrollArea>
 
-          <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Annuler
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={isSubmitting}
-              className="bg-vet-sage hover:bg-vet-sage/90 text-white"
-            >
-              {isSubmitting ? 'Création...' : 'Créer le rendez-vous'}
-            </Button>
-          </div>
-        </form>
+        {/* Actions en bas */}
+        <div className="flex justify-end space-x-3 px-6 py-4 border-t bg-gray-50/50">
+          <Button type="button" variant="outline" onClick={onClose} className="px-6">
+            Annuler
+          </Button>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="bg-vet-sage hover:bg-vet-sage/90 text-white px-6"
+            onClick={handleSubmit}
+          >
+            {isSubmitting ? 'Création...' : 'Créer le rendez-vous'}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
