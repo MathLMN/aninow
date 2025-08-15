@@ -1,6 +1,7 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Settings, AlertCircle, Calendar } from "lucide-react";
+import { AlertCircle, Calendar } from "lucide-react";
 import { useVetBookings } from "@/hooks/useVetBookings";
 import { useSlotManagement } from "@/hooks/useSlotManagement";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
@@ -12,7 +13,7 @@ import { AppointmentDetailsModal } from "@/components/planning/AppointmentDetail
 import { CreateAppointmentModal } from "@/components/planning/CreateAppointmentModal";
 import { PlanningHeader } from "@/components/planning/PlanningHeader";
 import { WeeklyNavigation } from "@/components/planning/WeeklyNavigation";
-import { SlotAssignmentManager } from "@/components/planning/SlotAssignmentManager";
+import { SlotAssignmentSheet } from "@/components/planning/SlotAssignmentSheet";
 import { RecurringBlocksModal } from "@/components/planning/RecurringBlocksModal";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState, useEffect } from "react";
@@ -37,8 +38,6 @@ const VetPlanning = () => {
     setIsCreateModalOpen,
     isDetailsModalOpen,
     setIsDetailsModalOpen,
-    showAssignmentManager,
-    setShowAssignmentManager,
     filters,
     setFilters,
     handleAppointmentClick,
@@ -238,16 +237,15 @@ const VetPlanning = () => {
               <Calendar className="h-4 w-4" />
               Blocages récurrents
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowAssignmentManager(!showAssignmentManager)}
-              className="flex items-center gap-2"
-              disabled={!canManageAssignments}
-            >
-              <Settings className="h-4 w-4" />
-              {showAssignmentManager ? 'Masquer' : 'Gérer'} les attributions
-            </Button>
+            
+            <SlotAssignmentSheet
+              assignments={assignments}
+              veterinarians={veterinarians}
+              selectedDate={currentDate}
+              onAssignmentsChange={refreshAssignments}
+              canManageAssignments={canManageAssignments}
+            />
+            
             {!canManageAssignments && (
               <Button
                 variant="outline"
@@ -271,16 +269,6 @@ const VetPlanning = () => {
             Aucun vétérinaire actif n'a été trouvé. Veuillez ajouter des vétérinaires dans la section Paramètres pour pouvoir gérer les attributions de créneaux.
           </AlertDescription>
         </Alert>
-      )}
-
-      {/* Gestionnaire d'attributions - visible uniquement en vue quotidienne */}
-      {viewMode === 'daily' && showAssignmentManager && canManageAssignments && (
-        <SlotAssignmentManager
-          assignments={assignments}
-          veterinarians={veterinarians}
-          selectedDate={currentDate}
-          onAssignmentsChange={refreshAssignments}
-        />
       )}
 
       {/* Filtres pour la vue hebdomadaire */}
