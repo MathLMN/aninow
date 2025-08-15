@@ -220,6 +220,7 @@ export type Database = {
           client_email: string
           client_name: string
           client_phone: string
+          client_status: string | null
           clinic_id: string
           conditional_answers: Json | null
           consultation_reason: string
@@ -277,6 +278,7 @@ export type Database = {
           client_email: string
           client_name: string
           client_phone: string
+          client_status?: string | null
           clinic_id: string
           conditional_answers?: Json | null
           consultation_reason: string
@@ -334,6 +336,7 @@ export type Database = {
           client_email?: string
           client_name?: string
           client_phone?: string
+          client_status?: string | null
           clinic_id?: string
           conditional_answers?: Json | null
           consultation_reason?: string
