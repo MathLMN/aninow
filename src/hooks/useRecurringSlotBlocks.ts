@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -138,31 +137,58 @@ export const useRecurringSlotBlocks = () => {
     }
   });
 
+  // Fonction pour générer les créneaux de 15 minutes entre deux heures
+  const generateTimeSlots = (startTime: string, endTime: string) => {
+    const slots = [];
+    const start = new Date(`2000-01-01T${startTime}`);
+    const end = new Date(`2000-01-01T${endTime}`);
+    
+    const current = new Date(start);
+    
+    while (current < end) {
+      const timeString = current.toTimeString().slice(0, 5);
+      slots.push(timeString);
+      current.setMinutes(current.getMinutes() + 15);
+    }
+    
+    return slots;
+  };
+
   // Fonction pour générer les blocages récurrents pour une date donnée
   const generateRecurringBlocksForDate = (date: Date) => {
     const dayOfWeek = date.getDay();
+    const dateStr = date.toISOString().split('T')[0];
+    
     return recurringBlocks
       .filter(block => block.day_of_week === dayOfWeek)
-      .map(block => ({
-        id: `recurring-${block.id}-${date.toISOString().split('T')[0]}`,
-        clinic_id: block.clinic_id,
-        veterinarian_id: block.veterinarian_id,
-        appointment_date: date.toISOString().split('T')[0],
-        appointment_time: block.start_time,
-        appointment_end_time: block.end_time,
-        client_name: 'CRÉNEAU BLOQUÉ',
-        client_email: 'blocked@clinic.internal',
-        client_phone: '0000000000',
-        preferred_contact_method: 'email',
-        animal_species: 'N/A',
-        animal_name: 'N/A',
-        consultation_reason: block.title,
-        status: 'confirmed',
-        is_blocked: true,
-        duration_minutes: calculateDurationMinutes(block.start_time, block.end_time),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }));
+      .flatMap(block => {
+        // Générer un blocage pour chaque créneau de 15 minutes dans la plage
+        const timeSlots = generateTimeSlots(block.start_time, block.end_time);
+        
+        return timeSlots.map((timeSlot, index) => ({
+          id: `recurring-${block.id}-${dateStr}-${timeSlot}`,
+          clinic_id: block.clinic_id,
+          veterinarian_id: block.veterinarian_id,
+          appointment_date: dateStr,
+          appointment_time: timeSlot,
+          appointment_end_time: index === timeSlots.length - 1 ? block.end_time : timeSlot,
+          client_name: 'CRÉNEAU BLOQUÉ',
+          client_email: 'blocked@clinic.internal',
+          client_phone: '0000000000',
+          preferred_contact_method: 'email',
+          animal_species: 'N/A',
+          animal_name: 'N/A',
+          consultation_reason: block.title,
+          status: 'confirmed',
+          is_blocked: true,
+          duration_minutes: 15,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          // Ajouter des métadonnées pour identifier les blocages récurrents
+          recurring_block_id: block.id,
+          recurring_block_title: block.title
+        }));
+      });
   };
 
   // Fonction utilitaire pour calculer la durée en minutes
