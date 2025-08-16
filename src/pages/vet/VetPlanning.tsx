@@ -116,7 +116,7 @@ export default function VetPlanning() {
       <div className="flex-1 flex min-h-0 p-1 gap-1">
         {/* Sidebar de navigation ultra-compacte */}
         <div className="w-48 flex-shrink-0 h-full">
-          <div className="bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg h-full flex flex-col">
+          <div className="bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg h-[calc(100vh-140px)] flex flex-col">
             {/* Header compact avec notification */}
             <div className="flex items-center justify-end p-2 border-b border-vet-blue/20">
               <PendingBookingsNotification />
