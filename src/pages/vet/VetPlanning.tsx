@@ -116,6 +116,7 @@ export default function VetPlanning() {
         <PlanningHeader
           viewMode={viewMode}
           onViewModeChange={setViewMode}
+          selectedDate={selectedDate}
         />
 
         {viewMode === 'daily' ? (
