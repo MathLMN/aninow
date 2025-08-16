@@ -28,34 +28,31 @@ export const EnhancedDateNavigation = ({
 
   if (compact) {
     return (
-      <div className="space-y-2 h-full flex flex-col">
-        {/* Navigation avec flèches et date - ultra compact */}
-        <div className="flex items-center justify-between mb-2">
+      <div className="h-full flex flex-col gap-1">
+        {/* Navigation ultra-compacte */}
+        <div className="flex items-center justify-between">
           <Button
             variant="outline"
             size="sm"
             onClick={() => navigateDay('prev')}
-            className="border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white h-6 w-6 p-0"
+            className="border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white h-5 w-5 p-0"
           >
-            <ChevronLeft className="h-3 w-3" />
+            <ChevronLeft className="h-2.5 w-2.5" />
           </Button>
           
           <div className="text-center flex-1 mx-1">
-            <h3 className="text-[10px] font-semibold text-vet-navy leading-tight">
+            <h3 className="text-[9px] font-semibold text-vet-navy leading-tight">
               {format(selectedDate, 'EEE d MMM', { locale: fr })}
             </h3>
-            <p className="text-[8px] text-vet-brown">
-              8h-12h / 14h-19h
-            </p>
           </div>
           
           <Button
             variant="outline"
             size="sm"
             onClick={() => navigateDay('next')}
-            className="border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white h-6 w-6 p-0"
+            className="border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white h-5 w-5 p-0"
           >
-            <ChevronRight className="h-3 w-3" />
+            <ChevronRight className="h-2.5 w-2.5" />
           </Button>
         </div>
 
@@ -63,13 +60,13 @@ export const EnhancedDateNavigation = ({
           variant="ghost"
           size="sm"
           onClick={() => onDateChange(new Date())}
-          className="w-full text-vet-blue hover:bg-vet-blue/10 h-6 text-[10px] mb-2"
+          className="w-full text-vet-blue hover:bg-vet-blue/10 h-5 text-[9px]"
         >
           Aujourd'hui
         </Button>
 
-        {/* Calendrier compact dans l'espace restant */}
-        <div className="flex-1 border border-vet-blue/30 rounded-lg overflow-hidden min-h-0">
+        {/* Calendrier ultra-compact - hauteur limitée */}
+        <div className="flex-1 border border-vet-blue/30 rounded overflow-hidden" style={{ maxHeight: '180px' }}>
           <Calendar
             mode="single"
             selected={selectedDate}
@@ -79,25 +76,25 @@ export const EnhancedDateNavigation = ({
               }
             }}
             locale={fr}
-            className={cn("p-1 pointer-events-auto w-full h-full")}
+            className={cn("p-0.5 pointer-events-auto w-full h-full")}
             classNames={{
               months: "flex flex-col h-full",
-              month: "space-y-1 w-full flex-1 flex flex-col",
-              caption: "flex justify-center pt-0.5 relative items-center text-[10px] font-medium text-vet-navy",
-              caption_label: "text-[10px] font-medium text-vet-navy",
-              nav: "space-x-1 flex items-center",
+              month: "space-y-0.5 w-full flex-1 flex flex-col",
+              caption: "flex justify-center relative items-center text-[8px] font-medium text-vet-navy p-0.5",
+              caption_label: "text-[8px] font-medium text-vet-navy",
+              nav: "space-x-0.5 flex items-center",
               nav_button: cn(
-                "h-4 w-4 bg-transparent p-0 opacity-70 hover:opacity-100 border border-vet-blue/30 text-vet-navy hover:bg-vet-blue/10"
+                "h-3 w-3 bg-transparent p-0 opacity-70 hover:opacity-100 border border-vet-blue/30 text-vet-navy hover:bg-vet-blue/10"
               ),
               nav_button_previous: "absolute left-0.5",
               nav_button_next: "absolute right-0.5",
               table: "w-full border-collapse flex-1",
               head_row: "flex w-full",
-              head_cell: "text-vet-brown rounded-md w-5 font-normal text-[8px] flex-1 text-center p-0",
-              row: "flex w-full mt-0.5",
-              cell: "h-5 w-5 text-center text-xs p-0 relative flex-1",
+              head_cell: "text-vet-brown rounded w-4 font-normal text-[7px] flex-1 text-center p-0",
+              row: "flex w-full",
+              cell: "h-4 w-4 text-center text-xs p-0 relative flex-1",
               day: cn(
-                "h-5 w-full p-0 font-normal aria-selected:opacity-100 text-[8px] hover:bg-vet-blue/10 rounded"
+                "h-4 w-full p-0 font-normal aria-selected:opacity-100 text-[7px] hover:bg-vet-blue/10 rounded"
               ),
               day_selected: "bg-vet-blue text-white hover:bg-vet-blue hover:text-white focus:bg-vet-blue focus:text-white",
               day_today: "bg-vet-sage/20 text-vet-navy font-medium",

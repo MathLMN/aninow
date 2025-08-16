@@ -111,19 +111,19 @@ export default function VetPlanning() {
   const weekDates = getWeekDates(selectedDate);
 
   return (
-    <div className="h-screen bg-gradient-to-br from-vet-blue/5 via-white to-vet-sage/5 flex flex-col overflow-hidden">
-      {/* Layout container optimisé pour écran complet */}
-      <div className="flex-1 flex min-h-0 p-1 gap-1">
-        {/* Sidebar de navigation ultra-compacte */}
-        <div className="w-48 flex-shrink-0">
-          <div className="bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg h-full flex flex-col">
+    <div className="h-screen bg-gradient-to-br from-vet-blue/5 via-white to-vet-sage/5 grid grid-rows-[1fr_auto] overflow-hidden">
+      {/* Zone principale avec sidebar et planning - optimisée pour utiliser tout l'espace disponible */}
+      <div className="grid grid-cols-[200px_1fr] gap-0.5 p-0.5 min-h-0">
+        {/* Sidebar ultra-compacte */}
+        <div className="bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg overflow-hidden">
+          <div className="h-full flex flex-col">
             {/* Header compact avec notification */}
-            <div className="flex items-center justify-end p-2 border-b border-vet-blue/20">
+            <div className="flex items-center justify-end p-1 border-b border-vet-blue/20 flex-shrink-0">
               <PendingBookingsNotification />
             </div>
             
-            {/* Contenu de navigation optimisé */}
-            <div className="flex-1 p-2 min-h-0">
+            {/* Navigation compacte - utilise tout l'espace restant */}
+            <div className="flex-1 min-h-0 p-1">
               {viewMode === 'daily' ? (
                 <DailyCalendarView
                   selectedDate={selectedDate}
@@ -155,48 +155,45 @@ export default function VetPlanning() {
           </div>
         </div>
 
-        {/* Zone principale avec planning optimisé */}
-        <div className="flex-1 flex flex-col min-h-0 gap-1">
-          {/* Contenu du planning principal - hauteur maximale */}
-          <div className="flex-1 min-h-0">
-            {viewMode === 'daily' ? (
-              <DailyCalendarView
-                selectedDate={selectedDate}
-                onDateChange={setSelectedDate}
-                bookings={todayBookings}
-                veterinarians={veterinarians}
-                onCreateAppointment={handleCreateAppointment}
-                onAppointmentClick={handleAppointmentClick}
-                onValidateBooking={handleValidateBooking}
-                onCancelBooking={handleCancelBooking}
-                onDuplicateBooking={handleDuplicateBooking}
-                onMoveBooking={handleMoveBooking}
-                onDeleteBooking={handleDeleteBooking}
-                onBlockSlot={handleBlockSlot}
-                mainViewMode={true}
-              />
-            ) : (
-              <WeeklyCalendarView
-                weekDates={weekDates}
-                bookings={bookings}
-                veterinarians={veterinarians}
-                filters={{ veterinarian: 'all', status: 'all' }}
-                isLoading={false}
-                onCreateAppointment={handleCreateAppointment}
-                onAppointmentClick={handleAppointmentClick}
-              />
-            )}
-          </div>
-
-          {/* Header de planning compact en bas */}
-          <div className="flex-shrink-0">
-            <PlanningHeader
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
+        {/* Zone planning principale - utilise tout l'espace disponible */}
+        <div className="bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg overflow-hidden">
+          {viewMode === 'daily' ? (
+            <DailyCalendarView
               selectedDate={selectedDate}
+              onDateChange={setSelectedDate}
+              bookings={todayBookings}
+              veterinarians={veterinarians}
+              onCreateAppointment={handleCreateAppointment}
+              onAppointmentClick={handleAppointmentClick}
+              onValidateBooking={handleValidateBooking}
+              onCancelBooking={handleCancelBooking}
+              onDuplicateBooking={handleDuplicateBooking}
+              onMoveBooking={handleMoveBooking}
+              onDeleteBooking={handleDeleteBooking}
+              onBlockSlot={handleBlockSlot}
+              mainViewMode={true}
             />
-          </div>
+          ) : (
+            <WeeklyCalendarView
+              weekDates={weekDates}
+              bookings={bookings}
+              veterinarians={veterinarians}
+              filters={{ veterinarian: 'all', status: 'all' }}
+              isLoading={false}
+              onCreateAppointment={handleCreateAppointment}
+              onAppointmentClick={handleAppointmentClick}
+            />
+          )}
         </div>
+      </div>
+
+      {/* Header de planning compact en bas - hauteur fixe minimale */}
+      <div className="flex-shrink-0 p-0.5">
+        <PlanningHeader
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          selectedDate={selectedDate}
+        />
       </div>
 
       <CreateAppointmentModal

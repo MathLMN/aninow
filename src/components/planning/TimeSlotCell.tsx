@@ -1,4 +1,3 @@
-
 import { Plus, Ban, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -26,6 +25,8 @@ interface TimeSlotCellProps {
   // Nouvelles props pour gérer l'affichage des blocages
   isFirstBlockedSlot?: boolean;
   blockedSlotsCount?: number;
+  // Nouvelle prop pour le mode compact
+  compactMode?: boolean;
 }
 
 export const TimeSlotCell = ({
@@ -45,7 +46,8 @@ export const TimeSlotCell = ({
   onBlockSlot,
   isVeterinarianAbsent = false,
   isFirstBlockedSlot = false,
-  blockedSlotsCount = 1
+  blockedSlotsCount = 1,
+  compactMode = false
 }: TimeSlotCellProps) => {
   const [showActions, setShowActions] = useState(false);
 
@@ -63,12 +65,12 @@ export const TimeSlotCell = ({
     }
   };
 
-  // Calculer la hauteur du rendez-vous en fonction de sa durée
+  // Calculer la hauteur du rendez-vous en fonction de sa durée - mode compact
   const getAppointmentHeight = (booking: any) => {
     const duration = booking.duration_minutes || 15;
-    // Chaque tranche de 15 minutes = 30px de hauteur
+    const baseHeight = compactMode ? 16 : 30; // Hauteur réduite en mode compact
     const slotsNeeded = Math.ceil(duration / 15);
-    return slotsNeeded * 30;
+    return slotsNeeded * baseHeight;
   };
 
   const handleCellClick = () => {
@@ -150,7 +152,7 @@ export const TimeSlotCell = ({
       <div
         className={cn(
           "border-l border-gray-200/30 relative transition-colors",
-          "h-[30px]",
+          compactMode ? "h-4" : "h-[30px]", // Hauteur adaptée au mode compact
           getCellBackground(),
           canInteract && "cursor-pointer group hover:bg-blue-50/30",
           !canInteract && canCreateTask && "group hover:bg-yellow-50/30"
@@ -159,25 +161,29 @@ export const TimeSlotCell = ({
         onMouseEnter={() => (canInteract || canCreateTask) && setShowActions(true)}
         onMouseLeave={() => setShowActions(false)}
       >
-        {/* Affichage spécial pour les créneaux bloqués récurrents - seulement sur le premier créneau */}
+        {/* Affichage spécial pour les créneaux bloqués récurrents - adapté au mode compact */}
         {isBlocked && recurringBlock && isFirstBlockedSlot && (
           <div 
-            className="absolute inset-0 flex items-center justify-center bg-gray-400/60 text-gray-800 text-[10px] font-medium z-10"
+            className="absolute inset-0 flex items-center justify-center bg-gray-400/60 text-gray-800 font-medium z-10"
             style={{ 
-              height: `${blockedSlotsCount * 30}px`,
-              minHeight: '30px'
+              height: `${blockedSlotsCount * (compactMode ? 16 : 30)}px`,
+              minHeight: compactMode ? '16px' : '30px'
             }}
           >
-            <div className="text-center px-1">
-              <div className="truncate">BLOQUÉ</div>
-              <div className="truncate text-[9px] opacity-80">
-                {recurringBlock.recurring_block_title}
+            <div className="text-center px-0.5">
+              <div className={cn("truncate", compactMode ? "text-[7px]" : "text-[10px]")}>
+                BLOQUÉ
               </div>
+              {!compactMode && (
+                <div className="truncate text-[9px] opacity-80">
+                  {recurringBlock.recurring_block_title}
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* Affichage des rendez-vous normaux */}
+        {/* Affichage des rendez-vous normaux - adapté au mode compact */}
         {bookings.filter(booking => !booking.is_blocked && !booking.recurring_block_id).map((booking) => (
           <div
             key={booking.id}
@@ -186,7 +192,8 @@ export const TimeSlotCell = ({
               onAppointmentClick(booking);
             }}
             className={cn(
-              "absolute inset-x-0 top-0 p-1 rounded-sm border transition-shadow text-[10px] leading-tight cursor-pointer hover:shadow-sm",
+              "absolute inset-x-0 top-0 p-0.5 rounded-sm border transition-shadow cursor-pointer hover:shadow-sm",
+              compactMode ? "text-[7px] leading-tight" : "text-[10px] leading-tight",
               getStatusColor(booking.status, false)
             )}
             style={{ 
@@ -194,63 +201,82 @@ export const TimeSlotCell = ({
               zIndex: 10
             }}
           >
-            {/* Indicateur d'arrivée - Point rouge en haut à droite */}
+            {/* Indicateur d'arrivée adapté au mode compact */}
             {booking.arrival_time && (
-              <div className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white z-20" title={`Client arrivé à ${booking.arrival_time}`}></div>
+              <div 
+                className={cn(
+                  "absolute top-0 right-0 bg-red-500 rounded-full border border-white z-20",
+                  compactMode ? "w-1 h-1" : "w-2 h-2"
+                )} 
+                title={`Client arrivé à ${booking.arrival_time}`}
+              />
             )}
             
-            <div className="font-medium truncate text-[10px]">
+            <div className={cn("font-medium truncate", compactMode ? "text-[7px]" : "text-[10px]")}>
               {booking.client_name}
             </div>
-            <div className="truncate text-[9px] opacity-80">
-              {booking.animal_name}
-            </div>
-            {booking.duration_minutes && booking.duration_minutes > 15 && (
-              <div className="text-[8px] opacity-70 mt-1">
-                {booking.duration_minutes} min
-              </div>
-            )}
-            {booking.status === 'pending' && (
-              <div className="text-[8px] opacity-70 font-medium">
-                En attente
-              </div>
+            {!compactMode && (
+              <>
+                <div className="truncate text-[9px] opacity-80">
+                  {booking.animal_name}
+                </div>
+                {booking.duration_minutes && booking.duration_minutes > 15 && (
+                  <div className="text-[8px] opacity-70 mt-1">
+                    {booking.duration_minutes} min
+                  </div>
+                )}
+                {booking.status === 'pending' && (
+                  <div className="text-[8px] opacity-70 font-medium">
+                    En attente
+                  </div>
+                )}
+              </>
             )}
           </div>
         ))}
         
-        {/* Actions au survol pour créneaux ouverts */}
+        {/* Actions au survol adaptées au mode compact */}
         {bookings.length === 0 && canInteract && showActions && (
           <div className="absolute inset-0 flex items-center justify-center bg-blue-50/40 transition-opacity z-20">
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-0.5">
               <button
                 onClick={handleCellClick}
-                className="p-1 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                className={cn(
+                  "rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors",
+                  compactMode ? "p-0.5 h-3 w-3" : "p-1"
+                )}
                 title="Ajouter un rendez-vous"
               >
-                <Plus className="h-3 w-3" />
+                <Plus className={compactMode ? "h-2 w-2" : "h-3 w-3"} />
               </button>
               {columnId !== 'asv' && (
                 <button
                   onClick={handleQuickBlock}
-                  className="p-1 rounded-full bg-red-600 hover:bg-red-700 text-white transition-colors"
+                  className={cn(
+                    "rounded-full bg-red-600 hover:bg-red-700 text-white transition-colors",
+                    compactMode ? "p-0.5 h-3 w-3" : "p-1"
+                  )}
                   title="Bloquer ce créneau"
                 >
-                  <Ban className="h-3 w-3" />
+                  <Ban className={compactMode ? "h-2 w-2" : "h-3 w-3"} />
                 </button>
               )}
             </div>
           </div>
         )}
 
-        {/* Actions au survol pour créneaux fermés - création de tâches */}
+        {/* Actions au survol pour créneaux fermés - adaptées au mode compact */}
         {bookings.length === 0 && !canInteract && canCreateTask && showActions && (
           <div className="absolute inset-0 flex items-center justify-center bg-yellow-50/40 transition-opacity z-20">
             <button
               onClick={handleCreateTask}
-              className="p-1 rounded-full bg-yellow-600 text-white hover:bg-yellow-700 transition-colors"
+              className={cn(
+                "rounded-full bg-yellow-600 text-white hover:bg-yellow-700 transition-colors",
+                compactMode ? "p-0.5 h-3 w-3" : "p-1"
+              )}
               title="Créer une tâche / note"
             >
-              <FileText className="h-3 w-3" />
+              <FileText className={compactMode ? "h-2 w-2" : "h-3 w-3"} />
             </button>
           </div>
         )}
