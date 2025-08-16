@@ -123,7 +123,7 @@ export default function VetPlanning() {
             </div>
             
             {/* Contenu de navigation optimisé */}
-            <div className="flex-1 p-2 min-h-0">
+            <div className="flex-1 p-2 overflow-hidden">
               {viewMode === 'daily' ? (
                 <DailyCalendarView
                   selectedDate={selectedDate}
