@@ -6,7 +6,7 @@ import { VetNavigation } from "./VetNavigation";
 const VetLayout = () => {
   return (
     <VetAuthGuard>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 font-poppins">
         <VetNavigation />
         <main className="pt-16">
           <Outlet />
