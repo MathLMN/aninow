@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { DailyCalendarView } from "@/components/planning/DailyCalendarView";
 import { WeeklyCalendarView } from "@/components/planning/WeeklyCalendarView";
@@ -112,17 +113,16 @@ export default function VetPlanning() {
 
   return (
     <div className="h-screen bg-gradient-to-br from-vet-blue/5 via-white to-vet-sage/5 flex flex-col">
-      {/* Layout container avec espacement minimal */}
-      <div className="flex-1 flex pt-1 pb-12 overflow-hidden">
-        {/* Sidebar de navigation réduite en largeur */}
-        <div className="w-56 flex-shrink-0 p-1 space-y-1">
-          {/* Panneau de navigation avec hauteur maximale */}
-          <div className="bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg p-3 h-full flex flex-col">
-            <div className="flex items-center justify-end mb-3">
+      {/* Layout container optimisé pour tenir sur l'écran */}
+      <div className="flex-1 flex pt-1 overflow-hidden">
+        {/* Sidebar de navigation compacte */}
+        <div className="w-52 flex-shrink-0 p-1">
+          <div className="bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg p-2 h-full flex flex-col">
+            <div className="flex items-center justify-end mb-2">
               <PendingBookingsNotification />
             </div>
             
-            {/* Contenu de navigation avec calendrier ouvert */}
+            {/* Contenu de navigation avec calendrier intégré */}
             <div className="flex-1 overflow-auto">
               {viewMode === 'daily' ? (
                 <DailyCalendarView
@@ -155,10 +155,10 @@ export default function VetPlanning() {
           </div>
         </div>
 
-        {/* Zone principale du planning avec plus d'espace */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Contenu du planning */}
-          <div className="flex-1 p-1">
+        {/* Zone principale avec planning et controls */}
+        <div className="flex-1 flex flex-col overflow-hidden p-1 space-y-2">
+          {/* Contenu du planning principal */}
+          <div className="flex-1 overflow-hidden">
             {viewMode === 'daily' ? (
               <DailyCalendarView
                 selectedDate={selectedDate}
@@ -187,15 +187,17 @@ export default function VetPlanning() {
               />
             )}
           </div>
+
+          {/* Header de planning intégré en bas */}
+          <div className="flex-shrink-0">
+            <PlanningHeader
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              selectedDate={selectedDate}
+            />
+          </div>
         </div>
       </div>
-
-      {/* Fixed bottom planning header */}
-      <PlanningHeader
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-        selectedDate={selectedDate}
-      />
 
       <CreateAppointmentModal
         isOpen={isCreateModalOpen}

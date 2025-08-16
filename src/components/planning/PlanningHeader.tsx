@@ -30,9 +30,9 @@ export const PlanningHeader = ({
 
   return (
     <>
-      {/* Bandeau fixe en bas d'écran */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-vet-blue/30 shadow-lg">
-        <div className="container mx-auto px-4 py-2">
+      {/* Bandeau intégré dans le layout */}
+      <div className="bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg shadow-sm">
+        <div className="px-4 py-2">
           <div className="flex items-center justify-between">
             {/* Sélecteur de vue à gauche */}
             <ViewModeSelector 
