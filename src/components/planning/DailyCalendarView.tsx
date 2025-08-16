@@ -102,49 +102,10 @@ export const DailyCalendarView = ({
     }
   };
 
-  // Si c'est le mode sidebar, afficher seulement la navigation
+  // Si c'est le mode sidebar, afficher seulement le calendrier
   if (sidebarMode) {
     return (
       <div className="space-y-4">
-        {/* Navigation quotidienne compacte */}
-        <div className="flex items-center justify-between">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigateDay('prev')}
-            className="border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white h-8 w-8 p-0"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          
-          <div className="text-center flex-1 mx-2">
-            <h3 className="text-sm font-semibold text-vet-navy">
-              {format(selectedDate, 'EEE d MMM', { locale: fr })}
-            </h3>
-            <p className="text-xs text-vet-brown">
-              8h-12h / 14h-19h
-            </p>
-          </div>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigateDay('next')}
-            className="border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white h-8 w-8 p-0"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onDateChange(new Date())}
-          className="w-full text-vet-blue hover:bg-vet-blue/10 h-8"
-        >
-          Aujourd'hui
-        </Button>
-
         <EnhancedDateNavigation 
           selectedDate={selectedDate} 
           onDateChange={onDateChange}

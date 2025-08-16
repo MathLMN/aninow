@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { DailyCalendarView } from "@/components/planning/DailyCalendarView";
 import { WeeklyCalendarView } from "@/components/planning/WeeklyCalendarView";
@@ -114,13 +113,12 @@ export default function VetPlanning() {
   return (
     <div className="h-screen bg-gradient-to-br from-vet-blue/5 via-white to-vet-sage/5 flex flex-col">
       {/* Layout container avec espacement minimal */}
-      <div className="flex-1 flex pt-2 pb-12 overflow-hidden">
+      <div className="flex-1 flex pt-1 pb-12 overflow-hidden">
         {/* Sidebar de navigation réduite en largeur */}
-        <div className="w-56 flex-shrink-0 p-2 space-y-2">
+        <div className="w-56 flex-shrink-0 p-1 space-y-1">
           {/* Panneau de navigation avec hauteur maximale */}
           <div className="bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg p-3 h-full flex flex-col">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-base font-semibold text-vet-navy">Navigation</h3>
+            <div className="flex items-center justify-end mb-3">
               <PendingBookingsNotification />
             </div>
             
@@ -160,7 +158,7 @@ export default function VetPlanning() {
         {/* Zone principale du planning avec plus d'espace */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Contenu du planning */}
-          <div className="flex-1 p-2">
+          <div className="flex-1 p-1">
             {viewMode === 'daily' ? (
               <DailyCalendarView
                 selectedDate={selectedDate}
