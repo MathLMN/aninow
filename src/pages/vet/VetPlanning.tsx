@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { DailyCalendarView } from "@/components/planning/DailyCalendarView";
 import { WeeklyCalendarView } from "@/components/planning/WeeklyCalendarView";
@@ -112,18 +111,19 @@ export default function VetPlanning() {
   const weekDates = getWeekDates(selectedDate);
 
   return (
-    <div className="h-screen bg-gradient-to-br from-vet-blue/5 via-white to-vet-sage/5 flex flex-col">
-      {/* Layout container optimisé pour tenir sur l'écran */}
-      <div className="flex-1 flex pt-1 overflow-hidden">
-        {/* Sidebar de navigation compacte */}
-        <div className="w-52 flex-shrink-0 p-1">
-          <div className="bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg p-2 h-full flex flex-col">
-            <div className="flex items-center justify-end mb-2">
+    <div className="h-screen bg-gradient-to-br from-vet-blue/5 via-white to-vet-sage/5 flex flex-col overflow-hidden">
+      {/* Layout container optimisé pour écran complet */}
+      <div className="flex-1 flex min-h-0 p-1 gap-1">
+        {/* Sidebar de navigation ultra-compacte */}
+        <div className="w-48 flex-shrink-0">
+          <div className="bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg h-full flex flex-col">
+            {/* Header compact avec notification */}
+            <div className="flex items-center justify-end p-2 border-b border-vet-blue/20">
               <PendingBookingsNotification />
             </div>
             
-            {/* Contenu de navigation avec calendrier intégré */}
-            <div className="flex-1 overflow-auto">
+            {/* Contenu de navigation optimisé */}
+            <div className="flex-1 p-2 min-h-0">
               {viewMode === 'daily' ? (
                 <DailyCalendarView
                   selectedDate={selectedDate}
@@ -155,10 +155,10 @@ export default function VetPlanning() {
           </div>
         </div>
 
-        {/* Zone principale avec planning et controls */}
-        <div className="flex-1 flex flex-col overflow-hidden p-1 space-y-2">
-          {/* Contenu du planning principal */}
-          <div className="flex-1 overflow-hidden">
+        {/* Zone principale avec planning optimisé */}
+        <div className="flex-1 flex flex-col min-h-0 gap-1">
+          {/* Contenu du planning principal - hauteur maximale */}
+          <div className="flex-1 min-h-0">
             {viewMode === 'daily' ? (
               <DailyCalendarView
                 selectedDate={selectedDate}
@@ -188,7 +188,7 @@ export default function VetPlanning() {
             )}
           </div>
 
-          {/* Header de planning intégré en bas */}
+          {/* Header de planning compact en bas */}
           <div className="flex-shrink-0">
             <PlanningHeader
               viewMode={viewMode}
