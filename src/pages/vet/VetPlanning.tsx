@@ -112,11 +112,20 @@ export default function VetPlanning() {
 
   return (
     <div className="h-screen bg-gradient-to-br from-vet-blue/5 via-white to-vet-sage/5 flex flex-col overflow-hidden">
-      {/* Layout container optimisé pour écran complet */}
+      {/* Header de planning en pleine largeur */}
+      <div className="flex-shrink-0 p-1">
+        <PlanningHeader
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          selectedDate={selectedDate}
+        />
+      </div>
+
+      {/* Layout container optimisé */}
       <div className="flex-1 flex min-h-0 p-1 gap-1">
-        {/* Sidebar de navigation ultra-compacte */}
+        {/* Sidebar de navigation réduite en hauteur */}
         <div className="w-48 flex-shrink-0 h-full">
-          <div className="bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg h-full flex flex-col">
+          <div className="bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg h-[60vh] flex flex-col">
             {/* Header compact avec notification */}
             <div className="flex items-center justify-end p-2 border-b border-vet-blue/20">
               <PendingBookingsNotification />
@@ -156,9 +165,9 @@ export default function VetPlanning() {
         </div>
 
         {/* Zone principale avec planning optimisé */}
-        <div className="flex-1 flex flex-col min-h-0 gap-1">
-          {/* Contenu du planning principal - hauteur réduite pour laisser place au header */}
-          <div className="flex-1 min-h-0 max-h-[calc(100vh-120px)]">
+        <div className="flex-1 flex flex-col min-h-0">
+          {/* Contenu du planning principal */}
+          <div className="flex-1 min-h-0">
             {viewMode === 'daily' ? (
               <DailyCalendarView
                 selectedDate={selectedDate}
@@ -186,15 +195,6 @@ export default function VetPlanning() {
                 onAppointmentClick={handleAppointmentClick}
               />
             )}
-          </div>
-
-          {/* Header de planning compact en bas */}
-          <div className="flex-shrink-0">
-            <PlanningHeader
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              selectedDate={selectedDate}
-            />
           </div>
         </div>
       </div>
