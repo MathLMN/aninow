@@ -181,11 +181,11 @@ export const DailyCalendarGrid = ({
   if (fixedHeaders) {
     return (
       <div className="h-full flex flex-col bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg overflow-hidden">
-        {/* En-tête fixe des colonnes */}
-        <div className={`grid border-b border-vet-blue/20 bg-vet-beige/30 flex-shrink-0`} style={{gridTemplateColumns: `100px repeat(${columns.length}, 1fr)`}}>
+        {/* En-tête fixe des colonnes - réduit en hauteur */}
+        <div className={`grid border-b border-vet-blue/20 bg-vet-beige/30 flex-shrink-0`} style={{gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`}}>
           {/* Colonne vide pour aligner avec la colonne horaire */}
-          <div className="p-2 border-r border-vet-blue/20">
-            <div className="text-xs text-vet-brown text-center font-medium">
+          <div className="p-1 border-r border-vet-blue/20">
+            <div className="text-[10px] text-vet-brown text-center font-medium">
               Horaires
             </div>
           </div>
@@ -201,11 +201,11 @@ export const DailyCalendarGrid = ({
             }, 0);
 
             return (
-              <div key={column.id} className="p-2 text-center border-l border-vet-blue/20">
-                <div className="font-semibold text-sm text-vet-navy">
+              <div key={column.id} className="p-1 text-center border-l border-vet-blue/20">
+                <div className="font-semibold text-xs text-vet-navy">
                   {column.title}
                 </div>
-                <div className="text-xs text-vet-brown mt-1">
+                <div className="text-[10px] text-vet-brown mt-0.5">
                   {totalBookings} RDV
                 </div>
               </div>
@@ -213,7 +213,7 @@ export const DailyCalendarGrid = ({
           })}
         </div>
 
-        {/* Zone scrollable avec les créneaux */}
+        {/* Zone scrollable avec les créneaux - hauteur des créneaux réduite */}
         <ScrollArea className="flex-1">
           <div className="relative">
             {timeSlots.map((time, timeIndex) => {
@@ -223,17 +223,17 @@ export const DailyCalendarGrid = ({
                 <div 
                   key={time} 
                   className={cn(
-                    "grid relative h-[30px] border-b border-gray-200/50"
+                    "grid relative h-[24px] border-b border-gray-200/50"
                   )} 
-                  style={{gridTemplateColumns: `100px repeat(${columns.length}, 1fr)`}}
+                  style={{gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`}}
                 >
-                  {/* Colonne horaire */}
+                  {/* Colonne horaire - réduite en largeur */}
                   <div className={cn(
                     "text-xs text-center font-medium border-r flex items-center justify-center px-1",
                     isOpen 
                       ? "bg-white text-gray-700 border-gray-300" 
                       : "bg-gray-300/80 text-gray-600 border-gray-400",
-                    "text-[11px] font-medium leading-none"
+                    "text-[10px] font-medium leading-none"
                   )}>
                     {time}
                   </div>
