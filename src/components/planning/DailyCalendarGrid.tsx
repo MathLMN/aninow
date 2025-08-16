@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { TimeSlotCell } from "./TimeSlotCell";
@@ -87,44 +88,24 @@ export const DailyCalendarGrid = ({
     <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 h-full flex flex-col">
       <CardContent className="p-1 flex-1 min-h-0">
         <div className="h-full flex flex-col">
-          {/* Header - conditionnel selon la page */}
-          {shouldUseFixedHeaders ? (
-            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-vet-blue/20">
-              <div className="grid grid-cols-[60px_1fr] gap-0">
-                <div className="h-8 bg-vet-blue/5 border-r border-vet-blue/20"></div>
-                <div className={`grid grid-cols-${columns.length} gap-0`}>
-                  {columns.map((column) => (
-                    <div
-                      key={column.id}
-                      className="h-8 px-1 bg-vet-blue/5 border-r border-vet-blue/20 flex items-center justify-center"
-                    >
-                      <span className="text-[9px] font-medium text-vet-navy truncate">
-                        {column.title}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+          {/* Header - toujours mobile sur /vet/planning */}
+          <div className="border-b border-vet-blue/20">
+            <div className="grid grid-cols-[60px_1fr] gap-0">
+              <div className="h-6 bg-vet-blue/5 border-r border-vet-blue/20"></div>
+              <div className={`grid grid-cols-${columns.length} gap-0`}>
+                {columns.map((column) => (
+                  <div
+                    key={column.id}
+                    className="h-6 px-1 bg-vet-blue/5 border-r border-vet-blue/20 flex items-center justify-center"
+                  >
+                    <span className="text-[8px] font-medium text-vet-navy truncate">
+                      {column.title}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
-          ) : (
-            <div className="border-b border-vet-blue/20">
-              <div className="grid grid-cols-[60px_1fr] gap-0">
-                <div className="h-8 bg-vet-blue/5 border-r border-vet-blue/20"></div>
-                <div className={`grid grid-cols-${columns.length} gap-0`}>
-                  {columns.map((column) => (
-                    <div
-                      key={column.id}
-                      className="h-8 px-1 bg-vet-blue/5 border-r border-vet-blue/20 flex items-center justify-center"
-                    >
-                      <span className="text-[9px] font-medium text-vet-navy truncate">
-                        {column.title}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
+          </div>
 
           {/* Contenu scrollable */}
           <div 
@@ -135,15 +116,15 @@ export const DailyCalendarGrid = ({
               {/* Matin */}
               {daySchedule.isOpen && (
                 <div>
-                  <div className="sticky left-0 bg-vet-sage/10 border-b border-vet-sage/30 py-1">
-                    <span className="text-[8px] font-medium text-vet-brown px-2">
+                  <div className="sticky left-0 bg-vet-sage/10 border-b border-vet-sage/30 py-0.5">
+                    <span className="text-[7px] font-medium text-vet-brown px-2">
                       Matin ({daySchedule.morning.start} - {daySchedule.morning.end})
                     </span>
                   </div>
                   {generateTimeSlots(daySchedule.morning.start, daySchedule.morning.end).map((time) => (
                     <div key={`morning-${time}`} className="grid grid-cols-[60px_1fr] gap-0 border-b border-vet-blue/10">
-                      <div className="h-5 bg-vet-blue/5 border-r border-vet-blue/20 flex items-center justify-center">
-                        <span className="text-[8px] text-vet-brown">{time}</span>
+                      <div className="h-4 bg-vet-blue/5 border-r border-vet-blue/20 flex items-center justify-center">
+                        <span className="text-[7px] text-vet-brown">{time}</span>
                       </div>
                       <div className={`grid grid-cols-${columns.length} gap-0`}>
                         {columns.map((column) => (
@@ -153,7 +134,8 @@ export const DailyCalendarGrid = ({
                             columnId={column.id}
                             selectedDate={selectedDate}
                             bookings={bookings}
-                            veterinarians={veterinarians}
+                            isOpen={daySchedule.isOpen}
+                            canBook={true}
                             onCreateAppointment={onCreateAppointment}
                             onAppointmentClick={onAppointmentClick}
                             onValidateBooking={onValidateBooking}
@@ -162,8 +144,6 @@ export const DailyCalendarGrid = ({
                             onMoveBooking={onMoveBooking}
                             onDeleteBooking={onDeleteBooking}
                             onBlockSlot={onBlockSlot}
-                            isHovered={hoveredSlot === `${time}-${column.id}`}
-                            onHover={setHoveredSlot}
                           />
                         ))}
                       </div>
@@ -173,8 +153,8 @@ export const DailyCalendarGrid = ({
               )}
 
               {/* Pause déjeuner */}
-              <div className="bg-vet-brown/5 border-y border-vet-brown/20 py-1">
-                <span className="text-[8px] font-medium text-vet-brown px-2">
+              <div className="bg-vet-brown/5 border-y border-vet-brown/20 py-0.5">
+                <span className="text-[7px] font-medium text-vet-brown px-2">
                   Pause déjeuner (12h00 - 14h00)
                 </span>
               </div>
@@ -182,15 +162,15 @@ export const DailyCalendarGrid = ({
               {/* Après-midi */}
               {daySchedule.isOpen && (
                 <div>
-                  <div className="sticky left-0 bg-vet-sage/10 border-b border-vet-sage/30 py-1">
-                    <span className="text-[8px] font-medium text-vet-brown px-2">
+                  <div className="sticky left-0 bg-vet-sage/10 border-b border-vet-sage/30 py-0.5">
+                    <span className="text-[7px] font-medium text-vet-brown px-2">
                       Après-midi ({daySchedule.afternoon.start} - {daySchedule.afternoon.end})
                     </span>
                   </div>
                   {generateTimeSlots(daySchedule.afternoon.start, daySchedule.afternoon.end).map((time) => (
                     <div key={`afternoon-${time}`} className="grid grid-cols-[60px_1fr] gap-0 border-b border-vet-blue/10">
-                      <div className="h-5 bg-vet-blue/5 border-r border-vet-blue/20 flex items-center justify-center">
-                        <span className="text-[8px] text-vet-brown">{time}</span>
+                      <div className="h-4 bg-vet-blue/5 border-r border-vet-blue/20 flex items-center justify-center">
+                        <span className="text-[7px] text-vet-brown">{time}</span>
                       </div>
                       <div className={`grid grid-cols-${columns.length} gap-0`}>
                         {columns.map((column) => (
@@ -200,7 +180,8 @@ export const DailyCalendarGrid = ({
                             columnId={column.id}
                             selectedDate={selectedDate}
                             bookings={bookings}
-                            veterinarians={veterinarians}
+                            isOpen={daySchedule.isOpen}
+                            canBook={true}
                             onCreateAppointment={onCreateAppointment}
                             onAppointmentClick={onAppointmentClick}
                             onValidateBooking={onValidateBooking}
@@ -209,8 +190,6 @@ export const DailyCalendarGrid = ({
                             onMoveBooking={onMoveBooking}
                             onDeleteBooking={onDeleteBooking}
                             onBlockSlot={onBlockSlot}
-                            isHovered={hoveredSlot === `${time}-${column.id}`}
-                            onHover={setHoveredSlot}
                           />
                         ))}
                       </div>
