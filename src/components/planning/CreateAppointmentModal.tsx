@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,6 @@ import { ClientSection } from "./appointment-form/ClientSection";
 import { AnimalSection } from "./appointment-form/AnimalSection";
 import { ConsultationSection } from "./appointment-form/ConsultationSection";
 import { useAppointmentForm } from "./appointment-form/useAppointmentForm";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { usePlanningActions } from "@/hooks/usePlanningActions";
 
 interface CreateAppointmentModalProps {
@@ -102,7 +100,7 @@ export const CreateAppointmentModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[85vh] p-0 overflow-hidden">
+      <DialogContent className="max-w-5xl max-h-[90vh] p-0 overflow-visible">
         <DialogHeader className="px-4 py-3 border-b bg-gradient-to-r from-vet-navy/5 to-vet-sage/5 flex-shrink-0">
           <DialogTitle className="text-lg font-bold text-vet-navy">
             {isEditMode ? 'Modifier le rendez-vous' : 'Créer un nouveau rendez-vous'}
@@ -116,79 +114,75 @@ export const CreateAppointmentModal = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
-          <ScrollArea className="flex-1 px-4 py-3">
-            <div className="space-y-3">
-              {/* Grille des 3 sections principales */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-                {/* Section Rendez-vous */}
-                <div className="bg-blue-50/50 border border-blue-200 rounded-lg p-2">
-                  <AppointmentSection
-                    formData={formData}
-                    veterinarians={veterinarians}
-                    consultationTypes={consultationTypes}
-                    onFieldUpdate={updateField}
-                    onConsultationTypeChange={onConsultationTypeChange}
-                    onTimeChange={handleTimeChange}
-                    calculateEndTime={calculateEndTime}
-                  />
-                </div>
-
-                {/* Section Client */}
-                <div className="bg-green-50/50 border border-green-200 rounded-lg p-2">
-                  <ClientSection
-                    formData={formData}
-                    onFieldUpdate={updateField}
-                  />
-                </div>
-
-                {/* Section Animal */}
-                <div className="bg-amber-50/50 border border-amber-200 rounded-lg p-2">
-                  <AnimalSection
-                    formData={formData}
-                    onFieldUpdate={updateField}
-                  />
-                </div>
+          <div className="px-4 py-3 space-y-3 flex-1">
+            {/* Grille des 3 sections principales - plus compacte */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+              {/* Section Rendez-vous */}
+              <div className="bg-blue-50/50 border border-blue-200 rounded-lg p-2">
+                <AppointmentSection
+                  formData={formData}
+                  veterinarians={veterinarians}
+                  consultationTypes={consultationTypes}
+                  onFieldUpdate={updateField}
+                  onConsultationTypeChange={onConsultationTypeChange}
+                  onTimeChange={handleTimeChange}
+                  calculateEndTime={calculateEndTime}
+                />
               </div>
 
-              {/* Section Consultation - pleine largeur */}
-              <div className="bg-purple-50/50 border border-purple-200 rounded-lg p-2">
-                <ConsultationSection
+              {/* Section Client */}
+              <div className="bg-green-50/50 border border-green-200 rounded-lg p-2">
+                <ClientSection
                   formData={formData}
                   onFieldUpdate={updateField}
                 />
               </div>
 
-              {/* Boutons d'action - visibles dans le contenu */}
-              <div className="flex justify-between items-center pt-4 border-t bg-gray-50/50 px-2 py-3 rounded-lg">
-                <div className="flex space-x-2">
-                  <Button type="button" variant="outline" onClick={onClose} className="px-4 text-sm">
-                    Annuler
-                  </Button>
-                  {isEditMode && (
-                    <Button 
-                      type="button" 
-                      variant="destructive"
-                      onClick={handleDelete}
-                      disabled={isDeletingBooking}
-                      className="px-4 text-sm"
-                    >
-                      {isDeletingBooking ? 'Suppression...' : 'Supprimer'}
-                    </Button>
-                  )}
-                </div>
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="bg-vet-sage hover:bg-vet-sage/90 text-white px-4 text-sm"
-                >
-                  {isSubmitting 
-                    ? (isEditMode ? 'Modification...' : 'Création...') 
-                    : 'Valider'
-                  }
-                </Button>
+              {/* Section Animal */}
+              <div className="bg-amber-50/50 border border-amber-200 rounded-lg p-2">
+                <AnimalSection
+                  formData={formData}
+                  onFieldUpdate={updateField}
+                />
               </div>
             </div>
-          </ScrollArea>
+
+            {/* Section Consultation - pleine largeur mais plus compacte */}
+            <div className="bg-purple-50/50 border border-purple-200 rounded-lg p-2">
+              <ConsultationSection
+                formData={formData}
+                onFieldUpdate={updateField}
+              />
+            </div>
+
+            {/* Boutons d'action - toujours visibles en bas */}
+            <div className="flex justify-between items-center pt-3 border-t bg-gray-50/50 px-2 py-2 rounded-lg mt-3">
+              <div className="flex space-x-2">
+                <Button type="button" variant="outline" onClick={onClose} className="px-4 text-sm">
+                  Annuler
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={isDeletingBooking}
+                  className="px-4 text-sm"
+                >
+                  {isDeletingBooking ? 'Suppression...' : 'Supprimer'}
+                </Button>
+              </div>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="bg-vet-sage hover:bg-vet-sage/90 text-white px-4 text-sm"
+              >
+                {isSubmitting 
+                  ? (isEditMode ? 'Modification...' : 'Création...') 
+                  : 'Valider'
+                }
+              </Button>
+            </div>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
