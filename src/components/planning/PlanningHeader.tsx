@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Settings, RefreshCw } from "lucide-react";
 import { ViewModeSelector } from "./ViewModeSelector";
 import { SlotAssignmentSheet } from "./SlotAssignmentSheet";
@@ -31,19 +30,17 @@ export const PlanningHeader = ({
 
   return (
     <>
-      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-        <CardContent className="p-4">
+      {/* Bandeau fixe en bas d'écran */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-vet-blue/30 shadow-lg">
+        <div className="container mx-auto px-4 py-2">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-semibold text-vet-navy">
-                Planning des consultations
-              </h1>
-              <ViewModeSelector 
-                viewMode={viewMode} 
-                onViewModeChange={onViewModeChange} 
-              />
-            </div>
+            {/* Sélecteur de vue à gauche */}
+            <ViewModeSelector 
+              viewMode={viewMode} 
+              onViewModeChange={onViewModeChange} 
+            />
 
+            {/* Boutons d'action à droite */}
             <div className="flex items-center gap-2">
               {/* Bouton Gérer les attributions */}
               <SlotAssignmentSheet
@@ -59,15 +56,15 @@ export const PlanningHeader = ({
                 onClick={() => setIsRecurringBlocksModalOpen(true)}
                 variant="outline"
                 size="sm"
-                className="flex items-center gap-2"
+                className="flex items-center gap-1 h-8 px-2 text-xs"
               >
-                <Calendar className="h-4 w-4" />
-                Blocages récurrents
+                <Calendar className="h-3 w-3" />
+                Blocages
               </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Modale des blocages récurrents */}
       <RecurringBlocksModal
