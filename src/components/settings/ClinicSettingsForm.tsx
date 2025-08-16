@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Clock, MapPin, Phone, Mail, Users, Plus, Edit, Trash2, Building2, Calendar, Settings, ChevronDown, ChevronRight } from "lucide-react";
+import { Clock, MapPin, Phone, Mail, Users, Plus, Edit, Trash2, Building2, Calendar, Settings, ChevronDown, ChevronRight, Stethoscope } from "lucide-react";
 import { useClinicSettings } from "@/hooks/useClinicSettings";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { useVeterinarianSchedules } from "@/hooks/useVeterinarianSchedules";
@@ -22,6 +22,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
+import { useSlotManagement } from "@/hooks/useSlotManagement";
 
 interface ClinicSettings {
   clinic_name: string;
@@ -104,6 +105,31 @@ const getDefaultDailySchedules = () => ({
   sunday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } }
 });
 
+interface ConsultationType {
+  id: string;
+  name: string;
+  duration_minutes: number;
+  color?: string;
+  is_default?: boolean;
+}
+
+interface NewConsultationType {
+  name: string;
+  duration_minutes: number;
+  color: string;
+}
+
+const DEFAULT_CONSULTATION_TYPES = [
+  { name: "Consultation médicale", duration_minutes: 30, color: "#3B82F6", is_default: true },
+  { name: "Vaccination", duration_minutes: 15, color: "#10B981", is_default: true },
+  { name: "Prise de sang", duration_minutes: 20, color: "#F59E0B", is_default: true }
+];
+
+const CONSULTATION_TYPE_COLORS = [
+  "#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", 
+  "#06B6D4", "#84CC16", "#F97316", "#EC4899", "#6366F1"
+];
+
 export const ClinicSettingsForm = () => {
   const {
     settings,
@@ -117,6 +143,7 @@ export const ClinicSettingsForm = () => {
     deleteVeterinarian
   } = useClinicVeterinarians();
   const { schedules } = useVeterinarianSchedules();
+  const { consultationTypes, fetchConsultationTypes } = useSlotManagement();
   const {
     toast
   } = useToast();
@@ -256,6 +283,118 @@ export const ClinicSettingsForm = () => {
     }
     setOpenVeterinarianSchedules(newOpenVets);
   };
+
+  const [isConsultationTypeDialogOpen, setIsConsultationTypeDialogOpen] = useState(false);
+  const [newConsultationType, setNewConsultationType] = useState<NewConsultationType>({
+    name: '',
+    duration_minutes: 30,
+    color: '#3B82F6'
+  });
+  const [editingConsultationType, setEditingConsultationType] = useState<ConsultationType | null>(null);
+
+  const handleConsultationTypeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newConsultationType.name.trim()) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez saisir un nom pour le type de consultation",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { currentClinicId } = await import('@/hooks/useClinicAccess');
+      
+      if (editingConsultationType) {
+        // Update existing type
+        const { error } = await supabase
+          .from('consultation_types')
+          .update({
+            name: newConsultationType.name,
+            duration_minutes: newConsultationType.duration_minutes,
+            color: newConsultationType.color
+          })
+          .eq('id', editingConsultationType.id);
+
+        if (error) throw error;
+        
+        toast({
+          title: "Type de consultation modifié",
+          description: "Le type de consultation a été mis à jour avec succès"
+        });
+      } else {
+        // Create new type
+        const { error } = await supabase
+          .from('consultation_types')
+          .insert([{
+            name: newConsultationType.name,
+            duration_minutes: newConsultationType.duration_minutes,
+            color: newConsultationType.color
+          }]);
+
+        if (error) throw error;
+        
+        toast({
+          title: "Type de consultation créé",
+          description: "Le nouveau type de consultation a été ajouté avec succès"
+        });
+      }
+
+      // Refresh consultation types
+      await fetchConsultationTypes();
+      
+      setIsConsultationTypeDialogOpen(false);
+      setNewConsultationType({
+        name: '',
+        duration_minutes: 30,
+        color: '#3B82F6'
+      });
+      setEditingConsultationType(null);
+    } catch (error) {
+      console.error('Error saving consultation type:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de sauvegarder le type de consultation",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteConsultationType = async (typeId: string) => {
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      
+      const { error } = await supabase
+        .from('consultation_types')
+        .delete()
+        .eq('id', typeId);
+
+      if (error) throw error;
+      
+      toast({
+        title: "Type de consultation supprimé",
+        description: "Le type de consultation a été supprimé avec succès"
+      });
+
+      // Refresh consultation types
+      await fetchConsultationTypes();
+    } catch (error) {
+      console.error('Error deleting consultation type:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le type de consultation",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Combine default and custom consultation types
+  const allConsultationTypes = [
+    ...DEFAULT_CONSULTATION_TYPES.map(type => ({ ...type, id: `default-${type.name}` })),
+    ...consultationTypes.filter(type => !DEFAULT_CONSULTATION_TYPES.some(def => def.name === type.name))
+  ];
 
   return (
     <div className="space-y-8">
@@ -421,6 +560,197 @@ export const ClinicSettingsForm = () => {
                 )}
               />
 
+              {/* Types de consultations */}
+              <div className="border border-vet-blue/30 rounded-lg bg-gradient-to-r from-vet-beige/5 to-vet-sage/5 p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-vet-sage/20 rounded-full">
+                      <Stethoscope className="h-5 w-5 text-vet-sage" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-vet-navy">
+                        Types de consultations
+                      </h3>
+                      <p className="text-sm text-vet-brown/80">
+                        Gérez les types de consultations et leurs durées
+                      </p>
+                    </div>
+                  </div>
+                  <Dialog open={isConsultationTypeDialogOpen} onOpenChange={setIsConsultationTypeDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button
+                        onClick={() => {
+                          setEditingConsultationType(null);
+                          setNewConsultationType({
+                            name: '',
+                            duration_minutes: 30,
+                            color: '#3B82F6'
+                          });
+                        }}
+                        className="bg-vet-blue hover:bg-vet-blue/90 text-white"
+                        size="sm"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Ajouter un type
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle className="text-vet-navy">
+                          {editingConsultationType ? 'Modifier le type de consultation' : 'Ajouter un type de consultation'}
+                        </DialogTitle>
+                        <DialogDescription>
+                          {editingConsultationType ? 'Modifiez les informations du type de consultation.' : 'Créez un nouveau type de consultation personnalisé.'}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <form onSubmit={handleConsultationTypeSubmit}>
+                        <div className="grid gap-4 py-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="type-name">Nom du type *</Label>
+                            <Input
+                              id="type-name"
+                              value={newConsultationType.name}
+                              onChange={(e) => setNewConsultationType(prev => ({
+                                ...prev,
+                                name: e.target.value
+                              }))}
+                              placeholder="Ex: Consultation urgence"
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="type-duration">Durée (minutes) *</Label>
+                            <Select
+                              value={newConsultationType.duration_minutes.toString()}
+                              onValueChange={(value) => setNewConsultationType(prev => ({
+                                ...prev,
+                                duration_minutes: parseInt(value)
+                              }))}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {[10, 15, 20, 30, 45, 60, 90, 120].map(duration => (
+                                  <SelectItem key={duration} value={duration.toString()}>
+                                    {duration} minutes
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Couleur</Label>
+                            <div className="flex gap-2 flex-wrap">
+                              {CONSULTATION_TYPE_COLORS.map(color => (
+                                <button
+                                  key={color}
+                                  type="button"
+                                  className={cn(
+                                    "w-8 h-8 rounded-full border-2 transition-all",
+                                    newConsultationType.color === color
+                                      ? "border-vet-navy scale-110"
+                                      : "border-gray-200 hover:scale-105"
+                                  )}
+                                  style={{ backgroundColor: color }}
+                                  onClick={() => setNewConsultationType(prev => ({
+                                    ...prev,
+                                    color
+                                  }))}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button type="button" variant="outline" onClick={() => setIsConsultationTypeDialogOpen(false)}>
+                            Annuler
+                          </Button>
+                          <Button type="submit" className="bg-vet-blue hover:bg-vet-blue/90 text-white">
+                            {editingConsultationType ? 'Enregistrer les modifications' : 'Ajouter'}
+                          </Button>
+                        </DialogFooter>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
+                <div className="space-y-2">
+                  {allConsultationTypes.map(type => (
+                    <div key={type.id} className="flex items-center justify-between p-3 border border-vet-blue/20 rounded-lg bg-white/50">
+                      <div className="flex items-center gap-3">
+                        <div 
+                          className="w-4 h-4 rounded-full border"
+                          style={{ backgroundColor: type.color }}
+                        />
+                        <div>
+                          <span className="font-medium text-vet-navy">{type.name}</span>
+                          {type.is_default && (
+                            <Badge variant="outline" className="ml-2 bg-vet-sage/10 text-vet-sage border-vet-sage/30 text-xs">
+                              Par défaut
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-vet-brown">{type.duration_minutes} min</span>
+                        {!type.is_default && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setEditingConsultationType(type);
+                                setNewConsultationType({
+                                  name: type.name,
+                                  duration_minutes: type.duration_minutes,
+                                  color: type.color || '#3B82F6'
+                                });
+                                setIsConsultationTypeDialogOpen(true);
+                              }}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Êtes-vous sûr de vouloir supprimer le type de consultation "{type.name}" ? Cette action est irréversible.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDeleteConsultationType(type.id)}
+                                    className="bg-red-600 hover:bg-red-700"
+                                  >
+                                    Supprimer
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {allConsultationTypes.length === DEFAULT_CONSULTATION_TYPES.length && (
+                    <div className="text-center py-4 text-vet-brown bg-vet-beige/10 rounded-lg border border-vet-blue/20">
+                      <Stethoscope className="h-6 w-6 mx-auto mb-2 text-vet-blue/60" />
+                      <p className="text-sm">Seuls les types par défaut sont disponibles</p>
+                      <p className="text-xs">Ajoutez vos types de consultations personnalisés</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <FormField
                 control={form.control}
                 name="asvEnabled"
@@ -438,8 +768,6 @@ export const ClinicSettingsForm = () => {
                   </FormItem>
                 )}
               />
-
-              <Separator />
 
               {/* Horaires d'ouverture - Section améliorée */}
               <div className="border border-vet-blue/30 rounded-lg bg-gradient-to-r from-vet-beige/5 to-vet-sage/5">
