@@ -16,7 +16,7 @@ export const ViewModeSelector = ({ viewMode, onViewModeChange }: ViewModeSelecto
         variant={viewMode === 'daily' ? 'default' : 'ghost'}
         size="sm"
         onClick={() => onViewModeChange('daily')}
-        className={`h-8 px-2 text-xs ${viewMode === 'daily' ? 'bg-vet-sage hover:bg-vet-sage/90 text-white' : 'text-vet-navy hover:bg-vet-sage/10'}`}
+        className={`h-7 px-2 text-[10px] ${viewMode === 'daily' ? 'bg-vet-sage hover:bg-vet-sage/90 text-white' : 'text-vet-navy hover:bg-vet-sage/10'}`}
       >
         <CalendarDays className="h-3 w-3 mr-1" />
         Jour
@@ -25,7 +25,7 @@ export const ViewModeSelector = ({ viewMode, onViewModeChange }: ViewModeSelecto
         variant={viewMode === 'weekly' ? 'default' : 'ghost'}
         size="sm"
         onClick={() => onViewModeChange('weekly')}
-        className={`h-8 px-2 text-xs ${viewMode === 'weekly' ? 'bg-vet-sage hover:bg-vet-sage/90 text-white' : 'text-vet-navy hover:bg-vet-sage/10'}`}
+        className={`h-7 px-2 text-[10px] ${viewMode === 'weekly' ? 'bg-vet-sage hover:bg-vet-sage/90 text-white' : 'text-vet-navy hover:bg-vet-sage/10'}`}
       >
         <List className="h-3 w-3 mr-1" />
         Semaine
