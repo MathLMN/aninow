@@ -8,7 +8,7 @@ const VetLayout = () => {
     <VetAuthGuard>
       <div className="min-h-screen bg-gray-50">
         <VetNavigation />
-        <main>
+        <main className="pt-16">
           <Outlet />
         </main>
       </div>

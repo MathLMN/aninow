@@ -15,7 +15,7 @@ const VetSettings = () => {
   console.log('🔍 VetSettings - Global admin status:', isGlobalAdmin);
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto py-6 pt-10 space-y-6">
       <div className="flex items-center space-x-4">
         <Settings className="h-8 w-8 text-vet-sage" />
         <div>

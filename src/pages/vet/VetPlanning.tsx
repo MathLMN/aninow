@@ -111,7 +111,7 @@ export default function VetPlanning() {
   const weekDates = getWeekDates(selectedDate);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-vet-blue/5 via-white to-vet-sage/5 pb-16">
+    <div className="min-h-screen bg-gradient-to-br from-vet-blue/5 via-white to-vet-sage/5 pb-20 pt-6">
       <div className="container mx-auto p-6 space-y-6">
         <PlanningHeader
           viewMode={viewMode}
