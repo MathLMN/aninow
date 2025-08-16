@@ -1,4 +1,3 @@
-
 import { Plus, Ban, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -63,12 +62,12 @@ export const TimeSlotCell = ({
     }
   };
 
-  // Calculer la hauteur du rendez-vous en fonction de sa durée
+  // Calculer la hauteur du rendez-vous en fonction de sa durée - ajustée pour la nouvelle hauteur
   const getAppointmentHeight = (booking: any) => {
     const duration = booking.duration_minutes || 15;
-    // Chaque tranche de 15 minutes = 30px de hauteur
+    // Chaque tranche de 15 minutes = 20px de hauteur (ajusté)
     const slotsNeeded = Math.ceil(duration / 15);
-    return slotsNeeded * 30;
+    return slotsNeeded * 20;
   };
 
   const handleCellClick = () => {
@@ -150,7 +149,7 @@ export const TimeSlotCell = ({
       <div
         className={cn(
           "border-l border-gray-200/30 relative transition-colors",
-          "h-[30px]",
+          "h-5", // Hauteur harmonisée avec la grille
           getCellBackground(),
           canInteract && "cursor-pointer group hover:bg-blue-50/30",
           !canInteract && canCreateTask && "group hover:bg-yellow-50/30"
@@ -159,25 +158,25 @@ export const TimeSlotCell = ({
         onMouseEnter={() => (canInteract || canCreateTask) && setShowActions(true)}
         onMouseLeave={() => setShowActions(false)}
       >
-        {/* Affichage spécial pour les créneaux bloqués récurrents - seulement sur le premier créneau */}
+        {/* Affichage spécial pour les créneaux bloqués récurrents - hauteur ajustée */}
         {isBlocked && recurringBlock && isFirstBlockedSlot && (
           <div 
-            className="absolute inset-0 flex items-center justify-center bg-gray-400/60 text-gray-800 text-[10px] font-medium z-10"
+            className="absolute inset-0 flex items-center justify-center bg-gray-400/60 text-gray-800 text-[9px] font-medium z-10"
             style={{ 
-              height: `${blockedSlotsCount * 30}px`,
-              minHeight: '30px'
+              height: `${blockedSlotsCount * 20}px`,
+              minHeight: '20px'
             }}
           >
             <div className="text-center px-1">
               <div className="truncate">BLOQUÉ</div>
-              <div className="truncate text-[9px] opacity-80">
+              <div className="truncate text-[8px] opacity-80">
                 {recurringBlock.recurring_block_title}
               </div>
             </div>
           </div>
         )}
 
-        {/* Affichage des rendez-vous normaux */}
+        {/* Affichage des rendez-vous normaux - taille de police ajustée */}
         {bookings.filter(booking => !booking.is_blocked && !booking.recurring_block_id).map((booking) => (
           <div
             key={booking.id}
@@ -186,7 +185,7 @@ export const TimeSlotCell = ({
               onAppointmentClick(booking);
             }}
             className={cn(
-              "absolute inset-x-0 top-0 p-1 rounded-sm border transition-shadow text-[10px] leading-tight cursor-pointer hover:shadow-sm",
+              "absolute inset-x-0 top-0 p-1 rounded-sm border transition-shadow text-[9px] leading-tight cursor-pointer hover:shadow-sm",
               getStatusColor(booking.status, false)
             )}
             style={{ 
@@ -196,46 +195,46 @@ export const TimeSlotCell = ({
           >
             {/* Indicateur d'arrivée - Point rouge en haut à droite */}
             {booking.arrival_time && (
-              <div className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white z-20" title={`Client arrivé à ${booking.arrival_time}`}></div>
+              <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-red-500 rounded-full border border-white z-20" title={`Client arrivé à ${booking.arrival_time}`}></div>
             )}
             
-            <div className="font-medium truncate text-[10px]">
+            <div className="font-medium truncate text-[9px]">
               {booking.client_name}
             </div>
-            <div className="truncate text-[9px] opacity-80">
+            <div className="truncate text-[8px] opacity-80">
               {booking.animal_name}
             </div>
             {booking.duration_minutes && booking.duration_minutes > 15 && (
-              <div className="text-[8px] opacity-70 mt-1">
+              <div className="text-[7px] opacity-70 mt-1">
                 {booking.duration_minutes} min
               </div>
             )}
             {booking.status === 'pending' && (
-              <div className="text-[8px] opacity-70 font-medium">
+              <div className="text-[7px] opacity-70 font-medium">
                 En attente
               </div>
             )}
           </div>
         ))}
         
-        {/* Actions au survol pour créneaux ouverts */}
+        {/* Actions au survol pour créneaux ouverts - taille des icônes ajustée */}
         {bookings.length === 0 && canInteract && showActions && (
           <div className="absolute inset-0 flex items-center justify-center bg-blue-50/40 transition-opacity z-20">
             <div className="flex items-center space-x-1">
               <button
                 onClick={handleCellClick}
-                className="p-1 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                className="p-0.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
                 title="Ajouter un rendez-vous"
               >
-                <Plus className="h-3 w-3" />
+                <Plus className="h-2.5 w-2.5" />
               </button>
               {columnId !== 'asv' && (
                 <button
                   onClick={handleQuickBlock}
-                  className="p-1 rounded-full bg-red-600 hover:bg-red-700 text-white transition-colors"
+                  className="p-0.5 rounded-full bg-red-600 hover:bg-red-700 text-white transition-colors"
                   title="Bloquer ce créneau"
                 >
-                  <Ban className="h-3 w-3" />
+                  <Ban className="h-2.5 w-2.5" />
                 </button>
               )}
             </div>
@@ -247,10 +246,10 @@ export const TimeSlotCell = ({
           <div className="absolute inset-0 flex items-center justify-center bg-yellow-50/40 transition-opacity z-20">
             <button
               onClick={handleCreateTask}
-              className="p-1 rounded-full bg-yellow-600 text-white hover:bg-yellow-700 transition-colors"
+              className="p-0.5 rounded-full bg-yellow-600 text-white hover:bg-yellow-700 transition-colors"
               title="Créer une tâche / note"
             >
-              <FileText className="h-3 w-3" />
+              <FileText className="h-2.5 w-2.5" />
             </button>
           </div>
         )}

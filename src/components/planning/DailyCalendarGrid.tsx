@@ -181,10 +181,10 @@ export const DailyCalendarGrid = ({
   return (
     <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 h-full flex flex-col">
       <CardContent className="p-0 flex flex-col h-full">
-        {/* En-tête fixe des colonnes */}
-        <div className={`grid border-b border-vet-blue/20 bg-vet-beige/30 flex-shrink-0`} style={{gridTemplateColumns: `100px repeat(${columns.length}, 1fr)`}}>
+        {/* En-tête fixe des colonnes - hauteur harmonisée */}
+        <div className={`grid border-b border-vet-blue/20 bg-vet-beige/30 flex-shrink-0 h-12`} style={{gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`}}>
           {/* Colonne vide pour aligner avec la colonne horaire */}
-          <div className="p-2 border-r border-vet-blue/20">
+          <div className="p-2 border-r border-vet-blue/20 flex items-center justify-center">
             <div className="text-xs text-vet-brown text-center font-medium">
               Horaires
             </div>
@@ -201,8 +201,8 @@ export const DailyCalendarGrid = ({
             }, 0);
 
             return (
-              <div key={column.id} className="p-2 text-center border-l border-vet-blue/20">
-                <div className="font-semibold text-sm text-vet-navy">
+              <div key={column.id} className="p-2 text-center border-l border-vet-blue/20 flex flex-col justify-center">
+                <div className="font-semibold text-sm text-vet-navy leading-tight">
                   {column.title}
                 </div>
                 <div className="text-xs text-vet-brown mt-1">
@@ -213,7 +213,7 @@ export const DailyCalendarGrid = ({
           })}
         </div>
 
-        {/* Zone scrollable avec les créneaux horaires */}
+        {/* Zone scrollable avec les créneaux horaires - hauteur ajustée */}
         <div className="flex-1 overflow-hidden">
           <ScrollArea className="h-full">
             <div className="relative">
@@ -224,17 +224,17 @@ export const DailyCalendarGrid = ({
                   <div 
                     key={time} 
                     className={cn(
-                      "grid relative h-[24px] border-b border-gray-200/50"
+                      "grid relative h-5 border-b border-gray-200/50"
                     )} 
-                    style={{gridTemplateColumns: `100px repeat(${columns.length}, 1fr)`}}
+                    style={{gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`}}
                   >
-                    {/* Colonne horaire */}
+                    {/* Colonne horaire - alignement centré */}
                     <div className={cn(
                       "text-xs text-center font-medium border-r flex items-center justify-center px-1",
                       isOpen 
                         ? "bg-white text-gray-700 border-gray-300" 
                         : "bg-gray-300/80 text-gray-600 border-gray-400",
-                      "text-[11px] font-medium leading-none"
+                      "text-[10px] font-medium leading-none"
                     )}>
                       {time}
                     </div>
