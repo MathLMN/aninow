@@ -1,21 +1,24 @@
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 import { TimeSlotCell } from "./TimeSlotCell";
-import { generateAllTimeSlots, isTimeSlotOpen, getBookingsForSlot, isFullHour } from "./utils/scheduleUtils";
-import { isVeterinarianAbsent } from "./utils/veterinarianAbsenceUtils";
-import { useVeterinarianAbsences } from "@/hooks/useVeterinarianAbsences";
-import { useClinicSettings } from "@/hooks/useClinicSettings";
-import { useClinicAccess } from "@/hooks/useClinicAccess";
-import { useState, useEffect, useMemo } from "react";
-import { formatDateLocal } from "@/utils/date";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { useLocation } from "react-router-dom";
 
 interface DailyCalendarGridProps {
   selectedDate: Date;
   bookings: any[];
-  columns: any[];
-  daySchedule: any;
-  onCreateAppointment: (timeSlot: { date: string; time: string; veterinarian?: string }) => void;
+  columns: Array<{ id: string; title: string }>;
+  daySchedule: {
+    isOpen: boolean;
+    morning: { start: string; end: string };
+    afternoon: { start: string; end: string };
+  };
+  onCreateAppointment: (timeSlot: {
+    date: string;
+    time: string;
+    veterinarian?: string;
+  }) => void;
   onAppointmentClick: (appointment: any) => void;
   veterinarians: any[];
   onValidateBooking?: (bookingId: string) => void;
@@ -23,9 +26,32 @@ interface DailyCalendarGridProps {
   onDuplicateBooking?: (booking: any) => void;
   onMoveBooking?: (booking: any) => void;
   onDeleteBooking?: (bookingId: string) => void;
-  onBlockSlot?: (timeSlot: { date: string; time: string; veterinarian: string }) => void;
+  onBlockSlot?: (timeSlot: {
+    date: string;
+    time: string;
+    veterinarian: string;
+  }) => void;
   fixedHeaders?: boolean;
 }
+
+// Fonction utilitaire pour générer les créneaux horaires
+const generateTimeSlots = (startTime: string, endTime: string) => {
+  const slots = [];
+  let currentTime = startTime;
+  while (currentTime <= endTime) {
+    slots.push(currentTime);
+    const [hours, minutes] = currentTime.split(':').map(Number);
+    let newMinutes = minutes + 30;
+    let newHours = hours;
+    if (newMinutes >= 60) {
+      newHours += 1;
+      newMinutes = newMinutes - 60;
+    }
+    currentTime = `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
+    if (currentTime === '24:00') break;
+  }
+  return slots;
+};
 
 export const DailyCalendarGrid = ({
   selectedDate,
@@ -43,239 +69,157 @@ export const DailyCalendarGrid = ({
   onBlockSlot,
   fixedHeaders = false
 }: DailyCalendarGridProps) => {
-  const { settings } = useClinicSettings();
-  const { currentClinicId } = useClinicAccess();
-  const { absences } = useVeterinarianAbsences();
-  const timeSlots = generateAllTimeSlots();
+  const [hoveredSlot, setHoveredSlot] = useState<string | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  
+  // Désactiver les headers fixes sur la page /vet/planning
+  const shouldUseFixedHeaders = fixedHeaders && !location.pathname.includes('/vet/planning');
 
-  // Optimiser le calcul des bookings par slot avec useMemo pour éviter les recalculs
-  const slotBookings = useMemo(() => {
-    const newSlotBookings: Record<string, any[]> = {};
-    const dateStr = formatDateLocal(selectedDate);
-    
-    console.log('🔄 Calculating slot bookings for date:', dateStr);
-    console.log('📊 Total bookings available:', bookings.length);
-    console.log('📋 Sample bookings for today:', bookings.filter(b => b.appointment_date === dateStr).slice(0, 3));
-    
-    for (const time of timeSlots) {
-      for (const column of columns) {
-        const key = `${time}-${column.id}`;
-        
-        // Filtrer directement les bookings pour ce créneau et cette colonne
-        let bookingsForSlot = [];
-        
-        if (column.id === 'asv') {
-          // Pour la colonne ASV : ne jamais afficher les blocages récurrents
-          bookingsForSlot = bookings.filter(booking => {
-            const matchesDate = booking.appointment_date === dateStr;
-            const matchesTime = booking.appointment_time === time;
-            const isNotBlocked = !booking.recurring_block_id && !booking.is_blocked;
-            const hasNoVet = !booking.veterinarian_id;
-            
-            const matches = matchesDate && matchesTime && isNotBlocked && hasNoVet;
-            
-            if (matches) {
-              console.log('📍 ASV booking found:', booking.client_name, time);
-            }
-            
-            return matches;
-          });
-        } else {
-          // Pour les colonnes vétérinaires : inclure tous les bookings assignés à ce vétérinaire
-          bookingsForSlot = bookings.filter(booking => {
-            const matchesDate = booking.appointment_date === dateStr;
-            const matchesTime = booking.appointment_time === time;
-            const matchesVet = booking.veterinarian_id === column.id;
-            
-            const matches = matchesDate && matchesTime && matchesVet;
-            
-            if (matches) {
-              console.log('👨‍⚕️ Vet booking found:', booking.client_name, column.title, time);
-            }
-            
-            return matches;
-          });
-        }
-        
-        newSlotBookings[key] = bookingsForSlot;
-        
-        // Log pour les créneaux bloqués récurrents
-        if (bookingsForSlot.some(b => b.recurring_block_id)) {
-          console.log('🔒 Recurring block found for:', key, bookingsForSlot.filter(b => b.recurring_block_id));
-        }
-      }
+  useEffect(() => {
+    // Scroll to top on date change
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo(0, 0);
     }
-    
-    return newSlotBookings;
-  }, [timeSlots, columns, bookings, selectedDate]);
-
-  // Fonction pour déterminer les plages de blocage continues
-  const getBlockedSlotInfo = useMemo(() => {
-    const blockedSlotInfo: Record<string, { isFirst: boolean; count: number }> = {};
-    
-    for (const column of columns) {
-      let currentBlockStart = -1;
-      let currentBlockCount = 0;
-      let currentBlockId: string | null = null;
-      
-      for (let i = 0; i < timeSlots.length; i++) {
-        const time = timeSlots[i];
-        const key = `${time}-${column.id}`;
-        const bookingsForSlot = slotBookings[key] || [];
-        
-        const isBlocked = bookingsForSlot.some(booking => 
-          booking.consultation_reason === 'Créneau bloqué' || 
-          booking.is_blocked || 
-          booking.client_name === 'CRÉNEAU BLOQUÉ' ||
-          booking.recurring_block_id
-        );
-        
-        const recurringBlock = bookingsForSlot.find(booking => booking.recurring_block_id);
-        const blockId = recurringBlock?.recurring_block_id || 'manual';
-        
-        if (isBlocked && (currentBlockStart === -1 || blockId === currentBlockId)) {
-          // Début d'un nouveau bloc ou continuation du bloc actuel
-          if (currentBlockStart === -1) {
-            currentBlockStart = i;
-            currentBlockCount = 1;
-            currentBlockId = blockId;
-          } else {
-            currentBlockCount++;
-          }
-        } else {
-          // Fin du bloc actuel, enregistrer les infos
-          if (currentBlockStart !== -1) {
-            for (let j = currentBlockStart; j < currentBlockStart + currentBlockCount; j++) {
-              const blockTime = timeSlots[j];
-              const blockKey = `${blockTime}-${column.id}`;
-              blockedSlotInfo[blockKey] = {
-                isFirst: j === currentBlockStart,
-                count: currentBlockCount
-              };
-            }
-          }
-          
-          // Reset pour le prochain bloc
-          currentBlockStart = isBlocked ? i : -1;
-          currentBlockCount = isBlocked ? 1 : 0;
-          currentBlockId = isBlocked ? blockId : null;
-        }
-      }
-      
-      // Traiter le dernier bloc s'il se termine à la fin
-      if (currentBlockStart !== -1) {
-        for (let j = currentBlockStart; j < currentBlockStart + currentBlockCount; j++) {
-          const blockTime = timeSlots[j];
-          const blockKey = `${blockTime}-${column.id}`;
-          blockedSlotInfo[blockKey] = {
-            isFirst: j === currentBlockStart,
-            count: currentBlockCount
-          };
-        }
-      }
-    }
-    
-    return blockedSlotInfo;
-  }, [timeSlots, columns, slotBookings]);
+  }, [selectedDate]);
 
   return (
     <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 h-full flex flex-col">
-      <CardContent className="p-0 flex flex-col h-full">
-        {/* En-tête fixe des colonnes - hauteur harmonisée */}
-        <div className={`grid border-b border-vet-blue/20 bg-vet-beige/30 flex-shrink-0 h-12`} style={{gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`}}>
-          {/* Colonne vide pour aligner avec la colonne horaire */}
-          <div className="p-2 border-r border-vet-blue/20 flex items-center justify-center">
-            <div className="text-xs text-vet-brown text-center font-medium">
-              Horaires
-            </div>
-          </div>
-          
-          {/* Colonnes des vétérinaires */}
-          {columns.map((column) => {
-            // Compter le total des RDV pour cette colonne pour toute la journée
-            const totalBookings = timeSlots.reduce((total, time) => {
-              const key = `${time}-${column.id}`;
-              const bookingsForSlot = slotBookings[key] || [];
-              // Ne compter que les vrais rendez-vous, pas les blocages
-              return total + bookingsForSlot.filter(b => !b.is_blocked && !b.recurring_block_id).length;
-            }, 0);
-
-            return (
-              <div key={column.id} className="p-2 text-center border-l border-vet-blue/20 flex flex-col justify-center">
-                <div className="font-semibold text-sm text-vet-navy leading-tight">
-                  {column.title}
-                </div>
-                <div className="text-xs text-vet-brown mt-1">
-                  {totalBookings} RDV
+      <CardContent className="p-1 flex-1 min-h-0">
+        <div className="h-full flex flex-col">
+          {/* Header - conditionnel selon la page */}
+          {shouldUseFixedHeaders ? (
+            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-vet-blue/20">
+              <div className="grid grid-cols-[60px_1fr] gap-0">
+                <div className="h-8 bg-vet-blue/5 border-r border-vet-blue/20"></div>
+                <div className={`grid grid-cols-${columns.length} gap-0`}>
+                  {columns.map((column) => (
+                    <div
+                      key={column.id}
+                      className="h-8 px-1 bg-vet-blue/5 border-r border-vet-blue/20 flex items-center justify-center"
+                    >
+                      <span className="text-[9px] font-medium text-vet-navy truncate">
+                        {column.title}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
-            );
-          })}
-        </div>
-
-        {/* Zone scrollable avec les créneaux horaires - hauteur ajustée */}
-        <div className="flex-1 overflow-hidden">
-          <ScrollArea className="h-full">
-            <div className="relative">
-              {timeSlots.map((time, timeIndex) => {
-                const isOpen = isTimeSlotOpen(time, daySchedule);
-                
-                return (
-                  <div 
-                    key={time} 
-                    className={cn(
-                      "grid relative h-5 border-b border-gray-200/50"
-                    )} 
-                    style={{gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`}}
-                  >
-                    {/* Colonne horaire - alignement centré */}
-                    <div className={cn(
-                      "text-xs text-center font-medium border-r flex items-center justify-center px-1",
-                      isOpen 
-                        ? "bg-white text-gray-700 border-gray-300" 
-                        : "bg-gray-300/80 text-gray-600 border-gray-400",
-                      "text-[10px] font-medium leading-none"
-                    )}>
-                      {time}
-                    </div>
-                    
-                    {/* Colonnes par vétérinaire et ASV */}
-                    {columns.map((column) => {
-                      const key = `${time}-${column.id}`;
-                      const slotBookingsForCell = slotBookings[key] || [];
-                      const blockInfo = getBlockedSlotInfo[key];
-                      
-                      // Vérifier si le vétérinaire est absent (seulement pour les colonnes vétérinaire, pas ASV)
-                      const isVetAbsent = column.id !== 'asv' && isVeterinarianAbsent(column.id, selectedDate, absences);
-                      
-                      return (
-                        <TimeSlotCell
-                          key={`${column.id}-${time}`}
-                          time={time}
-                          columnId={column.id}
-                          bookings={slotBookingsForCell}
-                          isOpen={isOpen}
-                          canBook={true}
-                          onCreateAppointment={onCreateAppointment}
-                          onAppointmentClick={onAppointmentClick}
-                          selectedDate={selectedDate}
-                          onValidateBooking={onValidateBooking}
-                          onCancelBooking={onCancelBooking}
-                          onDuplicateBooking={onDuplicateBooking}
-                          onMoveBooking={onMoveBooking}
-                          onDeleteBooking={onDeleteBooking}
-                          onBlockSlot={onBlockSlot}
-                          isVeterinarianAbsent={isVetAbsent}
-                          isFirstBlockedSlot={blockInfo?.isFirst || false}
-                          blockedSlotsCount={blockInfo?.count || 1}
-                        />
-                      );
-                    })}
-                  </div>
-                );
-              })}
             </div>
-          </ScrollArea>
+          ) : (
+            <div className="border-b border-vet-blue/20">
+              <div className="grid grid-cols-[60px_1fr] gap-0">
+                <div className="h-8 bg-vet-blue/5 border-r border-vet-blue/20"></div>
+                <div className={`grid grid-cols-${columns.length} gap-0`}>
+                  {columns.map((column) => (
+                    <div
+                      key={column.id}
+                      className="h-8 px-1 bg-vet-blue/5 border-r border-vet-blue/20 flex items-center justify-center"
+                    >
+                      <span className="text-[9px] font-medium text-vet-navy truncate">
+                        {column.title}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Contenu scrollable */}
+          <div 
+            ref={scrollContainerRef}
+            className="flex-1 overflow-y-auto"
+          >
+            <div className="min-h-full">
+              {/* Matin */}
+              {daySchedule.isOpen && (
+                <div>
+                  <div className="sticky left-0 bg-vet-sage/10 border-b border-vet-sage/30 py-1">
+                    <span className="text-[8px] font-medium text-vet-brown px-2">
+                      Matin ({daySchedule.morning.start} - {daySchedule.morning.end})
+                    </span>
+                  </div>
+                  {generateTimeSlots(daySchedule.morning.start, daySchedule.morning.end).map((time) => (
+                    <div key={`morning-${time}`} className="grid grid-cols-[60px_1fr] gap-0 border-b border-vet-blue/10">
+                      <div className="h-5 bg-vet-blue/5 border-r border-vet-blue/20 flex items-center justify-center">
+                        <span className="text-[8px] text-vet-brown">{time}</span>
+                      </div>
+                      <div className={`grid grid-cols-${columns.length} gap-0`}>
+                        {columns.map((column) => (
+                          <TimeSlotCell
+                            key={`${time}-${column.id}`}
+                            time={time}
+                            columnId={column.id}
+                            selectedDate={selectedDate}
+                            bookings={bookings}
+                            veterinarians={veterinarians}
+                            onCreateAppointment={onCreateAppointment}
+                            onAppointmentClick={onAppointmentClick}
+                            onValidateBooking={onValidateBooking}
+                            onCancelBooking={onCancelBooking}
+                            onDuplicateBooking={onDuplicateBooking}
+                            onMoveBooking={onMoveBooking}
+                            onDeleteBooking={onDeleteBooking}
+                            onBlockSlot={onBlockSlot}
+                            isHovered={hoveredSlot === `${time}-${column.id}`}
+                            onHover={setHoveredSlot}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Pause déjeuner */}
+              <div className="bg-vet-brown/5 border-y border-vet-brown/20 py-1">
+                <span className="text-[8px] font-medium text-vet-brown px-2">
+                  Pause déjeuner (12h00 - 14h00)
+                </span>
+              </div>
+
+              {/* Après-midi */}
+              {daySchedule.isOpen && (
+                <div>
+                  <div className="sticky left-0 bg-vet-sage/10 border-b border-vet-sage/30 py-1">
+                    <span className="text-[8px] font-medium text-vet-brown px-2">
+                      Après-midi ({daySchedule.afternoon.start} - {daySchedule.afternoon.end})
+                    </span>
+                  </div>
+                  {generateTimeSlots(daySchedule.afternoon.start, daySchedule.afternoon.end).map((time) => (
+                    <div key={`afternoon-${time}`} className="grid grid-cols-[60px_1fr] gap-0 border-b border-vet-blue/10">
+                      <div className="h-5 bg-vet-blue/5 border-r border-vet-blue/20 flex items-center justify-center">
+                        <span className="text-[8px] text-vet-brown">{time}</span>
+                      </div>
+                      <div className={`grid grid-cols-${columns.length} gap-0`}>
+                        {columns.map((column) => (
+                          <TimeSlotCell
+                            key={`${time}-${column.id}`}
+                            time={time}
+                            columnId={column.id}
+                            selectedDate={selectedDate}
+                            bookings={bookings}
+                            veterinarians={veterinarians}
+                            onCreateAppointment={onCreateAppointment}
+                            onAppointmentClick={onAppointmentClick}
+                            onValidateBooking={onValidateBooking}
+                            onCancelBooking={onCancelBooking}
+                            onDuplicateBooking={onDuplicateBooking}
+                            onMoveBooking={onMoveBooking}
+                            onDeleteBooking={onDeleteBooking}
+                            onBlockSlot={onBlockSlot}
+                            isHovered={hoveredSlot === `${time}-${column.id}`}
+                            onHover={setHoveredSlot}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>
