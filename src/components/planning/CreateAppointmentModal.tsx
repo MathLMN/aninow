@@ -8,6 +8,7 @@ import { AnimalSection } from "./appointment-form/AnimalSection";
 import { ConsultationSection } from "./appointment-form/ConsultationSection";
 import { useAppointmentForm } from "./appointment-form/useAppointmentForm";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { usePlanningActions } from "@/hooks/usePlanningActions";
 
 interface CreateAppointmentModalProps {
   isOpen: boolean;
@@ -36,6 +37,8 @@ export const CreateAppointmentModal = ({
     initializeFormData,
     handleTimeChange
   } = useAppointmentForm(onClose, appointmentToEdit?.id);
+
+  const { deleteBooking, isLoading: isDeletingBooking } = usePlanningActions();
 
   // Initialize form data when modal opens
   useEffect(() => {
@@ -86,16 +89,25 @@ export const CreateAppointmentModal = ({
     handleConsultationTypeChange(consultationTypeId, consultationTypes);
   };
 
+  const handleDelete = async () => {
+    if (appointmentToEdit?.id) {
+      const success = await deleteBooking(appointmentToEdit.id);
+      if (success) {
+        onClose();
+      }
+    }
+  };
+
   const isEditMode = !!appointmentToEdit;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[95vh] p-0 overflow-hidden">
-        <DialogHeader className="px-6 py-4 border-b bg-gradient-to-r from-vet-navy/5 to-vet-sage/5 flex-shrink-0">
-          <DialogTitle className="text-xl font-bold text-vet-navy">
+      <DialogContent className="max-w-5xl max-h-[85vh] p-0 overflow-hidden">
+        <DialogHeader className="px-4 py-3 border-b bg-gradient-to-r from-vet-navy/5 to-vet-sage/5 flex-shrink-0">
+          <DialogTitle className="text-lg font-bold text-vet-navy">
             {isEditMode ? 'Modifier le rendez-vous' : 'Créer un nouveau rendez-vous'}
           </DialogTitle>
-          <DialogDescription className="text-sm text-vet-brown">
+          <DialogDescription className="text-xs text-vet-brown">
             {isEditMode 
               ? 'Modifier les informations du rendez-vous et marquer l\'arrivée du client'
               : 'Saisir les informations pour un rendez-vous pris par téléphone ou sur place'
@@ -104,12 +116,12 @@ export const CreateAppointmentModal = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col h-full min-h-0">
-          <ScrollArea className="flex-1 px-6 py-4">
-            <div className="space-y-6">
+          <ScrollArea className="flex-1 px-4 py-3">
+            <div className="space-y-4">
               {/* Grille des 3 sections principales */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 {/* Section Rendez-vous */}
-                <div className="bg-blue-50/50 border border-blue-200 rounded-lg p-4">
+                <div className="bg-blue-50/50 border border-blue-200 rounded-lg p-3">
                   <AppointmentSection
                     formData={formData}
                     veterinarians={veterinarians}
@@ -122,7 +134,7 @@ export const CreateAppointmentModal = ({
                 </div>
 
                 {/* Section Client */}
-                <div className="bg-green-50/50 border border-green-200 rounded-lg p-4">
+                <div className="bg-green-50/50 border border-green-200 rounded-lg p-3">
                   <ClientSection
                     formData={formData}
                     onFieldUpdate={updateField}
@@ -130,7 +142,7 @@ export const CreateAppointmentModal = ({
                 </div>
 
                 {/* Section Animal */}
-                <div className="bg-amber-50/50 border border-amber-200 rounded-lg p-4">
+                <div className="bg-amber-50/50 border border-amber-200 rounded-lg p-3">
                   <AnimalSection
                     formData={formData}
                     onFieldUpdate={updateField}
@@ -139,7 +151,7 @@ export const CreateAppointmentModal = ({
               </div>
 
               {/* Section Consultation - pleine largeur */}
-              <div className="bg-purple-50/50 border border-purple-200 rounded-lg p-4">
+              <div className="bg-purple-50/50 border border-purple-200 rounded-lg p-3">
                 <ConsultationSection
                   formData={formData}
                   onFieldUpdate={updateField}
@@ -148,19 +160,32 @@ export const CreateAppointmentModal = ({
             </div>
           </ScrollArea>
 
-          {/* Actions intégrées dans le formulaire */}
-          <div className="flex justify-end space-x-3 px-6 py-4 border-t bg-gray-50/50 flex-shrink-0">
-            <Button type="button" variant="outline" onClick={onClose} className="px-6">
-              Annuler
-            </Button>
+          {/* Actions en bas de la fiche */}
+          <div className="flex justify-between items-center px-4 py-3 border-t bg-gray-50/50 flex-shrink-0">
+            <div className="flex space-x-2">
+              <Button type="button" variant="outline" onClick={onClose} className="px-4 text-sm">
+                Annuler
+              </Button>
+              {isEditMode && (
+                <Button 
+                  type="button" 
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={isDeletingBooking}
+                  className="px-4 text-sm"
+                >
+                  {isDeletingBooking ? 'Suppression...' : 'Supprimer'}
+                </Button>
+              )}
+            </div>
             <Button 
               type="submit" 
               disabled={isSubmitting}
-              className="bg-vet-sage hover:bg-vet-sage/90 text-white px-6"
+              className="bg-vet-sage hover:bg-vet-sage/90 text-white px-4 text-sm"
             >
               {isSubmitting 
                 ? (isEditMode ? 'Modification...' : 'Création...') 
-                : (isEditMode ? 'Modifier le rendez-vous' : 'Créer le rendez-vous')
+                : 'Valider'
               }
             </Button>
           </div>
