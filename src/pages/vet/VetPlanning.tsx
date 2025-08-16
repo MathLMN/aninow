@@ -113,51 +113,54 @@ export default function VetPlanning() {
 
   return (
     <div className="h-screen bg-gradient-to-br from-vet-blue/5 via-white to-vet-sage/5 flex flex-col">
-      {/* Fixed layout container */}
-      <div className="flex-1 flex pt-16 pb-16 overflow-hidden">
-        {/* Left sidebar with date navigation - Fixed */}
-        <div className="w-80 flex-shrink-0 p-4 space-y-4">
-          {/* Date navigation panel */}
-          <div className="bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg p-4">
+      {/* Layout container avec espacement réduit */}
+      <div className="flex-1 flex pt-4 pb-16 overflow-hidden">
+        {/* Sidebar de navigation réduite en largeur */}
+        <div className="w-64 flex-shrink-0 p-3 space-y-4">
+          {/* Panneau de navigation avec hauteur maximale */}
+          <div className="bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg p-4 h-full flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-vet-navy">Navigation</h3>
               <PendingBookingsNotification />
             </div>
             
-            {viewMode === 'daily' ? (
-              <DailyCalendarView
-                selectedDate={selectedDate}
-                onDateChange={setSelectedDate}
-                bookings={todayBookings}
-                veterinarians={veterinarians}
-                onCreateAppointment={handleCreateAppointment}
-                onAppointmentClick={handleAppointmentClick}
-                onValidateBooking={handleValidateBooking}
-                onCancelBooking={handleCancelBooking}
-                onDuplicateBooking={handleDuplicateBooking}
-                onMoveBooking={handleMoveBooking}
-                onDeleteBooking={handleDeleteBooking}
-                onBlockSlot={handleBlockSlot}
-                sidebarMode={true}
-              />
-            ) : (
-              <WeeklyCalendarView
-                weekDates={weekDates}
-                bookings={bookings}
-                veterinarians={veterinarians}
-                filters={{ veterinarian: 'all', status: 'all' }}
-                isLoading={false}
-                onCreateAppointment={handleCreateAppointment}
-                onAppointmentClick={handleAppointmentClick}
-              />
-            )}
+            {/* Contenu de navigation avec calendrier ouvert */}
+            <div className="flex-1 overflow-auto">
+              {viewMode === 'daily' ? (
+                <DailyCalendarView
+                  selectedDate={selectedDate}
+                  onDateChange={setSelectedDate}
+                  bookings={todayBookings}
+                  veterinarians={veterinarians}
+                  onCreateAppointment={handleCreateAppointment}
+                  onAppointmentClick={handleAppointmentClick}
+                  onValidateBooking={handleValidateBooking}
+                  onCancelBooking={handleCancelBooking}
+                  onDuplicateBooking={handleDuplicateBooking}
+                  onMoveBooking={handleMoveBooking}
+                  onDeleteBooking={handleDeleteBooking}
+                  onBlockSlot={handleBlockSlot}
+                  sidebarMode={true}
+                />
+              ) : (
+                <WeeklyCalendarView
+                  weekDates={weekDates}
+                  bookings={bookings}
+                  veterinarians={veterinarians}
+                  filters={{ veterinarian: 'all', status: 'all' }}
+                  isLoading={false}
+                  onCreateAppointment={handleCreateAppointment}
+                  onAppointmentClick={handleAppointmentClick}
+                />
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Right main content area - Fixed headers with scrollable content */}
+        {/* Zone principale du planning avec plus d'espace */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Planning content */}
-          <div className="flex-1 p-4">
+          {/* Contenu du planning */}
+          <div className="flex-1 p-3">
             {viewMode === 'daily' ? (
               <DailyCalendarView
                 selectedDate={selectedDate}
