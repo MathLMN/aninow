@@ -4,6 +4,7 @@ import { DailyCalendarView } from "@/components/planning/DailyCalendarView";
 import { WeeklyCalendarView } from "@/components/planning/WeeklyCalendarView";
 import { PlanningHeader } from "@/components/planning/PlanningHeader";
 import { CreateAppointmentModal } from "@/components/planning/CreateAppointmentModal";
+import { PendingBookingsNotification } from "@/components/planning/PendingBookingsNotification";
 import { useVetBookings } from "@/hooks/useVetBookings";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { usePlanningActions } from "@/hooks/usePlanningActions";
@@ -111,50 +112,98 @@ export default function VetPlanning() {
   const weekDates = getWeekDates(selectedDate);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-vet-blue/5 via-white to-vet-sage/5 pb-20 pt-6">
-      <div className="container mx-auto p-6 space-y-6">
-        <PlanningHeader
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          selectedDate={selectedDate}
-        />
+    <div className="h-screen bg-gradient-to-br from-vet-blue/5 via-white to-vet-sage/5 flex flex-col">
+      {/* Fixed layout container */}
+      <div className="flex-1 flex pt-16 pb-16 overflow-hidden">
+        {/* Left sidebar with date navigation - Fixed */}
+        <div className="w-80 flex-shrink-0 p-4 space-y-4">
+          {/* Date navigation panel */}
+          <div className="bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-vet-navy">Navigation</h3>
+              <PendingBookingsNotification />
+            </div>
+            
+            {viewMode === 'daily' ? (
+              <DailyCalendarView
+                selectedDate={selectedDate}
+                onDateChange={setSelectedDate}
+                bookings={todayBookings}
+                veterinarians={veterinarians}
+                onCreateAppointment={handleCreateAppointment}
+                onAppointmentClick={handleAppointmentClick}
+                onValidateBooking={handleValidateBooking}
+                onCancelBooking={handleCancelBooking}
+                onDuplicateBooking={handleDuplicateBooking}
+                onMoveBooking={handleMoveBooking}
+                onDeleteBooking={handleDeleteBooking}
+                onBlockSlot={handleBlockSlot}
+                sidebarMode={true}
+              />
+            ) : (
+              <WeeklyCalendarView
+                weekDates={weekDates}
+                bookings={bookings}
+                veterinarians={veterinarians}
+                filters={{ veterinarian: 'all', status: 'all' }}
+                isLoading={false}
+                onCreateAppointment={handleCreateAppointment}
+                onAppointmentClick={handleAppointmentClick}
+              />
+            )}
+          </div>
+        </div>
 
-        {viewMode === 'daily' ? (
-          <DailyCalendarView
-            selectedDate={selectedDate}
-            onDateChange={setSelectedDate}
-            bookings={todayBookings}
-            veterinarians={veterinarians}
-            onCreateAppointment={handleCreateAppointment}
-            onAppointmentClick={handleAppointmentClick}
-            onValidateBooking={handleValidateBooking}
-            onCancelBooking={handleCancelBooking}
-            onDuplicateBooking={handleDuplicateBooking}
-            onMoveBooking={handleMoveBooking}
-            onDeleteBooking={handleDeleteBooking}
-            onBlockSlot={handleBlockSlot}
-          />
-        ) : (
-          <WeeklyCalendarView
-            weekDates={weekDates}
-            bookings={bookings}
-            veterinarians={veterinarians}
-            filters={{ veterinarian: 'all', status: 'all' }}
-            isLoading={false}
-            onCreateAppointment={handleCreateAppointment}
-            onAppointmentClick={handleAppointmentClick}
-          />
-        )}
-
-        <CreateAppointmentModal
-          isOpen={isCreateModalOpen}
-          onClose={handleCloseModal}
-          defaultData={createModalDefaultData}
-          appointmentToEdit={appointmentToEdit}
-          veterinarians={veterinarians}
-          consultationTypes={[]}
-        />
+        {/* Right main content area - Fixed headers with scrollable content */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Planning content */}
+          <div className="flex-1 p-4">
+            {viewMode === 'daily' ? (
+              <DailyCalendarView
+                selectedDate={selectedDate}
+                onDateChange={setSelectedDate}
+                bookings={todayBookings}
+                veterinarians={veterinarians}
+                onCreateAppointment={handleCreateAppointment}
+                onAppointmentClick={handleAppointmentClick}
+                onValidateBooking={handleValidateBooking}
+                onCancelBooking={handleCancelBooking}
+                onDuplicateBooking={handleDuplicateBooking}
+                onMoveBooking={handleMoveBooking}
+                onDeleteBooking={handleDeleteBooking}
+                onBlockSlot={handleBlockSlot}
+                mainViewMode={true}
+              />
+            ) : (
+              <WeeklyCalendarView
+                weekDates={weekDates}
+                bookings={bookings}
+                veterinarians={veterinarians}
+                filters={{ veterinarian: 'all', status: 'all' }}
+                isLoading={false}
+                onCreateAppointment={handleCreateAppointment}
+                onAppointmentClick={handleAppointmentClick}
+              />
+            )}
+          </div>
+        </div>
       </div>
+
+      {/* Fixed bottom planning header */}
+      <PlanningHeader
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        selectedDate={selectedDate}
+      />
+
+      <CreateAppointmentModal
+        isOpen={isCreateModalOpen}
+        onClose={handleCloseModal}
+        defaultData={createModalDefaultData}
+        appointmentToEdit={appointmentToEdit}
+        veterinarians={veterinarians}
+        consultationTypes={[]}
+      />
     </div>
   );
 }
