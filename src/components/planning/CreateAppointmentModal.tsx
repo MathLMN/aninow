@@ -100,9 +100,9 @@ export const CreateAppointmentModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[85vh] p-0 overflow-hidden">
-        <DialogHeader className="px-3 py-2 border-b bg-gradient-to-r from-vet-navy/5 to-vet-sage/5 flex-shrink-0">
-          <DialogTitle className="text-base font-bold text-vet-navy">
+      <DialogContent className="max-w-5xl max-h-[90vh] p-0 overflow-visible">
+        <DialogHeader className="px-4 py-3 border-b bg-gradient-to-r from-vet-navy/5 to-vet-sage/5 flex-shrink-0">
+          <DialogTitle className="text-lg font-bold text-vet-navy">
             {isEditMode ? 'Modifier le rendez-vous' : 'Créer un nouveau rendez-vous'}
           </DialogTitle>
           <DialogDescription className="text-xs text-vet-brown">
@@ -114,11 +114,11 @@ export const CreateAppointmentModal = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
-          <div className="px-3 py-2 space-y-2 flex-1">
+          <div className="px-4 py-3 space-y-3 flex-1">
             {/* Grille des 3 sections principales - plus compacte */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
               {/* Section Rendez-vous */}
-              <div className="bg-blue-50/50 border border-blue-200 rounded-md p-2">
+              <div className="bg-blue-50/50 border border-blue-200 rounded-lg p-2">
                 <AppointmentSection
                   formData={formData}
                   veterinarians={veterinarians}
@@ -131,7 +131,7 @@ export const CreateAppointmentModal = ({
               </div>
 
               {/* Section Client */}
-              <div className="bg-green-50/50 border border-green-200 rounded-md p-2">
+              <div className="bg-green-50/50 border border-green-200 rounded-lg p-2">
                 <ClientSection
                   formData={formData}
                   onFieldUpdate={updateField}
@@ -139,7 +139,7 @@ export const CreateAppointmentModal = ({
               </div>
 
               {/* Section Animal */}
-              <div className="bg-amber-50/50 border border-amber-200 rounded-md p-2">
+              <div className="bg-amber-50/50 border border-amber-200 rounded-lg p-2">
                 <AnimalSection
                   formData={formData}
                   onFieldUpdate={updateField}
@@ -148,17 +148,17 @@ export const CreateAppointmentModal = ({
             </div>
 
             {/* Section Consultation - pleine largeur mais plus compacte */}
-            <div className="bg-purple-50/50 border border-purple-200 rounded-md p-2">
+            <div className="bg-purple-50/50 border border-purple-200 rounded-lg p-2">
               <ConsultationSection
                 formData={formData}
                 onFieldUpdate={updateField}
               />
             </div>
 
-            {/* Boutons d'action - intégrés dans le cadre */}
-            <div className="flex justify-between items-center pt-2 border-t bg-gray-50/50 px-2 py-2 rounded-md">
+            {/* Boutons d'action - toujours visibles en bas */}
+            <div className="flex justify-between items-center pt-3 border-t bg-gray-50/50 px-2 py-2 rounded-lg mt-3">
               <div className="flex space-x-2">
-                <Button type="button" variant="outline" onClick={onClose} className="px-3 py-1 text-xs h-7">
+                <Button type="button" variant="outline" onClick={onClose} className="px-4 text-sm">
                   Annuler
                 </Button>
                 <Button 
@@ -166,7 +166,7 @@ export const CreateAppointmentModal = ({
                   variant="destructive"
                   onClick={handleDelete}
                   disabled={isDeletingBooking}
-                  className="px-3 py-1 text-xs h-7"
+                  className="px-4 text-sm"
                 >
                   {isDeletingBooking ? 'Suppression...' : 'Supprimer'}
                 </Button>
@@ -174,7 +174,7 @@ export const CreateAppointmentModal = ({
               <Button 
                 type="submit" 
                 disabled={isSubmitting}
-                className="bg-vet-sage hover:bg-vet-sage/90 text-white px-3 py-1 text-xs h-7"
+                className="bg-vet-sage hover:bg-vet-sage/90 text-white px-4 text-sm"
               >
                 {isSubmitting 
                   ? (isEditMode ? 'Modification...' : 'Création...') 
