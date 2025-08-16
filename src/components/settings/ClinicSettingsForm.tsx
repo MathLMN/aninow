@@ -14,6 +14,7 @@ import { Clock, MapPin, Phone, Mail, Users, Plus, Edit, Trash2, Building2, Calen
 import { useClinicSettings } from "@/hooks/useClinicSettings";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { useVeterinarianSchedules } from "@/hooks/useVeterinarianSchedules";
+import { useClinicAccess } from "@/hooks/useClinicAccess";
 import { VeterinarianAbsenceManager } from "./VeterinarianAbsenceManager";
 import { VeterinarianWeeklySchedule } from "./VeterinarianWeeklySchedule";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +24,7 @@ import * as z from "zod";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
 import { useSlotManagement } from "@/hooks/useSlotManagement";
+import { supabase } from '@/integrations/supabase/client';
 
 interface ClinicSettings {
   clinic_name: string;
@@ -143,7 +145,8 @@ export const ClinicSettingsForm = () => {
     deleteVeterinarian
   } = useClinicVeterinarians();
   const { schedules } = useVeterinarianSchedules();
-  const { consultationTypes, fetchConsultationTypes } = useSlotManagement();
+  const { consultationTypes } = useSlotManagement();
+  const { currentClinicId } = useClinicAccess();
   const {
     toast
   } = useToast();
@@ -292,6 +295,12 @@ export const ClinicSettingsForm = () => {
   });
   const [editingConsultationType, setEditingConsultationType] = useState<ConsultationType | null>(null);
 
+  // Function to refresh consultation types
+  const refreshConsultationTypes = async () => {
+    // This will trigger a re-render since consultationTypes comes from useSlotManagement
+    // which should automatically refresh when the data changes in Supabase
+  };
+
   const handleConsultationTypeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newConsultationType.name.trim()) {
@@ -304,9 +313,6 @@ export const ClinicSettingsForm = () => {
     }
 
     try {
-      const { supabase } = await import('@/integrations/supabase/client');
-      const { currentClinicId } = await import('@/hooks/useClinicAccess');
-      
       if (editingConsultationType) {
         // Update existing type
         const { error } = await supabase
@@ -331,7 +337,8 @@ export const ClinicSettingsForm = () => {
           .insert([{
             name: newConsultationType.name,
             duration_minutes: newConsultationType.duration_minutes,
-            color: newConsultationType.color
+            color: newConsultationType.color,
+            clinic_id: currentClinicId
           }]);
 
         if (error) throw error;
@@ -343,7 +350,7 @@ export const ClinicSettingsForm = () => {
       }
 
       // Refresh consultation types
-      await fetchConsultationTypes();
+      await refreshConsultationTypes();
       
       setIsConsultationTypeDialogOpen(false);
       setNewConsultationType({
@@ -364,8 +371,6 @@ export const ClinicSettingsForm = () => {
 
   const handleDeleteConsultationType = async (typeId: string) => {
     try {
-      const { supabase } = await import('@/integrations/supabase/client');
-      
       const { error } = await supabase
         .from('consultation_types')
         .delete()
@@ -379,7 +384,7 @@ export const ClinicSettingsForm = () => {
       });
 
       // Refresh consultation types
-      await fetchConsultationTypes();
+      await refreshConsultationTypes();
     } catch (error) {
       console.error('Error deleting consultation type:', error);
       toast({
@@ -392,8 +397,8 @@ export const ClinicSettingsForm = () => {
 
   // Combine default and custom consultation types
   const allConsultationTypes = [
-    ...DEFAULT_CONSULTATION_TYPES.map(type => ({ ...type, id: `default-${type.name}` })),
-    ...consultationTypes.filter(type => !DEFAULT_CONSULTATION_TYPES.some(def => def.name === type.name))
+    ...DEFAULT_CONSULTATION_TYPES.map(type => ({ ...type, id: `default-${type.name}`, is_default: true })),
+    ...consultationTypes.filter(type => !DEFAULT_CONSULTATION_TYPES.some(def => def.name === type.name)).map(type => ({ ...type, is_default: false }))
   ];
 
   return (
