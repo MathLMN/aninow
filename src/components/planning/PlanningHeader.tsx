@@ -30,9 +30,9 @@ export const PlanningHeader = ({
 
   return (
     <>
-      {/* Bandeau ultra-compact - hauteur minimale */}
+      {/* Bandeau ultra-compact */}
       <div className="bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg shadow-sm">
-        <div className="px-2 py-1">
+        <div className="px-3 py-1.5">
           <div className="flex items-center justify-between">
             {/* Sélecteur de vue à gauche */}
             <ViewModeSelector 
@@ -40,8 +40,8 @@ export const PlanningHeader = ({
               onViewModeChange={onViewModeChange} 
             />
 
-            {/* Boutons d'action à droite - ultra-compacts */}
-            <div className="flex items-center gap-1">
+            {/* Boutons d'action à droite - plus compacts */}
+            <div className="flex items-center gap-1.5">
               {/* Bouton Gérer les attributions */}
               <SlotAssignmentSheet
                 assignments={assignments}
@@ -56,9 +56,9 @@ export const PlanningHeader = ({
                 onClick={() => setIsRecurringBlocksModalOpen(true)}
                 variant="outline"
                 size="sm"
-                className="flex items-center gap-0.5 h-6 px-1.5 text-[9px]"
+                className="flex items-center gap-1 h-7 px-2 text-[10px]"
               >
-                <Calendar className="h-2.5 w-2.5" />
+                <Calendar className="h-3 w-3" />
                 Blocages
               </Button>
             </div>
