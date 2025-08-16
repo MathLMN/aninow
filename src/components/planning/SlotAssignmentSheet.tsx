@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -212,12 +211,12 @@ export const SlotAssignmentSheet = ({
       <SheetTrigger asChild>
         <Button
           variant="outline"
-          size="default"
-          className="flex items-center gap-2"
+          size="sm"
+          className="flex items-center gap-1 h-7 px-2 text-[10px]"
           disabled={!canManageAssignments}
         >
-          <Settings className="h-4 w-4" />
-          Gérer les attributions
+          <Settings className="h-3 w-3" />
+          Attributions
         </Button>
       </SheetTrigger>
       <SheetContent className="w-[400px] sm:w-[540px]">
