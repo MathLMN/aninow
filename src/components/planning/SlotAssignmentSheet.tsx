@@ -212,7 +212,7 @@ export const SlotAssignmentSheet = ({
       <SheetTrigger asChild>
         <Button
           variant="outline"
-          size="sm"
+          size="default"
           className="flex items-center gap-2"
           disabled={!canManageAssignments}
         >
