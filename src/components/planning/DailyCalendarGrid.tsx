@@ -178,14 +178,14 @@ export const DailyCalendarGrid = ({
     return blockedSlotInfo;
   }, [timeSlots, columns, slotBookings]);
 
-  if (fixedHeaders) {
-    return (
-      <div className="h-full flex flex-col bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg overflow-hidden">
-        {/* En-tête fixe des colonnes - réduit en hauteur */}
-        <div className={`grid border-b border-vet-blue/20 bg-vet-beige/30 flex-shrink-0`} style={{gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`}}>
+  return (
+    <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 h-full flex flex-col">
+      <CardContent className="p-0 flex flex-col h-full">
+        {/* En-tête fixe des colonnes */}
+        <div className={`grid border-b border-vet-blue/20 bg-vet-beige/30 flex-shrink-0`} style={{gridTemplateColumns: `100px repeat(${columns.length}, 1fr)`}}>
           {/* Colonne vide pour aligner avec la colonne horaire */}
-          <div className="p-1 border-r border-vet-blue/20">
-            <div className="text-[10px] text-vet-brown text-center font-medium">
+          <div className="p-2 border-r border-vet-blue/20">
+            <div className="text-xs text-vet-brown text-center font-medium">
               Horaires
             </div>
           </div>
@@ -201,11 +201,11 @@ export const DailyCalendarGrid = ({
             }, 0);
 
             return (
-              <div key={column.id} className="p-1 text-center border-l border-vet-blue/20">
-                <div className="font-semibold text-xs text-vet-navy">
+              <div key={column.id} className="p-2 text-center border-l border-vet-blue/20">
+                <div className="font-semibold text-sm text-vet-navy">
                   {column.title}
                 </div>
-                <div className="text-[10px] text-vet-brown mt-0.5">
+                <div className="text-xs text-vet-brown mt-1">
                   {totalBookings} RDV
                 </div>
               </div>
@@ -213,111 +213,9 @@ export const DailyCalendarGrid = ({
           })}
         </div>
 
-        {/* Zone scrollable avec les créneaux - hauteur des créneaux réduite */}
-        <ScrollArea className="flex-1">
-          <div className="relative">
-            {timeSlots.map((time, timeIndex) => {
-              const isOpen = isTimeSlotOpen(time, daySchedule);
-              
-              return (
-                <div 
-                  key={time} 
-                  className={cn(
-                    "grid relative h-[24px] border-b border-gray-200/50"
-                  )} 
-                  style={{gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`}}
-                >
-                  {/* Colonne horaire - réduite en largeur */}
-                  <div className={cn(
-                    "text-xs text-center font-medium border-r flex items-center justify-center px-1",
-                    isOpen 
-                      ? "bg-white text-gray-700 border-gray-300" 
-                      : "bg-gray-300/80 text-gray-600 border-gray-400",
-                    "text-[10px] font-medium leading-none"
-                  )}>
-                    {time}
-                  </div>
-                  
-                  {/* Colonnes par vétérinaire et ASV */}
-                  {columns.map((column) => {
-                    const key = `${time}-${column.id}`;
-                    const slotBookingsForCell = slotBookings[key] || [];
-                    const blockInfo = getBlockedSlotInfo[key];
-                    
-                    // Vérifier si le vétérinaire est absent (seulement pour les colonnes vétérinaire, pas ASV)
-                    const isVetAbsent = column.id !== 'asv' && isVeterinarianAbsent(column.id, selectedDate, absences);
-                    
-                    return (
-                      <TimeSlotCell
-                        key={`${column.id}-${time}`}
-                        time={time}
-                        columnId={column.id}
-                        bookings={slotBookingsForCell}
-                        isOpen={isOpen}
-                        canBook={true}
-                        onCreateAppointment={onCreateAppointment}
-                        onAppointmentClick={onAppointmentClick}
-                        selectedDate={selectedDate}
-                        onValidateBooking={onValidateBooking}
-                        onCancelBooking={onCancelBooking}
-                        onDuplicateBooking={onDuplicateBooking}
-                        onMoveBooking={onMoveBooking}
-                        onDeleteBooking={onDeleteBooking}
-                        onBlockSlot={onBlockSlot}
-                        isVeterinarianAbsent={isVetAbsent}
-                        isFirstBlockedSlot={blockInfo?.isFirst || false}
-                        blockedSlotsCount={blockInfo?.count || 1}
-                      />
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </div>
-        </ScrollArea>
-      </div>
-    );
-  }
-
-  // Mode par défaut (compatibilité)
-  return (
-    <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-      <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <div className="min-w-full">
-            {/* En-tête des colonnes avec alignement correct */}
-            <div className={`grid border-b border-vet-blue/20 bg-vet-beige/30`} style={{gridTemplateColumns: `100px repeat(${columns.length}, 1fr)`}}>
-              {/* Colonne vide pour aligner avec la colonne horaire */}
-              <div className="p-2 border-r border-vet-blue/20">
-                <div className="text-xs text-vet-brown text-center font-medium">
-                  Horaires
-                </div>
-              </div>
-              
-              {/* Colonnes des vétérinaires */}
-              {columns.map((column) => {
-                // Compter le total des RDV pour cette colonne pour toute la journée
-                const totalBookings = timeSlots.reduce((total, time) => {
-                  const key = `${time}-${column.id}`;
-                  const bookingsForSlot = slotBookings[key] || [];
-                  // Ne compter que les vrais rendez-vous, pas les blocages
-                  return total + bookingsForSlot.filter(b => !b.is_blocked && !b.recurring_block_id).length;
-                }, 0);
-
-                return (
-                  <div key={column.id} className="p-2 text-center border-l border-vet-blue/20">
-                    <div className="font-semibold text-sm text-vet-navy">
-                      {column.title}
-                    </div>
-                    <div className="text-xs text-vet-brown mt-1">
-                      {totalBookings} RDV
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Grille horaire 7h-21h avec lignes fines uniformes */}
+        {/* Zone scrollable avec les créneaux horaires */}
+        <div className="flex-1 overflow-hidden">
+          <ScrollArea className="h-full">
             <div className="relative">
               {timeSlots.map((time, timeIndex) => {
                 const isOpen = isTimeSlotOpen(time, daySchedule);
@@ -326,24 +224,18 @@ export const DailyCalendarGrid = ({
                   <div 
                     key={time} 
                     className={cn(
-                      `grid relative`,
-                      // Hauteur identique pour tous les créneaux
-                      "h-[30px]",
-                      // Lignes fines uniformes pour tous les créneaux
-                      "border-b border-gray-200/50"
+                      "grid relative h-[24px] border-b border-gray-200/50"
                     )} 
                     style={{gridTemplateColumns: `100px repeat(${columns.length}, 1fr)`}}
                   >
-                    {/* Colonne horaire - affichage de toutes les heures avec alignement parfait */}
+                    {/* Colonne horaire */}
                     <div className={cn(
                       "text-xs text-center font-medium border-r flex items-center justify-center px-1",
                       isOpen 
                         ? "bg-white text-gray-700 border-gray-300" 
                         : "bg-gray-300/80 text-gray-600 border-gray-400",
-                      // Police et style pour une meilleure lisibilité
                       "text-[11px] font-medium leading-none"
                     )}>
-                      {/* Afficher toutes les heures pour un alignement parfait */}
                       {time}
                     </div>
                     
@@ -383,7 +275,7 @@ export const DailyCalendarGrid = ({
                 );
               })}
             </div>
-          </div>
+          </ScrollArea>
         </div>
       </CardContent>
     </Card>
