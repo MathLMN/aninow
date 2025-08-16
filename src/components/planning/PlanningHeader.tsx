@@ -24,10 +24,10 @@ export const PlanningHeader = ({
   const [isRecurringBlocksModalOpen, setIsRecurringBlocksModalOpen] = useState(false);
   const { veterinarians } = useClinicVeterinarians();
   const { assignments, refreshAssignments } = useSlotAssignments(selectedDate);
-  const { currentUser } = useVetAuth();
+  const { adminProfile, clinicAccess } = useVetAuth();
 
   // Vérifier si l'utilisateur peut gérer les attributions (admin ou vétérinaire principal)
-  const canManageAssignments = currentUser?.role === 'admin' || currentUser?.is_clinic_admin;
+  const canManageAssignments = !!adminProfile || (clinicAccess?.role === 'admin' || clinicAccess?.role === 'veterinarian');
 
   return (
     <>
