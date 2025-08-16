@@ -13,7 +13,7 @@ interface CreateAppointmentModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultData?: any;
-  appointmentToEdit?: any; // Nouveau: rendez-vous à éditer
+  appointmentToEdit?: any;
   veterinarians: any[];
   consultationTypes: any[];
 }
@@ -90,8 +90,8 @@ export const CreateAppointmentModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[95vh] p-0">
-        <DialogHeader className="px-6 py-4 border-b bg-gradient-to-r from-vet-navy/5 to-vet-sage/5">
+      <DialogContent className="max-w-6xl max-h-[95vh] p-0 overflow-hidden">
+        <DialogHeader className="px-6 py-4 border-b bg-gradient-to-r from-vet-navy/5 to-vet-sage/5 flex-shrink-0">
           <DialogTitle className="text-xl font-bold text-vet-navy">
             {isEditMode ? 'Modifier le rendez-vous' : 'Créer un nouveau rendez-vous'}
           </DialogTitle>
@@ -103,66 +103,68 @@ export const CreateAppointmentModal = ({
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[calc(95vh-140px)]">
-          <form onSubmit={handleSubmit} className="p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Section Rendez-vous */}
-              <div className="bg-blue-50/50 border border-blue-200 rounded-lg p-4">
-                <AppointmentSection
-                  formData={formData}
-                  veterinarians={veterinarians}
-                  consultationTypes={consultationTypes}
-                  onFieldUpdate={updateField}
-                  onConsultationTypeChange={onConsultationTypeChange}
-                  onTimeChange={handleTimeChange}
-                  calculateEndTime={calculateEndTime}
-                />
+        <form onSubmit={handleSubmit} className="flex flex-col h-full min-h-0">
+          <ScrollArea className="flex-1 px-6 py-4">
+            <div className="space-y-6">
+              {/* Grille des 3 sections principales */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Section Rendez-vous */}
+                <div className="bg-blue-50/50 border border-blue-200 rounded-lg p-4">
+                  <AppointmentSection
+                    formData={formData}
+                    veterinarians={veterinarians}
+                    consultationTypes={consultationTypes}
+                    onFieldUpdate={updateField}
+                    onConsultationTypeChange={onConsultationTypeChange}
+                    onTimeChange={handleTimeChange}
+                    calculateEndTime={calculateEndTime}
+                  />
+                </div>
+
+                {/* Section Client */}
+                <div className="bg-green-50/50 border border-green-200 rounded-lg p-4">
+                  <ClientSection
+                    formData={formData}
+                    onFieldUpdate={updateField}
+                  />
+                </div>
+
+                {/* Section Animal */}
+                <div className="bg-amber-50/50 border border-amber-200 rounded-lg p-4">
+                  <AnimalSection
+                    formData={formData}
+                    onFieldUpdate={updateField}
+                  />
+                </div>
               </div>
 
-              {/* Section Client */}
-              <div className="bg-green-50/50 border border-green-200 rounded-lg p-4">
-                <ClientSection
-                  formData={formData}
-                  onFieldUpdate={updateField}
-                />
-              </div>
-
-              {/* Section Animal */}
-              <div className="bg-amber-50/50 border border-amber-200 rounded-lg p-4">
-                <AnimalSection
+              {/* Section Consultation - pleine largeur */}
+              <div className="bg-purple-50/50 border border-purple-200 rounded-lg p-4">
+                <ConsultationSection
                   formData={formData}
                   onFieldUpdate={updateField}
                 />
               </div>
             </div>
+          </ScrollArea>
 
-            {/* Section Consultation - pleine largeur */}
-            <div className="mt-6 bg-purple-50/50 border border-purple-200 rounded-lg p-4">
-              <ConsultationSection
-                formData={formData}
-                onFieldUpdate={updateField}
-              />
-            </div>
-          </form>
-        </ScrollArea>
-
-        {/* Actions en bas */}
-        <div className="flex justify-end space-x-3 px-6 py-4 border-t bg-gray-50/50">
-          <Button type="button" variant="outline" onClick={onClose} className="px-6">
-            Annuler
-          </Button>
-          <Button 
-            type="submit" 
-            disabled={isSubmitting}
-            className="bg-vet-sage hover:bg-vet-sage/90 text-white px-6"
-            onClick={handleSubmit}
-          >
-            {isSubmitting 
-              ? (isEditMode ? 'Modification...' : 'Création...') 
-              : (isEditMode ? 'Modifier le rendez-vous' : 'Créer le rendez-vous')
-            }
-          </Button>
-        </div>
+          {/* Actions intégrées dans le formulaire */}
+          <div className="flex justify-end space-x-3 px-6 py-4 border-t bg-gray-50/50 flex-shrink-0">
+            <Button type="button" variant="outline" onClick={onClose} className="px-6">
+              Annuler
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="bg-vet-sage hover:bg-vet-sage/90 text-white px-6"
+            >
+              {isSubmitting 
+                ? (isEditMode ? 'Modification...' : 'Création...') 
+                : (isEditMode ? 'Modifier le rendez-vous' : 'Créer le rendez-vous')
+              }
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );
