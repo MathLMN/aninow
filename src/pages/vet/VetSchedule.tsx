@@ -11,7 +11,6 @@ import { SlotsList } from "@/components/slots/SlotsList";
 const VetSchedule = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const {
-    consultationTypes,
     availableSlots,
     isLoading,
     fetchAvailableSlots,
@@ -62,7 +61,6 @@ const VetSchedule = () => {
         <div className="flex items-center space-x-3">
           <CreateSlotDialog
             veterinarians={veterinarians}
-            consultationTypes={consultationTypes}
             onCreateSlot={handleCreateSlot}
           />
         </div>

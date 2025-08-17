@@ -6,9 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus } from "lucide-react"
-import type { Database } from '@/integrations/supabase/types'
-
-type ConsultationTypeRow = Database['public']['Tables']['consultation_types']['Row']
+import { useConsultationTypes } from "@/hooks/useConsultationTypes"
 
 interface VeterinarianForSlot {
   id: string;
@@ -19,7 +17,6 @@ interface VeterinarianForSlot {
 
 interface CreateSlotDialogProps {
   veterinarians: VeterinarianForSlot[]
-  consultationTypes: ConsultationTypeRow[]
   onCreateSlot: (slotData: {
     veterinarian_id: string
     consultation_type_id: string
@@ -29,9 +26,11 @@ interface CreateSlotDialogProps {
   }) => Promise<boolean>
 }
 
-export const CreateSlotDialog = ({ veterinarians, consultationTypes, onCreateSlot }: CreateSlotDialogProps) => {
+export const CreateSlotDialog = ({ veterinarians, onCreateSlot }: CreateSlotDialogProps) => {
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const { consultationTypes, isLoading: typesLoading } = useConsultationTypes()
+  
   const [formData, setFormData] = useState({
     veterinarian_id: '',
     consultation_type_id: '',
@@ -120,9 +119,9 @@ export const CreateSlotDialog = ({ veterinarians, consultationTypes, onCreateSlo
 
           <div className="space-y-2">
             <Label htmlFor="consultation_type">Type de consultation</Label>
-            <Select value={formData.consultation_type_id} onValueChange={handleConsultationTypeChange}>
+            <Select value={formData.consultation_type_id} onValueChange={handleConsultationTypeChange} disabled={typesLoading}>
               <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez un type" />
+                <SelectValue placeholder={typesLoading ? "Chargement..." : "Sélectionnez un type"} />
               </SelectTrigger>
               <SelectContent>
                 {consultationTypes.map((type) => (
@@ -164,6 +163,8 @@ export const CreateSlotDialog = ({ veterinarians, consultationTypes, onCreateSlo
                 value={formData.end_time}
                 onChange={(e) => setFormData(prev => ({ ...prev, end_time: e.target.value }))}
                 required
+                className="bg-gray-50"
+                readOnly
               />
             </div>
           </div>
