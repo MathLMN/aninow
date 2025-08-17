@@ -7,6 +7,7 @@ import { PendingBookingsNotification } from "@/components/planning/PendingBookin
 import { useVetBookings } from "@/hooks/useVetBookings";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { usePlanningActions } from "@/hooks/usePlanningActions";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function VetPlanning() {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -17,6 +18,7 @@ export default function VetPlanning() {
 
   const { bookings, refreshBookings } = useVetBookings();
   const { veterinarians } = useClinicVeterinarians();
+  const isMobile = useIsMobile();
 
   const {
     validateBooking,
@@ -111,54 +113,66 @@ export default function VetPlanning() {
   const weekDates = getWeekDates(selectedDate);
 
   return (
-    <div className="h-screen bg-gradient-to-br from-vet-blue/5 via-white to-vet-sage/5 flex flex-col overflow-hidden">
-      {/* Layout container optimisé pour écran complet */}
-      <div className="flex-1 flex min-h-0 p-1 gap-1">
-        {/* Sidebar de navigation ultra-compacte */}
-        <div className="w-48 flex-shrink-0 h-full">
-          <div className="bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg h-[calc(100vh-140px)] flex flex-col">
-            {/* Header compact avec notification */}
-            <div className="flex items-center justify-end p-2 border-b border-vet-blue/20">
-              <PendingBookingsNotification />
-            </div>
-            
-            {/* Contenu de navigation optimisé */}
-            <div className="flex-1 p-2 overflow-hidden">
-              {viewMode === 'daily' ? (
-                <DailyCalendarView
-                  selectedDate={selectedDate}
-                  onDateChange={setSelectedDate}
-                  bookings={todayBookings}
-                  veterinarians={veterinarians}
-                  onCreateAppointment={handleCreateAppointment}
-                  onAppointmentClick={handleAppointmentClick}
-                  onValidateBooking={handleValidateBooking}
-                  onCancelBooking={handleCancelBooking}
-                  onDuplicateBooking={handleDuplicateBooking}
-                  onMoveBooking={handleMoveBooking}
-                  onDeleteBooking={handleDeleteBooking}
-                  onBlockSlot={handleBlockSlot}
-                  sidebarMode={true}
-                />
-              ) : (
-                <WeeklyCalendarView
-                  weekDates={weekDates}
-                  bookings={bookings}
-                  veterinarians={veterinarians}
-                  filters={{ veterinarian: 'all', status: 'all' }}
-                  isLoading={false}
-                  onCreateAppointment={handleCreateAppointment}
-                  onAppointmentClick={handleAppointmentClick}
-                />
-              )}
+    <div className="min-h-screen bg-gradient-to-br from-vet-blue/5 via-white to-vet-sage/5 flex flex-col overflow-hidden">
+      {/* Layout responsive optimisé */}
+      <div className="flex-1 flex flex-col lg:flex-row min-h-0 p-1 sm:p-2 gap-1 sm:gap-2">
+        
+        {/* Sidebar - caché sur mobile, visible sur desktop */}
+        {!isMobile && (
+          <div className="w-full lg:w-48 xl:w-56 flex-shrink-0 h-full">
+            <div className="bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg h-[calc(100vh-120px)] sm:h-[calc(100vh-140px)] flex flex-col">
+              {/* Header compact avec notification */}
+              <div className="flex items-center justify-end p-2 border-b border-vet-blue/20">
+                <PendingBookingsNotification />
+              </div>
+              
+              {/* Contenu de navigation optimisé */}
+              <div className="flex-1 p-2 overflow-hidden">
+                {viewMode === 'daily' ? (
+                  <DailyCalendarView
+                    selectedDate={selectedDate}
+                    onDateChange={setSelectedDate}
+                    bookings={todayBookings}
+                    veterinarians={veterinarians}
+                    onCreateAppointment={handleCreateAppointment}
+                    onAppointmentClick={handleAppointmentClick}
+                    onValidateBooking={handleValidateBooking}
+                    onCancelBooking={handleCancelBooking}
+                    onDuplicateBooking={handleDuplicateBooking}
+                    onMoveBooking={handleMoveBooking}
+                    onDeleteBooking={handleDeleteBooking}
+                    onBlockSlot={handleBlockSlot}
+                    sidebarMode={true}
+                  />
+                ) : (
+                  <WeeklyCalendarView
+                    weekDates={weekDates}
+                    bookings={bookings}
+                    veterinarians={veterinarians}
+                    filters={{ veterinarian: 'all', status: 'all' }}
+                    isLoading={false}
+                    onCreateAppointment={handleCreateAppointment}
+                    onAppointmentClick={handleAppointmentClick}
+                  />
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Zone principale avec planning optimisé */}
-        <div className="flex-1 flex flex-col min-h-0 gap-1">
-          {/* Contenu du planning principal - hauteur réduite pour laisser place au header */}
-          <div className="flex-1 min-h-0 max-h-[calc(100vh-120px)]">
+        {/* Zone principale avec planning responsive */}
+        <div className="flex-1 flex flex-col min-h-0 gap-1 sm:gap-2">
+          {/* Header de planning - en haut sur mobile, en bas sur desktop */}
+          <div className={`flex-shrink-0 order-1 ${isMobile ? 'lg:order-2' : 'lg:order-2'}`}>
+            <PlanningHeader
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              selectedDate={selectedDate}
+            />
+          </div>
+
+          {/* Contenu du planning principal - responsive height */}
+          <div className={`flex-1 min-h-0 order-2 ${isMobile ? 'lg:order-1' : 'lg:order-1'} max-h-[calc(100vh-160px)] sm:max-h-[calc(100vh-180px)] lg:max-h-[calc(100vh-120px)]`}>
             {viewMode === 'daily' ? (
               <DailyCalendarView
                 selectedDate={selectedDate}
@@ -186,15 +200,6 @@ export default function VetPlanning() {
                 onAppointmentClick={handleAppointmentClick}
               />
             )}
-          </div>
-
-          {/* Header de planning compact en bas */}
-          <div className="flex-shrink-0">
-            <PlanningHeader
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              selectedDate={selectedDate}
-            />
           </div>
         </div>
       </div>
