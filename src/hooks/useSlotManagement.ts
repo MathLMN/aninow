@@ -10,6 +10,8 @@ type SlotInsert = Database['public']['Tables']['available_slots']['Insert']
 export const useSlotManagement = () => {
   const [availableSlots, setAvailableSlots] = useState<AvailableSlotRow[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isCreating, setIsCreating] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
 
@@ -40,7 +42,8 @@ export const useSlotManagement = () => {
     }
   }
 
-  const createSlot = async (slotData: Omit<SlotInsert, 'id' | 'created_at' | 'updated_at'>) => {
+  const createSlot = async (slotData: Omit<SlotInsert, 'id' | 'created_at' | 'updated_at'>): Promise<boolean> => {
+    setIsCreating(true)
     try {
       console.log('🔄 Creating slot:', slotData);
       const { data, error } = await supabase
@@ -71,10 +74,13 @@ export const useSlotManagement = () => {
         variant: "destructive"
       })
       return false
+    } finally {
+      setIsCreating(false)
     }
   }
 
-  const deleteSlot = async (slotId: string) => {
+  const deleteSlot = async (slotId: string): Promise<boolean> => {
+    setIsDeleting(true)
     try {
       console.log('🔄 Deleting slot:', slotId);
       const { error } = await supabase
@@ -105,6 +111,8 @@ export const useSlotManagement = () => {
         variant: "destructive"
       })
       return false
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -131,6 +139,8 @@ export const useSlotManagement = () => {
   return {
     availableSlots,
     isLoading,
+    isCreating,
+    isDeleting,
     error,
     fetchAvailableSlots,
     createSlot,

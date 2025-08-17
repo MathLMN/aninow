@@ -1,3 +1,4 @@
+
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -5,6 +6,7 @@ import * as z from 'zod'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { useClinicAccess } from '@/hooks/useClinicAccess'
+import { format } from 'date-fns'
 
 const appointmentSchema = z.object({
   clientName: z.string().min(2, {
@@ -79,7 +81,7 @@ export const useAppointmentForm = (appointmentToEdit?: any, onSuccess?: () => vo
         animal_name: values.animalName,
         animal_species: values.animalSpecies,
         consultation_reason: values.consultationReason,
-        appointment_date: values.appointmentDate,
+        appointment_date: format(values.appointmentDate, 'yyyy-MM-dd'),
         appointment_time: values.appointmentTime,
         end_time: values.endTime,
         veterinarian_id: values.veterinarianId,
