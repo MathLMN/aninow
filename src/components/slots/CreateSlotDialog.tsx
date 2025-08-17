@@ -15,21 +15,36 @@ interface VeterinarianForSlot {
   is_active: boolean;
 }
 
+interface ConsultationType {
+  id: string;
+  name: string;
+  duration_minutes: number;
+  color?: string;
+}
+
 interface CreateSlotDialogProps {
-  veterinarians: VeterinarianForSlot[]
-  onCreateSlot: (slotData: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (slotData: {
     veterinarian_id: string
     consultation_type_id: string
     date: string
     start_time: string
     end_time: string
-  }) => Promise<boolean>
+  }) => Promise<void>;
+  veterinarians: VeterinarianForSlot[];
+  consultationTypes: ConsultationType[];
+  isCreating: boolean;
 }
 
-export const CreateSlotDialog = ({ veterinarians, onCreateSlot }: CreateSlotDialogProps) => {
-  const [open, setOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const { consultationTypes } = useConsultationTypes()
+export const CreateSlotDialog = ({ 
+  open, 
+  onOpenChange, 
+  onSubmit, 
+  veterinarians, 
+  consultationTypes, 
+  isCreating 
+}: CreateSlotDialogProps) => {
   const [formData, setFormData] = useState({
     veterinarian_id: '',
     consultation_type_id: '',
@@ -40,22 +55,7 @@ export const CreateSlotDialog = ({ veterinarians, onCreateSlot }: CreateSlotDial
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
-
-    const success = await onCreateSlot(formData)
-    
-    if (success) {
-      setFormData({
-        veterinarian_id: '',
-        consultation_type_id: '',
-        date: '',
-        start_time: '',
-        end_time: ''
-      })
-      setOpen(false)
-    }
-    
-    setIsLoading(false)
+    await onSubmit(formData)
   }
 
   const handleConsultationTypeChange = (consultationTypeId: string) => {
@@ -85,13 +85,7 @@ export const CreateSlotDialog = ({ veterinarians, onCreateSlot }: CreateSlotDial
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-vet-sage hover:bg-vet-sage/90 text-white">
-          <Plus className="h-4 w-4 mr-2" />
-          Nouveau créneau
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-vet-navy">Créer un nouveau créneau</DialogTitle>
@@ -175,11 +169,11 @@ export const CreateSlotDialog = ({ veterinarians, onCreateSlot }: CreateSlotDial
           </div>
 
           <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Annuler
             </Button>
-            <Button type="submit" disabled={isLoading} className="bg-vet-sage hover:bg-vet-sage/90 text-white">
-              {isLoading ? 'Création...' : 'Créer le créneau'}
+            <Button type="submit" disabled={isCreating} className="bg-vet-sage hover:bg-vet-sage/90 text-white">
+              {isCreating ? 'Création...' : 'Créer le créneau'}
             </Button>
           </div>
         </form>
