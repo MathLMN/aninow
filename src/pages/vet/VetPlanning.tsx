@@ -205,7 +205,6 @@ export default function VetPlanning() {
         defaultData={createModalDefaultData}
         appointmentToEdit={appointmentToEdit}
         veterinarians={veterinarians}
-        consultationTypes={[]}
       />
     </div>
   );
