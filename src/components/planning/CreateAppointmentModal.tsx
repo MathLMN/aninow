@@ -14,6 +14,7 @@ interface CreateAppointmentModalProps {
   defaultData?: any;
   appointmentToEdit?: any;
   veterinarians: any[];
+  consultationTypes: any[];
 }
 
 export const CreateAppointmentModal = ({
@@ -21,7 +22,8 @@ export const CreateAppointmentModal = ({
   onClose,
   defaultData,
   appointmentToEdit,
-  veterinarians
+  veterinarians,
+  consultationTypes
 }: CreateAppointmentModalProps) => {
   const {
     formData,
@@ -82,7 +84,7 @@ export const CreateAppointmentModal = ({
   }, [isOpen, defaultData, appointmentToEdit]);
 
   const onConsultationTypeChange = (consultationTypeId: string) => {
-    handleConsultationTypeChange(consultationTypeId);
+    handleConsultationTypeChange(consultationTypeId, consultationTypes);
   };
 
   const handleDelete = async () => {
@@ -120,6 +122,7 @@ export const CreateAppointmentModal = ({
                 <AppointmentSection
                   formData={formData}
                   veterinarians={veterinarians}
+                  consultationTypes={consultationTypes}
                   onFieldUpdate={updateField}
                   onConsultationTypeChange={onConsultationTypeChange}
                   onTimeChange={handleTimeChange}

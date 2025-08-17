@@ -4,11 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, UserCheck } from "lucide-react";
-import { useConsultationTypes } from "@/hooks/useConsultationTypes";
 
 interface AppointmentSectionProps {
   formData: any;
   veterinarians: any[];
+  consultationTypes: any[];
   onFieldUpdate: (field: string, value: string | number) => void;
   onConsultationTypeChange: (consultationTypeId: string) => void;
   onTimeChange: (time: string) => void;
@@ -18,13 +18,12 @@ interface AppointmentSectionProps {
 export const AppointmentSection = ({
   formData,
   veterinarians,
+  consultationTypes,
   onFieldUpdate,
   onConsultationTypeChange,
   onTimeChange,
   calculateEndTime
 }: AppointmentSectionProps) => {
-  const { consultationTypes, isLoading: typesLoading } = useConsultationTypes();
-
   const handleMarkArrival = () => {
     const now = new Date();
     const timeString = now.toTimeString().slice(0, 5); // Format HH:MM
@@ -82,9 +81,9 @@ export const AppointmentSection = ({
 
         <div>
           <Label htmlFor="consultationTypeId" className="text-xs font-medium text-gray-700">Type de consultation</Label>
-          <Select value={formData.consultationTypeId} onValueChange={onConsultationTypeChange} disabled={typesLoading}>
+          <Select value={formData.consultationTypeId} onValueChange={onConsultationTypeChange}>
             <SelectTrigger className="h-8 text-sm">
-              <SelectValue placeholder={typesLoading ? "Chargement..." : "Sélectionnez..."} />
+              <SelectValue placeholder="Sélectionnez..." />
             </SelectTrigger>
             <SelectContent>
               {consultationTypes.map((type) => (
@@ -106,8 +105,7 @@ export const AppointmentSection = ({
               step="5"
               value={formData.duration}
               onChange={(e) => onFieldUpdate('duration', parseInt(e.target.value) || 15)}
-              className="h-8 text-sm bg-gray-50"
-              readOnly
+              className="h-8 text-sm"
             />
           </div>
           <div>

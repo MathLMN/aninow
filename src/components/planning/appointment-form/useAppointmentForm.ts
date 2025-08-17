@@ -1,8 +1,8 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useClinicAccess } from '@/hooks/useClinicAccess';
-import { useConsultationTypes } from '@/hooks/useConsultationTypes';
 
 interface FormData {
   // Rendez-vous
@@ -39,7 +39,6 @@ interface FormData {
 export const useAppointmentForm = (onClose: () => void, appointmentId?: string) => {
   const { toast } = useToast();
   const { currentClinicId } = useClinicAccess();
-  const { consultationTypes } = useConsultationTypes();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState<FormData>({
@@ -72,7 +71,7 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleConsultationTypeChange = (consultationTypeId: string) => {
+  const handleConsultationTypeChange = (consultationTypeId: string, consultationTypes: any[]) => {
     console.log('🔄 Consultation type changed:', consultationTypeId);
     const selectedType = consultationTypes.find(type => type.id === consultationTypeId);
     if (selectedType) {

@@ -11,6 +11,7 @@ import { SlotsList } from "@/components/slots/SlotsList";
 const VetSchedule = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const {
+    consultationTypes,
     availableSlots,
     isLoading,
     fetchAvailableSlots,
@@ -40,13 +41,7 @@ const VetSchedule = () => {
     start_time: string;
     end_time: string;
   }) => {
-    createSlot(slotData);
-    return true;
-  };
-
-  const handleDeleteSlot = async (slotId: string) => {
-    deleteSlot(slotId);
-    return true;
+    return await createSlot(slotData);
   };
 
   const todaySlots = availableSlots.filter(slot => {
@@ -67,6 +62,7 @@ const VetSchedule = () => {
         <div className="flex items-center space-x-3">
           <CreateSlotDialog
             veterinarians={veterinarians}
+            consultationTypes={consultationTypes}
             onCreateSlot={handleCreateSlot}
           />
         </div>
@@ -148,7 +144,7 @@ const VetSchedule = () => {
       {/* Liste des créneaux */}
       <SlotsList
         slots={availableSlots}
-        onDeleteSlot={handleDeleteSlot}
+        onDeleteSlot={deleteSlot}
         onFilterByDate={handleFilterByDate}
         isLoading={isLoading}
       />

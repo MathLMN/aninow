@@ -1,172 +1,171 @@
 
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { useClinicAccess } from './useClinicAccess';
+import { useState, useEffect } from 'react'
+import { supabase } from '@/integrations/supabase/client'
+import { useToast } from '@/hooks/use-toast'
+import type { Database } from '@/integrations/supabase/types'
+
+type ClinicVeterinarianRow = Database['public']['Tables']['clinic_veterinarians']['Row']
+type ConsultationTypeRow = Database['public']['Tables']['consultation_types']['Row']
+type AvailableSlotRow = Database['public']['Tables']['available_slots']['Row']
+type SlotInsert = Database['public']['Tables']['available_slots']['Insert']
 
 export const useSlotManagement = () => {
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const { currentClinicId } = useClinicAccess();
+  const [consultationTypes, setConsultationTypes] = useState<ConsultationTypeRow[]>([])
+  const [availableSlots, setAvailableSlots] = useState<AvailableSlotRow[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { toast } = useToast()
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['available-slots', currentClinicId],
-    queryFn: async () => {
-      if (!currentClinicId) {
-        console.log('No clinic ID available');
-        return [];
-      }
+  // Note: Veterinarian fetching is now handled by useClinicVeterinarians hook
+  // This provides proper clinic-scoped access for authenticated users
 
+  const fetchConsultationTypes = async () => {
+    try {
+      console.log('🔄 Fetching consultation types...');
       const { data, error } = await supabase
-        .from('available_slots')
+        .from('consultation_types')
         .select('*')
-        .eq('clinic_id', currentClinicId);
+        .order('name')
 
       if (error) {
-        console.error('Error fetching available slots:', error);
+        console.error('❌ Error fetching consultation types:', error);
         throw error;
       }
-
-      return data || [];
-    },
-    enabled: !!currentClinicId,
-  });
+      console.log('✅ Consultation types loaded:', data?.length || 0);
+      setConsultationTypes(data || [])
+    } catch (err: any) {
+      console.error('❌ Failed to fetch consultation types:', err)
+      setError(err.message)
+      // Don't show toast for this error, it's handled by the main component
+    }
+  }
 
   const fetchAvailableSlots = async (date?: string) => {
-    if (!currentClinicId) {
-      console.log('No clinic ID available');
-      return;
+    try {
+      console.log('🔄 Fetching available slots...');
+      let query = supabase
+        .from('available_slots')
+        .select('*')
+        .order('date')
+        .order('start_time')
+
+      if (date) {
+        query = query.eq('date', date)
+      }
+
+      const { data, error } = await query
+
+      if (error) {
+        console.error('❌ Error fetching slots:', error);
+        throw error;
+      }
+      console.log('✅ Available slots loaded:', data?.length || 0);
+      setAvailableSlots(data || [])
+    } catch (err: any) {
+      console.error('❌ Failed to fetch available slots:', err)
+      setError(err.message)
+      // Don't show toast for this error, it's handled by the main component
     }
+  }
 
-    queryClient.invalidateQueries({ queryKey: ['available-slots', currentClinicId] });
-  };
-
-  const createSlotMutation = useMutation({
-    mutationFn: async (newSlot: {
-      veterinarian_id: string;
-      consultation_type_id: string;
-      date: string;
-      start_time: string;
-      end_time: string;
-    }) => {
-      const slotData = {
-        ...newSlot,
-        clinic_id: currentClinicId
-      };
-
+  const createSlot = async (slotData: Omit<SlotInsert, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
+      console.log('🔄 Creating slot:', slotData);
       const { data, error } = await supabase
         .from('available_slots')
-        .insert([slotData]);
+        .insert([slotData])
+        .select()
 
       if (error) {
-        console.error('Error creating slot:', error);
+        console.error('❌ Error creating slot:', error);
         throw error;
       }
 
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['available-slots'] });
+      console.log('✅ Slot created:', data);
       toast({
-        title: "Créneau ajouté",
-        description: "Le créneau a été ajouté avec succès.",
-      });
-    },
-    onError: (error) => {
-      console.error('Error creating slot:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible d'ajouter le créneau.",
-        variant: "destructive"
-      });
-    },
-  });
+        title: "Créneau créé",
+        description: "Le créneau a été ajouté avec succès",
+      })
 
-  const updateSlotMutation = useMutation({
-    mutationFn: async ({ slotId, updatedSlot }: { 
-      slotId: string; 
-      updatedSlot: {
-        veterinarian_id: string;
-        consultation_type_id: string;
-        date: string;
-        start_time: string;
-        end_time: string;
-      }
-    }) => {
-      const { data, error } = await supabase
-        .from('available_slots')
-        .update(updatedSlot)
-        .eq('id', slotId);
-
-      if (error) {
-        console.error('Error updating slot:', error);
-        throw error;
-      }
-
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['available-slots'] });
-      toast({
-        title: "Créneau mis à jour",
-        description: "Le créneau a été mis à jour avec succès.",
-      });
-    },
-    onError: (error) => {
-      console.error('Error updating slot:', error);
+      // Recharger les créneaux
+      await fetchAvailableSlots()
+      return true
+    } catch (err: any) {
+      console.error('❌ Failed to create slot:', err)
+      setError(err.message)
       toast({
         title: "Erreur",
-        description: "Impossible de mettre à jour le créneau.",
+        description: "Impossible de créer le créneau",
         variant: "destructive"
-      });
-    },
-  });
+      })
+      return false
+    }
+  }
 
-  const deleteSlotMutation = useMutation({
-    mutationFn: async (slotId: string) => {
-      const { data, error } = await supabase
+  const deleteSlot = async (slotId: string) => {
+    try {
+      console.log('🔄 Deleting slot:', slotId);
+      const { error } = await supabase
         .from('available_slots')
         .delete()
-        .eq('id', slotId);
+        .eq('id', slotId)
 
       if (error) {
-        console.error('Error deleting slot:', error);
+        console.error('❌ Error deleting slot:', error);
         throw error;
       }
 
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['available-slots'] });
+      console.log('✅ Slot deleted');
       toast({
         title: "Créneau supprimé",
-        description: "Le créneau a été supprimé avec succès.",
-      });
-    },
-    onError: (error) => {
-      console.error('Error deleting slot:', error);
+        description: "Le créneau a été supprimé avec succès",
+      })
+
+      // Recharger les créneaux
+      await fetchAvailableSlots()
+      return true
+    } catch (err: any) {
+      console.error('❌ Failed to delete slot:', err)
+      setError(err.message)
       toast({
         title: "Erreur",
-        description: "Impossible de supprimer le créneau.",
+        description: "Impossible de supprimer le créneau",
         variant: "destructive"
-      });
-    },
-  });
+      })
+      return false
+    }
+  }
+
+  useEffect(() => {
+    const loadData = async () => {
+      console.log('🔄 Loading slot management data...');
+      setIsLoading(true)
+      setError(null)
+      
+      try {
+        await Promise.all([
+          fetchConsultationTypes(),
+          fetchAvailableSlots()
+        ])
+        console.log('✅ All slot management data loaded successfully');
+      } catch (err: any) {
+        console.error('❌ Failed to load slot management data:', err);
+        setError(err.message || 'Erreur lors du chargement des données')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadData()
+  }, [])
 
   return {
-    availableSlots: data || [],
+    consultationTypes,
+    availableSlots,
     isLoading,
     error,
-    isCreateDialogOpen,
-    setIsCreateDialogOpen,
     fetchAvailableSlots,
-    createSlot: createSlotMutation.mutate,
-    isCreating: createSlotMutation.isPending,
-    updateSlot: updateSlotMutation.mutate,
-    isUpdating: updateSlotMutation.isPending,
-    deleteSlot: deleteSlotMutation.mutate,
-    isDeleting: deleteSlotMutation.isPending,
-  };
-};
+    createSlot,
+    deleteSlot
+  }
+}
