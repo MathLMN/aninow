@@ -8,10 +8,8 @@ const VetLayout = () => {
     <VetAuthGuard>
       <div className="min-h-screen bg-gray-50 font-poppins">
         <VetNavigation />
-        <main className="pt-14 sm:pt-16 lg:pt-16">
-          <div className="w-full">
-            <Outlet />
-          </div>
+        <main className="pt-16">
+          <Outlet />
         </main>
       </div>
     </VetAuthGuard>

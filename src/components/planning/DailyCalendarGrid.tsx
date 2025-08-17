@@ -48,6 +48,7 @@ export const DailyCalendarGrid = ({
   const { absences } = useVeterinarianAbsences();
   const timeSlots = generateAllTimeSlots();
 
+  // Optimiser le calcul des bookings par slot avec useMemo pour éviter les recalculs
   const slotBookings = useMemo(() => {
     const newSlotBookings: Record<string, any[]> = {};
     const dateStr = formatDateLocal(selectedDate);
@@ -60,9 +61,11 @@ export const DailyCalendarGrid = ({
       for (const column of columns) {
         const key = `${time}-${column.id}`;
         
+        // Filtrer directement les bookings pour ce créneau et cette colonne
         let bookingsForSlot = [];
         
         if (column.id === 'asv') {
+          // Pour la colonne ASV : ne jamais afficher les blocages récurrents
           bookingsForSlot = bookings.filter(booking => {
             const matchesDate = booking.appointment_date === dateStr;
             const matchesTime = booking.appointment_time === time;
@@ -78,6 +81,7 @@ export const DailyCalendarGrid = ({
             return matches;
           });
         } else {
+          // Pour les colonnes vétérinaires : inclure tous les bookings assignés à ce vétérinaire
           bookingsForSlot = bookings.filter(booking => {
             const matchesDate = booking.appointment_date === dateStr;
             const matchesTime = booking.appointment_time === time;
@@ -95,6 +99,7 @@ export const DailyCalendarGrid = ({
         
         newSlotBookings[key] = bookingsForSlot;
         
+        // Log pour les créneaux bloqués récurrents
         if (bookingsForSlot.some(b => b.recurring_block_id)) {
           console.log('🔒 Recurring block found for:', key, bookingsForSlot.filter(b => b.recurring_block_id));
         }
@@ -104,6 +109,7 @@ export const DailyCalendarGrid = ({
     return newSlotBookings;
   }, [timeSlots, columns, bookings, selectedDate]);
 
+  // Fonction pour déterminer les plages de blocage continues
   const getBlockedSlotInfo = useMemo(() => {
     const blockedSlotInfo: Record<string, { isFirst: boolean; count: number }> = {};
     
@@ -128,6 +134,7 @@ export const DailyCalendarGrid = ({
         const blockId = recurringBlock?.recurring_block_id || 'manual';
         
         if (isBlocked && (currentBlockStart === -1 || blockId === currentBlockId)) {
+          // Début d'un nouveau bloc ou continuation du bloc actuel
           if (currentBlockStart === -1) {
             currentBlockStart = i;
             currentBlockCount = 1;
@@ -136,6 +143,7 @@ export const DailyCalendarGrid = ({
             currentBlockCount++;
           }
         } else {
+          // Fin du bloc actuel, enregistrer les infos
           if (currentBlockStart !== -1) {
             for (let j = currentBlockStart; j < currentBlockStart + currentBlockCount; j++) {
               const blockTime = timeSlots[j];
@@ -147,12 +155,14 @@ export const DailyCalendarGrid = ({
             }
           }
           
+          // Reset pour le prochain bloc
           currentBlockStart = isBlocked ? i : -1;
           currentBlockCount = isBlocked ? 1 : 0;
           currentBlockId = isBlocked ? blockId : null;
         }
       }
       
+      // Traiter le dernier bloc s'il se termine à la fin
       if (currentBlockStart !== -1) {
         for (let j = currentBlockStart; j < currentBlockStart + currentBlockCount; j++) {
           const blockTime = timeSlots[j];
@@ -169,28 +179,30 @@ export const DailyCalendarGrid = ({
   }, [timeSlots, columns, slotBookings]);
 
   return (
-    <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 h-full w-full flex flex-col">
-      <CardContent className="p-0 flex flex-col h-full w-full">
-        {/* En-tête fixe des colonnes - pleine largeur */}
-        <div className={`grid border-b border-vet-blue/20 bg-vet-beige/30 flex-shrink-0 h-12 w-full`} style={{gridTemplateColumns: `60px repeat(${columns.length}, 1fr)`}}>
-          {/* Colonne horaire */}
+    <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 h-full flex flex-col">
+      <CardContent className="p-0 flex flex-col h-full">
+        {/* En-tête fixe des colonnes - hauteur harmonisée */}
+        <div className={`grid border-b border-vet-blue/20 bg-vet-beige/30 flex-shrink-0 h-12`} style={{gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`}}>
+          {/* Colonne vide pour aligner avec la colonne horaire */}
           <div className="p-2 border-r border-vet-blue/20 flex items-center justify-center">
             <div className="text-xs text-vet-brown text-center font-medium">
               Horaires
             </div>
           </div>
           
-          {/* Colonnes des vétérinaires - répartition équitable */}
+          {/* Colonnes des vétérinaires */}
           {columns.map((column) => {
+            // Compter le total des RDV pour cette colonne pour toute la journée
             const totalBookings = timeSlots.reduce((total, time) => {
               const key = `${time}-${column.id}`;
               const bookingsForSlot = slotBookings[key] || [];
+              // Ne compter que les vrais rendez-vous, pas les blocages
               return total + bookingsForSlot.filter(b => !b.is_blocked && !b.recurring_block_id).length;
             }, 0);
 
             return (
-              <div key={column.id} className="p-2 text-center border-l border-vet-blue/20 flex flex-col justify-center min-w-0">
-                <div className="font-semibold text-sm text-vet-navy leading-tight truncate">
+              <div key={column.id} className="p-2 text-center border-l border-vet-blue/20 flex flex-col justify-center">
+                <div className="font-semibold text-sm text-vet-navy leading-tight">
                   {column.title}
                 </div>
                 <div className="text-xs text-vet-brown mt-1">
@@ -201,10 +213,10 @@ export const DailyCalendarGrid = ({
           })}
         </div>
 
-        {/* Zone scrollable avec les créneaux horaires - pleine largeur et hauteur */}
-        <div className="flex-1 overflow-hidden w-full">
-          <ScrollArea className="h-full w-full">
-            <div className="relative w-full">
+        {/* Zone scrollable avec les créneaux horaires - hauteur ajustée */}
+        <div className="flex-1 overflow-hidden">
+          <ScrollArea className="h-full">
+            <div className="relative">
               {timeSlots.map((time, timeIndex) => {
                 const isOpen = isTimeSlotOpen(time, daySchedule);
                 
@@ -212,11 +224,11 @@ export const DailyCalendarGrid = ({
                   <div 
                     key={time} 
                     className={cn(
-                      "grid relative h-5 border-b border-gray-200/50 w-full"
+                      "grid relative h-5 border-b border-gray-200/50"
                     )} 
-                    style={{gridTemplateColumns: `60px repeat(${columns.length}, 1fr)`}}
+                    style={{gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`}}
                   >
-                    {/* Colonne horaire */}
+                    {/* Colonne horaire - alignement centré */}
                     <div className={cn(
                       "text-xs text-center font-medium border-r flex items-center justify-center px-1",
                       isOpen 
@@ -227,12 +239,13 @@ export const DailyCalendarGrid = ({
                       {time}
                     </div>
                     
-                    {/* Colonnes par vétérinaire et ASV - pleine largeur */}
+                    {/* Colonnes par vétérinaire et ASV */}
                     {columns.map((column) => {
                       const key = `${time}-${column.id}`;
                       const slotBookingsForCell = slotBookings[key] || [];
                       const blockInfo = getBlockedSlotInfo[key];
                       
+                      // Vérifier si le vétérinaire est absent (seulement pour les colonnes vétérinaire, pas ASV)
                       const isVetAbsent = column.id !== 'asv' && isVeterinarianAbsent(column.id, selectedDate, absences);
                       
                       return (

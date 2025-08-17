@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useAvailableSlots } from "@/hooks/useAvailableSlots";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface BlockSlotModalProps {
   isOpen: boolean;
@@ -41,7 +40,6 @@ export const BlockSlotModal = ({
   defaultVeterinarian,
   veterinarians
 }: BlockSlotModalProps) => {
-  const isMobile = useIsMobile();
   const [formData, setFormData] = useState({
     date: defaultDate || '',
     startTime: defaultTime || '',
@@ -92,33 +90,27 @@ export const BlockSlotModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className={`
-        ${isMobile 
-          ? 'w-[95vw] max-h-[95vh] m-2 p-0 rounded-lg' 
-          : 'sm:max-w-[500px] max-h-[90vh] p-0'
-        } 
-        overflow-hidden flex flex-col
-      `}>
-        <DialogHeader className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-b flex-shrink-0">
-          <DialogTitle className="text-base sm:text-lg text-vet-navy">Bloquer un créneau</DialogTitle>
-          <DialogDescription className="text-xs sm:text-sm text-vet-brown">
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle className="text-vet-navy">Bloquer un créneau</DialogTitle>
+          <DialogDescription className="text-vet-brown">
             Bloquez manuellement un créneau horaire pour empêcher les réservations
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 space-y-4 sm:space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="veterinarian" className="text-xs sm:text-sm font-medium">Vétérinaire</Label>
+            <Label htmlFor="veterinarian">Vétérinaire</Label>
             <Select 
               value={formData.veterinarianId} 
               onValueChange={(value) => setFormData(prev => ({ ...prev, veterinarianId: value }))}
             >
-              <SelectTrigger className="text-xs sm:text-sm">
+              <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez un vétérinaire" />
               </SelectTrigger>
               <SelectContent>
                 {veterinarians.filter(vet => vet.is_active).map((vet) => (
-                  <SelectItem key={vet.id} value={vet.id} className="text-xs sm:text-sm">
+                  <SelectItem key={vet.id} value={vet.id}>
                     {vet.name}
                   </SelectItem>
                 ))}
@@ -126,45 +118,42 @@ export const BlockSlotModal = ({
             </Select>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="date" className="text-xs sm:text-sm font-medium">Date</Label>
-              <Input
-                id="date"
-                type="date"
-                value={formData.date}
-                onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
-                required
-                className="text-xs sm:text-sm"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="startTime" className="text-xs sm:text-sm font-medium">Heure de début</Label>
-              <Select value={formData.startTime} onValueChange={(value) => setFormData(prev => ({ ...prev, startTime: value }))}>
-                <SelectTrigger className="text-xs sm:text-sm">
-                  <SelectValue placeholder="Début" />
-                </SelectTrigger>
-                <SelectContent className="max-h-[200px]">
-                  {TIME_SLOTS.map((time) => (
-                    <SelectItem key={time} value={time} className="text-xs sm:text-sm">
-                      {time}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="date">Date</Label>
+            <Input
+              id="date"
+              type="date"
+              value={formData.date}
+              onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
+              required
+            />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="endTime" className="text-xs sm:text-sm font-medium">Heure de fin</Label>
+            <Label htmlFor="startTime">Heure de début</Label>
+            <Select value={formData.startTime} onValueChange={(value) => setFormData(prev => ({ ...prev, startTime: value }))}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionnez l'heure de début" />
+              </SelectTrigger>
+              <SelectContent className="max-h-[200px]">
+                {TIME_SLOTS.map((time) => (
+                  <SelectItem key={time} value={time}>
+                    {time}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="endTime">Heure de fin</Label>
             <Select value={formData.endTime} onValueChange={(value) => setFormData(prev => ({ ...prev, endTime: value }))}>
-              <SelectTrigger className="text-xs sm:text-sm">
-                <SelectValue placeholder="Fin" />
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionnez l'heure de fin" />
               </SelectTrigger>
               <SelectContent className="max-h-[200px]">
                 {TIME_SLOTS.filter(time => time > formData.startTime).map((time) => (
-                  <SelectItem key={time} value={time} className="text-xs sm:text-sm">
+                  <SelectItem key={time} value={time}>
                     {time}
                   </SelectItem>
                 ))}
@@ -174,40 +163,31 @@ export const BlockSlotModal = ({
 
           {formData.startTime && formData.endTime && (
             <div className="p-3 bg-blue-50 rounded-md border border-blue-200">
-              <p className="text-xs sm:text-sm text-blue-800">
+              <p className="text-sm text-blue-800">
                 <strong>Créneau bloqué :</strong> de {formData.startTime} à {formData.endTime}
               </p>
             </div>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="reason" className="text-xs sm:text-sm font-medium">Raison (optionnel)</Label>
+            <Label htmlFor="reason">Raison (optionnel)</Label>
             <Textarea
               id="reason"
               placeholder="Ex: Absence exceptionnelle, formation, urgence..."
               value={formData.reason}
               onChange={(e) => setFormData(prev => ({ ...prev, reason: e.target.value }))}
               rows={3}
-              className="text-xs sm:text-sm resize-none"
             />
           </div>
 
-          <div className={`
-            flex gap-2 sm:gap-3 pt-4
-            ${isMobile ? 'flex-col' : 'flex-row justify-end'}
-          `}>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={onClose}
-              className="text-xs sm:text-sm px-3 sm:px-4 py-2"
-            >
+          <div className="flex justify-end space-x-2">
+            <Button type="button" variant="outline" onClick={onClose}>
               Annuler
             </Button>
             <Button 
               type="submit" 
               disabled={isSubmitting}
-              className="bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm px-3 sm:px-4 py-2"
+              className="bg-red-600 hover:bg-red-700 text-white"
             >
               {isSubmitting ? 'Blocage...' : 'Bloquer le créneau'}
             </Button>

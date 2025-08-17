@@ -1,9 +1,9 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, User, Plus } from "lucide-react";
 import { formatDateLocal } from "@/utils/date";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface WeeklyCalendarViewProps {
   weekDates: Date[];
@@ -24,16 +24,10 @@ export const WeeklyCalendarView = ({
   onAppointmentClick,
   onCreateAppointment
 }: WeeklyCalendarViewProps) => {
-  const isMobile = useIsMobile();
-
-  // Heures de consultation adaptées au mobile
+  // Heures de consultation (7h à 21h par créneaux de 15min)
   const timeSlots = [];
-  const startHour = 7;
-  const endHour = 21;
-  const interval = isMobile ? 30 : 15; // 30min sur mobile, 15min sur desktop
-  
-  for (let hour = startHour; hour < endHour; hour++) {
-    for (let minute = 0; minute < 60; minute += interval) {
+  for (let hour = 7; hour < 21; hour++) {
+    for (let minute = 0; minute < 60; minute += 15) {
       const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
       timeSlots.push(time);
     }
@@ -73,30 +67,28 @@ export const WeeklyCalendarView = ({
 
   if (isLoading) {
     return (
-      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 w-full">
-        <CardContent className="p-4 sm:p-8">
-          <div className="text-center text-vet-brown text-sm sm:text-base">Chargement du planning...</div>
+      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
+        <CardContent className="p-8">
+          <div className="text-center text-vet-brown">Chargement du planning...</div>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 w-full h-full">
-      <CardContent className="p-0 h-full">
-        <div className="h-full w-full overflow-auto">
-          <div className="min-w-full" style={{ minWidth: isMobile ? '800px' : 'auto' }}>
-            {/* En-tête des colonnes - pleine largeur */}
-            <div className="grid grid-cols-8 border-b border-vet-blue/20 bg-vet-beige/30 sticky top-0 z-10">
-              <div className="p-2 sm:p-4 font-semibold text-vet-navy text-center text-xs sm:text-sm border-r border-vet-blue/20">
-                {isMobile ? 'H.' : 'Horaires'}
-              </div>
+    <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
+      <CardContent className="p-0">
+        <div className="overflow-x-auto">
+          <div className="min-w-full">
+            {/* En-tête des colonnes */}
+            <div className="grid grid-cols-8 border-b border-vet-blue/20 bg-vet-beige/30">
+              <div className="p-4 font-semibold text-vet-navy text-center">Horaires</div>
               {weekDates.map((date, index) => (
-                <div key={index} className="p-2 sm:p-4 text-center border-l border-vet-blue/20 min-w-0">
-                  <div className="font-semibold text-vet-navy text-xs sm:text-sm truncate">
-                    {date.toLocaleDateString('fr-FR', { weekday: isMobile ? 'short' : 'short' })}
+                <div key={index} className="p-4 text-center border-l border-vet-blue/20">
+                  <div className="font-semibold text-vet-navy">
+                    {date.toLocaleDateString('fr-FR', { weekday: 'short' })}
                   </div>
-                  <div className="text-xs text-vet-brown truncate">
+                  <div className="text-sm text-vet-brown">
                     {date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                   </div>
                   <div className="text-xs text-vet-brown mt-1">
@@ -106,16 +98,16 @@ export const WeeklyCalendarView = ({
               ))}
             </div>
 
-            {/* Grille horaire - pleine largeur */}
+            {/* Grille horaire */}
             <div className="relative">
               {timeSlots.map((time, timeIndex) => (
-                <div key={time} className={`grid grid-cols-8 border-b border-vet-blue/10 min-h-[40px] sm:min-h-[60px] ${timeIndex % (isMobile ? 2 : 4) === 0 ? 'border-vet-blue/20' : ''}`}>
+                <div key={time} className={`grid grid-cols-8 border-b border-vet-blue/10 min-h-[60px] ${timeIndex % 4 === 0 ? 'border-vet-blue/20' : ''}`}>
                   {/* Colonne horaire */}
-                  <div className="p-1 sm:p-2 text-xs sm:text-sm text-vet-brown text-center font-medium bg-vet-beige/10 border-r border-vet-blue/20 flex items-center justify-center">
+                  <div className="p-2 text-sm text-vet-brown text-center font-medium bg-vet-beige/10 border-r border-vet-blue/20">
                     {time}
                   </div>
                   
-                  {/* Colonnes par jour - répartition équitable */}
+                  {/* Colonnes par jour */}
                   {weekDates.map((date, dayIndex) => {
                     const dayBookings = getBookingsForDateAndVet(date);
                     const timeBookings = dayBookings.filter(booking => 
@@ -125,13 +117,13 @@ export const WeeklyCalendarView = ({
                     return (
                       <div
                         key={`${dayIndex}-${time}`}
-                        className="p-1 border-l border-vet-blue/10 relative group hover:bg-vet-sage/5 transition-colors min-w-0 flex-1"
+                        className="p-1 border-l border-vet-blue/10 relative group hover:bg-vet-sage/5 transition-colors"
                       >
                         {timeBookings.map((booking, bookingIndex) => (
                           <div
                             key={booking.id}
                             onClick={() => onAppointmentClick(booking)}
-                            className={`mb-1 p-1 sm:p-2 rounded-md border cursor-pointer hover:shadow-md transition-shadow ${getStatusColor(booking.status)} min-w-0`}
+                            className={`mb-1 p-2 rounded-md border cursor-pointer hover:shadow-md transition-shadow ${getStatusColor(booking.status)}`}
                           >
                             <div className="text-xs font-medium truncate">
                               {booking.client_name}
@@ -139,11 +131,9 @@ export const WeeklyCalendarView = ({
                             <div className="text-xs truncate">
                               {booking.animal_name} - {booking.animal_species}
                             </div>
-                            {!isMobile && (
-                              <div className="text-xs opacity-75 truncate">
-                                {booking.consultation_reason}
-                              </div>
-                            )}
+                            <div className="text-xs opacity-75">
+                              {booking.consultation_reason}
+                            </div>
                           </div>
                         ))}
                         
@@ -157,7 +147,7 @@ export const WeeklyCalendarView = ({
                             time: time
                           })}
                         >
-                          <Plus className="h-3 w-3 sm:h-4 sm:w-4 text-vet-sage" />
+                          <Plus className="h-4 w-4 text-vet-sage" />
                         </Button>
                       </div>
                     );
