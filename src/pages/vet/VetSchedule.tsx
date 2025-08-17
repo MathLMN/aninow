@@ -1,149 +1,124 @@
-
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CreateSlotDialog } from "@/components/slots/CreateSlotDialog";
-import { SlotsList } from "@/components/slots/SlotsList";
-import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
-import { useSlotManagement } from "@/hooks/useSlotManagement";
-import { useConsultationTypes } from "@/hooks/useConsultationTypes";
-import { Calendar, Clock, Users } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "lucide-react";
+import { DatePicker } from "@/components/ui/date-picker"
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CreateSlotDialog } from '@/components/slots/CreateSlotDialog';
+import { useSlotManagement } from '@/hooks/useSlotManagement';
+import { SlotsList } from '@/components/slots/SlotsList';
+import { useClinicVeterinarians } from '@/hooks/useClinicVeterinarians';
+import { useConsultationTypes } from '@/hooks/useConsultationTypes';
 
 const VetSchedule = () => {
+  const { availableSlots, createSlot, deleteSlot, isLoading, isCreating, isDeleting } = useSlotManagement();
   const { veterinarians } = useClinicVeterinarians();
-  const { 
-    availableSlots, 
-    isLoading, 
-    error, 
-    fetchAvailableSlots,
-    createSlot, 
-    deleteSlot 
-  } = useSlotManagement();
   const { consultationTypes } = useConsultationTypes();
 
-  console.log('🔍 VetSchedule - Veterinarians:', veterinarians?.length || 0);
-  console.log('🔍 VetSchedule - Available slots:', availableSlots?.length || 0);
-  console.log('🔍 VetSchedule - Consultation types:', consultationTypes?.length || 0);
-  console.log('🔍 VetSchedule - Loading:', isLoading);
-  console.log('🔍 VetSchedule - Error:', error);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedVeterinarian, setSelectedVeterinarian] = useState<string | undefined>('');
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto py-6 space-y-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vet-sage mx-auto mb-4"></div>
-            <p className="text-vet-brown">Chargement des créneaux...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const handleCreateSlot = async (slotData: {
-    veterinarian_id: string
-    consultation_type_id: string
-    date: string
-    start_time: string
-    end_time: string
-  }) => {
-    console.log('🔄 Creating slot with data:', slotData);
-    return await createSlot(slotData);
+  const handleCreateSlot = async (slotData: any) => {
+    const success = await createSlot(slotData);
+    if (success) {
+      setShowCreateDialog(false);
+    }
   };
 
+  const filteredSlots = useMemo(() => {
+    let filtered = availableSlots;
+
+    if (selectedDate) {
+      const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+      filtered = filtered.filter(slot => slot.date === formattedDate);
+    }
+
+    if (selectedVeterinarian) {
+      filtered = filtered.filter(slot => slot.veterinarian_id === selectedVeterinarian);
+    }
+
+    return filtered;
+  }, [availableSlots, selectedDate, selectedVeterinarian]);
+
+  const isLoadingData = isLoading || !veterinarians || !consultationTypes;
+
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Calendar className="h-8 w-8 text-vet-sage" />
-          <div>
-            <h1 className="text-3xl font-bold text-vet-navy">Gestion des créneaux</h1>
-            <p className="text-vet-brown">Créez et gérez les créneaux disponibles pour les consultations</p>
-          </div>
+    <div className="container mx-auto py-6 pt-10 space-y-6">
+      <div className="flex items-center space-x-4">
+        <Calendar className="h-8 w-8 text-vet-sage" />
+        <div>
+          <h1 className="text-3xl font-bold text-vet-navy">Planning</h1>
+          <p className="text-vet-brown">Gérez vos créneaux de consultation</p>
         </div>
-        <CreateSlotDialog 
-          veterinarians={veterinarians}
-          onCreateSlot={handleCreateSlot}
-        />
       </div>
 
-      {error && (
-        <Card className="border-red-200 bg-red-50">
-          <CardContent className="pt-6">
-            <p className="text-red-600">Erreur: {error}</p>
-          </CardContent>
-        </Card>
-      )}
+      <CreateSlotDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        onSubmit={handleCreateSlot}
+        veterinarians={veterinarians}
+        consultationTypes={consultationTypes}
+        isCreating={isCreating}
+      />
 
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-vet-navy">
-              Créneaux disponibles
-            </CardTitle>
-            <Clock className="h-4 w-4 text-vet-sage" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vet-navy">
-              {availableSlots?.filter(slot => !slot.is_booked).length || 0}
-            </div>
-            <p className="text-xs text-vet-brown">
-              créneaux libres
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-vet-navy">
-              Créneaux réservés
-            </CardTitle>
-            <Calendar className="h-4 w-4 text-vet-sage" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vet-navy">
-              {availableSlots?.filter(slot => slot.is_booked).length || 0}
-            </div>
-            <p className="text-xs text-vet-brown">
-              créneaux occupés
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-vet-navy">
-              Vétérinaires actifs
-            </CardTitle>
-            <Users className="h-4 w-4 text-vet-sage" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-vet-navy">
-              {veterinarians?.filter(vet => vet.is_active).length || 0}
-            </div>
-            <p className="text-xs text-vet-brown">
-              praticiens disponibles
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
+      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
         <CardHeader>
-          <CardTitle className="text-2xl text-vet-navy">
-            Liste des créneaux
-          </CardTitle>
-          <CardDescription className="text-vet-brown">
-            Tous les créneaux disponibles et réservés
-          </CardDescription>
+          <CardTitle className="text-vet-navy">Filtres</CardTitle>
+          <CardDescription>Affinez les créneaux affichés</CardDescription>
         </CardHeader>
-        <CardContent>
-          <SlotsList 
-            slots={availableSlots}
-            veterinarians={veterinarians}
-            consultationTypes={consultationTypes}
-            onDeleteSlot={deleteSlot}
-          />
+        <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div>
+            <Label htmlFor="date">Date</Label>
+            <DatePicker
+              id="date"
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              locale={fr}
+              placeholderText={format(new Date(), 'dd/MM/yyyy', { locale: fr })}
+            />
+          </div>
+          <div>
+            <Label htmlFor="veterinarian">Vétérinaire</Label>
+            <Select onValueChange={setSelectedVeterinarian}>
+              <SelectTrigger>
+                <SelectValue placeholder="Tous les vétérinaires" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Tous les vétérinaires</SelectItem>
+                {veterinarians?.map(vet => (
+                  <SelectItem key={vet.id} value={vet.id}>{vet.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-end justify-end">
+            <Button onClick={() => setShowCreateDialog(true)} className="bg-vet-blue hover:bg-vet-blue/90 text-white">
+              Ajouter un créneau
+            </Button>
+          </div>
         </CardContent>
       </Card>
+
+      {isLoadingData ? (
+        <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
+          <CardContent>
+            <div className="flex items-center justify-center h-48">
+              <p className="text-vet-brown">Chargement des créneaux...</p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <SlotsList
+          slots={filteredSlots}
+          onDeleteSlot={deleteSlot}
+        />
+      )}
     </div>
   );
 };

@@ -1,14 +1,16 @@
-
+import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ClientSection } from './appointment-form/ClientSection';
+import { AnimalSection } from './appointment-form/AnimalSection';
+import { ConsultationSection } from './appointment-form/ConsultationSection';
+import { AppointmentSection } from './appointment-form/AppointmentSection';
 import { Button } from "@/components/ui/button";
-import { ClientSection } from "./appointment-form/ClientSection";
-import { AnimalSection } from "./appointment-form/AnimalSection";
-import { ConsultationSection } from "./appointment-form/ConsultationSection";
-import { AppointmentSection } from "./appointment-form/AppointmentSection";
-import { useAppointmentForm } from "./appointment-form/useAppointmentForm";
-import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
+import { Form } from "@/components/ui/form";
+import { useAppointmentForm } from './appointment-form/useAppointmentForm';
+import { useClinicVeterinarians } from '@/hooks/useClinicVeterinarians';
+import { useEffect } from 'react';
 
-export interface CreateAppointmentModalProps {
+interface CreateAppointmentModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultData?: any;
@@ -23,69 +25,54 @@ export const CreateAppointmentModal = ({
 }: CreateAppointmentModalProps) => {
   const { veterinarians } = useClinicVeterinarians();
   
-  const {
-    formData,
-    isSubmitting,
-    handleFieldUpdate,
-    handleConsultationTypeChange,
-    handleTimeChange,
-    calculateEndTime,
-    handleSubmit
-  } = useAppointmentForm(defaultData || appointmentToEdit, onClose);
+  const { form, onSubmit, isSubmitting } = useAppointmentForm(appointmentToEdit, () => {
+    onClose();
+  });
+
+  useEffect(() => {
+    if (defaultData) {
+      form.reset({
+        appointmentDate: defaultData.date,
+        appointmentTime: defaultData.start_time,
+        endTime: defaultData.end_time,
+        veterinarianId: defaultData.veterinarian_id,
+      });
+    }
+  }, [defaultData, form]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-blue-900">
-            {appointmentToEdit ? 'Modifier le rendez-vous' : 'Créer un nouveau rendez-vous'}
+          <DialogTitle className="text-vet-navy">
+            {appointmentToEdit ? 'Modifier le rendez-vous' : 'Nouveau rendez-vous'}
           </DialogTitle>
         </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="space-y-6">
-              <ClientSection 
-                formData={formData}
-                onFieldUpdate={handleFieldUpdate}
-              />
-              
-              <AnimalSection 
-                formData={formData}
-                onFieldUpdate={handleFieldUpdate}
-              />
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <ClientSection form={form} />
+            <AnimalSection form={form} />
+            <ConsultationSection form={form} />
+            <AppointmentSection 
+              form={form} 
+              veterinarians={veterinarians}
+            />
+
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={onClose}>
+                Annuler
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="bg-vet-blue hover:bg-vet-blue/90 text-white"
+              >
+                {isSubmitting ? 'Enregistrement...' : (appointmentToEdit ? 'Modifier' : 'Créer')}
+              </Button>
             </div>
-            
-            <div className="space-y-6">
-              <AppointmentSection 
-                formData={formData}
-                veterinarians={veterinarians}
-                onFieldUpdate={handleFieldUpdate}
-                onConsultationTypeChange={handleConsultationTypeChange}
-                onTimeChange={handleTimeChange}
-                calculateEndTime={calculateEndTime}
-              />
-              
-              <ConsultationSection 
-                formData={formData}
-                onFieldUpdate={handleFieldUpdate}
-              />
-            </div>
-          </div>
-          
-          <div className="flex justify-end space-x-3 pt-6 border-t">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Annuler
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={isSubmitting}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              {isSubmitting ? 'Enregistrement...' : (appointmentToEdit ? 'Modifier' : 'Créer le rendez-vous')}
-            </Button>
-          </div>
-        </form>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

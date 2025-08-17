@@ -1,153 +1,140 @@
-import { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { useConsultationTypes } from '@/hooks/useConsultationTypes';
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+import { supabase } from '@/integrations/supabase/client'
+import { useToast } from '@/hooks/use-toast'
+import { useClinicAccess } from '@/hooks/useClinicAccess'
 
-export const useAppointmentForm = (defaultData?: any, onSuccess?: () => void) => {
-  const { toast } = useToast();
-  const { consultationTypes } = useConsultationTypes();
-  
-  const [formData, setFormData] = useState({
-    clientName: '',
-    clientEmail: '',
-    clientPhone: '',
-    clientComment: '',
-    animalName: '',
-    animalSpecies: '',
-    consultationReason: '',
-    appointmentDate: '',
-    appointmentTime: '',
-    appointmentEndTime: '',
-    duration: 30,
-    veterinarianId: '',
-    consultationTypeId: '',
-    booking_source: 'phone',
-    arrival_time: '',
-    ...defaultData
-  });
+const appointmentSchema = z.object({
+  clientName: z.string().min(2, {
+    message: "Le nom du client doit comporter au moins 2 caractères."
+  }),
+  clientEmail: z.string().email({
+    message: "Veuillez entrer une adresse email valide."
+  }),
+  clientPhone: z.string().min(10, {
+    message: "Le numéro de téléphone doit comporter au moins 10 chiffres."
+  }),
+  clientComment: z.string().optional(),
+  animalName: z.string().min(2, {
+    message: "Le nom de l'animal doit comporter au moins 2 caractères."
+  }),
+  animalSpecies: z.string().min(2, {
+    message: "L'espèce de l'animal doit comporter au moins 2 caractères."
+  }),
+  consultationReason: z.string().min(2, {
+    message: "Le motif de consultation doit comporter au moins 2 caractères."
+  }),
+  appointmentDate: z.date(),
+  appointmentTime: z.string(),
+  endTime: z.string(),
+  veterinarianId: z.string(),
+  consultationTypeId: z.string(),
+  status: z.string().optional()
+})
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export const useAppointmentForm = (appointmentToEdit?: any, onSuccess?: () => void) => {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { toast } = useToast()
+  const { currentClinicId } = useClinicAccess()
 
-  const handleFieldUpdate = (field: string, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleConsultationTypeChange = (consultationTypeId: string) => {
-    setFormData(prev => ({ ...prev, consultationTypeId }));
-    
-    // Auto-update duration based on consultation type
-    const consultationType = consultationTypes.find(ct => ct.id === consultationTypeId);
-    if (consultationType) {
-      const newDuration = consultationType.duration_minutes;
-      setFormData(prev => ({
-        ...prev,
-        duration: newDuration,
-        appointmentEndTime: calculateEndTime(prev.appointmentTime, newDuration)
-      }));
+  const form = useForm<z.infer<typeof appointmentSchema>>({
+    resolver: zodResolver(appointmentSchema),
+    defaultValues: {
+      clientName: appointmentToEdit?.client_name || "",
+      clientEmail: appointmentToEdit?.client_email || "",
+      clientPhone: appointmentToEdit?.client_phone || "",
+      clientComment: appointmentToEdit?.client_comment || "",
+      animalName: appointmentToEdit?.animal_name || "",
+      animalSpecies: appointmentToEdit?.animal_species || "",
+      consultationReason: appointmentToEdit?.consultation_reason || "",
+      appointmentDate: appointmentToEdit?.appointment_date ? new Date(appointmentToEdit.appointment_date) : new Date(),
+      appointmentTime: appointmentToEdit?.appointment_time || "",
+      endTime: appointmentToEdit?.end_time || "",
+      veterinarianId: appointmentToEdit?.veterinarian_id || "",
+      consultationTypeId: appointmentToEdit?.consultation_type_id || "",
+      status: appointmentToEdit?.status || 'confirmed'
     }
-  };
+  })
 
-  const handleTimeChange = (time: string) => {
-    const endTime = calculateEndTime(time, formData.duration);
-    setFormData(prev => ({
-      ...prev,
-      appointmentTime: time,
-      appointmentEndTime: endTime
-    }));
-  };
-
-  const calculateEndTime = (startTime: string, duration: number): string => {
-    if (!startTime) return '';
-    
-    const [hours, minutes] = startTime.split(':').map(Number);
-    const startDate = new Date();
-    startDate.setHours(hours, minutes, 0, 0);
-    
-    const endDate = new Date(startDate.getTime() + duration * 60000);
-    const endHours = endDate.getHours().toString().padStart(2, '0');
-    const endMinutes = endDate.getMinutes().toString().padStart(2, '0');
-    
-    return `${endHours}:${endMinutes}`;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const bookingData = {
-        client_name: formData.clientName,
-        client_email: formData.clientEmail,
-        client_phone: formData.clientPhone,
-        client_comment: formData.clientComment || null,
-        animal_name: formData.animalName,
-        animal_species: formData.animalSpecies,
-        consultation_reason: formData.consultationReason,
-        appointment_date: formData.appointmentDate,
-        appointment_time: formData.appointmentTime,
-        appointment_end_time: formData.appointmentEndTime,
-        duration_minutes: formData.duration,
-        veterinarian_id: formData.veterinarianId || null,
-        consultation_type_id: formData.consultationTypeId || null,
-        booking_source: formData.booking_source,
-        arrival_time: formData.arrival_time || null,
-        status: 'confirmed',
-        preferred_contact_method: 'phone'
-      };
-
-      const { error } = await supabase
-        .from('bookings')
-        .insert([bookingData]);
-
-      if (error) throw error;
-
-      toast({
-        title: "Rendez-vous créé",
-        description: "Le rendez-vous a été créé avec succès",
-      });
-
-      if (onSuccess) {
-        onSuccess();
-      }
-
-      // Reset form
-      setFormData({
-        clientName: '',
-        clientEmail: '',
-        clientPhone: '',
-        clientComment: '',
-        animalName: '',
-        animalSpecies: '',
-        consultationReason: '',
-        appointmentDate: '',
-        appointmentTime: '',
-        appointmentEndTime: '',
-        duration: 30,
-        veterinarianId: '',
-        consultationTypeId: '',
-        booking_source: 'phone',
-        arrival_time: ''
-      });
-
-    } catch (error) {
-      console.error('Error creating appointment:', error);
+  const onSubmit = async (values: z.infer<typeof appointmentSchema>) => {
+    if (!currentClinicId) {
       toast({
         title: "Erreur",
-        description: "Impossible de créer le rendez-vous",
+        description: "Aucune clinique sélectionnée",
         variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
+      })
+      return
     }
-  };
+
+    setIsSubmitting(true)
+    
+    try {
+      const appointmentData = {
+        client_name: values.clientName,
+        client_email: values.clientEmail,
+        client_phone: values.clientPhone,
+        client_comment: values.clientComment,
+        animal_name: values.animalName,
+        animal_species: values.animalSpecies,
+        consultation_reason: values.consultationReason,
+        appointment_date: values.appointmentDate,
+        appointment_time: values.appointmentTime,
+        end_time: values.endTime,
+        veterinarian_id: values.veterinarianId,
+        consultation_type_id: values.consultationTypeId,
+        status: values.status || 'confirmed',
+        clinic_id: currentClinicId,
+        preferred_contact_method: 'phone'
+      }
+
+      let result
+      if (appointmentToEdit?.id) {
+        result = await supabase
+          .from('bookings')
+          .update(appointmentData)
+          .eq('id', appointmentToEdit.id)
+          .select()
+          .single()
+      } else {
+        result = await supabase
+          .from('bookings')
+          .insert([appointmentData])
+          .select()
+          .single()
+      }
+
+      const { data, error } = result
+
+      if (error) {
+        console.error('Error saving appointment:', error)
+        throw error
+      }
+
+      toast({
+        title: appointmentToEdit ? "Rendez-vous modifié" : "Rendez-vous créé",
+        description: appointmentToEdit 
+          ? "Le rendez-vous a été modifié avec succès" 
+          : "Le nouveau rendez-vous a été créé avec succès"
+      })
+
+      onSuccess?.()
+    } catch (error) {
+      console.error('Error:', error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la sauvegarde",
+        variant: "destructive"
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return {
-    formData,
-    isSubmitting,
-    handleFieldUpdate,
-    handleConsultationTypeChange,
-    handleTimeChange,
-    calculateEndTime,
-    handleSubmit
-  };
-};
+    form,
+    onSubmit,
+    isSubmitting
+  }
+}
