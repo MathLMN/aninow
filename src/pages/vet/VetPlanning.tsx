@@ -36,20 +36,20 @@ const VetPlanning = () => {
   const { 
     bookings, 
     isLoading, 
-    refetch,
+    refreshBookings,
     updateBookingStatus 
-  } = useVetBookings(currentDate);
+  } = useVetBookings();
 
   const { veterinarians } = useClinicVeterinarians();
   const { consultationTypes } = useConsultationTypes();
 
   const {
-    onValidateBooking,
-    onCancelBooking,
-    onDuplicateBooking,
-    onMoveBooking,
-    onDeleteBooking
-  } = usePlanningActions(refetch);
+    validateBooking,
+    cancelBooking,
+    duplicateBooking,
+    moveAppointment,
+    deleteBooking
+  } = usePlanningActions();
 
   const handleCreateAppointmentFromSlot = (timeSlot: {
     date: string;
@@ -68,7 +68,7 @@ const VetPlanning = () => {
   const handleCloseCreateModal = () => {
     setIsCreateModalOpen(false);
     setSelectedAppointment(null);
-    refetch(); // Rafraîchir les données après création
+    refreshBookings(); // Rafraîchir les données après création
   };
 
   const handleCloseDetailsModal = () => {
@@ -78,8 +78,8 @@ const VetPlanning = () => {
 
   const handleUpdateStatus = async (appointmentId: string, status: string, notes?: string) => {
     try {
-      await updateBookingStatus(appointmentId, status, notes);
-      refetch();
+      updateBookingStatus({ id: appointmentId, status });
+      refreshBookings();
       return true;
     } catch (error) {
       console.error('Error updating status:', error);
@@ -120,11 +120,11 @@ const VetPlanning = () => {
                 veterinarians={veterinarians}
                 onCreateAppointment={handleCreateAppointmentFromSlot}
                 onAppointmentClick={handleAppointmentClick}
-                onValidateBooking={onValidateBooking}
-                onCancelBooking={onCancelBooking}
-                onDuplicateBooking={onDuplicateBooking}
-                onMoveBooking={onMoveBooking}
-                onDeleteBooking={onDeleteBooking}
+                onValidateBooking={validateBooking}
+                onCancelBooking={cancelBooking}
+                onDuplicateBooking={duplicateBooking}
+                onMoveBooking={moveAppointment}
+                onDeleteBooking={deleteBooking}
                 sidebarMode={true}
               />
             </CardContent>
@@ -153,11 +153,11 @@ const VetPlanning = () => {
               veterinarians={veterinarians}
               onCreateAppointment={handleCreateAppointmentFromSlot}
               onAppointmentClick={handleAppointmentClick}
-              onValidateBooking={onValidateBooking}
-              onCancelBooking={onCancelBooking}
-              onDuplicateBooking={onDuplicateBooking}
-              onMoveBooking={onMoveBooking}
-              onDeleteBooking={onDeleteBooking}
+              onValidateBooking={validateBooking}
+              onCancelBooking={cancelBooking}
+              onDuplicateBooking={duplicateBooking}
+              onMoveBooking={moveAppointment}
+              onDeleteBooking={deleteBooking}
               mainViewMode={true}
             />
           ) : (
