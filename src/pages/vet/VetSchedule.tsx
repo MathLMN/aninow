@@ -40,7 +40,13 @@ const VetSchedule = () => {
     start_time: string;
     end_time: string;
   }) => {
-    return await createSlot(slotData);
+    createSlot(slotData);
+    return true;
+  };
+
+  const handleDeleteSlot = async (slotId: string) => {
+    deleteSlot(slotId);
+    return true;
   };
 
   const todaySlots = availableSlots.filter(slot => {
@@ -142,7 +148,7 @@ const VetSchedule = () => {
       {/* Liste des créneaux */}
       <SlotsList
         slots={availableSlots}
-        onDeleteSlot={deleteSlot}
+        onDeleteSlot={handleDeleteSlot}
         onFilterByDate={handleFilterByDate}
         isLoading={isLoading}
       />

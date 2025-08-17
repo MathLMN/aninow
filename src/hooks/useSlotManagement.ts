@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,11 +34,31 @@ export const useSlotManagement = () => {
     enabled: !!currentClinicId,
   });
 
+  const fetchAvailableSlots = async (date?: string) => {
+    if (!currentClinicId) {
+      console.log('No clinic ID available');
+      return;
+    }
+
+    queryClient.invalidateQueries({ queryKey: ['available-slots', currentClinicId] });
+  };
+
   const createSlotMutation = useMutation({
-    mutationFn: async (newSlot) => {
+    mutationFn: async (newSlot: {
+      veterinarian_id: string;
+      consultation_type_id: string;
+      date: string;
+      start_time: string;
+      end_time: string;
+    }) => {
+      const slotData = {
+        ...newSlot,
+        clinic_id: currentClinicId
+      };
+
       const { data, error } = await supabase
         .from('available_slots')
-        .insert([newSlot]);
+        .insert([slotData]);
 
       if (error) {
         console.error('Error creating slot:', error);
@@ -64,7 +85,16 @@ export const useSlotManagement = () => {
   });
 
   const updateSlotMutation = useMutation({
-    mutationFn: async ({ slotId, updatedSlot }) => {
+    mutationFn: async ({ slotId, updatedSlot }: { 
+      slotId: string; 
+      updatedSlot: {
+        veterinarian_id: string;
+        consultation_type_id: string;
+        date: string;
+        start_time: string;
+        end_time: string;
+      }
+    }) => {
       const { data, error } = await supabase
         .from('available_slots')
         .update(updatedSlot)
@@ -95,7 +125,7 @@ export const useSlotManagement = () => {
   });
 
   const deleteSlotMutation = useMutation({
-    mutationFn: async (slotId) => {
+    mutationFn: async (slotId: string) => {
       const { data, error } = await supabase
         .from('available_slots')
         .delete()
@@ -131,6 +161,7 @@ export const useSlotManagement = () => {
     error,
     isCreateDialogOpen,
     setIsCreateDialogOpen,
+    fetchAvailableSlots,
     createSlot: createSlotMutation.mutate,
     isCreating: createSlotMutation.isPending,
     updateSlot: updateSlotMutation.mutate,

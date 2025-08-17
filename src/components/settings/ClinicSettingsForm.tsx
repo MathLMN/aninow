@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useClinicSettings } from "@/hooks/useClinicSettings";
 import { useSlotManagement } from "@/hooks/useSlotManagement";
@@ -6,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "lucide-react";
+import { Calendar, Plus, Edit, Trash2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -62,12 +63,17 @@ const ClinicSettingsForm = () => {
   const handleSettingsSubmit = async (event: any) => {
     event.preventDefault();
     const formData = new FormData(event.target);
-    const name = formData.get('name') as string;
-    const address = formData.get('address') as string;
-    const phone = formData.get('phone') as string;
-    const email = formData.get('email') as string;
+    const clinic_name = formData.get('clinic_name') as string;
+    const clinic_address_street = formData.get('clinic_address_street') as string;
+    const clinic_phone = formData.get('clinic_phone') as string;
+    const clinic_email = formData.get('clinic_email') as string;
 
-    await updateSettings({ name, address, phone, email });
+    await updateSettings({ 
+      clinic_name, 
+      clinic_address_street, 
+      clinic_phone, 
+      clinic_email 
+    });
   };
 
   const handleCreateSlot = async () => {
@@ -80,7 +86,7 @@ const ClinicSettingsForm = () => {
       return;
     }
 
-    await createSlot(newSlot);
+    createSlot(newSlot);
     setNewSlot({
       date: '',
       start_time: '',
@@ -92,7 +98,7 @@ const ClinicSettingsForm = () => {
   };
 
   const handleDeleteSlot = async (slotId: string) => {
-    await deleteSlot(slotId);
+    deleteSlot(slotId);
   };
 
   const handleOpenUpdateDialog = (slot: any) => {
@@ -116,7 +122,7 @@ const ClinicSettingsForm = () => {
       return;
     }
 
-    await updateSlot({ id: selectedSlotForUpdate.id, ...newSlot });
+    updateSlot({ slotId: selectedSlotForUpdate.id, updatedSlot: newSlot });
     setNewSlot({
       date: '',
       start_time: '',
@@ -142,22 +148,22 @@ const ClinicSettingsForm = () => {
           <form onSubmit={handleSettingsSubmit} className="grid gap-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="name">Nom de la clinique</Label>
-                <Input id="name" name="name" defaultValue={settings?.name} className="bg-white" />
+                <Label htmlFor="clinic_name">Nom de la clinique</Label>
+                <Input id="clinic_name" name="clinic_name" defaultValue={settings?.clinic_name} className="bg-white" />
               </div>
               <div>
-                <Label htmlFor="address">Adresse</Label>
-                <Input id="address" name="address" defaultValue={settings?.address} className="bg-white" />
+                <Label htmlFor="clinic_address_street">Adresse</Label>
+                <Input id="clinic_address_street" name="clinic_address_street" defaultValue={settings?.clinic_address_street} className="bg-white" />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="phone">Téléphone</Label>
-                <Input id="phone" name="phone" defaultValue={settings?.phone} className="bg-white" />
+                <Label htmlFor="clinic_phone">Téléphone</Label>
+                <Input id="clinic_phone" name="clinic_phone" defaultValue={settings?.clinic_phone} className="bg-white" />
               </div>
               <div>
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" name="email" defaultValue={settings?.email} className="bg-white" />
+                <Label htmlFor="clinic_email">Email</Label>
+                <Input id="clinic_email" name="clinic_email" defaultValue={settings?.clinic_email} className="bg-white" />
               </div>
             </div>
             <Button type="submit" className="bg-vet-sage hover:bg-vet-sage/90 text-white w-full">
