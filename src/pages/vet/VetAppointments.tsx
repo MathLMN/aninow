@@ -27,7 +27,7 @@ import { AppointmentDetailsModal } from "@/components/planning/AppointmentDetail
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const VetAppointments = () => {
-  const { bookings, isLoading, stats } = useVetBookings();
+  const { bookings, isLoading, stats, updateBookingStatus } = useVetBookings();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
@@ -95,6 +95,16 @@ const VetAppointments = () => {
   const handleViewDetails = (booking: any) => {
     setSelectedAppointment(booking);
     setIsDetailsModalOpen(true);
+  };
+
+  const handleUpdateStatus = async (appointmentId: string, status: string, notes?: string): Promise<boolean> => {
+    try {
+      updateBookingStatus({ id: appointmentId, status });
+      return true;
+    } catch (error) {
+      console.error('Error updating appointment status:', error);
+      return false;
+    }
   };
 
   if (isLoading) {
@@ -290,6 +300,7 @@ const VetAppointments = () => {
               setSelectedAppointment(null);
             }}
             appointment={selectedAppointment}
+            onUpdateStatus={handleUpdateStatus}
           />
         )}
       </div>

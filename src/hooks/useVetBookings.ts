@@ -104,12 +104,14 @@ export const useVetBookings = () => {
     
     const total = rawBookings.length;
     const pending = rawBookings.filter(booking => booking.status === 'pending').length;
+    const confirmed = rawBookings.filter(booking => booking.status === 'confirmed').length;
     const highUrgency = rawBookings.filter(booking => booking.urgency_score && booking.urgency_score >= 7).length;
     
     return {
       todayBookings,
       total,
       pending,
+      confirmed,
       highUrgency
     };
   }, [rawBookings]);
