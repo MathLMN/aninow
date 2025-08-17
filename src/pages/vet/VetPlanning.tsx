@@ -1,203 +1,212 @@
+import { useState } from "react";
+import { DailyCalendarView } from "@/components/planning/DailyCalendarView";
+import { WeeklyCalendarView } from "@/components/planning/WeeklyCalendarView";
+import { PlanningHeader } from "@/components/planning/PlanningHeader";
+import { CreateAppointmentModal } from "@/components/planning/CreateAppointmentModal";
+import { PendingBookingsNotification } from "@/components/planning/PendingBookingsNotification";
+import { useVetBookings } from "@/hooks/useVetBookings";
+import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
+import { usePlanningActions } from "@/hooks/usePlanningActions";
 
-import React from 'react';
-import { PlanningHeader } from '@/components/planning/PlanningHeader';
-import { DailyCalendarView } from '@/components/planning/DailyCalendarView';
-import { WeeklyCalendarView } from '@/components/planning/WeeklyCalendarView';
-import { CreateAppointmentModal } from '@/components/planning/CreateAppointmentModal';
-import { AppointmentDetailsModal } from '@/components/planning/AppointmentDetailsModal';
-import { usePlanningLogic } from '@/hooks/usePlanningLogic';
-import { useVetBookings } from '@/hooks/useVetBookings';
-import { useClinicVeterinarians } from '@/hooks/useClinicVeterinarians';
-import { usePlanningActions } from '@/hooks/usePlanningActions';
-import { useConsultationTypes } from '@/hooks/useConsultationTypes';
-import { Card, CardContent } from "@/components/ui/card";
-import { EnhancedDateNavigation } from '@/components/planning/EnhancedDateNavigation';
+export default function VetPlanning() {
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [viewMode, setViewMode] = useState<'daily' | 'weekly'>('daily');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [appointmentToEdit, setAppointmentToEdit] = useState<any>(null);
+  const [createModalDefaultData, setCreateModalDefaultData] = useState<any>(null);
 
-const VetPlanning = () => {
-  const {
-    currentDate,
-    setCurrentDate,
-    viewMode,
-    setViewMode,
-    selectedAppointment,
-    setSelectedAppointment,
-    isCreateModalOpen,
-    setIsCreateModalOpen,
-    isDetailsModalOpen,
-    setIsDetailsModalOpen,
-    filters,
-    setFilters,
-    handleAppointmentClick,
-    handleCreateAppointment,
-    navigateWeek,
-    getWeekDates
-  } = usePlanningLogic();
-
-  const { 
-    bookings, 
-    isLoading, 
-    refreshBookings,
-    updateBookingStatus 
-  } = useVetBookings();
-
+  const { bookings, refreshBookings } = useVetBookings();
   const { veterinarians } = useClinicVeterinarians();
-  const { consultationTypes } = useConsultationTypes();
 
   const {
     validateBooking,
     cancelBooking,
     duplicateBooking,
     moveAppointment,
-    deleteBooking
+    deleteBooking,
+    handleBlockSlot
   } = usePlanningActions();
 
-  const handleCreateAppointmentFromSlot = (timeSlot: {
-    date: string;
-    time: string;
-    veterinarian?: string;
-  }) => {
-    setSelectedAppointment({
-      date: timeSlot.date,
-      start_time: timeSlot.time,
-      end_time: timeSlot.time,
-      veterinarian_id: timeSlot.veterinarian || ''
-    });
+  const handleCreateAppointment = (timeSlot: { date: string; time: string; veterinarian?: string }) => {
+    console.log('🎯 Opening create modal with time slot:', timeSlot);
+    setCreateModalDefaultData(timeSlot);
+    setAppointmentToEdit(null);
     setIsCreateModalOpen(true);
   };
 
-  const handleCloseCreateModal = () => {
+  const handleAppointmentClick = (appointment: any) => {
+    console.log('🎯 Opening edit modal for appointment:', appointment);
+    setAppointmentToEdit(appointment);
+    setCreateModalDefaultData(null);
+    setIsCreateModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
     setIsCreateModalOpen(false);
-    setSelectedAppointment(null);
-    refreshBookings(); // Rafraîchir les données après création
+    setCreateModalDefaultData(null);
+    setAppointmentToEdit(null);
+    refreshBookings();
   };
 
-  const handleCloseDetailsModal = () => {
-    setIsDetailsModalOpen(false);
-    setSelectedAppointment(null);
-  };
-
-  const handleUpdateStatus = async (appointmentId: string, status: string, notes?: string) => {
-    try {
-      updateBookingStatus({ id: appointmentId, status });
+  // Wrapper functions to match expected signatures
+  const handleValidateBooking = async (bookingId: string) => {
+    const success = await validateBooking(bookingId);
+    if (success) {
       refreshBookings();
-      return true;
-    } catch (error) {
-      console.error('Error updating status:', error);
-      return false;
     }
   };
 
-  // Create wrapper function for move booking that matches expected signature
-  const handleMoveBooking = (booking: any) => {
-    // This would typically open a modal for the user to select new date/time
-    // The actual moveAppointment function will be called from within that modal
-    console.log('Move booking:', booking);
+  const handleCancelBooking = async (bookingId: string) => {
+    const success = await cancelBooking(bookingId);
+    if (success) {
+      refreshBookings();
+    }
   };
 
+  const handleDuplicateBooking = async (booking: any) => {
+    const success = await duplicateBooking(booking);
+    if (success) {
+      refreshBookings();
+    }
+  };
+
+  const handleMoveBooking = async (booking: any) => {
+    // For now, we'll handle move through the edit modal
+    // This could be enhanced later with a dedicated move interface
+    handleAppointmentClick(booking);
+  };
+
+  const handleDeleteBooking = async (bookingId: string) => {
+    const success = await deleteBooking(bookingId);
+    if (success) {
+      refreshBookings();
+    }
+  };
+
+  // Filter bookings for selected date (daily view)
+  const todayBookings = bookings.filter(booking => {
+    if (viewMode === 'daily') {
+      const bookingDate = new Date(booking.appointment_date);
+      return bookingDate.toDateString() === selectedDate.toDateString();
+    }
+    return true;
+  });
+
+  // Get week dates for weekly view
+  const getWeekDates = (date: Date) => {
+    const week = [];
+    const startOfWeek = new Date(date);
+    const day = startOfWeek.getDay();
+    const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1); // Monday as first day
+    startOfWeek.setDate(diff);
+
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(startOfWeek);
+      day.setDate(startOfWeek.getDate() + i);
+      week.push(day);
+    }
+    return week;
+  };
+
+  const weekDates = getWeekDates(selectedDate);
+
   return (
-    <div className="min-h-screen bg-vet-beige/20 flex">
-      {/* Sidebar gauche avec navigation de date */}
-      <div className="w-80 bg-white border-r border-vet-blue/20 flex flex-col">
-        {/* Header de la sidebar */}
-        <div className="p-4 border-b border-vet-blue/20">
-          <h2 className="text-lg font-semibold text-vet-navy mb-2">Navigation</h2>
-          <p className="text-sm text-vet-brown">Sélectionnez une date</p>
+    <div className="h-screen bg-gradient-to-br from-vet-blue/5 via-white to-vet-sage/5 flex flex-col overflow-hidden">
+      {/* Layout container optimisé pour écran complet */}
+      <div className="flex-1 flex min-h-0 p-1 gap-1">
+        {/* Sidebar de navigation ultra-compacte */}
+        <div className="w-48 flex-shrink-0 h-full">
+          <div className="bg-white/90 backdrop-blur-sm border border-vet-blue/30 rounded-lg h-[calc(100vh-140px)] flex flex-col">
+            {/* Header compact avec notification */}
+            <div className="flex items-center justify-end p-2 border-b border-vet-blue/20">
+              <PendingBookingsNotification />
+            </div>
+            
+            {/* Contenu de navigation optimisé */}
+            <div className="flex-1 p-2 overflow-hidden">
+              {viewMode === 'daily' ? (
+                <DailyCalendarView
+                  selectedDate={selectedDate}
+                  onDateChange={setSelectedDate}
+                  bookings={todayBookings}
+                  veterinarians={veterinarians}
+                  onCreateAppointment={handleCreateAppointment}
+                  onAppointmentClick={handleAppointmentClick}
+                  onValidateBooking={handleValidateBooking}
+                  onCancelBooking={handleCancelBooking}
+                  onDuplicateBooking={handleDuplicateBooking}
+                  onMoveBooking={handleMoveBooking}
+                  onDeleteBooking={handleDeleteBooking}
+                  onBlockSlot={handleBlockSlot}
+                  sidebarMode={true}
+                />
+              ) : (
+                <WeeklyCalendarView
+                  weekDates={weekDates}
+                  bookings={bookings}
+                  veterinarians={veterinarians}
+                  filters={{ veterinarian: 'all', status: 'all' }}
+                  isLoading={false}
+                  onCreateAppointment={handleCreateAppointment}
+                  onAppointmentClick={handleAppointmentClick}
+                />
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Navigation de date */}
-        <div className="p-4">
-          <EnhancedDateNavigation 
-            selectedDate={currentDate} 
-            onDateChange={setCurrentDate}
-            compact={false}
-          />
-        </div>
-
-        {/* Vue quotidienne compacte dans la sidebar */}
-        <div className="flex-1 p-4">
-          <Card className="bg-vet-beige/30 border-vet-blue/20">
-            <CardContent className="p-3">
-              <h3 className="text-sm font-medium text-vet-navy mb-2">
-                Aperçu du jour
-              </h3>
+        {/* Zone principale avec planning optimisé */}
+        <div className="flex-1 flex flex-col min-h-0 gap-1">
+          {/* Contenu du planning principal - hauteur réduite pour laisser place au header */}
+          <div className="flex-1 min-h-0 max-h-[calc(100vh-120px)]">
+            {viewMode === 'daily' ? (
               <DailyCalendarView
-                selectedDate={currentDate}
-                onDateChange={setCurrentDate}
+                selectedDate={selectedDate}
+                onDateChange={setSelectedDate}
+                bookings={todayBookings}
+                veterinarians={veterinarians}
+                onCreateAppointment={handleCreateAppointment}
+                onAppointmentClick={handleAppointmentClick}
+                onValidateBooking={handleValidateBooking}
+                onCancelBooking={handleCancelBooking}
+                onDuplicateBooking={handleDuplicateBooking}
+                onMoveBooking={handleMoveBooking}
+                onDeleteBooking={handleDeleteBooking}
+                onBlockSlot={handleBlockSlot}
+                mainViewMode={true}
+              />
+            ) : (
+              <WeeklyCalendarView
+                weekDates={weekDates}
                 bookings={bookings}
                 veterinarians={veterinarians}
-                onCreateAppointment={handleCreateAppointmentFromSlot}
+                filters={{ veterinarian: 'all', status: 'all' }}
+                isLoading={false}
+                onCreateAppointment={handleCreateAppointment}
                 onAppointmentClick={handleAppointmentClick}
-                onValidateBooking={validateBooking}
-                onCancelBooking={cancelBooking}
-                onDuplicateBooking={duplicateBooking}
-                onMoveBooking={handleMoveBooking}
-                onDeleteBooking={deleteBooking}
-                sidebarMode={true}
               />
-            </CardContent>
-          </Card>
+            )}
+          </div>
+
+          {/* Header de planning compact en bas */}
+          <div className="flex-shrink-0">
+            <PlanningHeader
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              selectedDate={selectedDate}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Zone principale */}
-      <div className="flex-1 flex flex-col">
-        {/* Header du planning avec sélecteur de vue et boutons d'action */}
-        <div className="p-4 border-b border-vet-blue/20 bg-white">
-          <PlanningHeader 
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            selectedDate={currentDate}
-          />
-        </div>
-
-        {/* Contenu principal du planning */}
-        <div className="flex-1 p-4">
-          {viewMode === 'daily' ? (
-            <DailyCalendarView
-              selectedDate={currentDate}
-              onDateChange={setCurrentDate}
-              bookings={bookings}
-              veterinarians={veterinarians}
-              onCreateAppointment={handleCreateAppointmentFromSlot}
-              onAppointmentClick={handleAppointmentClick}
-              onValidateBooking={validateBooking}
-              onCancelBooking={cancelBooking}
-              onDuplicateBooking={duplicateBooking}
-              onMoveBooking={handleMoveBooking}
-              onDeleteBooking={deleteBooking}
-              mainViewMode={true}
-            />
-          ) : (
-            <WeeklyCalendarView
-              weekDates={getWeekDates()}
-              bookings={bookings}
-              veterinarians={veterinarians}
-              filters={filters}
-              isLoading={isLoading}
-              onAppointmentClick={handleAppointmentClick}
-              onCreateAppointment={handleCreateAppointmentFromSlot}
-            />
-          )}
-        </div>
-      </div>
-
-      {/* Modale de création/modification de rendez-vous */}
       <CreateAppointmentModal
         isOpen={isCreateModalOpen}
-        onClose={handleCloseCreateModal}
-        defaultData={selectedAppointment}
-        appointmentToEdit={selectedAppointment?.id ? selectedAppointment : undefined}
-      />
-
-      {/* Modale de détails du rendez-vous */}
-      <AppointmentDetailsModal
-        appointment={selectedAppointment}
-        isOpen={isDetailsModalOpen}
-        onClose={handleCloseDetailsModal}
-        onUpdateStatus={handleUpdateStatus}
+        onClose={handleCloseModal}
+        defaultData={createModalDefaultData}
+        appointmentToEdit={appointmentToEdit}
+        veterinarians={veterinarians}
+        consultationTypes={[]}
       />
     </div>
   );
-};
-
-export default VetPlanning;
+}

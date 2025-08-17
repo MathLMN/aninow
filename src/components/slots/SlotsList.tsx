@@ -1,139 +1,157 @@
 
-import React, { useMemo } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Clock, User, Calendar, Trash2 } from "lucide-react";
-import { format, parseISO } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { useClinicVeterinarians } from '@/hooks/useClinicVeterinarians';
-import { useConsultationTypes } from '@/hooks/useConsultationTypes';
-import type { Database } from '@/integrations/supabase/types';
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Calendar, Clock, User, Trash2, Filter } from "lucide-react"
+import type { Database } from '@/integrations/supabase/types'
 
-type AvailableSlotRow = Database['public']['Tables']['available_slots']['Row'];
-
-interface SlotsListProps {
-  slots: AvailableSlotRow[];
-  onDeleteSlot: (slotId: string) => Promise<boolean>;
+type AvailableSlotRow = Database['public']['Tables']['available_slots']['Row'] & {
+  veterinarians?: { name: string; clinic_name: string } | null
+  consultation_types?: { name: string; duration_minutes: number; color: string } | null
 }
 
-export const SlotsList = ({ slots, onDeleteSlot }: SlotsListProps) => {
-  const { veterinarians } = useClinicVeterinarians();
-  const { consultationTypes } = useConsultationTypes();
+interface SlotsListProps {
+  slots: AvailableSlotRow[]
+  onDeleteSlot: (slotId: string) => Promise<boolean>
+  onFilterByDate: (date: string) => void
+  isLoading: boolean
+}
 
-  const groupedSlots = useMemo(() => {
-    return slots.reduce((acc, slot) => {
-      const date = slot.date;
-      if (!acc[date]) {
-        acc[date] = [];
-      }
-      acc[date].push(slot);
-      return acc;
-    }, {} as Record<string, AvailableSlotRow[]>);
-  }, [slots]);
+export const SlotsList = ({ slots, onDeleteSlot, onFilterByDate, isLoading }: SlotsListProps) => {
+  const [filterDate, setFilterDate] = useState('')
 
-  const getVeterinarianName = (vetId: string) => {
-    const vet = veterinarians.find(v => v.id === vetId);
-    return vet ? vet.name : 'Vétérinaire inconnu';
-  };
+  const handleFilterSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onFilterByDate(filterDate)
+  }
 
-  const getConsultationTypeName = (typeId: string) => {
-    const type = consultationTypes.find(t => t.id === typeId);
-    return type ? type.name : 'Type inconnu';
-  };
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    })
+  }
 
-  const getConsultationTypeColor = (typeId: string) => {
-    const type = consultationTypes.find(t => t.id === typeId);
-    return type ? type.color : '#3B82F6';
-  };
+  const formatTime = (timeString: string) => {
+    return timeString.slice(0, 5)
+  }
 
-  const handleDelete = async (slotId: string) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce créneau ?')) {
-      await onDeleteSlot(slotId);
-    }
-  };
-
-  if (slots.length === 0) {
+  if (isLoading) {
     return (
       <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-        <CardContent>
-          <div className="flex items-center justify-center h-48">
-            <p className="text-vet-brown">Aucun créneau disponible pour les critères sélectionnés</p>
-          </div>
+        <CardContent className="p-8">
+          <div className="text-center text-vet-brown">Chargement des créneaux...</div>
         </CardContent>
       </Card>
-    );
+    )
   }
 
   return (
-    <div className="space-y-6">
-      {Object.entries(groupedSlots).map(([date, dateSlots]) => (
-        <Card key={date} className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-          <CardHeader>
-            <CardTitle className="flex items-center text-vet-navy">
-              <Calendar className="h-5 w-5 mr-2" />
-              {format(parseISO(date), 'EEEE d MMMM yyyy', { locale: fr })}
-            </CardTitle>
-            <CardDescription>
-              {dateSlots.length} créneau{dateSlots.length > 1 ? 'x' : ''} disponible{dateSlots.length > 1 ? 's' : ''}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {dateSlots.map((slot) => (
-                <div
-                  key={slot.id}
-                  className="p-4 border rounded-lg bg-white/50"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-1 text-vet-blue" />
-                      <span className="font-medium">
-                        {slot.start_time} - {slot.end_time}
-                      </span>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(slot.id)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center">
-                      <User className="h-4 w-4 mr-1 text-vet-sage" />
-                      <span className="text-sm text-vet-brown">
-                        {getVeterinarianName(slot.veterinarian_id)}
-                      </span>
-                    </div>
-                    
-                    <Badge 
-                      variant="secondary" 
-                      className="text-xs"
-                      style={{ 
-                        backgroundColor: getConsultationTypeColor(slot.consultation_type_id) + '20',
-                        color: getConsultationTypeColor(slot.consultation_type_id),
-                        borderColor: getConsultationTypeColor(slot.consultation_type_id)
-                      }}
-                    >
-                      {getConsultationTypeName(slot.consultation_type_id)}
-                    </Badge>
+    <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between text-vet-navy">
+          <div className="flex items-center">
+            <Calendar className="h-5 w-5 mr-2 text-vet-sage" />
+            Créneaux disponibles
+          </div>
+          <Badge variant="secondary" className="bg-vet-beige text-vet-navy">
+            {slots.length} créneaux
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {/* Filtre par date */}
+        <form onSubmit={handleFilterSubmit} className="mb-6 flex items-end gap-4">
+          <div className="flex-1">
+            <Label htmlFor="filter-date" className="text-vet-navy">Filtrer par date</Label>
+            <Input
+              id="filter-date"
+              type="date"
+              value={filterDate}
+              onChange={(e) => setFilterDate(e.target.value)}
+              className="mt-1"
+            />
+          </div>
+          <Button type="submit" variant="outline" className="border-vet-blue text-vet-blue hover:bg-vet-blue hover:text-white">
+            <Filter className="h-4 w-4 mr-2" />
+            Filtrer
+          </Button>
+          <Button type="button" variant="ghost" onClick={() => { setFilterDate(''); onFilterByDate(''); }} className="text-vet-brown hover:text-vet-navy">
+            Réinitialiser
+          </Button>
+        </form>
 
-                    {slot.is_booked && (
-                      <Badge variant="destructive" className="text-xs">
-                        Réservé
+        {slots.length === 0 ? (
+          <div className="text-center py-8 text-vet-brown">
+            Aucun créneau disponible pour les critères sélectionnés
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-vet-blue/20">
+                  <TableHead className="text-vet-navy">Date</TableHead>
+                  <TableHead className="text-vet-navy">Horaire</TableHead>
+                  <TableHead className="text-vet-navy">Vétérinaire</TableHead>
+                  <TableHead className="text-vet-navy">Consultation</TableHead>
+                  <TableHead className="text-vet-navy">Statut</TableHead>
+                  <TableHead className="text-vet-navy">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {slots.map((slot) => (
+                  <TableRow key={slot.id} className="border-vet-blue/10">
+                    <TableCell className="font-medium text-vet-navy">
+                      {formatDate(slot.date)}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center text-vet-brown">
+                        <Clock className="h-4 w-4 mr-2" />
+                        {formatTime(slot.start_time)} - {formatTime(slot.end_time)}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center text-vet-brown">
+                        <User className="h-4 w-4 mr-2" />
+                        {slot.veterinarians?.name || 'N/A'}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge 
+                        style={{ backgroundColor: slot.consultation_types?.color || '#3B82F6' }}
+                        className="text-white"
+                      >
+                        {slot.consultation_types?.name || 'N/A'}
                       </Badge>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-};
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={slot.is_booked ? "destructive" : "default"} className={slot.is_booked ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"}>
+                        {slot.is_booked ? 'Réservé' : 'Disponible'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onDeleteSlot(slot.id)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}

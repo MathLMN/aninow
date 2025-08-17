@@ -4,16 +4,41 @@ import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import type { Database } from '@/integrations/supabase/types'
 
+type ClinicVeterinarianRow = Database['public']['Tables']['clinic_veterinarians']['Row']
+type ConsultationTypeRow = Database['public']['Tables']['consultation_types']['Row']
 type AvailableSlotRow = Database['public']['Tables']['available_slots']['Row']
 type SlotInsert = Database['public']['Tables']['available_slots']['Insert']
 
 export const useSlotManagement = () => {
+  const [consultationTypes, setConsultationTypes] = useState<ConsultationTypeRow[]>([])
   const [availableSlots, setAvailableSlots] = useState<AvailableSlotRow[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [isCreating, setIsCreating] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
+
+  // Note: Veterinarian fetching is now handled by useClinicVeterinarians hook
+  // This provides proper clinic-scoped access for authenticated users
+
+  const fetchConsultationTypes = async () => {
+    try {
+      console.log('🔄 Fetching consultation types...');
+      const { data, error } = await supabase
+        .from('consultation_types')
+        .select('*')
+        .order('name')
+
+      if (error) {
+        console.error('❌ Error fetching consultation types:', error);
+        throw error;
+      }
+      console.log('✅ Consultation types loaded:', data?.length || 0);
+      setConsultationTypes(data || [])
+    } catch (err: any) {
+      console.error('❌ Failed to fetch consultation types:', err)
+      setError(err.message)
+      // Don't show toast for this error, it's handled by the main component
+    }
+  }
 
   const fetchAvailableSlots = async (date?: string) => {
     try {
@@ -39,11 +64,11 @@ export const useSlotManagement = () => {
     } catch (err: any) {
       console.error('❌ Failed to fetch available slots:', err)
       setError(err.message)
+      // Don't show toast for this error, it's handled by the main component
     }
   }
 
-  const createSlot = async (slotData: Omit<SlotInsert, 'id' | 'created_at' | 'updated_at'>): Promise<boolean> => {
-    setIsCreating(true)
+  const createSlot = async (slotData: Omit<SlotInsert, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       console.log('🔄 Creating slot:', slotData);
       const { data, error } = await supabase
@@ -74,13 +99,10 @@ export const useSlotManagement = () => {
         variant: "destructive"
       })
       return false
-    } finally {
-      setIsCreating(false)
     }
   }
 
-  const deleteSlot = async (slotId: string): Promise<boolean> => {
-    setIsDeleting(true)
+  const deleteSlot = async (slotId: string) => {
     try {
       console.log('🔄 Deleting slot:', slotId);
       const { error } = await supabase
@@ -111,8 +133,6 @@ export const useSlotManagement = () => {
         variant: "destructive"
       })
       return false
-    } finally {
-      setIsDeleting(false)
     }
   }
 
@@ -123,7 +143,10 @@ export const useSlotManagement = () => {
       setError(null)
       
       try {
-        await fetchAvailableSlots()
+        await Promise.all([
+          fetchConsultationTypes(),
+          fetchAvailableSlots()
+        ])
         console.log('✅ All slot management data loaded successfully');
       } catch (err: any) {
         console.error('❌ Failed to load slot management data:', err);
@@ -137,10 +160,9 @@ export const useSlotManagement = () => {
   }, [])
 
   return {
+    consultationTypes,
     availableSlots,
     isLoading,
-    isCreating,
-    isDeleting,
     error,
     fetchAvailableSlots,
     createSlot,

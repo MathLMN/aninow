@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus } from "lucide-react"
-import { useConsultationTypes } from "@/hooks/useConsultationTypes"
+import type { Database } from '@/integrations/supabase/types'
+
+type ConsultationTypeRow = Database['public']['Tables']['consultation_types']['Row']
 
 interface VeterinarianForSlot {
   id: string;
@@ -15,36 +17,21 @@ interface VeterinarianForSlot {
   is_active: boolean;
 }
 
-interface ConsultationType {
-  id: string;
-  name: string;
-  duration_minutes: number;
-  color?: string;
-}
-
 interface CreateSlotDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSubmit: (slotData: {
+  veterinarians: VeterinarianForSlot[]
+  consultationTypes: ConsultationTypeRow[]
+  onCreateSlot: (slotData: {
     veterinarian_id: string
     consultation_type_id: string
     date: string
     start_time: string
     end_time: string
-  }) => Promise<void>;
-  veterinarians: VeterinarianForSlot[];
-  consultationTypes: ConsultationType[];
-  isCreating: boolean;
+  }) => Promise<boolean>
 }
 
-export const CreateSlotDialog = ({ 
-  open, 
-  onOpenChange, 
-  onSubmit, 
-  veterinarians, 
-  consultationTypes, 
-  isCreating 
-}: CreateSlotDialogProps) => {
+export const CreateSlotDialog = ({ veterinarians, consultationTypes, onCreateSlot }: CreateSlotDialogProps) => {
+  const [open, setOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     veterinarian_id: '',
     consultation_type_id: '',
@@ -55,7 +42,22 @@ export const CreateSlotDialog = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await onSubmit(formData)
+    setIsLoading(true)
+
+    const success = await onCreateSlot(formData)
+    
+    if (success) {
+      setFormData({
+        veterinarian_id: '',
+        consultation_type_id: '',
+        date: '',
+        start_time: '',
+        end_time: ''
+      })
+      setOpen(false)
+    }
+    
+    setIsLoading(false)
   }
 
   const handleConsultationTypeChange = (consultationTypeId: string) => {
@@ -85,7 +87,13 @@ export const CreateSlotDialog = ({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="bg-vet-sage hover:bg-vet-sage/90 text-white">
+          <Plus className="h-4 w-4 mr-2" />
+          Nouveau créneau
+        </Button>
+      </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-vet-navy">Créer un nouveau créneau</DialogTitle>
@@ -119,15 +127,7 @@ export const CreateSlotDialog = ({
               <SelectContent>
                 {consultationTypes.map((type) => (
                   <SelectItem key={type.id} value={type.id}>
-                    <div className="flex items-center gap-2">
-                      {type.color && (
-                        <div 
-                          className="w-3 h-3 rounded-full" 
-                          style={{ backgroundColor: type.color }}
-                        />
-                      )}
-                      {type.name} ({type.duration_minutes} min)
-                    </div>
+                    {type.name} ({type.duration_minutes} min)
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -169,11 +169,11 @@ export const CreateSlotDialog = ({
           </div>
 
           <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Annuler
             </Button>
-            <Button type="submit" disabled={isCreating} className="bg-vet-sage hover:bg-vet-sage/90 text-white">
-              {isCreating ? 'Création...' : 'Créer le créneau'}
+            <Button type="submit" disabled={isLoading} className="bg-vet-sage hover:bg-vet-sage/90 text-white">
+              {isLoading ? 'Création...' : 'Créer le créneau'}
             </Button>
           </div>
         </form>

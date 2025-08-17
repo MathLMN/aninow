@@ -15,7 +15,6 @@ import { useClinicSettings } from "@/hooks/useClinicSettings";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { useVeterinarianSchedules } from "@/hooks/useVeterinarianSchedules";
 import { useClinicAccess } from "@/hooks/useClinicAccess";
-import { useConsultationTypes } from "@/hooks/useConsultationTypes";
 import { VeterinarianAbsenceManager } from "./VeterinarianAbsenceManager";
 import { VeterinarianWeeklySchedule } from "./VeterinarianWeeklySchedule";
 import { useToast } from "@/hooks/use-toast";
@@ -24,6 +23,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
+import { useSlotManagement } from "@/hooks/useSlotManagement";
 import { supabase } from '@/integrations/supabase/client';
 
 interface ClinicSettings {
@@ -145,7 +145,7 @@ export const ClinicSettingsForm = () => {
     deleteVeterinarian
   } = useClinicVeterinarians();
   const { schedules } = useVeterinarianSchedules();
-  const { consultationTypes } = useConsultationTypes();
+  const { consultationTypes } = useSlotManagement();
   const { currentClinicId } = useClinicAccess();
   const {
     toast
@@ -463,9 +463,9 @@ export const ClinicSettingsForm = () => {
     }
   };
 
-  const customConsultationTypes = consultationTypes?.filter(type => 
+  const customConsultationTypes = consultationTypes.filter(type => 
     !DEFAULT_CONSULTATION_TYPES.some(def => def.name === type.name)
-  ) || [];
+  );
 
   return (
     <div className="space-y-8">
