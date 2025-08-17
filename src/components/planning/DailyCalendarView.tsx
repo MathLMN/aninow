@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -80,7 +79,6 @@ export const DailyCalendarView = ({
     setBlockSlotData(null);
   };
 
-  // Créer les colonnes pour l'affichage
   const columns = [{
     id: 'asv',
     title: 'ASV'
@@ -89,7 +87,6 @@ export const DailyCalendarView = ({
     title: vet.name
   }))];
 
-  // Configuration des horaires simplifiée - horaires ouverts de 8h à 19h
   const daySchedule = {
     isOpen: true,
     morning: {
@@ -105,7 +102,7 @@ export const DailyCalendarView = ({
   // Si c'est le mode sidebar, afficher seulement le calendrier
   if (sidebarMode) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
         <EnhancedDateNavigation 
           selectedDate={selectedDate} 
           onDateChange={onDateChange}
@@ -115,11 +112,11 @@ export const DailyCalendarView = ({
     );
   }
 
-  // Si c'est le mode vue principale, afficher seulement la grille
+  // Si c'est le mode vue principale, afficher la grille pleine largeur
   if (mainViewMode) {
     return (
-      <div className="h-full flex flex-col">
-        {/* Grille du planning avec headers fixes */}
+      <div className="h-full w-full flex flex-col">
+        {/* Grille du planning - pleine largeur et hauteur */}
         <DailyCalendarGrid 
           selectedDate={selectedDate} 
           bookings={bookings} 
@@ -152,19 +149,19 @@ export const DailyCalendarView = ({
     );
   }
 
-  // Mode par défaut (compatibilité)
+  // Mode par défaut (compatibilité) - pleine largeur
   return (
-    <div className="space-y-6">
-      {/* Navigation quotidienne */}
+    <div className="w-full space-y-4">
+      {/* Navigation quotidienne - pleine largeur */}
       <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-        <CardContent className="p-4">
+        <CardContent className="p-3 sm:p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="text-center">
-                <h2 className="text-xl font-semibold text-vet-navy">
+                <h2 className="text-lg sm:text-xl font-semibold text-vet-navy">
                   {format(selectedDate, 'EEEE d MMMM yyyy', { locale: fr })}
                 </h2>
-                <p className="text-sm text-vet-brown">
+                <p className="text-xs sm:text-sm text-vet-brown">
                   Ouvert 8h-12h / 14h-19h
                 </p>
               </div>
@@ -175,7 +172,7 @@ export const DailyCalendarView = ({
         </CardContent>
       </Card>
 
-      {/* Grille du planning */}
+      {/* Grille du planning - pleine largeur */}
       <DailyCalendarGrid 
         selectedDate={selectedDate} 
         bookings={bookings} 

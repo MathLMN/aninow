@@ -73,7 +73,7 @@ export const WeeklyCalendarView = ({
 
   if (isLoading) {
     return (
-      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
+      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 w-full">
         <CardContent className="p-4 sm:p-8">
           <div className="text-center text-vet-brown text-sm sm:text-base">Chargement du planning...</div>
         </CardContent>
@@ -82,21 +82,21 @@ export const WeeklyCalendarView = ({
   }
 
   return (
-    <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-      <CardContent className="p-0">
-        <div className="overflow-x-auto">
+    <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 w-full h-full">
+      <CardContent className="p-0 h-full">
+        <div className="h-full w-full overflow-auto">
           <div className="min-w-full" style={{ minWidth: isMobile ? '800px' : 'auto' }}>
-            {/* En-tête des colonnes responsive */}
-            <div className="grid grid-cols-8 border-b border-vet-blue/20 bg-vet-beige/30">
-              <div className="p-2 sm:p-4 font-semibold text-vet-navy text-center text-xs sm:text-sm">
+            {/* En-tête des colonnes - pleine largeur */}
+            <div className="grid grid-cols-8 border-b border-vet-blue/20 bg-vet-beige/30 sticky top-0 z-10">
+              <div className="p-2 sm:p-4 font-semibold text-vet-navy text-center text-xs sm:text-sm border-r border-vet-blue/20">
                 {isMobile ? 'H.' : 'Horaires'}
               </div>
               {weekDates.map((date, index) => (
-                <div key={index} className="p-2 sm:p-4 text-center border-l border-vet-blue/20">
-                  <div className="font-semibold text-vet-navy text-xs sm:text-sm">
+                <div key={index} className="p-2 sm:p-4 text-center border-l border-vet-blue/20 min-w-0">
+                  <div className="font-semibold text-vet-navy text-xs sm:text-sm truncate">
                     {date.toLocaleDateString('fr-FR', { weekday: isMobile ? 'short' : 'short' })}
                   </div>
-                  <div className="text-xs text-vet-brown">
+                  <div className="text-xs text-vet-brown truncate">
                     {date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                   </div>
                   <div className="text-xs text-vet-brown mt-1">
@@ -106,16 +106,16 @@ export const WeeklyCalendarView = ({
               ))}
             </div>
 
-            {/* Grille horaire responsive */}
+            {/* Grille horaire - pleine largeur */}
             <div className="relative">
               {timeSlots.map((time, timeIndex) => (
                 <div key={time} className={`grid grid-cols-8 border-b border-vet-blue/10 min-h-[40px] sm:min-h-[60px] ${timeIndex % (isMobile ? 2 : 4) === 0 ? 'border-vet-blue/20' : ''}`}>
                   {/* Colonne horaire */}
-                  <div className="p-1 sm:p-2 text-xs sm:text-sm text-vet-brown text-center font-medium bg-vet-beige/10 border-r border-vet-blue/20">
+                  <div className="p-1 sm:p-2 text-xs sm:text-sm text-vet-brown text-center font-medium bg-vet-beige/10 border-r border-vet-blue/20 flex items-center justify-center">
                     {time}
                   </div>
                   
-                  {/* Colonnes par jour */}
+                  {/* Colonnes par jour - répartition équitable */}
                   {weekDates.map((date, dayIndex) => {
                     const dayBookings = getBookingsForDateAndVet(date);
                     const timeBookings = dayBookings.filter(booking => 
@@ -125,13 +125,13 @@ export const WeeklyCalendarView = ({
                     return (
                       <div
                         key={`${dayIndex}-${time}`}
-                        className="p-1 border-l border-vet-blue/10 relative group hover:bg-vet-sage/5 transition-colors"
+                        className="p-1 border-l border-vet-blue/10 relative group hover:bg-vet-sage/5 transition-colors min-w-0 flex-1"
                       >
                         {timeBookings.map((booking, bookingIndex) => (
                           <div
                             key={booking.id}
                             onClick={() => onAppointmentClick(booking)}
-                            className={`mb-1 p-1 sm:p-2 rounded-md border cursor-pointer hover:shadow-md transition-shadow ${getStatusColor(booking.status)}`}
+                            className={`mb-1 p-1 sm:p-2 rounded-md border cursor-pointer hover:shadow-md transition-shadow ${getStatusColor(booking.status)} min-w-0`}
                           >
                             <div className="text-xs font-medium truncate">
                               {booking.client_name}
@@ -140,7 +140,7 @@ export const WeeklyCalendarView = ({
                               {booking.animal_name} - {booking.animal_species}
                             </div>
                             {!isMobile && (
-                              <div className="text-xs opacity-75">
+                              <div className="text-xs opacity-75 truncate">
                                 {booking.consultation_reason}
                               </div>
                             )}
