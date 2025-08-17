@@ -1,153 +1,149 @@
 
-import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useSlotManagement } from "@/hooks/useSlotManagement";
-import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreateSlotDialog } from "@/components/slots/CreateSlotDialog";
 import { SlotsList } from "@/components/slots/SlotsList";
+import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
+import { useSlotManagement } from "@/hooks/useSlotManagement";
+import { useConsultationTypes } from "@/hooks/useConsultationTypes";
+import { Calendar, Clock, Users } from "lucide-react";
 
 const VetSchedule = () => {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const {
-    consultationTypes,
-    availableSlots,
-    isLoading,
-    fetchAvailableSlots,
-    createSlot,
-    deleteSlot
-  } = useSlotManagement();
-  
+  const { veterinarians } = useClinicVeterinarians();
   const { 
-    veterinarians,
-    isLoading: vetsLoading 
-  } = useClinicVeterinarians();
+    availableSlots, 
+    isLoading, 
+    error, 
+    fetchAvailableSlots,
+    createSlot, 
+    deleteSlot 
+  } = useSlotManagement();
+  const { consultationTypes } = useConsultationTypes();
 
-  const navigateDate = (direction: 'prev' | 'next') => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(currentDate.getDate() + (direction === 'next' ? 1 : -1));
-    setCurrentDate(newDate);
-  };
+  console.log('🔍 VetSchedule - Veterinarians:', veterinarians?.length || 0);
+  console.log('🔍 VetSchedule - Available slots:', availableSlots?.length || 0);
+  console.log('🔍 VetSchedule - Consultation types:', consultationTypes?.length || 0);
+  console.log('🔍 VetSchedule - Loading:', isLoading);
+  console.log('🔍 VetSchedule - Error:', error);
 
-  const handleFilterByDate = (date: string) => {
-    fetchAvailableSlots(date);
-  };
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-6 space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vet-sage mx-auto mb-4"></div>
+            <p className="text-vet-brown">Chargement des créneaux...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleCreateSlot = async (slotData: {
-    veterinarian_id: string;
-    consultation_type_id: string;
-    date: string;
-    start_time: string;
-    end_time: string;
+    veterinarian_id: string
+    consultation_type_id: string
+    date: string
+    start_time: string
+    end_time: string
   }) => {
+    console.log('🔄 Creating slot with data:', slotData);
     return await createSlot(slotData);
   };
 
-  const todaySlots = availableSlots.filter(slot => {
-    const today = new Date().toISOString().split('T')[0];
-    return slot.date === today;
-  });
-
-  const availableSlotsCount = availableSlots.filter(slot => !slot.is_booked).length;
-
   return (
-    <div className="space-y-6">
-      {/* En-tête */}
+    <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-vet-navy">Planning et Créneaux</h1>
-          <p className="text-vet-brown">Gestion de vos créneaux de consultation</p>
+        <div className="flex items-center space-x-4">
+          <Calendar className="h-8 w-8 text-vet-sage" />
+          <div>
+            <h1 className="text-3xl font-bold text-vet-navy">Gestion des créneaux</h1>
+            <p className="text-vet-brown">Créez et gérez les créneaux disponibles pour les consultations</p>
+          </div>
         </div>
-        <div className="flex items-center space-x-3">
-          <CreateSlotDialog
+        <CreateSlotDialog 
+          veterinarians={veterinarians}
+          onCreateSlot={handleCreateSlot}
+        />
+      </div>
+
+      {error && (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="pt-6">
+            <p className="text-red-600">Erreur: {error}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-vet-navy">
+              Créneaux disponibles
+            </CardTitle>
+            <Clock className="h-4 w-4 text-vet-sage" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-vet-navy">
+              {availableSlots?.filter(slot => !slot.is_booked).length || 0}
+            </div>
+            <p className="text-xs text-vet-brown">
+              créneaux libres
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-vet-navy">
+              Créneaux réservés
+            </CardTitle>
+            <Calendar className="h-4 w-4 text-vet-sage" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-vet-navy">
+              {availableSlots?.filter(slot => slot.is_booked).length || 0}
+            </div>
+            <p className="text-xs text-vet-brown">
+              créneaux occupés
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-vet-navy">
+              Vétérinaires actifs
+            </CardTitle>
+            <Users className="h-4 w-4 text-vet-sage" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-vet-navy">
+              {veterinarians?.filter(vet => vet.is_active).length || 0}
+            </div>
+            <p className="text-xs text-vet-brown">
+              praticiens disponibles
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-xl">
+        <CardHeader>
+          <CardTitle className="text-2xl text-vet-navy">
+            Liste des créneaux
+          </CardTitle>
+          <CardDescription className="text-vet-brown">
+            Tous les créneaux disponibles et réservés
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <SlotsList 
+            slots={availableSlots}
             veterinarians={veterinarians}
             consultationTypes={consultationTypes}
-            onCreateSlot={handleCreateSlot}
+            onDeleteSlot={deleteSlot}
           />
-        </div>
-      </div>
-
-      {/* Statistiques rapides */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-          <CardContent className="p-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-vet-navy">{availableSlots.length}</div>
-              <div className="text-sm text-vet-brown">Total créneaux</div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-          <CardContent className="p-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-vet-sage">{availableSlotsCount}</div>
-              <div className="text-sm text-vet-brown">Disponibles</div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-          <CardContent className="p-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-vet-blue">{availableSlots.length - availableSlotsCount}</div>
-              <div className="text-sm text-vet-brown">Réservés</div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-          <CardContent className="p-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-vet-navy">{todaySlots.length}</div>
-              <div className="text-sm text-vet-brown">Aujourd'hui</div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Navigation de date */}
-      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => navigateDate('prev')}
-              className="border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            
-            <div className="text-center">
-              <h2 className="text-xl font-semibold text-vet-navy">
-                {currentDate.toLocaleDateString('fr-FR', { 
-                  weekday: 'long', 
-                  day: 'numeric', 
-                  month: 'long', 
-                  year: 'numeric' 
-                })}
-              </h2>
-              <p className="text-vet-brown">{todaySlots.length} créneaux aujourd'hui</p>
-            </div>
-            
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => navigateDate('next')}
-              className="border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
         </CardContent>
       </Card>
-
-      {/* Liste des créneaux */}
-      <SlotsList
-        slots={availableSlots}
-        onDeleteSlot={deleteSlot}
-        onFilterByDate={handleFilterByDate}
-        isLoading={isLoading}
-      />
     </div>
   );
 };

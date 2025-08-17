@@ -6,9 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus } from "lucide-react"
-import type { Database } from '@/integrations/supabase/types'
-
-type ConsultationTypeRow = Database['public']['Tables']['consultation_types']['Row']
+import { useConsultationTypes } from "@/hooks/useConsultationTypes"
 
 interface VeterinarianForSlot {
   id: string;
@@ -19,7 +17,6 @@ interface VeterinarianForSlot {
 
 interface CreateSlotDialogProps {
   veterinarians: VeterinarianForSlot[]
-  consultationTypes: ConsultationTypeRow[]
   onCreateSlot: (slotData: {
     veterinarian_id: string
     consultation_type_id: string
@@ -29,9 +26,10 @@ interface CreateSlotDialogProps {
   }) => Promise<boolean>
 }
 
-export const CreateSlotDialog = ({ veterinarians, consultationTypes, onCreateSlot }: CreateSlotDialogProps) => {
+export const CreateSlotDialog = ({ veterinarians, onCreateSlot }: CreateSlotDialogProps) => {
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const { consultationTypes } = useConsultationTypes()
   const [formData, setFormData] = useState({
     veterinarian_id: '',
     consultation_type_id: '',
@@ -127,7 +125,15 @@ export const CreateSlotDialog = ({ veterinarians, consultationTypes, onCreateSlo
               <SelectContent>
                 {consultationTypes.map((type) => (
                   <SelectItem key={type.id} value={type.id}>
-                    {type.name} ({type.duration_minutes} min)
+                    <div className="flex items-center gap-2">
+                      {type.color && (
+                        <div 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: type.color }}
+                        />
+                      )}
+                      {type.name} ({type.duration_minutes} min)
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>

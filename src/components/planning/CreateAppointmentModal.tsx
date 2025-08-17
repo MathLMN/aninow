@@ -1,187 +1,89 @@
-import { useEffect } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { AppointmentSection } from "./appointment-form/AppointmentSection";
 import { ClientSection } from "./appointment-form/ClientSection";
 import { AnimalSection } from "./appointment-form/AnimalSection";
 import { ConsultationSection } from "./appointment-form/ConsultationSection";
+import { AppointmentSection } from "./appointment-form/AppointmentSection";
 import { useAppointmentForm } from "./appointment-form/useAppointmentForm";
-import { usePlanningActions } from "@/hooks/usePlanningActions";
+import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 
-interface CreateAppointmentModalProps {
+export interface CreateAppointmentModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultData?: any;
   appointmentToEdit?: any;
-  veterinarians: any[];
-  consultationTypes: any[];
 }
 
 export const CreateAppointmentModal = ({
   isOpen,
   onClose,
   defaultData,
-  appointmentToEdit,
-  veterinarians,
-  consultationTypes
+  appointmentToEdit
 }: CreateAppointmentModalProps) => {
+  const { veterinarians } = useClinicVeterinarians();
+  
   const {
     formData,
     isSubmitting,
-    updateField,
+    handleFieldUpdate,
     handleConsultationTypeChange,
-    handleSubmit,
+    handleTimeChange,
     calculateEndTime,
-    initializeFormData,
-    handleTimeChange
-  } = useAppointmentForm(onClose, appointmentToEdit?.id);
-
-  const { deleteBooking, isLoading: isDeletingBooking } = usePlanningActions();
-
-  // Initialize form data when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      if (appointmentToEdit) {
-        console.log('🔄 Modal opened for editing appointment:', appointmentToEdit);
-        // Mode édition: pré-remplir avec les données du rendez-vous
-        initializeFormData({
-          // Données du rendez-vous
-          appointmentDate: appointmentToEdit.appointment_date,
-          appointmentTime: appointmentToEdit.appointment_time,
-          appointmentEndTime: appointmentToEdit.appointment_end_time,
-          veterinarianId: appointmentToEdit.veterinarian_id,
-          consultationTypeId: appointmentToEdit.consultation_type_id,
-          duration: appointmentToEdit.duration_minutes,
-          arrival_time: appointmentToEdit.arrival_time,
-          
-          // Données client
-          clientName: appointmentToEdit.client_name,
-          clientEmail: appointmentToEdit.client_email,
-          clientPhone: appointmentToEdit.client_phone,
-          preferredContactMethod: appointmentToEdit.preferred_contact_method,
-          clientStatus: appointmentToEdit.client_status,
-          
-          // Données animal
-          animalName: appointmentToEdit.animal_name,
-          animalSpecies: appointmentToEdit.animal_species,
-          animalBreed: appointmentToEdit.animal_breed,
-          animalAge: appointmentToEdit.animal_age,
-          animalWeight: appointmentToEdit.animal_weight,
-          animalSex: appointmentToEdit.animal_sex,
-          animalSterilized: appointmentToEdit.animal_sterilized,
-          animalVaccinesUpToDate: appointmentToEdit.animal_vaccines_up_to_date,
-          
-          // Consultation
-          consultationReason: appointmentToEdit.consultation_reason,
-          clientComment: appointmentToEdit.client_comment,
-        });
-      } else if (defaultData) {
-        console.log('🔄 Modal opened for creating with default data:', defaultData);
-        // Mode création: pré-remplir avec les données du créneau sélectionné
-        initializeFormData(defaultData);
-      }
-    }
-  }, [isOpen, defaultData, appointmentToEdit]);
-
-  const onConsultationTypeChange = (consultationTypeId: string) => {
-    handleConsultationTypeChange(consultationTypeId, consultationTypes);
-  };
-
-  const handleDelete = async () => {
-    if (appointmentToEdit?.id) {
-      const success = await deleteBooking(appointmentToEdit.id);
-      if (success) {
-        onClose();
-      }
-    }
-  };
-
-  const isEditMode = !!appointmentToEdit;
+    handleSubmit
+  } = useAppointmentForm(defaultData || appointmentToEdit, onClose);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] p-0 overflow-visible">
-        <DialogHeader className="px-4 py-3 border-b bg-gradient-to-r from-vet-navy/5 to-vet-sage/5 flex-shrink-0">
-          <DialogTitle className="text-lg font-bold text-vet-navy">
-            {isEditMode ? 'Modifier le rendez-vous' : 'Créer un nouveau rendez-vous'}
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold text-blue-900">
+            {appointmentToEdit ? 'Modifier le rendez-vous' : 'Créer un nouveau rendez-vous'}
           </DialogTitle>
-          <DialogDescription className="text-xs text-vet-brown">
-            {isEditMode 
-              ? 'Modifier les informations du rendez-vous et marquer l\'arrivée du client'
-              : 'Saisir les informations pour un rendez-vous pris par téléphone ou sur place'
-            }
-          </DialogDescription>
         </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="flex flex-col h-full">
-          <div className="px-4 py-3 space-y-3 flex-1">
-            {/* Grille des 3 sections principales - plus compacte */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
-              {/* Section Rendez-vous */}
-              <div className="bg-blue-50/50 border border-blue-200 rounded-lg p-2">
-                <AppointmentSection
-                  formData={formData}
-                  veterinarians={veterinarians}
-                  consultationTypes={consultationTypes}
-                  onFieldUpdate={updateField}
-                  onConsultationTypeChange={onConsultationTypeChange}
-                  onTimeChange={handleTimeChange}
-                  calculateEndTime={calculateEndTime}
-                />
-              </div>
-
-              {/* Section Client */}
-              <div className="bg-green-50/50 border border-green-200 rounded-lg p-2">
-                <ClientSection
-                  formData={formData}
-                  onFieldUpdate={updateField}
-                />
-              </div>
-
-              {/* Section Animal */}
-              <div className="bg-amber-50/50 border border-amber-200 rounded-lg p-2">
-                <AnimalSection
-                  formData={formData}
-                  onFieldUpdate={updateField}
-                />
-              </div>
-            </div>
-
-            {/* Section Consultation - pleine largeur mais plus compacte */}
-            <div className="bg-purple-50/50 border border-purple-200 rounded-lg p-2">
-              <ConsultationSection
+        
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="space-y-6">
+              <ClientSection 
                 formData={formData}
-                onFieldUpdate={updateField}
+                onFieldUpdate={handleFieldUpdate}
+              />
+              
+              <AnimalSection 
+                formData={formData}
+                onFieldUpdate={handleFieldUpdate}
               />
             </div>
-
-            {/* Boutons d'action - toujours visibles en bas */}
-            <div className="flex justify-between items-center pt-3 border-t bg-gray-50/50 px-2 py-2 rounded-lg mt-3">
-              <div className="flex space-x-2">
-                <Button type="button" variant="outline" onClick={onClose} className="px-4 text-sm">
-                  Annuler
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="destructive"
-                  onClick={handleDelete}
-                  disabled={isDeletingBooking}
-                  className="px-4 text-sm"
-                >
-                  {isDeletingBooking ? 'Suppression...' : 'Supprimer'}
-                </Button>
-              </div>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="bg-vet-sage hover:bg-vet-sage/90 text-white px-4 text-sm"
-              >
-                {isSubmitting 
-                  ? (isEditMode ? 'Modification...' : 'Création...') 
-                  : 'Valider'
-                }
-              </Button>
+            
+            <div className="space-y-6">
+              <AppointmentSection 
+                formData={formData}
+                veterinarians={veterinarians}
+                onFieldUpdate={handleFieldUpdate}
+                onConsultationTypeChange={handleConsultationTypeChange}
+                onTimeChange={handleTimeChange}
+                calculateEndTime={calculateEndTime}
+              />
+              
+              <ConsultationSection 
+                formData={formData}
+                onFieldUpdate={handleFieldUpdate}
+              />
             </div>
+          </div>
+          
+          <div className="flex justify-end space-x-3 pt-6 border-t">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Annuler
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {isSubmitting ? 'Enregistrement...' : (appointmentToEdit ? 'Modifier' : 'Créer le rendez-vous')}
+            </Button>
           </div>
         </form>
       </DialogContent>

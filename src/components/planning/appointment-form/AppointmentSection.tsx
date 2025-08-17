@@ -4,11 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, UserCheck } from "lucide-react";
+import { useConsultationTypes } from "@/hooks/useConsultationTypes";
 
 interface AppointmentSectionProps {
   formData: any;
   veterinarians: any[];
-  consultationTypes: any[];
   onFieldUpdate: (field: string, value: string | number) => void;
   onConsultationTypeChange: (consultationTypeId: string) => void;
   onTimeChange: (time: string) => void;
@@ -18,12 +18,13 @@ interface AppointmentSectionProps {
 export const AppointmentSection = ({
   formData,
   veterinarians,
-  consultationTypes,
   onFieldUpdate,
   onConsultationTypeChange,
   onTimeChange,
   calculateEndTime
 }: AppointmentSectionProps) => {
+  const { consultationTypes } = useConsultationTypes();
+
   const handleMarkArrival = () => {
     const now = new Date();
     const timeString = now.toTimeString().slice(0, 5); // Format HH:MM
@@ -88,7 +89,15 @@ export const AppointmentSection = ({
             <SelectContent>
               {consultationTypes.map((type) => (
                 <SelectItem key={type.id} value={type.id} className="text-sm">
-                  {type.name} ({type.duration_minutes} min)
+                  <div className="flex items-center gap-2">
+                    {type.color && (
+                      <div 
+                        className="w-3 h-3 rounded-full" 
+                        style={{ backgroundColor: type.color }}
+                      />
+                    )}
+                    {type.name} ({type.duration_minutes} min)
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
