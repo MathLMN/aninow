@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Users, Search, Filter, Calendar, AlertTriangle, Clock, Phone, Mail } from "lucide-react";
+import { Users, Search, Filter, Calendar, AlertTriangle, Clock, Phone, Mail, Globe } from "lucide-react";
 import { useVetBookings } from "@/hooks/useVetBookings";
 
 const VetAppointments = () => {
@@ -71,12 +71,15 @@ const VetAppointments = () => {
       {/* En-tête */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-vet-navy">Réservations</h1>
-          <p className="text-vet-brown">Gestion de toutes les réservations</p>
+          <h1 className="text-3xl font-bold text-vet-navy">Réservations en ligne</h1>
+          <p className="text-vet-brown flex items-center mt-2">
+            <Globe className="h-4 w-4 mr-2" />
+            Rendez-vous pris en ligne par les clients
+          </p>
         </div>
         <div className="flex items-center space-x-2">
           <div className="text-sm text-vet-brown">
-            Total: {bookings.length} réservations
+            Total: {bookings.length} réservations en ligne
           </div>
         </div>
       </div>
@@ -107,10 +110,10 @@ const VetAppointments = () => {
         <CardHeader>
           <CardTitle className="flex items-center text-vet-navy">
             <Users className="h-5 w-5 mr-2 text-vet-sage" />
-            Liste des réservations
+            Réservations en ligne
           </CardTitle>
           <CardDescription className="text-vet-brown">
-            {filteredBookings.length} réservation(s) trouvée(s)
+            {filteredBookings.length} réservation(s) en ligne trouvée(s)
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -136,6 +139,10 @@ const VetAppointments = () => {
                         {booking.urgency_score && booking.urgency_score >= 7 && (
                           <AlertTriangle className="h-4 w-4 text-red-500 ml-2" />
                         )}
+                        <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full flex items-center">
+                          <Globe className="h-3 w-3 mr-1" />
+                          En ligne
+                        </span>
                       </h3>
                       <p className="text-vet-brown font-medium">{booking.client_name}</p>
                       <div className="flex items-center space-x-4 text-sm text-vet-brown">
@@ -235,10 +242,10 @@ const VetAppointments = () => {
 
           {filteredBookings.length === 0 && (
             <div className="text-center py-12">
-              <Users className="h-16 w-16 text-vet-blue mx-auto mb-4 opacity-50" />
-              <h3 className="text-xl font-semibold text-vet-navy mb-2">Aucune réservation trouvée</h3>
+              <Globe className="h-16 w-16 text-vet-blue mx-auto mb-4 opacity-50" />
+              <h3 className="text-xl font-semibold text-vet-navy mb-2">Aucune réservation en ligne trouvée</h3>
               <p className="text-vet-brown">
-                {searchTerm ? 'Essayez de modifier vos critères de recherche' : 'Aucune réservation enregistrée pour le moment'}
+                {searchTerm ? 'Essayez de modifier vos critères de recherche' : 'Aucune réservation en ligne enregistrée pour le moment'}
               </p>
             </div>
           )}

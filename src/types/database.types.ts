@@ -58,6 +58,7 @@ export interface Database {
           veterinarian_id?: string
           client_status?: string
           arrival_time?: string
+          booking_source: string
         }
         Insert: {
           id?: string
@@ -115,6 +116,7 @@ export interface Database {
           veterinarian_id?: string
           client_status?: string
           arrival_time?: string
+          booking_source?: string
         }
         Update: {
           id?: string
@@ -172,6 +174,7 @@ export interface Database {
           veterinarian_id?: string
           client_status?: string
           arrival_time?: string
+          booking_source?: string
         }
       }
       clinics: {
