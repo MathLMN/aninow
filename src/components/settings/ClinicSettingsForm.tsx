@@ -115,18 +115,6 @@ interface ConsultationType {
   is_default?: boolean;
 }
 
-interface NewConsultationType {
-  name: string;
-  duration_minutes: number;
-  color: string;
-}
-
-const DEFAULT_CONSULTATION_TYPES = [
-  { name: "Consultation médicale", duration_minutes: 30, color: "#3B82F6" },
-  { name: "Vaccination", duration_minutes: 15, color: "#10B981" },
-  { name: "Prise de sang", duration_minutes: 20, color: "#F59E0B" }
-];
-
 const CONSULTATION_TYPE_COLORS = [
   "#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", 
   "#06B6D4", "#84CC16", "#F97316", "#EC4899", "#6366F1"
@@ -147,9 +135,8 @@ export const ClinicSettingsForm = () => {
   const { schedules } = useVeterinarianSchedules();
   const { consultationTypes } = useSlotManagement();
   const { currentClinicId } = useClinicAccess();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+
   const [isVetDialogOpen, setIsVetDialogOpen] = useState(false);
   const [newVeterinarian, setNewVeterinarian] = useState<NewVeterinarian>({
     name: 'Dr. ',
@@ -192,6 +179,44 @@ export const ClinicSettingsForm = () => {
       setTempDailySchedules(settings.daily_schedules || getDefaultDailySchedules());
     }
   }, [settings, form]);
+
+  // Nettoyage: supprimer de la base les anciens types par défaut (si encore présents)
+  useEffect(() => {
+    if (!currentClinicId) return;
+
+    const deleteObsoleteDefaults = async () => {
+      const names = ["Consultation médicale", "Vaccination", "Prise de sang"];
+      console.log("🧹 Suppression des types de consultation par défaut obsolètes…", names);
+
+      // Supprimer pour la clinique courante
+      const { error: clinicErr } = await supabase
+        .from('consultation_types')
+        .delete()
+        .in('name', names)
+        .eq('clinic_id', currentClinicId);
+
+      if (clinicErr) {
+        console.error("Erreur suppression (clinic scope):", clinicErr);
+      } else {
+        console.log("✔️ Suppression (clinic scope) effectuée.");
+      }
+
+      // Supprimer éventuels enregistrements globaux (clinic_id NULL)
+      const { error: globalErr } = await supabase
+        .from('consultation_types')
+        .delete()
+        .in('name', names)
+        .is('clinic_id', null);
+
+      if (globalErr) {
+        console.error("Erreur suppression (global scope):", globalErr);
+      } else {
+        console.log("✔️ Suppression (global scope) effectuée.");
+      }
+    };
+
+    deleteObsoleteDefaults();
+  }, [currentClinicId]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const success = await updateSettings({
@@ -294,81 +319,6 @@ export const ClinicSettingsForm = () => {
     color: '#3B82F6'
   });
   const [editingConsultationType, setEditingConsultationType] = useState<ConsultationType | null>(null);
-  const [defaultTypesSettings, setDefaultTypesSettings] = useState<{[key: string]: {duration_minutes: number, color: string}}>({});
-
-  useEffect(() => {
-    if (consultationTypes.length > 0) {
-      const defaultSettings: {[key: string]: {duration_minutes: number, color: string}} = {};
-      
-      DEFAULT_CONSULTATION_TYPES.forEach(defaultType => {
-        const existingType = consultationTypes.find(type => type.name === defaultType.name);
-        if (existingType) {
-          defaultSettings[defaultType.name] = {
-            duration_minutes: existingType.duration_minutes,
-            color: existingType.color || defaultType.color
-          };
-        } else {
-          defaultSettings[defaultType.name] = {
-            duration_minutes: defaultType.duration_minutes,
-            color: defaultType.color
-          };
-        }
-      });
-      
-      setDefaultTypesSettings(defaultSettings);
-    }
-  }, [consultationTypes]);
-
-  const handleDefaultTypeUpdate = async (typeName: string, field: 'duration_minutes' | 'color', value: number | string) => {
-    const updatedSettings = {
-      ...defaultTypesSettings,
-      [typeName]: {
-        ...defaultTypesSettings[typeName],
-        [field]: value
-      }
-    };
-    setDefaultTypesSettings(updatedSettings);
-
-    try {
-      const existingType = consultationTypes.find(type => type.name === typeName);
-      
-      const updateData = {
-        name: typeName,
-        duration_minutes: field === 'duration_minutes' ? Number(value) : updatedSettings[typeName].duration_minutes,
-        color: field === 'color' ? String(value) : updatedSettings[typeName].color
-      };
-
-      if (existingType) {
-        const { error } = await supabase
-          .from('consultation_types')
-          .update(updateData)
-          .eq('id', existingType.id);
-
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('consultation_types')
-          .insert([{
-            ...updateData,
-            clinic_id: currentClinicId
-          }]);
-
-        if (error) throw error;
-      }
-
-      toast({
-        title: "Type de consultation mis à jour",
-        description: `${typeName} a été mis à jour avec succès`
-      });
-    } catch (error) {
-      console.error('Error updating default consultation type:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de mettre à jour le type de consultation",
-        variant: "destructive"
-      });
-    }
-  };
 
   const refreshConsultationTypes = async () => {
   };
@@ -463,9 +413,8 @@ export const ClinicSettingsForm = () => {
     }
   };
 
-  const customConsultationTypes = consultationTypes.filter(type => 
-    !DEFAULT_CONSULTATION_TYPES.some(def => def.name === type.name)
-  );
+  // Afficher désormais tous les types existants sans distinction "par défaut"
+  const displayedConsultationTypes = consultationTypes;
 
   return (
     <div className="space-y-8">
@@ -650,53 +599,7 @@ export const ClinicSettingsForm = () => {
                   <div>
                     <h4 className="text-md font-medium text-vet-navy mb-3">Types de consultations</h4>
                     <div className="space-y-2">
-                      {DEFAULT_CONSULTATION_TYPES.map(defaultType => {
-                        const settings = defaultTypesSettings[defaultType.name] || {
-                          duration_minutes: defaultType.duration_minutes,
-                          color: defaultType.color
-                        };
-                        
-                        return (
-                          <div key={defaultType.name} className="flex items-center justify-between p-3 border border-vet-blue/20 rounded-lg bg-white/50">
-                            <div className="flex items-center gap-3">
-                              <div 
-                                className="w-4 h-4 rounded-full border cursor-pointer"
-                                style={{ backgroundColor: settings.color }}
-                                onClick={() => {
-                                  const colorInput = document.createElement('input');
-                                  colorInput.type = 'color';
-                                  colorInput.value = settings.color;
-                                  colorInput.onchange = (e) => {
-                                    const target = e.target as HTMLInputElement;
-                                    handleDefaultTypeUpdate(defaultType.name, 'color', target.value);
-                                  };
-                                  colorInput.click();
-                                }}
-                              />
-                              <span className="font-medium text-vet-navy">{defaultType.name}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Select
-                                value={settings.duration_minutes.toString()}
-                                onValueChange={(value) => handleDefaultTypeUpdate(defaultType.name, 'duration_minutes', parseInt(value))}
-                              >
-                                <SelectTrigger className="w-32">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {[10, 15, 20, 30, 45, 60, 90, 120].map(duration => (
-                                    <SelectItem key={duration} value={duration.toString()}>
-                                      {duration} min
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                        );
-                      })}
-
-                      {customConsultationTypes.map(type => (
+                      {displayedConsultationTypes.map(type => (
                         <div key={type.id} className="flex items-center justify-between p-3 border border-vet-blue/20 rounded-lg bg-white/50">
                           <div className="flex items-center gap-3">
                             <div 
