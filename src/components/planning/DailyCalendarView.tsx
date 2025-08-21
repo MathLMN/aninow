@@ -23,14 +23,16 @@ interface DailyCalendarViewProps {
   onAppointmentClick: (appointment: any) => void;
   onValidateBooking?: (bookingId: string) => void;
   onCancelBooking?: (bookingId: string) => void;
-  onDuplicateBooking?: (booking: any) => void;
-  onMoveBooking?: (booking: any) => void;
+  onCopyBooking?: (booking: any) => void;
+  onCutBooking?: (booking: any) => void;
+  onPasteBooking?: (timeSlot: { date: string; time: string; veterinarian?: string }) => void;
   onDeleteBooking?: (bookingId: string) => void;
   onBlockSlot?: (timeSlot: {
     date: string;
     time: string;
     veterinarian: string;
   }) => void;
+  hasClipboard?: boolean;
   sidebarMode?: boolean;
   mainViewMode?: boolean;
 }
@@ -44,10 +46,12 @@ export const DailyCalendarView = ({
   onAppointmentClick,
   onValidateBooking,
   onCancelBooking,
-  onDuplicateBooking,
-  onMoveBooking,
+  onCopyBooking,
+  onCutBooking,
+  onPasteBooking,
   onDeleteBooking,
   onBlockSlot,
+  hasClipboard = false,
   sidebarMode = false,
   mainViewMode = false
 }: DailyCalendarViewProps) => {
@@ -130,10 +134,12 @@ export const DailyCalendarView = ({
           veterinarians={veterinarians} 
           onValidateBooking={onValidateBooking} 
           onCancelBooking={onCancelBooking} 
-          onDuplicateBooking={onDuplicateBooking} 
-          onMoveBooking={onMoveBooking} 
+          onCopyBooking={onCopyBooking}
+          onCutBooking={onCutBooking}
+          onPasteBooking={onPasteBooking}
           onDeleteBooking={onDeleteBooking} 
           onBlockSlot={handleBlockSlot}
+          hasClipboard={hasClipboard}
           fixedHeaders={true}
         />
 
@@ -186,10 +192,12 @@ export const DailyCalendarView = ({
         veterinarians={veterinarians} 
         onValidateBooking={onValidateBooking} 
         onCancelBooking={onCancelBooking} 
-        onDuplicateBooking={onDuplicateBooking} 
-        onMoveBooking={onMoveBooking} 
+        onCopyBooking={onCopyBooking}
+        onCutBooking={onCutBooking}
+        onPasteBooking={onPasteBooking}
         onDeleteBooking={onDeleteBooking} 
-        onBlockSlot={handleBlockSlot} 
+        onBlockSlot={handleBlockSlot}
+        hasClipboard={hasClipboard}
       />
 
       {/* Modale de blocage de créneau */}

@@ -18,8 +18,9 @@ interface TimeSlotCellProps {
   // Nouvelles props pour les actions du menu contextuel
   onValidateBooking?: (bookingId: string) => void;
   onCancelBooking?: (bookingId: string) => void;
-  onDuplicateBooking?: (booking: any) => void;
-  onMoveBooking?: (booking: any) => void;
+  onCopyBooking?: (booking: any) => void;
+  onCutBooking?: (booking: any) => void;
+  onPasteBooking?: (timeSlot: { date: string; time: string; veterinarian?: string }) => void;
   onDeleteBooking?: (bookingId: string) => void;
   // Nouvelle prop pour indiquer si le vétérinaire est absent
   isVeterinarianAbsent?: boolean;
@@ -28,6 +29,7 @@ interface TimeSlotCellProps {
   blockedSlotsCount?: number;
   // Nouvelles props pour les types de consultation
   consultationTypes?: any[];
+  hasClipboard?: boolean;
 }
 
 export const TimeSlotCell = ({
@@ -41,14 +43,16 @@ export const TimeSlotCell = ({
   selectedDate,
   onValidateBooking,
   onCancelBooking,
-  onDuplicateBooking,
-  onMoveBooking,
+  onCopyBooking,
+  onCutBooking,
+  onPasteBooking,
   onDeleteBooking,
   onBlockSlot,
   isVeterinarianAbsent = false,
   isFirstBlockedSlot = false,
   blockedSlotsCount = 1,
-  consultationTypes = []
+  consultationTypes = [],
+  hasClipboard = false
 }: TimeSlotCellProps) => {
   const [showActions, setShowActions] = useState(false);
 
@@ -174,11 +178,13 @@ export const TimeSlotCell = ({
       onCreateAppointment={onCreateAppointment}
       onValidateBooking={onValidateBooking}
       onCancelBooking={onCancelBooking}
-      onDuplicateBooking={onDuplicateBooking}
-      onMoveBooking={onMoveBooking}
+      onCopyBooking={onCopyBooking}
+      onCutBooking={onCutBooking}
+      onPasteBooking={onPasteBooking}
       onDeleteBooking={onDeleteBooking}
       onBlockSlot={onBlockSlot}
       hasBookings={bookings.length > 0}
+      hasClipboard={hasClipboard}
     >
       <div
         className={cn(
