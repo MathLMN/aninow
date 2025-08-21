@@ -1,4 +1,3 @@
-
 import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -83,8 +82,7 @@ export const useVetBookings = () => {
     
     // Filtrer les vrais rendez-vous (pas les blocages)
     const realBookings = rawBookings.filter(booking => 
-      !booking.is_blocked && 
-      !booking.recurring_block_id &&
+      booking?.is_blocked !== true &&
       booking.booking_source !== 'blocked'
     );
     
