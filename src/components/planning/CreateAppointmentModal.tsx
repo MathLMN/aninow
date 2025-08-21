@@ -1,7 +1,7 @@
-
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { AppointmentSection } from "./appointment-form/AppointmentSection";
 import { ClientSection } from "./appointment-form/ClientSection";
 import { AnimalSection } from "./appointment-form/AnimalSection";
@@ -16,6 +16,7 @@ interface CreateAppointmentModalProps {
   appointmentToEdit?: any;
   veterinarians: any[];
   consultationTypes: any[];
+  onAppointmentDeleted?: () => void; // Nouvelle prop pour rafraîchir le planning
 }
 
 export const CreateAppointmentModal = ({
@@ -24,8 +25,11 @@ export const CreateAppointmentModal = ({
   defaultData,
   appointmentToEdit,
   veterinarians,
-  consultationTypes
+  consultationTypes,
+  onAppointmentDeleted
 }: CreateAppointmentModalProps) => {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   const {
     formData,
     isSubmitting,
@@ -90,13 +94,20 @@ export const CreateAppointmentModal = ({
 
   const handleDelete = async () => {
     if (appointmentToEdit?.id) {
-      console.log('🗑️ Attempting to delete appointment:', appointmentToEdit.id);
+      console.log('🗑️ Starting deletion process for appointment:', appointmentToEdit.id);
       const success = await deleteBooking(appointmentToEdit.id);
       if (success) {
-        console.log('✅ Appointment deleted successfully, closing modal');
-        onClose(); // This will trigger refreshBookings in the parent component
+        console.log('✅ Appointment deleted successfully');
+        setShowDeleteConfirm(false);
+        onClose();
+        // Appeler la fonction de callback pour rafraîchir le planning
+        if (onAppointmentDeleted) {
+          console.log('📱 Calling onAppointmentDeleted callback');
+          onAppointmentDeleted();
+        }
       } else {
         console.error('❌ Failed to delete appointment');
+        setShowDeleteConfirm(false);
       }
     }
   };
@@ -168,15 +179,45 @@ export const CreateAppointmentModal = ({
                 Annuler
               </Button>
               {isEditMode && (
-                <Button 
-                  type="button" 
-                  variant="destructive"
-                  onClick={handleDelete}
-                  disabled={isDeletingBooking}
-                  className="px-3 py-1 text-xs h-8"
-                >
-                  {isDeletingBooking ? 'Suppression...' : 'Supprimer'}
-                </Button>
+                <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      type="button" 
+                      variant="destructive"
+                      disabled={isDeletingBooking}
+                      className="px-3 py-1 text-xs h-8"
+                    >
+                      {isDeletingBooking ? 'Suppression...' : 'Supprimer'}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Êtes-vous sûr de vouloir supprimer définitivement ce rendez-vous ?
+                        <br />
+                        <strong>Client :</strong> {appointmentToEdit?.client_name}
+                        <br />
+                        <strong>Animal :</strong> {appointmentToEdit?.animal_name}
+                        <br />
+                        <strong>Date :</strong> {appointmentToEdit?.appointment_date} à {appointmentToEdit?.appointment_time}
+                        <br />
+                        <br />
+                        Cette action est irréversible.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="text-xs h-8">Annuler</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={handleDelete}
+                        disabled={isDeletingBooking}
+                        className="bg-red-600 hover:bg-red-700 text-xs h-8"
+                      >
+                        {isDeletingBooking ? 'Suppression...' : 'Supprimer définitivement'}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               )}
             </div>
             <Button 

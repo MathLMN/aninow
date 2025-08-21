@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -137,53 +136,65 @@ export const usePlanningActions = () => {
   const deleteBooking = async (bookingId: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      console.log('🗑️ Attempting to delete booking with ID:', bookingId);
+      console.log('🗑️ Starting deletion process for booking ID:', bookingId);
       
-      // Vérifier d'abord si le booking existe
+      // Vérifier d'abord que le booking existe
       const { data: existingBooking, error: fetchError } = await supabase
         .from('bookings')
-        .select('id, client_name')
+        .select('id, client_name, animal_name, appointment_date, appointment_time')
         .eq('id', bookingId)
         .single();
 
-      if (fetchError) {
-        console.error('❌ Error fetching booking to delete:', fetchError);
-        throw new Error('Rendez-vous introuvable');
-      }
-
-      if (!existingBooking) {
-        console.error('❌ Booking not found for deletion');
-        throw new Error('Rendez-vous introuvable');
+      if (fetchError || !existingBooking) {
+        console.error('❌ Booking not found:', fetchError);
+        throw new Error('Rendez-vous introuvable dans la base de données');
       }
 
       console.log('✅ Found booking to delete:', existingBooking);
 
-      // Procéder à la suppression
-      const { error: deleteError } = await supabase
+      // Procéder à la suppression avec une requête directe
+      const { error: deleteError, count } = await supabase
         .from('bookings')
-        .delete()
+        .delete({ count: 'exact' })
         .eq('id', bookingId);
 
       if (deleteError) {
-        console.error('❌ Error deleting booking:', deleteError);
-        throw deleteError;
+        console.error('❌ Database error during deletion:', deleteError);
+        throw new Error(`Erreur de base de données: ${deleteError.message}`);
       }
 
-      console.log('✅ Booking deleted successfully');
+      console.log('✅ Deletion completed, rows affected:', count);
+
+      // Vérifier que la suppression a bien eu lieu
+      const { data: checkBooking } = await supabase
+        .from('bookings')
+        .select('id')
+        .eq('id', bookingId)
+        .single();
+
+      if (checkBooking) {
+        console.error('❌ Booking still exists after deletion attempt');
+        throw new Error('La suppression n\'a pas été effectuée correctement');
+      }
+
+      console.log('✅ Booking successfully deleted and verified');
 
       toast({
         title: "Rendez-vous supprimé",
-        description: "Le rendez-vous a été supprimé définitivement",
+        description: `Le rendez-vous de ${existingBooking.client_name} a été supprimé définitivement`,
       });
+      
       return true;
     } catch (error) {
-      console.error('❌ Erreur lors de la suppression:', error);
+      console.error('❌ Error during deletion process:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue lors de la suppression';
+      
       toast({
-        title: "Erreur",
-        description: `Impossible de supprimer le rendez-vous: ${errorMessage}`,
+        title: "Erreur de suppression",
+        description: errorMessage,
         variant: "destructive"
       });
+      
       return false;
     } finally {
       setIsLoading(false);
