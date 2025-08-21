@@ -22,8 +22,8 @@ export const ClientSection = ({ formData, onFieldUpdate }: ClientSectionProps) =
         <div>
           <Label className="text-xs font-medium text-gray-700">Statut *</Label>
           <RadioGroup
-            value={formData.client_status}
-            onValueChange={(value) => onFieldUpdate('client_status', value)}
+            value={formData.clientStatus}
+            onValueChange={(value) => onFieldUpdate('clientStatus', value)}
             className="flex gap-3 mt-1"
           >
             <div className="flex items-center space-x-1">
@@ -38,45 +38,45 @@ export const ClientSection = ({ formData, onFieldUpdate }: ClientSectionProps) =
         </div>
 
         <div>
-          <Label htmlFor="client_name" className="text-xs font-medium text-gray-700">Nom complet *</Label>
+          <Label htmlFor="clientName" className="text-xs font-medium text-gray-700">Nom complet *</Label>
           <Input
-            id="client_name"
+            id="clientName"
             type="text"
             placeholder="Nom et prénom"
-            value={formData.client_name}
-            onChange={(e) => onFieldUpdate('client_name', e.target.value)}
+            value={formData.clientName}
+            onChange={(e) => onFieldUpdate('clientName', e.target.value)}
             required
             className="h-7 text-xs"
           />
         </div>
 
         <div>
-          <Label htmlFor="client_phone" className="text-xs font-medium text-gray-700">Téléphone</Label>
+          <Label htmlFor="clientPhone" className="text-xs font-medium text-gray-700">Téléphone</Label>
           <Input
-            id="client_phone"
+            id="clientPhone"
             type="tel"
             placeholder="06 12 34 56 78"
-            value={formData.client_phone}
-            onChange={(e) => onFieldUpdate('client_phone', e.target.value)}
+            value={formData.clientPhone}
+            onChange={(e) => onFieldUpdate('clientPhone', e.target.value)}
             className="h-7 text-xs"
           />
         </div>
 
         <div>
-          <Label htmlFor="client_email" className="text-xs font-medium text-gray-700">Email</Label>
+          <Label htmlFor="clientEmail" className="text-xs font-medium text-gray-700">Email</Label>
           <Input
-            id="client_email"
+            id="clientEmail"
             type="email"
             placeholder="client@email.com"
-            value={formData.client_email}
-            onChange={(e) => onFieldUpdate('client_email', e.target.value)}
+            value={formData.clientEmail}
+            onChange={(e) => onFieldUpdate('clientEmail', e.target.value)}
             className="h-7 text-xs"
           />
         </div>
 
         <div>
-          <Label htmlFor="preferred_contact_method" className="text-xs font-medium text-gray-700">Contact préféré</Label>
-          <Select value={formData.preferred_contact_method} onValueChange={(value) => onFieldUpdate('preferred_contact_method', value)}>
+          <Label htmlFor="preferredContactMethod" className="text-xs font-medium text-gray-700">Contact préféré</Label>
+          <Select value={formData.preferredContactMethod} onValueChange={(value) => onFieldUpdate('preferredContactMethod', value)}>
             <SelectTrigger className="h-7 text-xs">
               <SelectValue />
             </SelectTrigger>

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -105,7 +104,7 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
   const initializeFormData = (defaultData: any) => {
     console.log('🔄 Initializing form with data:', defaultData);
     
-    // Mise à jour des champs un par un pour déclencher les recalculs
+    // Mise à jour des champs de rendez-vous
     if (defaultData.appointmentDate || defaultData.date) {
       const date = defaultData.appointmentDate || defaultData.date;
       console.log('📅 Setting appointment date:', date);
@@ -140,26 +139,98 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
       updateField('arrival_time', defaultData.arrival_time);
     }
     
-    // Données client
-    if (defaultData.clientName) updateField('clientName', defaultData.clientName);
-    if (defaultData.clientEmail) updateField('clientEmail', defaultData.clientEmail);
-    if (defaultData.clientPhone) updateField('clientPhone', defaultData.clientPhone);
-    if (defaultData.preferredContactMethod) updateField('preferredContactMethod', defaultData.preferredContactMethod);
-    if (defaultData.clientStatus) updateField('clientStatus', defaultData.clientStatus);
+    // Données client - correction du mapping des noms de champs
+    if (defaultData.clientName || defaultData.client_name) {
+      const name = defaultData.clientName || defaultData.client_name;
+      console.log('👤 Setting client name:', name);
+      updateField('clientName', name);
+    }
     
-    // Données animal
-    if (defaultData.animalName) updateField('animalName', defaultData.animalName);
-    if (defaultData.animalSpecies) updateField('animalSpecies', defaultData.animalSpecies);
-    if (defaultData.animalBreed) updateField('animalBreed', defaultData.animalBreed);
-    if (defaultData.animalAge) updateField('animalAge', defaultData.animalAge);
-    if (defaultData.animalWeight) updateField('animalWeight', defaultData.animalWeight);
-    if (defaultData.animalSex) updateField('animalSex', defaultData.animalSex);
-    if (defaultData.animalSterilized !== undefined) updateField('animalSterilized', defaultData.animalSterilized);
-    if (defaultData.animalVaccinesUpToDate !== undefined) updateField('animalVaccinesUpToDate', defaultData.animalVaccinesUpToDate);
+    if (defaultData.clientEmail || defaultData.client_email) {
+      const email = defaultData.clientEmail || defaultData.client_email;
+      console.log('📧 Setting client email:', email);
+      updateField('clientEmail', email);
+    }
+    
+    if (defaultData.clientPhone || defaultData.client_phone) {
+      const phone = defaultData.clientPhone || defaultData.client_phone;
+      console.log('📞 Setting client phone:', phone);
+      updateField('clientPhone', phone);
+    }
+    
+    if (defaultData.preferredContactMethod || defaultData.preferred_contact_method) {
+      const method = defaultData.preferredContactMethod || defaultData.preferred_contact_method;
+      console.log('📱 Setting preferred contact method:', method);
+      updateField('preferredContactMethod', method);
+    }
+    
+    if (defaultData.clientStatus || defaultData.client_status) {
+      const status = defaultData.clientStatus || defaultData.client_status;
+      console.log('👥 Setting client status:', status);
+      updateField('clientStatus', status);
+    }
+    
+    // Données animal - correction du mapping des noms de champs
+    if (defaultData.animalName || defaultData.animal_name) {
+      const name = defaultData.animalName || defaultData.animal_name;
+      console.log('🐕 Setting animal name:', name);
+      updateField('animalName', name);
+    }
+    
+    if (defaultData.animalSpecies || defaultData.animal_species) {
+      const species = defaultData.animalSpecies || defaultData.animal_species;
+      console.log('🐾 Setting animal species:', species);
+      updateField('animalSpecies', species);
+    }
+    
+    if (defaultData.animalBreed || defaultData.animal_breed) {
+      const breed = defaultData.animalBreed || defaultData.animal_breed;
+      console.log('🏷️ Setting animal breed:', breed);
+      updateField('animalBreed', breed);
+    }
+    
+    if (defaultData.animalAge || defaultData.animal_age) {
+      const age = defaultData.animalAge || defaultData.animal_age;
+      console.log('📅 Setting animal age:', age);
+      updateField('animalAge', age);
+    }
+    
+    if (defaultData.animalWeight || defaultData.animal_weight) {
+      const weight = defaultData.animalWeight || defaultData.animal_weight;
+      console.log('⚖️ Setting animal weight:', weight);
+      updateField('animalWeight', weight);
+    }
+    
+    if (defaultData.animalSex || defaultData.animal_sex) {
+      const sex = defaultData.animalSex || defaultData.animal_sex;
+      console.log('♂️♀️ Setting animal sex:', sex);
+      updateField('animalSex', sex);
+    }
+    
+    if (defaultData.animalSterilized !== undefined || defaultData.animal_sterilized !== undefined) {
+      const sterilized = defaultData.animalSterilized !== undefined ? defaultData.animalSterilized : defaultData.animal_sterilized;
+      console.log('✂️ Setting animal sterilized:', sterilized);
+      updateField('animalSterilized', sterilized);
+    }
+    
+    if (defaultData.animalVaccinesUpToDate !== undefined || defaultData.animal_vaccines_up_to_date !== undefined) {
+      const vaccines = defaultData.animalVaccinesUpToDate !== undefined ? defaultData.animalVaccinesUpToDate : defaultData.animal_vaccines_up_to_date;
+      console.log('💉 Setting animal vaccines up to date:', vaccines);
+      updateField('animalVaccinesUpToDate', vaccines);
+    }
     
     // Consultation
-    if (defaultData.consultationReason) updateField('consultationReason', defaultData.consultationReason);
-    if (defaultData.clientComment) updateField('clientComment', defaultData.clientComment);
+    if (defaultData.consultationReason || defaultData.consultation_reason) {
+      const reason = defaultData.consultationReason || defaultData.consultation_reason;
+      console.log('🩺 Setting consultation reason:', reason);
+      updateField('consultationReason', reason);
+    }
+    
+    if (defaultData.clientComment || defaultData.client_comment) {
+      const comment = defaultData.clientComment || defaultData.client_comment;
+      console.log('💬 Setting client comment:', comment);
+      updateField('clientComment', comment);
+    }
     
     // Recalculer l'heure de fin si on a time et duration
     const time = defaultData.appointmentTime || defaultData.time;

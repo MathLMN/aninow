@@ -19,23 +19,23 @@ export const AnimalSection = ({ formData, onFieldUpdate }: AnimalSectionProps) =
       
       <div className="space-y-2">
         <div>
-          <Label htmlFor="animal_name" className="text-xs font-medium text-gray-700">Nom *</Label>
+          <Label htmlFor="animalName" className="text-xs font-medium text-gray-700">Nom *</Label>
           <Input
-            id="animal_name"
+            id="animalName"
             type="text"
             placeholder="Nom de l'animal"
-            value={formData.animal_name}
-            onChange={(e) => onFieldUpdate('animal_name', e.target.value)}
+            value={formData.animalName}
+            onChange={(e) => onFieldUpdate('animalName', e.target.value)}
             required
             className="h-7 text-xs"
           />
         </div>
 
         <div>
-          <Label htmlFor="animal_species" className="text-xs font-medium text-gray-700">Espèce *</Label>
+          <Label htmlFor="animalSpecies" className="text-xs font-medium text-gray-700">Espèce *</Label>
           <Select 
-            value={formData.animal_species} 
-            onValueChange={(value) => onFieldUpdate('animal_species', value)}
+            value={formData.animalSpecies} 
+            onValueChange={(value) => onFieldUpdate('animalSpecies', value)}
             required
           >
             <SelectTrigger className="h-7 text-xs">
@@ -55,21 +55,21 @@ export const AnimalSection = ({ formData, onFieldUpdate }: AnimalSectionProps) =
         </div>
 
         <div>
-          <Label htmlFor="animal_breed" className="text-xs font-medium text-gray-700">Race</Label>
+          <Label htmlFor="animalBreed" className="text-xs font-medium text-gray-700">Race</Label>
           <Input
-            id="animal_breed"
+            id="animalBreed"
             type="text"
             placeholder="Race"
-            value={formData.animal_breed}
-            onChange={(e) => onFieldUpdate('animal_breed', e.target.value)}
+            value={formData.animalBreed || ''}
+            onChange={(e) => onFieldUpdate('animalBreed', e.target.value)}
             className="h-7 text-xs"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <Label htmlFor="animal_age" className="text-xs font-medium text-gray-700">Âge</Label>
-            <Select value={formData.animal_age} onValueChange={(value) => onFieldUpdate('animal_age', value)}>
+            <Label htmlFor="animalAge" className="text-xs font-medium text-gray-700">Âge</Label>
+            <Select value={formData.animalAge || ''} onValueChange={(value) => onFieldUpdate('animalAge', value)}>
               <SelectTrigger className="h-7 text-xs">
                 <SelectValue placeholder="Âge" />
               </SelectTrigger>
@@ -86,22 +86,22 @@ export const AnimalSection = ({ formData, onFieldUpdate }: AnimalSectionProps) =
           </div>
           
           <div>
-            <Label htmlFor="animal_weight" className="text-xs font-medium text-gray-700">Poids (kg)</Label>
+            <Label htmlFor="animalWeight" className="text-xs font-medium text-gray-700">Poids (kg)</Label>
             <Input
-              id="animal_weight"
+              id="animalWeight"
               type="number"
               step="0.1"
               placeholder="Poids"
-              value={formData.animal_weight}
-              onChange={(e) => onFieldUpdate('animal_weight', e.target.value)}
+              value={formData.animalWeight || ''}
+              onChange={(e) => onFieldUpdate('animalWeight', parseFloat(e.target.value) || null)}
               className="h-7 text-xs"
             />
           </div>
         </div>
 
         <div>
-          <Label htmlFor="animal_sex" className="text-xs font-medium text-gray-700">Sexe</Label>
-          <Select value={formData.animal_sex} onValueChange={(value) => onFieldUpdate('animal_sex', value)}>
+          <Label htmlFor="animalSex" className="text-xs font-medium text-gray-700">Sexe</Label>
+          <Select value={formData.animalSex || ''} onValueChange={(value) => onFieldUpdate('animalSex', value)}>
             <SelectTrigger className="h-7 text-xs">
               <SelectValue placeholder="Sexe" />
             </SelectTrigger>
