@@ -31,14 +31,14 @@ export const AppointmentSection = ({
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center mb-3">
-        <Calendar className="h-5 w-5 mr-2 text-blue-600" />
-        <h3 className="font-semibold text-blue-900 text-lg">Rendez-vous</h3>
+    <div className="space-y-2">
+      <div className="flex items-center mb-2">
+        <Calendar className="h-4 w-4 mr-1 text-blue-600" />
+        <h3 className="font-semibold text-blue-900 text-sm">Rendez-vous</h3>
       </div>
       
-      <div className="space-y-3">
-        <div className="grid grid-cols-2 gap-3">
+      <div className="space-y-2">
+        <div className="grid grid-cols-2 gap-2">
           <div>
             <Label htmlFor="appointmentDate" className="text-xs font-medium text-gray-700">Date *</Label>
             <Input
@@ -47,7 +47,7 @@ export const AppointmentSection = ({
               value={formData.appointmentDate}
               onChange={(e) => onFieldUpdate('appointmentDate', e.target.value)}
               required
-              className="h-8 text-sm"
+              className="h-7 text-xs"
             />
           </div>
           <div>
@@ -58,7 +58,7 @@ export const AppointmentSection = ({
               value={formData.appointmentTime}
               onChange={(e) => onTimeChange(e.target.value)}
               required
-              className="h-8 text-sm"
+              className="h-7 text-xs"
             />
           </div>
         </div>
@@ -66,12 +66,12 @@ export const AppointmentSection = ({
         <div>
           <Label htmlFor="veterinarianId" className="text-xs font-medium text-gray-700">Vétérinaire</Label>
           <Select value={formData.veterinarianId} onValueChange={(value) => onFieldUpdate('veterinarianId', value)}>
-            <SelectTrigger className="h-8 text-sm">
+            <SelectTrigger className="h-7 text-xs">
               <SelectValue placeholder="Sélectionnez..." />
             </SelectTrigger>
             <SelectContent>
               {veterinarians.map((vet) => (
-                <SelectItem key={vet.id} value={vet.id} className="text-sm">
+                <SelectItem key={vet.id} value={vet.id} className="text-xs">
                   {vet.name} - {vet.specialty}
                 </SelectItem>
               ))}
@@ -82,12 +82,12 @@ export const AppointmentSection = ({
         <div>
           <Label htmlFor="consultationTypeId" className="text-xs font-medium text-gray-700">Type de consultation</Label>
           <Select value={formData.consultationTypeId} onValueChange={onConsultationTypeChange}>
-            <SelectTrigger className="h-8 text-sm">
+            <SelectTrigger className="h-7 text-xs">
               <SelectValue placeholder="Sélectionnez..." />
             </SelectTrigger>
             <SelectContent>
               {consultationTypes.map((type) => (
-                <SelectItem key={type.id} value={type.id} className="text-sm">
+                <SelectItem key={type.id} value={type.id} className="text-xs">
                   {type.name} ({type.duration_minutes} min)
                 </SelectItem>
               ))}
@@ -95,7 +95,7 @@ export const AppointmentSection = ({
           </Select>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           <div>
             <Label htmlFor="duration" className="text-xs font-medium text-gray-700">Durée (min)</Label>
             <Input
@@ -105,38 +105,38 @@ export const AppointmentSection = ({
               step="5"
               value={formData.duration}
               onChange={(e) => onFieldUpdate('duration', parseInt(e.target.value) || 15)}
-              className="h-8 text-sm"
+              className="h-7 text-xs"
             />
           </div>
           <div>
             <Label className="text-xs font-medium text-gray-700">Heure de fin</Label>
-            <div className="flex items-center text-xs text-blue-700 bg-blue-50 p-2 rounded border h-8">
+            <div className="flex items-center text-xs text-blue-700 bg-blue-50 p-1 rounded border h-7">
               <Clock className="h-3 w-3 mr-1" />
               {formData.appointmentEndTime || '--:--'}
             </div>
           </div>
         </div>
 
-        {/* Section Arrivée du client */}
-        <div className="bg-green-50/50 border border-green-200 rounded-lg p-3">
+        {/* Section Arrivée du client - plus compacte */}
+        <div className="bg-green-50/50 border border-green-200 rounded p-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <UserCheck className="h-4 w-4 mr-2 text-green-600" />
-              <Label className="text-xs font-medium text-gray-700">Arrivée du client</Label>
+              <UserCheck className="h-3 w-3 mr-1 text-green-600" />
+              <Label className="text-xs font-medium text-gray-700">Arrivée client</Label>
             </div>
             {!formData.arrival_time ? (
               <Button
                 type="button"
                 size="sm"
                 onClick={handleMarkArrival}
-                className="bg-green-600 hover:bg-green-700 text-white h-7 px-3 text-xs"
+                className="bg-green-600 hover:bg-green-700 text-white h-6 px-2 text-xs"
               >
-                Client arrivé
+                Arrivé
               </Button>
             ) : (
               <div className="flex items-center text-xs">
-                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                <span className="text-green-700 font-medium">Arrivé à {formData.arrival_time}</span>
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
+                <span className="text-green-700 font-medium">{formData.arrival_time}</span>
               </div>
             )}
           </div>
@@ -145,7 +145,7 @@ export const AppointmentSection = ({
         <div>
           <Label htmlFor="booking_source" className="text-xs font-medium text-gray-700">Source</Label>
           <Select value={formData.booking_source || 'phone'} onValueChange={(value) => onFieldUpdate('booking_source', value)}>
-            <SelectTrigger className="h-8 text-sm">
+            <SelectTrigger className="h-7 text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
