@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,8 @@ interface CreateAppointmentModalProps {
   appointmentToEdit?: any;
   veterinarians: any[];
   consultationTypes: any[];
-  onAppointmentDeleted?: () => void; // Nouvelle prop pour rafraîchir le planning
+  onAppointmentDeleted?: () => void;
+  onRefreshPlanning?: () => void; // Nouvelle prop pour déclencher le rafraîchissement
 }
 
 export const CreateAppointmentModal = ({
@@ -26,7 +28,8 @@ export const CreateAppointmentModal = ({
   appointmentToEdit,
   veterinarians,
   consultationTypes,
-  onAppointmentDeleted
+  onAppointmentDeleted,
+  onRefreshPlanning
 }: CreateAppointmentModalProps) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -99,15 +102,21 @@ export const CreateAppointmentModal = ({
       if (success) {
         console.log('✅ Appointment deleted successfully');
         setShowDeleteConfirm(false);
-        onClose();
-        // Appeler la fonction de callback pour rafraîchir le planning
+        onClose(); // Fermer le modal
+        
+        // Déclencher le rafraîchissement du planning
         if (onAppointmentDeleted) {
           console.log('📱 Calling onAppointmentDeleted callback');
           onAppointmentDeleted();
         }
+        
+        if (onRefreshPlanning) {
+          console.log('🔄 Triggering planning refresh');
+          onRefreshPlanning();
+        }
       } else {
         console.error('❌ Failed to delete appointment');
-        setShowDeleteConfirm(false);
+        // Ne pas fermer le modal en cas d'erreur
       }
     }
   };
@@ -207,7 +216,12 @@ export const CreateAppointmentModal = ({
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel className="text-xs h-8">Annuler</AlertDialogCancel>
+                      <AlertDialogCancel 
+                        className="text-xs h-8"
+                        disabled={isDeletingBooking}
+                      >
+                        Annuler
+                      </AlertDialogCancel>
                       <AlertDialogAction 
                         onClick={handleDelete}
                         disabled={isDeletingBooking}
