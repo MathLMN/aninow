@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { DailyCalendarView } from "@/components/planning/DailyCalendarView";
 import { WeeklyCalendarView } from "@/components/planning/WeeklyCalendarView";
@@ -7,6 +8,7 @@ import { PendingBookingsNotification } from "@/components/planning/PendingBookin
 import { useVetBookings } from "@/hooks/useVetBookings";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { usePlanningActions } from "@/hooks/usePlanningActions";
+import { useSlotManagement } from "@/hooks/useSlotManagement";
 
 export default function VetPlanning() {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -17,6 +19,7 @@ export default function VetPlanning() {
 
   const { bookings, refreshBookings } = useVetBookings();
   const { veterinarians } = useClinicVeterinarians();
+  const { consultationTypes } = useSlotManagement();
 
   const {
     validateBooking,
@@ -205,7 +208,7 @@ export default function VetPlanning() {
         defaultData={createModalDefaultData}
         appointmentToEdit={appointmentToEdit}
         veterinarians={veterinarians}
-        consultationTypes={[]}
+        consultationTypes={consultationTypes}
       />
     </div>
   );
