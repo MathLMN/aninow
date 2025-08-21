@@ -648,7 +648,7 @@ export const ClinicSettingsForm = () => {
 
                 <div className="space-y-4">
                   <div>
-                    <h4 className="text-md font-medium text-vet-navy mb-3">Types de base</h4>
+                    <h4 className="text-md font-medium text-vet-navy mb-3">Types de consultations</h4>
                     <div className="space-y-2">
                       {DEFAULT_CONSULTATION_TYPES.map(defaultType => {
                         const settings = defaultTypesSettings[defaultType.name] || {
@@ -673,12 +673,7 @@ export const ClinicSettingsForm = () => {
                                   colorInput.click();
                                 }}
                               />
-                              <div>
-                                <span className="font-medium text-vet-navy">{defaultType.name}</span>
-                                <Badge variant="outline" className="ml-2 bg-vet-sage/10 text-vet-sage border-vet-sage/30 text-xs">
-                                  Type de base
-                                </Badge>
-                              </div>
+                              <span className="font-medium text-vet-navy">{defaultType.name}</span>
                             </div>
                             <div className="flex items-center gap-2">
                               <Select
@@ -700,12 +695,61 @@ export const ClinicSettingsForm = () => {
                           </div>
                         );
                       })}
-                    </div>
-                  </div>
 
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-md font-medium text-vet-navy">Types personnalisés</h4>
+                      {customConsultationTypes.map(type => (
+                        <div key={type.id} className="flex items-center justify-between p-3 border border-vet-blue/20 rounded-lg bg-white/50">
+                          <div className="flex items-center gap-3">
+                            <div 
+                              className="w-4 h-4 rounded-full border"
+                              style={{ backgroundColor: type.color }}
+                            />
+                            <span className="font-medium text-vet-navy">{type.name}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-vet-brown">{type.duration_minutes} min</span>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setEditingConsultationType(type);
+                                setNewConsultationType({
+                                  name: type.name,
+                                  duration_minutes: type.duration_minutes,
+                                  color: type.color || '#3B82F6'
+                                });
+                                setIsConsultationTypeDialogOpen(true);
+                              }}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Êtes-vous sûr de vouloir supprimer le type de consultation "{type.name}" ? Cette action est irréversible.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDeleteConsultationType(type.id)}
+                                    className="bg-red-600 hover:bg-red-700"
+                                  >
+                                    Supprimer
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </div>
+                      ))}
+
                       <Dialog open={isConsultationTypeDialogOpen} onOpenChange={setIsConsultationTypeDialogOpen}>
                         <DialogTrigger asChild>
                           <Button
@@ -717,11 +761,11 @@ export const ClinicSettingsForm = () => {
                                 color: '#3B82F6'
                               });
                             }}
-                            className="bg-vet-blue hover:bg-vet-blue/90 text-white"
-                            size="sm"
+                            className="bg-vet-blue hover:bg-vet-blue/90 text-white w-full"
+                            variant="outline"
                           >
                             <Plus className="h-4 w-4 mr-2" />
-                            Ajouter un type
+                            Ajouter un type personnalisé
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-[425px]">
@@ -803,70 +847,6 @@ export const ClinicSettingsForm = () => {
                           </form>
                         </DialogContent>
                       </Dialog>
-                    </div>
-
-                    <div className="space-y-2">
-                      {customConsultationTypes.length > 0 ? (
-                        customConsultationTypes.map(type => (
-                          <div key={type.id} className="flex items-center justify-between p-3 border border-vet-blue/20 rounded-lg bg-white/50">
-                            <div className="flex items-center gap-3">
-                              <div 
-                                className="w-4 h-4 rounded-full border"
-                                style={{ backgroundColor: type.color }}
-                              />
-                              <span className="font-medium text-vet-navy">{type.name}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm text-vet-brown">{type.duration_minutes} min</span>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setEditingConsultationType(type);
-                                  setNewConsultationType({
-                                    name: type.name,
-                                    duration_minutes: type.duration_minutes,
-                                    color: type.color || '#3B82F6'
-                                  });
-                                  setIsConsultationTypeDialogOpen(true);
-                                }}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Êtes-vous sûr de vouloir supprimer le type de consultation "{type.name}" ? Cette action est irréversible.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                    <AlertDialogAction
-                                      onClick={() => handleDeleteConsultationType(type.id)}
-                                      className="bg-red-600 hover:bg-red-700"
-                                    >
-                                      Supprimer
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-center py-4 text-vet-brown bg-vet-beige/10 rounded-lg border border-vet-blue/20">
-                          <Stethoscope className="h-6 w-6 mx-auto mb-2 text-vet-blue/60" />
-                          <p className="text-sm">Aucun type personnalisé</p>
-                          <p className="text-xs">Utilisez le bouton "Ajouter un type" pour créer vos propres types</p>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
