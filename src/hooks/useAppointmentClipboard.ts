@@ -59,10 +59,18 @@ export const useAppointmentClipboard = () => {
       duration: clipboard.data.duration_minutes,
     };
 
-    return {
+    const result = {
       data: pastedData,
-      originalId: clipboard.action === 'cut' ? clipboard.data.id : null
+      originalId: clipboard.action === 'cut' ? clipboard.data.id : null,
+      action: clipboard.action
     };
+
+    // Si c'était un "couper", vider le clipboard après utilisation
+    if (clipboard.action === 'cut') {
+      setClipboard(null);
+    }
+
+    return result;
   };
 
   const clearClipboard = () => {
@@ -78,12 +86,17 @@ export const useAppointmentClipboard = () => {
     return clipboard?.action || null;
   };
 
+  const getClipboardAppointment = () => {
+    return clipboard?.data || null;
+  };
+
   return {
     copyAppointment,
     cutAppointment,
     pasteAppointment,
     clearClipboard,
     hasClipboard,
-    getClipboardAction
+    getClipboardAction,
+    getClipboardAppointment
   };
 };

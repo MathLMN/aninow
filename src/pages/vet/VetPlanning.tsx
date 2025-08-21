@@ -34,7 +34,8 @@ export default function VetPlanning() {
     cutAppointment,
     pasteAppointment,
     clearClipboard,
-    hasClipboard
+    hasClipboard,
+    getClipboardAppointment
   } = useAppointmentClipboard();
 
   const handleCreateAppointment = (timeSlot: { date: string; time: string; veterinarian?: string }) => {
@@ -82,21 +83,34 @@ export default function VetPlanning() {
   };
 
   const handleCutBooking = async (booking: any) => {
+    console.log('✂️ Cutting booking:', booking.id);
     cutAppointment(booking);
+    
+    // Supprimer immédiatement le rendez-vous du planning
+    const success = await deleteBooking(booking.id);
+    if (success) {
+      console.log('✅ Appointment cut and removed from original slot');
+      refreshBookings();
+    } else {
+      console.error('❌ Failed to cut appointment');
+      clearClipboard(); // Nettoyer le clipboard si la suppression a échoué
+    }
   };
 
   const handlePasteBooking = async (timeSlot: { date: string; time: string; veterinarian?: string }) => {
     const pasteResult = pasteAppointment(timeSlot);
     if (pasteResult) {
       console.log('📌 Opening create modal with pasted data:', pasteResult.data);
+      
+      if (pasteResult.action === 'cut') {
+        console.log('🔄 This is a move operation (cut/paste)');
+      } else {
+        console.log('📋 This is a copy operation');
+      }
+      
       setCreateModalDefaultData(pasteResult.data);
       setAppointmentToEdit(null);
       setIsCreateModalOpen(true);
-      
-      // Si c'était un "couper", on devra supprimer l'original après création
-      if (pasteResult.originalId) {
-        // TODO: Gérer la suppression de l'original après création
-      }
     }
   };
 
