@@ -243,25 +243,35 @@ export const TimeSlotCell = ({
               <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-red-500 rounded-full border border-white z-20" title={`Client arrivé à ${booking.arrival_time}`}></div>
             )}
             
+            {/* 1. Nom complet du client */}
             <div className="font-medium truncate text-[9px]">
               {booking.client_name}
             </div>
-            <div className="truncate text-[8px] opacity-90">
+            
+            {/* 2. Nom de l'animal */}
+            <div className="truncate text-[8px] opacity-90 font-medium">
               {booking.animal_name}
             </div>
+            
+            {/* 3. Motif du RDV */}
             <div className="truncate text-[8px] opacity-80">
               {booking.consultation_reason}
             </div>
-            {booking.duration_minutes && booking.duration_minutes > 15 && (
-              <div className="text-[7px] opacity-70 mt-1">
+            
+            {/* 4. Durée du RDV */}
+            {booking.duration_minutes && (
+              <div className="text-[7px] opacity-70 mt-0.5 font-medium">
                 {booking.duration_minutes} min
               </div>
             )}
+            
+            {/* Statut en attente */}
             {booking.status === 'pending' && (
               <div className="text-[7px] opacity-70 font-medium">
                 En attente
               </div>
             )}
+            
             {/* Indicateur de source de réservation */}
             <div className="text-[6px] opacity-60 absolute bottom-0 right-0">
               {booking.booking_source === 'online' ? '🌐' : 
