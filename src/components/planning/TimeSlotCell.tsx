@@ -1,3 +1,4 @@
+
 import { Plus, Ban, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -25,6 +26,8 @@ interface TimeSlotCellProps {
   // Nouvelles props pour gérer l'affichage des blocages
   isFirstBlockedSlot?: boolean;
   blockedSlotsCount?: number;
+  // Nouvelles props pour les types de consultation
+  consultationTypes?: any[];
 }
 
 export const TimeSlotCell = ({
@@ -44,16 +47,27 @@ export const TimeSlotCell = ({
   onBlockSlot,
   isVeterinarianAbsent = false,
   isFirstBlockedSlot = false,
-  blockedSlotsCount = 1
+  blockedSlotsCount = 1,
+  consultationTypes = []
 }: TimeSlotCellProps) => {
   const [showActions, setShowActions] = useState(false);
 
-  const getStatusColor = (status: string, isBlockedSlot: boolean = false) => {
-    if (isBlockedSlot) {
+  const getStatusColor = (booking: any) => {
+    // Gérer les blocages
+    if (booking.is_blocked || booking.recurring_block_id || booking.booking_source === 'blocked') {
       return 'bg-gray-400 text-gray-800 border-gray-500';
     }
+
+    // Couleur basée sur le type de consultation
+    if (booking.consultation_type_id && consultationTypes.length > 0) {
+      const consultationType = consultationTypes.find(ct => ct.id === booking.consultation_type_id);
+      if (consultationType?.color) {
+        return `border-2 text-white` + ' ' + getBgColorClass(consultationType.color);
+      }
+    }
     
-    switch (status) {
+    // Couleurs par défaut basées sur le statut
+    switch (booking.status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-300 border-dashed';
       case 'confirmed': return 'bg-green-100 text-green-800 border-green-300';
       case 'cancelled': return 'bg-red-100 text-red-800 border-red-300';
@@ -62,10 +76,25 @@ export const TimeSlotCell = ({
     }
   };
 
-  // Calculer la hauteur du rendez-vous en fonction de sa durée - ajustée pour la nouvelle hauteur
+  const getBgColorClass = (color: string) => {
+    // Convertir la couleur hex en classe Tailwind appropriée
+    const colorMap: Record<string, string> = {
+      '#3B82F6': 'bg-blue-500',
+      '#10B981': 'bg-green-500',
+      '#F59E0B': 'bg-yellow-500',
+      '#EF4444': 'bg-red-500',
+      '#8B5CF6': 'bg-purple-500',
+      '#F97316': 'bg-orange-500',
+      '#06B6D4': 'bg-cyan-500',
+      '#84CC16': 'bg-lime-500',
+    };
+    return colorMap[color] || 'bg-blue-500';
+  };
+
+  // Calculer la hauteur du rendez-vous en fonction de sa durée
   const getAppointmentHeight = (booking: any) => {
     const duration = booking.duration_minutes || 15;
-    // Chaque tranche de 15 minutes = 20px de hauteur (ajusté)
+    // Chaque tranche de 15 minutes = 20px de hauteur
     const slotsNeeded = Math.ceil(duration / 15);
     return slotsNeeded * 20;
   };
@@ -103,16 +132,21 @@ export const TimeSlotCell = ({
     }
   };
 
-  // Déterminer si le créneau est bloqué - améliorer la détection
+  // Déterminer si le créneau est bloqué
   const isBlocked = bookings.some(booking => 
     booking.consultation_reason === 'Créneau bloqué' || 
     booking.is_blocked || 
     booking.client_name === 'CRÉNEAU BLOQUÉ' ||
-    booking.recurring_block_id // Nouveau critère pour les blocages récurrents
+    booking.recurring_block_id ||
+    booking.booking_source === 'blocked'
   );
 
-  // Récupérer les informations du blocage récurrent s'il y en a un
-  const recurringBlock = bookings.find(booking => booking.recurring_block_id);
+  // Récupérer les informations du blocage
+  const blockingBooking = bookings.find(booking => 
+    booking.is_blocked || 
+    booking.recurring_block_id ||
+    booking.booking_source === 'blocked'
+  );
 
   // Styles pour les différents états
   const getCellBackground = () => {
@@ -122,8 +156,8 @@ export const TimeSlotCell = ({
     if (!isOpen) {
       return "bg-gray-300/80";
     }
-    if (isBlocked) {
-      return "bg-gray-400/60"; // Plus visible pour les blocages
+    if (isBlocked && !isFirstBlockedSlot) {
+      return "bg-gray-400/60"; // Pour les créneaux bloqués non-premiers
     }
     return "";
   };
@@ -158,8 +192,8 @@ export const TimeSlotCell = ({
         onMouseEnter={() => (canInteract || canCreateTask) && setShowActions(true)}
         onMouseLeave={() => setShowActions(false)}
       >
-        {/* Affichage spécial pour les créneaux bloqués récurrents - hauteur ajustée */}
-        {isBlocked && recurringBlock && isFirstBlockedSlot && (
+        {/* Affichage spécial pour les créneaux bloqués */}
+        {isBlocked && isFirstBlockedSlot && (
           <div 
             className="absolute inset-0 flex items-center justify-center bg-gray-400/60 text-gray-800 text-[9px] font-medium z-10"
             style={{ 
@@ -168,16 +202,27 @@ export const TimeSlotCell = ({
             }}
           >
             <div className="text-center px-1">
-              <div className="truncate">BLOQUÉ</div>
-              <div className="truncate text-[8px] opacity-80">
-                {recurringBlock.recurring_block_title}
-              </div>
+              <div className="truncate font-semibold">BLOQUÉ</div>
+              {blockingBooking?.recurring_block_title && (
+                <div className="truncate text-[8px] opacity-80">
+                  {blockingBooking.recurring_block_title}
+                </div>
+              )}
+              {blockingBooking?.consultation_reason && blockingBooking.consultation_reason !== 'Créneau bloqué' && (
+                <div className="truncate text-[8px] opacity-80">
+                  {blockingBooking.consultation_reason}
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* Affichage des rendez-vous normaux - taille de police ajustée */}
-        {bookings.filter(booking => !booking.is_blocked && !booking.recurring_block_id).map((booking) => (
+        {/* Affichage des rendez-vous normaux */}
+        {bookings.filter(booking => 
+          !booking.is_blocked && 
+          !booking.recurring_block_id && 
+          booking.booking_source !== 'blocked'
+        ).map((booking) => (
           <div
             key={booking.id}
             onClick={(e) => {
@@ -186,7 +231,7 @@ export const TimeSlotCell = ({
             }}
             className={cn(
               "absolute inset-x-0 top-0 p-1 rounded-sm border transition-shadow text-[9px] leading-tight cursor-pointer hover:shadow-sm",
-              getStatusColor(booking.status, false)
+              getStatusColor(booking)
             )}
             style={{ 
               height: `${getAppointmentHeight(booking)}px`,
@@ -201,8 +246,11 @@ export const TimeSlotCell = ({
             <div className="font-medium truncate text-[9px]">
               {booking.client_name}
             </div>
-            <div className="truncate text-[8px] opacity-80">
+            <div className="truncate text-[8px] opacity-90">
               {booking.animal_name}
+            </div>
+            <div className="truncate text-[8px] opacity-80">
+              {booking.consultation_reason}
             </div>
             {booking.duration_minutes && booking.duration_minutes > 15 && (
               <div className="text-[7px] opacity-70 mt-1">
@@ -214,10 +262,15 @@ export const TimeSlotCell = ({
                 En attente
               </div>
             )}
+            {/* Indicateur de source de réservation */}
+            <div className="text-[6px] opacity-60 absolute bottom-0 right-0">
+              {booking.booking_source === 'online' ? '🌐' : 
+               booking.booking_source === 'manual' ? '✏️' : ''}
+            </div>
           </div>
         ))}
         
-        {/* Actions au survol pour créneaux ouverts - taille des icônes ajustée */}
+        {/* Actions au survol pour créneaux ouverts */}
         {bookings.length === 0 && canInteract && showActions && (
           <div className="absolute inset-0 flex items-center justify-center bg-blue-50/40 transition-opacity z-20">
             <div className="flex items-center space-x-1">

@@ -13,7 +13,7 @@ export const useVetBookings = () => {
   const { currentClinicId } = useClinicAccess();
   const { generateRecurringBlocksForDate, recurringBlocks } = useRecurringSlotBlocks();
 
-  // Récupérer uniquement les rendez-vous pris en ligne (booking_source = 'online')
+  // Récupérer TOUS les rendez-vous (manuels, en ligne, et bloqués)
   const { data: rawBookings = [], isLoading, error, refetch } = useQuery({
     queryKey: ['vet-bookings', currentClinicId],
     queryFn: async () => {
@@ -22,25 +22,28 @@ export const useVetBookings = () => {
         return [];
       }
       
-      console.log('🔄 Fetching online bookings for clinic:', currentClinicId);
+      console.log('🔄 Fetching ALL bookings for clinic:', currentClinicId);
       
       const { data, error } = await supabase
         .from('bookings')
         .select('*')
         .eq('clinic_id', currentClinicId)
-        .eq('booking_source', 'online')  // Filtrer uniquement les RDV pris en ligne
-        .eq('is_blocked', false)         // Exclure les créneaux bloqués
         .order('appointment_date', { ascending: true })
         .order('appointment_time', { ascending: true });
 
       if (error) {
-        console.error('❌ Error fetching online bookings:', error);
+        console.error('❌ Error fetching bookings:', error);
         throw error;
       }
 
-      console.log('✅ Online bookings fetched:', data?.length || 0, 'records');
+      console.log('✅ All bookings fetched:', data?.length || 0, 'records');
       console.log('🏥 Fetched for clinic ID:', currentClinicId);
       console.log('📋 Sample bookings:', data?.slice(0, 3));
+      console.log('📊 Booking sources:', data?.reduce((acc, booking) => {
+        acc[booking.booking_source || 'unknown'] = (acc[booking.booking_source || 'unknown'] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>));
+      
       return data || [];
     },
     enabled: !!currentClinicId,
@@ -50,21 +53,48 @@ export const useVetBookings = () => {
     refetchInterval: 30000, // Refetch toutes les 30 secondes
   });
 
-  // Pour la page /vet/appointments, on retourne directement les rawBookings (pas de combinaison avec les blocages récurrents)
-  const bookings = rawBookings;
+  // Combiner avec les blocages récurrents pour le planning
+  const bookings = useMemo(() => {
+    if (!currentClinicId) return rawBookings;
 
-  // Calculer les statistiques basées uniquement sur les vrais rendez-vous pris en ligne
+    // Générer les blocages récurrents pour les 30 prochains jours
+    const today = new Date();
+    const recurringBookings = [];
+    
+    for (let i = 0; i < 30; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      const blocksForDate = generateRecurringBlocksForDate(date);
+      recurringBookings.push(...blocksForDate);
+    }
+
+    console.log('🔄 Combined bookings:', {
+      rawBookings: rawBookings.length,
+      recurringBlocks: recurringBookings.length,
+      total: rawBookings.length + recurringBookings.length
+    });
+
+    return [...rawBookings, ...recurringBookings];
+  }, [rawBookings, currentClinicId, generateRecurringBlocksForDate]);
+
+  // Calculer les statistiques basées uniquement sur les vrais rendez-vous
   const stats = useMemo(() => {
     const today = formatDateLocal(new Date());
     
-    // rawBookings contient seulement les vrais rendez-vous pris en ligne
-    const todayBookings = rawBookings.filter(booking => 
+    // Filtrer les vrais rendez-vous (pas les blocages)
+    const realBookings = rawBookings.filter(booking => 
+      !booking.is_blocked && 
+      !booking.recurring_block_id &&
+      booking.booking_source !== 'blocked'
+    );
+    
+    const todayBookings = realBookings.filter(booking => 
       booking.appointment_date === today || booking.created_at.split('T')[0] === today
     ).length;
     
-    const total = rawBookings.length;
-    const pending = rawBookings.filter(booking => booking.status === 'pending').length;
-    const highUrgency = rawBookings.filter(booking => booking.urgency_score && booking.urgency_score >= 7).length;
+    const total = realBookings.length;
+    const pending = realBookings.filter(booking => booking.status === 'pending').length;
+    const highUrgency = realBookings.filter(booking => booking.urgency_score && booking.urgency_score >= 7).length;
     
     return {
       todayBookings,
@@ -105,7 +135,7 @@ export const useVetBookings = () => {
 
   // Fonction pour forcer le rechargement des données
   const refreshBookings = async () => {
-    console.log('🔄 Force refreshing online bookings for clinic:', currentClinicId);
+    console.log('🔄 Force refreshing ALL bookings for clinic:', currentClinicId);
     await queryClient.invalidateQueries({ queryKey: ['vet-bookings', currentClinicId] });
     await refetch();
   };

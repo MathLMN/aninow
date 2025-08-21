@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { TimeSlotCell } from "./TimeSlotCell";
@@ -6,6 +7,7 @@ import { isVeterinarianAbsent } from "./utils/veterinarianAbsenceUtils";
 import { useVeterinarianAbsences } from "@/hooks/useVeterinarianAbsences";
 import { useClinicSettings } from "@/hooks/useClinicSettings";
 import { useClinicAccess } from "@/hooks/useClinicAccess";
+import { useSlotManagement } from "@/hooks/useSlotManagement";
 import { useState, useEffect, useMemo } from "react";
 import { formatDateLocal } from "@/utils/date";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -46,6 +48,7 @@ export const DailyCalendarGrid = ({
   const { settings } = useClinicSettings();
   const { currentClinicId } = useClinicAccess();
   const { absences } = useVeterinarianAbsences();
+  const { consultationTypes } = useSlotManagement();
   const timeSlots = generateAllTimeSlots();
 
   // Optimiser le calcul des bookings par slot avec useMemo pour éviter les recalculs
@@ -65,14 +68,13 @@ export const DailyCalendarGrid = ({
         let bookingsForSlot = [];
         
         if (column.id === 'asv') {
-          // Pour la colonne ASV : ne jamais afficher les blocages récurrents
+          // Pour la colonne ASV : afficher les rendez-vous sans vétérinaire assigné
           bookingsForSlot = bookings.filter(booking => {
             const matchesDate = booking.appointment_date === dateStr;
             const matchesTime = booking.appointment_time === time;
-            const isNotBlocked = !booking.recurring_block_id && !booking.is_blocked;
-            const hasNoVet = !booking.veterinarian_id;
+            const hasNoVet = !booking.veterinarian_id || booking.veterinarian_id === 'asv';
             
-            const matches = matchesDate && matchesTime && isNotBlocked && hasNoVet;
+            const matches = matchesDate && matchesTime && hasNoVet;
             
             if (matches) {
               console.log('📍 ASV booking found:', booking.client_name, time);
@@ -90,7 +92,7 @@ export const DailyCalendarGrid = ({
             const matches = matchesDate && matchesTime && matchesVet;
             
             if (matches) {
-              console.log('👨‍⚕️ Vet booking found:', booking.client_name, column.title, time);
+              console.log('👨‍⚕️ Vet booking found:', booking.client_name, column.title, time, 'Source:', booking.booking_source);
             }
             
             return matches;
@@ -99,9 +101,9 @@ export const DailyCalendarGrid = ({
         
         newSlotBookings[key] = bookingsForSlot;
         
-        // Log pour les créneaux bloqués récurrents
-        if (bookingsForSlot.some(b => b.recurring_block_id)) {
-          console.log('🔒 Recurring block found for:', key, bookingsForSlot.filter(b => b.recurring_block_id));
+        // Log pour les créneaux bloqués
+        if (bookingsForSlot.some(b => b.is_blocked || b.recurring_block_id || b.booking_source === 'blocked')) {
+          console.log('🔒 Blocked slot found for:', key, bookingsForSlot.filter(b => b.is_blocked || b.recurring_block_id || b.booking_source === 'blocked'));
         }
       }
     }
@@ -127,11 +129,14 @@ export const DailyCalendarGrid = ({
           booking.consultation_reason === 'Créneau bloqué' || 
           booking.is_blocked || 
           booking.client_name === 'CRÉNEAU BLOQUÉ' ||
-          booking.recurring_block_id
+          booking.recurring_block_id ||
+          booking.booking_source === 'blocked'
         );
         
-        const recurringBlock = bookingsForSlot.find(booking => booking.recurring_block_id);
-        const blockId = recurringBlock?.recurring_block_id || 'manual';
+        const blockingBooking = bookingsForSlot.find(booking => 
+          booking.recurring_block_id || booking.is_blocked || booking.booking_source === 'blocked'
+        );
+        const blockId = blockingBooking?.recurring_block_id || blockingBooking?.id || 'manual';
         
         if (isBlocked && (currentBlockStart === -1 || blockId === currentBlockId)) {
           // Début d'un nouveau bloc ou continuation du bloc actuel
@@ -197,7 +202,11 @@ export const DailyCalendarGrid = ({
               const key = `${time}-${column.id}`;
               const bookingsForSlot = slotBookings[key] || [];
               // Ne compter que les vrais rendez-vous, pas les blocages
-              return total + bookingsForSlot.filter(b => !b.is_blocked && !b.recurring_block_id).length;
+              return total + bookingsForSlot.filter(b => 
+                !b.is_blocked && 
+                !b.recurring_block_id && 
+                b.booking_source !== 'blocked'
+              ).length;
             }, 0);
 
             return (
@@ -268,6 +277,7 @@ export const DailyCalendarGrid = ({
                           isVeterinarianAbsent={isVetAbsent}
                           isFirstBlockedSlot={blockInfo?.isFirst || false}
                           blockedSlotsCount={blockInfo?.count || 1}
+                          consultationTypes={consultationTypes}
                         />
                       );
                     })}
