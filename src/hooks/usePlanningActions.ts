@@ -63,40 +63,6 @@ export const usePlanningActions = () => {
     }
   };
 
-  const duplicateBooking = async (booking: any): Promise<boolean> => {
-    setIsLoading(true);
-    try {
-      const { id, created_at, updated_at, ...bookingData } = booking;
-      const duplicatedBooking = {
-        ...bookingData,
-        status: 'pending',
-        client_comment: `[DUPLIQUÉ] ${bookingData.client_comment || ''}`
-      };
-
-      const { error } = await supabase
-        .from('bookings')
-        .insert([duplicatedBooking]);
-
-      if (error) throw error;
-
-      toast({
-        title: "Rendez-vous dupliqué",
-        description: "Le rendez-vous a été dupliqué avec succès",
-      });
-      return true;
-    } catch (error) {
-      console.error('Erreur lors de la duplication:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de dupliquer le rendez-vous",
-        variant: "destructive"
-      });
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const moveAppointment = async (appointmentId: string, newDate: string, newTime: string, newVetId?: string): Promise<boolean> => {
     setIsLoading(true);
     try {
@@ -186,7 +152,6 @@ export const usePlanningActions = () => {
     isLoading,
     validateBooking,
     cancelBooking,
-    duplicateBooking,
     moveAppointment,
     deleteBooking,
     handleBlockSlot

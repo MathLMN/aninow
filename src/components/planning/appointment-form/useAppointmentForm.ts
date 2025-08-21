@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -36,36 +37,39 @@ interface FormData {
   clientComment: string | null;
 }
 
+const getInitialFormData = (): FormData => ({
+  appointmentDate: '',
+  appointmentTime: '',
+  appointmentEndTime: '',
+  veterinarianId: '',
+  consultationTypeId: '',
+  duration: 30,
+  arrival_time: null,
+  booking_source: 'phone',
+  clientName: '',
+  clientEmail: '',
+  clientPhone: '',
+  preferredContactMethod: 'phone',
+  clientStatus: 'existing',
+  animalName: '',
+  animalSpecies: 'chien',
+  animalBreed: null,
+  animalAge: null,
+  animalWeight: null,
+  animalSex: null,
+  animalSterilized: null,
+  animalVaccinesUpToDate: null,
+  consultationReason: '',
+  clientComment: null,
+});
+
 export const useAppointmentForm = (onClose: () => void, appointmentId?: string) => {
   const { toast } = useToast();
   const { currentClinicId } = useClinicAccess();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const [formData, setFormData] = useState<FormData>({
-    appointmentDate: '',
-    appointmentTime: '',
-    appointmentEndTime: '',
-    veterinarianId: '',
-    consultationTypeId: '',
-    duration: 30,
-    arrival_time: null,
-    booking_source: 'phone',
-    clientName: '',
-    clientEmail: '',
-    clientPhone: '',
-    preferredContactMethod: 'phone',
-    clientStatus: 'existing',
-    animalName: '',
-    animalSpecies: 'chien',
-    animalBreed: null,
-    animalAge: null,
-    animalWeight: null,
-    animalSex: null,
-    animalSterilized: null,
-    animalVaccinesUpToDate: null,
-    consultationReason: '',
-    clientComment: null,
-  });
+  // Toujours commencer avec des données vierges
+  const [formData, setFormData] = useState<FormData>(getInitialFormData());
 
   const updateField = (field: keyof FormData, value: any) => {
     console.log(`🔄 Updating field ${field} with value:`, value);
@@ -106,151 +110,160 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
   const initializeFormData = (defaultData: any) => {
     console.log('🔄 Initializing form with data:', defaultData);
     
-    // Mise à jour des champs de rendez-vous
-    if (defaultData.appointmentDate || defaultData.date) {
-      const date = defaultData.appointmentDate || defaultData.date;
-      console.log('📅 Setting appointment date:', date);
-      updateField('appointmentDate', date);
-    }
+    // Réinitialiser complètement le formulaire
+    const cleanData = getInitialFormData();
     
-    if (defaultData.appointmentTime || defaultData.time) {
-      const time = defaultData.appointmentTime || defaultData.time;
-      console.log('⏰ Setting appointment time:', time);
-      updateField('appointmentTime', time);
-    }
-    
-    if (defaultData.appointmentEndTime) {
-      updateField('appointmentEndTime', defaultData.appointmentEndTime);
-    }
-    
-    if (defaultData.veterinarianId || (defaultData.veterinarian && defaultData.veterinarian !== 'asv')) {
-      const vetId = defaultData.veterinarianId || defaultData.veterinarian;
-      console.log('👨‍⚕️ Setting veterinarian:', vetId);
-      updateField('veterinarianId', vetId);
-    }
-    
-    if (defaultData.consultationTypeId) {
-      updateField('consultationTypeId', defaultData.consultationTypeId);
-    }
-    
-    if (defaultData.duration) {
-      updateField('duration', defaultData.duration);
-    }
-    
-    if (defaultData.arrival_time) {
-      updateField('arrival_time', defaultData.arrival_time);
-    }
+    if (defaultData) {
+      // Données de rendez-vous uniquement
+      if (defaultData.appointmentDate || defaultData.date) {
+        const date = defaultData.appointmentDate || defaultData.date;
+        console.log('📅 Setting appointment date:', date);
+        cleanData.appointmentDate = date;
+      }
+      
+      if (defaultData.appointmentTime || defaultData.time) {
+        const time = defaultData.appointmentTime || defaultData.time;
+        console.log('⏰ Setting appointment time:', time);
+        cleanData.appointmentTime = time;
+      }
+      
+      if (defaultData.appointmentEndTime) {
+        cleanData.appointmentEndTime = defaultData.appointmentEndTime;
+      }
+      
+      if (defaultData.veterinarianId || (defaultData.veterinarian && defaultData.veterinarian !== 'asv')) {
+        const vetId = defaultData.veterinarianId || defaultData.veterinarian;
+        console.log('👨‍⚕️ Setting veterinarian:', vetId);
+        cleanData.veterinarianId = vetId;
+      }
+      
+      if (defaultData.consultationTypeId) {
+        cleanData.consultationTypeId = defaultData.consultationTypeId;
+      }
+      
+      if (defaultData.duration) {
+        cleanData.duration = defaultData.duration;
+      }
+      
+      if (defaultData.arrival_time) {
+        cleanData.arrival_time = defaultData.arrival_time;
+      }
 
-    // Déterminer automatiquement la source de réservation
-    if (defaultData.booking_source) {
-      updateField('booking_source', defaultData.booking_source);
-    } else if (defaultData.status === 'pending' || defaultData.status === 'confirmed') {
-      // Si le rendez-vous vient d'une réservation en ligne (statut pending/confirmed)
-      console.log('🌐 Setting booking source to online for online booking');
-      updateField('booking_source', 'online');
+      // Source de réservation
+      if (defaultData.booking_source) {
+        cleanData.booking_source = defaultData.booking_source;
+      } else if (defaultData.status === 'pending' || defaultData.status === 'confirmed') {
+        cleanData.booking_source = 'online';
+      }
+      
+      // Données client - seulement si elles existent dans defaultData
+      if (defaultData.clientName || defaultData.client_name) {
+        const name = defaultData.clientName || defaultData.client_name;
+        console.log('👤 Setting client name:', name);
+        cleanData.clientName = name;
+      }
+      
+      if (defaultData.clientEmail || defaultData.client_email) {
+        const email = defaultData.clientEmail || defaultData.client_email;
+        console.log('📧 Setting client email:', email);
+        cleanData.clientEmail = email;
+      }
+      
+      if (defaultData.clientPhone || defaultData.client_phone) {
+        const phone = defaultData.clientPhone || defaultData.client_phone;
+        console.log('📞 Setting client phone:', phone);
+        cleanData.clientPhone = phone;
+      }
+      
+      if (defaultData.preferredContactMethod || defaultData.preferred_contact_method) {
+        const method = defaultData.preferredContactMethod || defaultData.preferred_contact_method;
+        console.log('📱 Setting preferred contact method:', method);
+        cleanData.preferredContactMethod = method;
+      }
+      
+      if (defaultData.clientStatus || defaultData.client_status) {
+        const status = defaultData.clientStatus || defaultData.client_status;
+        console.log('👥 Setting client status:', status);
+        cleanData.clientStatus = status;
+      }
+      
+      // Données animal - seulement si elles existent dans defaultData
+      if (defaultData.animalName || defaultData.animal_name) {
+        const name = defaultData.animalName || defaultData.animal_name;
+        console.log('🐕 Setting animal name:', name);
+        cleanData.animalName = name;
+      }
+      
+      if (defaultData.animalSpecies || defaultData.animal_species) {
+        const species = defaultData.animalSpecies || defaultData.animal_species;
+        console.log('🐾 Setting animal species:', species);
+        cleanData.animalSpecies = species;
+      }
+      
+      if (defaultData.animalBreed || defaultData.animal_breed) {
+        const breed = defaultData.animalBreed || defaultData.animal_breed;
+        console.log('🏷️ Setting animal breed:', breed);
+        cleanData.animalBreed = breed;
+      }
+      
+      if (defaultData.animalAge || defaultData.animal_age) {
+        const age = defaultData.animalAge || defaultData.animal_age;
+        console.log('📅 Setting animal age:', age);
+        cleanData.animalAge = age;
+      }
+      
+      if (defaultData.animalWeight || defaultData.animal_weight) {
+        const weight = defaultData.animalWeight || defaultData.animal_weight;
+        console.log('⚖️ Setting animal weight:', weight);
+        cleanData.animalWeight = weight;
+      }
+      
+      if (defaultData.animalSex || defaultData.animal_sex) {
+        const sex = defaultData.animalSex || defaultData.animal_sex;
+        console.log('♂️♀️ Setting animal sex:', sex);
+        cleanData.animalSex = sex;
+      }
+      
+      if (defaultData.animalSterilized !== undefined || defaultData.animal_sterilized !== undefined) {
+        const sterilized = defaultData.animalSterilized !== undefined ? defaultData.animalSterilized : defaultData.animal_sterilized;
+        console.log('✂️ Setting animal sterilized:', sterilized);
+        cleanData.animalSterilized = sterilized;
+      }
+      
+      if (defaultData.animalVaccinesUpToDate !== undefined || defaultData.animal_vaccines_up_to_date !== undefined) {
+        const vaccines = defaultData.animalVaccinesUpToDate !== undefined ? defaultData.animalVaccinesUpToDate : defaultData.animal_vaccines_up_to_date;
+        console.log('💉 Setting animal vaccines up to date:', vaccines);
+        cleanData.animalVaccinesUpToDate = vaccines;
+      }
+      
+      // Consultation
+      if (defaultData.consultationReason || defaultData.consultation_reason) {
+        const reason = defaultData.consultationReason || defaultData.consultation_reason;
+        console.log('🩺 Setting consultation reason:', reason);
+        cleanData.consultationReason = reason;
+      }
+      
+      if (defaultData.clientComment || defaultData.client_comment) {
+        const comment = defaultData.clientComment || defaultData.client_comment;
+        console.log('💬 Setting client comment:', comment);
+        // Éviter de propager le commentaire [DUPLIQUÉ]
+        if (!comment.includes('[DUPLIQUÉ]')) {
+          cleanData.clientComment = comment;
+        }
+      }
+      
+      // Recalculer l'heure de fin si on a time et duration
+      const time = cleanData.appointmentTime;
+      const duration = cleanData.duration;
+      if (time && duration && !cleanData.appointmentEndTime) {
+        const endTime = calculateEndTime(time, duration);
+        console.log('⏰ Initial end time calculation:', endTime);
+        cleanData.appointmentEndTime = endTime;
+      }
     }
     
-    // Données client - mapping complet de tous les champs
-    if (defaultData.clientName || defaultData.client_name) {
-      const name = defaultData.clientName || defaultData.client_name;
-      console.log('👤 Setting client name:', name);
-      updateField('clientName', name);
-    }
-    
-    if (defaultData.clientEmail || defaultData.client_email) {
-      const email = defaultData.clientEmail || defaultData.client_email;
-      console.log('📧 Setting client email:', email);
-      updateField('clientEmail', email);
-    }
-    
-    if (defaultData.clientPhone || defaultData.client_phone) {
-      const phone = defaultData.clientPhone || defaultData.client_phone;
-      console.log('📞 Setting client phone:', phone);
-      updateField('clientPhone', phone);
-    }
-    
-    if (defaultData.preferredContactMethod || defaultData.preferred_contact_method) {
-      const method = defaultData.preferredContactMethod || defaultData.preferred_contact_method;
-      console.log('📱 Setting preferred contact method:', method);
-      updateField('preferredContactMethod', method);
-    }
-    
-    if (defaultData.clientStatus || defaultData.client_status) {
-      const status = defaultData.clientStatus || defaultData.client_status;
-      console.log('👥 Setting client status:', status);
-      updateField('clientStatus', status);
-    }
-    
-    // Données animal - mapping complet de tous les champs
-    if (defaultData.animalName || defaultData.animal_name) {
-      const name = defaultData.animalName || defaultData.animal_name;
-      console.log('🐕 Setting animal name:', name);
-      updateField('animalName', name);
-    }
-    
-    if (defaultData.animalSpecies || defaultData.animal_species) {
-      const species = defaultData.animalSpecies || defaultData.animal_species;
-      console.log('🐾 Setting animal species:', species);
-      updateField('animalSpecies', species);
-    }
-    
-    if (defaultData.animalBreed || defaultData.animal_breed) {
-      const breed = defaultData.animalBreed || defaultData.animal_breed;
-      console.log('🏷️ Setting animal breed:', breed);
-      updateField('animalBreed', breed);
-    }
-    
-    if (defaultData.animalAge || defaultData.animal_age) {
-      const age = defaultData.animalAge || defaultData.animal_age;
-      console.log('📅 Setting animal age:', age);
-      updateField('animalAge', age);
-    }
-    
-    if (defaultData.animalWeight || defaultData.animal_weight) {
-      const weight = defaultData.animalWeight || defaultData.animal_weight;
-      console.log('⚖️ Setting animal weight:', weight);
-      updateField('animalWeight', weight);
-    }
-    
-    if (defaultData.animalSex || defaultData.animal_sex) {
-      const sex = defaultData.animalSex || defaultData.animal_sex;
-      console.log('♂️♀️ Setting animal sex:', sex);
-      updateField('animalSex', sex);
-    }
-    
-    if (defaultData.animalSterilized !== undefined || defaultData.animal_sterilized !== undefined) {
-      const sterilized = defaultData.animalSterilized !== undefined ? defaultData.animalSterilized : defaultData.animal_sterilized;
-      console.log('✂️ Setting animal sterilized:', sterilized);
-      updateField('animalSterilized', sterilized);
-    }
-    
-    if (defaultData.animalVaccinesUpToDate !== undefined || defaultData.animal_vaccines_up_to_date !== undefined) {
-      const vaccines = defaultData.animalVaccinesUpToDate !== undefined ? defaultData.animalVaccinesUpToDate : defaultData.animal_vaccines_up_to_date;
-      console.log('💉 Setting animal vaccines up to date:', vaccines);
-      updateField('animalVaccinesUpToDate', vaccines);
-    }
-    
-    // Consultation
-    if (defaultData.consultationReason || defaultData.consultation_reason) {
-      const reason = defaultData.consultationReason || defaultData.consultation_reason;
-      console.log('🩺 Setting consultation reason:', reason);
-      updateField('consultationReason', reason);
-    }
-    
-    if (defaultData.clientComment || defaultData.client_comment) {
-      const comment = defaultData.clientComment || defaultData.client_comment;
-      console.log('💬 Setting client comment:', comment);
-      updateField('clientComment', comment);
-    }
-    
-    // Recalculer l'heure de fin si on a time et duration
-    const time = defaultData.appointmentTime || defaultData.time;
-    const duration = defaultData.duration || formData.duration;
-    if (time && duration && !defaultData.appointmentEndTime) {
-      const endTime = calculateEndTime(time, duration);
-      console.log('⏰ Initial end time calculation:', endTime);
-      updateField('appointmentEndTime', endTime);
-    }
+    console.log('✅ Final clean form data:', cleanData);
+    setFormData(cleanData);
   };
 
   const handleTimeChange = (time: string) => {

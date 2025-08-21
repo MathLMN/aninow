@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger, ContextMenuSeparator } from "@/components/ui/context-menu";
-import { Plus, Check, X, Copy, Move, Trash2, Clock, User, Calendar } from "lucide-react";
+import { Plus, Check, X, Copy, Scissors, Clipboard, Trash2, Clock, User, Calendar } from "lucide-react";
 
 interface TimeSlotContextMenuProps {
   children: React.ReactNode;
@@ -12,11 +12,13 @@ interface TimeSlotContextMenuProps {
   onCreateAppointment: (timeSlot: { date: string; time: string; veterinarian?: string }) => void;
   onValidateBooking?: (bookingId: string) => void;
   onCancelBooking?: (bookingId: string) => void;
-  onDuplicateBooking?: (booking: any) => void;
-  onMoveBooking?: (booking: any) => void;
+  onCopyBooking?: (booking: any) => void;
+  onCutBooking?: (booking: any) => void;
+  onPasteBooking?: (timeSlot: { date: string; time: string; veterinarian?: string }) => void;
   onDeleteBooking?: (bookingId: string) => void;
   onBlockSlot?: (timeSlot: { date: string; time: string; veterinarian: string }) => void;
   hasBookings: boolean;
+  hasClipboard?: boolean;
 }
 
 export const TimeSlotContextMenu = ({
@@ -28,11 +30,13 @@ export const TimeSlotContextMenu = ({
   onCreateAppointment,
   onValidateBooking,
   onCancelBooking,
-  onDuplicateBooking,
-  onMoveBooking,
+  onCopyBooking,
+  onCutBooking,
+  onPasteBooking,
   onDeleteBooking,
   onBlockSlot,
-  hasBookings
+  hasBookings,
+  hasClipboard = false
 }: TimeSlotContextMenuProps) => {
   const dateStr = selectedDate.toISOString().split('T')[0];
   const pendingBookings = bookings.filter(b => b.status === 'pending');
@@ -56,6 +60,16 @@ export const TimeSlotContextMenu = ({
     }
   };
 
+  const handlePasteBooking = () => {
+    if (onPasteBooking) {
+      onPasteBooking({
+        date: dateStr,
+        time: time,
+        veterinarian: columnId !== 'asv' ? columnId : undefined
+      });
+    }
+  };
+
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
@@ -69,6 +83,12 @@ export const TimeSlotContextMenu = ({
               <Plus className="h-4 w-4" />
               Créer un rendez-vous
             </ContextMenuItem>
+            {hasClipboard && (
+              <ContextMenuItem onClick={handlePasteBooking} className="flex items-center gap-2">
+                <Clipboard className="h-4 w-4" />
+                Coller le rendez-vous
+              </ContextMenuItem>
+            )}
             {columnId !== 'asv' && (
               <ContextMenuItem onClick={handleBlockSlot} className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
@@ -110,18 +130,18 @@ export const TimeSlotContextMenu = ({
             {confirmedBookings.map((booking) => (
               <div key={booking.id}>
                 <ContextMenuItem 
-                  onClick={() => onDuplicateBooking?.(booking)} 
+                  onClick={() => onCopyBooking?.(booking)} 
                   className="flex items-center gap-2"
                 >
                   <Copy className="h-4 w-4" />
-                  Dupliquer - {booking.client_name}
+                  Copier - {booking.client_name}
                 </ContextMenuItem>
                 <ContextMenuItem 
-                  onClick={() => onMoveBooking?.(booking)} 
+                  onClick={() => onCutBooking?.(booking)} 
                   className="flex items-center gap-2"
                 >
-                  <Move className="h-4 w-4" />
-                  Déplacer - {booking.client_name}
+                  <Scissors className="h-4 w-4" />
+                  Couper - {booking.client_name}
                 </ContextMenuItem>
                 <ContextMenuItem 
                   onClick={() => onDeleteBooking?.(booking.id)} 

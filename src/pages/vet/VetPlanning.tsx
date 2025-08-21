@@ -9,6 +9,7 @@ import { useVetBookings } from "@/hooks/useVetBookings";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { usePlanningActions } from "@/hooks/usePlanningActions";
 import { useSlotManagement } from "@/hooks/useSlotManagement";
+import { useAppointmentClipboard } from "@/hooks/useAppointmentClipboard";
 
 export default function VetPlanning() {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -24,15 +25,26 @@ export default function VetPlanning() {
   const {
     validateBooking,
     cancelBooking,
-    duplicateBooking,
-    moveAppointment,
     deleteBooking,
     handleBlockSlot
   } = usePlanningActions();
 
+  const {
+    copyAppointment,
+    cutAppointment,
+    pasteAppointment,
+    clearClipboard,
+    hasClipboard
+  } = useAppointmentClipboard();
+
   const handleCreateAppointment = (timeSlot: { date: string; time: string; veterinarian?: string }) => {
     console.log('🎯 Opening create modal with time slot:', timeSlot);
-    setCreateModalDefaultData(timeSlot);
+    // S'assurer que les données sont propres (pas de contamination)
+    setCreateModalDefaultData({
+      date: timeSlot.date,
+      time: timeSlot.time,
+      veterinarian: timeSlot.veterinarian
+    });
     setAppointmentToEdit(null);
     setIsCreateModalOpen(true);
   };
@@ -51,7 +63,6 @@ export default function VetPlanning() {
     refreshBookings();
   };
 
-  // Wrapper functions to match expected signatures
   const handleValidateBooking = async (bookingId: string) => {
     const success = await validateBooking(bookingId);
     if (success) {
@@ -66,17 +77,27 @@ export default function VetPlanning() {
     }
   };
 
-  const handleDuplicateBooking = async (booking: any) => {
-    const success = await duplicateBooking(booking);
-    if (success) {
-      refreshBookings();
-    }
+  const handleCopyBooking = async (booking: any) => {
+    copyAppointment(booking);
   };
 
-  const handleMoveBooking = async (booking: any) => {
-    // For now, we'll handle move through the edit modal
-    // This could be enhanced later with a dedicated move interface
-    handleAppointmentClick(booking);
+  const handleCutBooking = async (booking: any) => {
+    cutAppointment(booking);
+  };
+
+  const handlePasteBooking = async (timeSlot: { date: string; time: string; veterinarian?: string }) => {
+    const pasteResult = pasteAppointment(timeSlot);
+    if (pasteResult) {
+      console.log('📌 Opening create modal with pasted data:', pasteResult.data);
+      setCreateModalDefaultData(pasteResult.data);
+      setAppointmentToEdit(null);
+      setIsCreateModalOpen(true);
+      
+      // Si c'était un "couper", on devra supprimer l'original après création
+      if (pasteResult.originalId) {
+        // TODO: Gérer la suppression de l'original après création
+      }
+    }
   };
 
   const handleDeleteBooking = async (bookingId: string) => {
@@ -137,10 +158,12 @@ export default function VetPlanning() {
                   onAppointmentClick={handleAppointmentClick}
                   onValidateBooking={handleValidateBooking}
                   onCancelBooking={handleCancelBooking}
-                  onDuplicateBooking={handleDuplicateBooking}
-                  onMoveBooking={handleMoveBooking}
+                  onCopyBooking={handleCopyBooking}
+                  onCutBooking={handleCutBooking}
+                  onPasteBooking={handlePasteBooking}
                   onDeleteBooking={handleDeleteBooking}
                   onBlockSlot={handleBlockSlot}
+                  hasClipboard={hasClipboard()}
                   sidebarMode={true}
                 />
               ) : (
@@ -172,10 +195,12 @@ export default function VetPlanning() {
                 onAppointmentClick={handleAppointmentClick}
                 onValidateBooking={handleValidateBooking}
                 onCancelBooking={handleCancelBooking}
-                onDuplicateBooking={handleDuplicateBooking}
-                onMoveBooking={handleMoveBooking}
+                onCopyBooking={handleCopyBooking}
+                onCutBooking={handleCutBooking}
+                onPasteBooking={handlePasteBooking}
                 onDeleteBooking={handleDeleteBooking}
                 onBlockSlot={handleBlockSlot}
+                hasClipboard={hasClipboard()}
                 mainViewMode={true}
               />
             ) : (
