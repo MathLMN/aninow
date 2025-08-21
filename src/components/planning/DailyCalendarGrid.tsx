@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { TimeSlotCell } from "./TimeSlotCell";
@@ -22,10 +21,12 @@ interface DailyCalendarGridProps {
   veterinarians: any[];
   onValidateBooking?: (bookingId: string) => void;
   onCancelBooking?: (bookingId: string) => void;
-  onDuplicateBooking?: (booking: any) => void;
-  onMoveBooking?: (booking: any) => void;
+  onCopyBooking?: (booking: any) => void;
+  onCutBooking?: (booking: any) => void;
+  onPasteBooking?: (timeSlot: { date: string; time: string; veterinarian?: string }) => void;
   onDeleteBooking?: (bookingId: string) => void;
   onBlockSlot?: (timeSlot: { date: string; time: string; veterinarian: string }) => void;
+  hasClipboard?: boolean;
   fixedHeaders?: boolean;
 }
 
@@ -39,10 +40,12 @@ export const DailyCalendarGrid = ({
   veterinarians,
   onValidateBooking,
   onCancelBooking,
-  onDuplicateBooking,
-  onMoveBooking,
+  onCopyBooking,
+  onCutBooking,
+  onPasteBooking,
   onDeleteBooking,
   onBlockSlot,
+  hasClipboard = false,
   fixedHeaders = false
 }: DailyCalendarGridProps) => {
   const { settings } = useClinicSettings();
@@ -270,14 +273,16 @@ export const DailyCalendarGrid = ({
                           selectedDate={selectedDate}
                           onValidateBooking={onValidateBooking}
                           onCancelBooking={onCancelBooking}
-                          onDuplicateBooking={onDuplicateBooking}
-                          onMoveBooking={onMoveBooking}
+                          onCopyBooking={onCopyBooking}
+                          onCutBooking={onCutBooking}
+                          onPasteBooking={onPasteBooking}
                           onDeleteBooking={onDeleteBooking}
                           onBlockSlot={onBlockSlot}
                           isVeterinarianAbsent={isVetAbsent}
                           isFirstBlockedSlot={blockInfo?.isFirst || false}
                           blockedSlotsCount={blockInfo?.count || 1}
                           consultationTypes={consultationTypes}
+                          hasClipboard={hasClipboard}
                         />
                       );
                     })}
