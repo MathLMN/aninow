@@ -79,6 +79,20 @@ interface NewVeterinarian {
   is_active: boolean;
 }
 
+interface ConsultationType {
+  id: string;
+  name: string;
+  duration_minutes: number;
+  color?: string;
+  is_default?: boolean;
+}
+
+interface NewConsultationType {
+  name: string;
+  duration_minutes: number;
+  color: string;
+}
+
 const SPECIALTY_OPTIONS = [
   "Médecine générale",
   "Ophtalmologie", 
@@ -106,14 +120,6 @@ const getDefaultDailySchedules = () => ({
   saturday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } },
   sunday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } }
 });
-
-interface ConsultationType {
-  id: string;
-  name: string;
-  duration_minutes: number;
-  color?: string;
-  is_default?: boolean;
-}
 
 const CONSULTATION_TYPE_COLORS = [
   "#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", 
