@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -89,9 +90,13 @@ export const CreateAppointmentModal = ({
 
   const handleDelete = async () => {
     if (appointmentToEdit?.id) {
+      console.log('🗑️ Attempting to delete appointment:', appointmentToEdit.id);
       const success = await deleteBooking(appointmentToEdit.id);
       if (success) {
-        onClose();
+        console.log('✅ Appointment deleted successfully, closing modal');
+        onClose(); // This will trigger refreshBookings in the parent component
+      } else {
+        console.error('❌ Failed to delete appointment');
       }
     }
   };
@@ -162,15 +167,17 @@ export const CreateAppointmentModal = ({
               <Button type="button" variant="outline" onClick={onClose} className="px-3 py-1 text-xs h-8">
                 Annuler
               </Button>
-              <Button 
-                type="button" 
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={isDeletingBooking}
-                className="px-3 py-1 text-xs h-8"
-              >
-                {isDeletingBooking ? 'Suppression...' : 'Supprimer'}
-              </Button>
+              {isEditMode && (
+                <Button 
+                  type="button" 
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={isDeletingBooking}
+                  className="px-3 py-1 text-xs h-8"
+                >
+                  {isDeletingBooking ? 'Suppression...' : 'Supprimer'}
+                </Button>
+              )}
             </div>
             <Button 
               type="submit" 

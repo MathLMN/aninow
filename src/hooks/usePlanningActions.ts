@@ -137,12 +137,39 @@ export const usePlanningActions = () => {
   const deleteBooking = async (bookingId: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      const { error } = await supabase
+      console.log('🗑️ Attempting to delete booking with ID:', bookingId);
+      
+      // Vérifier d'abord si le booking existe
+      const { data: existingBooking, error: fetchError } = await supabase
+        .from('bookings')
+        .select('id, client_name')
+        .eq('id', bookingId)
+        .single();
+
+      if (fetchError) {
+        console.error('❌ Error fetching booking to delete:', fetchError);
+        throw new Error('Rendez-vous introuvable');
+      }
+
+      if (!existingBooking) {
+        console.error('❌ Booking not found for deletion');
+        throw new Error('Rendez-vous introuvable');
+      }
+
+      console.log('✅ Found booking to delete:', existingBooking);
+
+      // Procéder à la suppression
+      const { error: deleteError } = await supabase
         .from('bookings')
         .delete()
         .eq('id', bookingId);
 
-      if (error) throw error;
+      if (deleteError) {
+        console.error('❌ Error deleting booking:', deleteError);
+        throw deleteError;
+      }
+
+      console.log('✅ Booking deleted successfully');
 
       toast({
         title: "Rendez-vous supprimé",
@@ -150,10 +177,11 @@ export const usePlanningActions = () => {
       });
       return true;
     } catch (error) {
-      console.error('Erreur lors de la suppression:', error);
+      console.error('❌ Erreur lors de la suppression:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue lors de la suppression';
       toast({
         title: "Erreur",
-        description: "Impossible de supprimer le rendez-vous",
+        description: `Impossible de supprimer le rendez-vous: ${errorMessage}`,
         variant: "destructive"
       });
       return false;
