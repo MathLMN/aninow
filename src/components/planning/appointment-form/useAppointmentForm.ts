@@ -12,6 +12,7 @@ interface FormData {
   consultationTypeId: string;
   duration: number;
   arrival_time: string | null;
+  booking_source: string;
   
   // Client
   clientName: string;
@@ -48,6 +49,7 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
     consultationTypeId: '',
     duration: 30,
     arrival_time: null,
+    booking_source: 'phone',
     clientName: '',
     clientEmail: '',
     clientPhone: '',
@@ -137,6 +139,15 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
     
     if (defaultData.arrival_time) {
       updateField('arrival_time', defaultData.arrival_time);
+    }
+
+    // Déterminer automatiquement la source de réservation
+    if (defaultData.booking_source) {
+      updateField('booking_source', defaultData.booking_source);
+    } else if (defaultData.status === 'pending' || defaultData.status === 'confirmed') {
+      // Si le rendez-vous vient d'une réservation en ligne (statut pending/confirmed)
+      console.log('🌐 Setting booking source to online for online booking');
+      updateField('booking_source', 'online');
     }
     
     // Données client - correction du mapping des noms de champs
@@ -291,6 +302,7 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
         consultation_type_id: formData.consultationTypeId,
         duration_minutes: formData.duration,
         arrival_time: formData.arrival_time,
+        booking_source: formData.booking_source,
         status: 'confirmed',
         selected_symptoms: [],
         convenience_options: [],
