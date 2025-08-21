@@ -150,7 +150,7 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
       updateField('booking_source', 'online');
     }
     
-    // Données client - correction du mapping des noms de champs
+    // Données client - mapping complet de tous les champs
     if (defaultData.clientName || defaultData.client_name) {
       const name = defaultData.clientName || defaultData.client_name;
       console.log('👤 Setting client name:', name);
@@ -181,7 +181,7 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
       updateField('clientStatus', status);
     }
     
-    // Données animal - correction du mapping des noms de champs
+    // Données animal - mapping complet de tous les champs
     if (defaultData.animalName || defaultData.animal_name) {
       const name = defaultData.animalName || defaultData.animal_name;
       console.log('🐕 Setting animal name:', name);
@@ -288,6 +288,8 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
         animal_age: formData.animalAge,
         animal_weight: formData.animalWeight,
         animal_sex: formData.animalSex,
+        animal_sterilized: formData.animalSterilized,
+        animal_vaccines_up_to_date: formData.animalVaccinesUpToDate,
         client_name: formData.clientName,
         client_email: formData.clientEmail,
         client_phone: formData.clientPhone,
@@ -329,8 +331,6 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
         second_animal_sex: null,
         second_animal_sterilized: null,
         second_animal_vaccines_up_to_date: null,
-        animal_sterilized: formData.animalSterilized,
-        animal_vaccines_up_to_date: formData.animalVaccinesUpToDate,
         ai_analysis: null,
         urgency_score: null,
         recommended_actions: [],
