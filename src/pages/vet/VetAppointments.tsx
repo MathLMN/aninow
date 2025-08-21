@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,7 +39,13 @@ const VetAppointments = () => {
     }
   };
 
-  const filteredBookings = bookings.filter(booking =>
+  // Filtrer pour n'afficher que les réservations en ligne (exclure manuels et blocages)
+  const onlineBookings = bookings.filter(
+    (booking) => booking.booking_source === "online" && booking?.is_blocked !== true
+  );
+
+  // Appliquer la recherche uniquement sur les réservations en ligne
+  const filteredBookings = onlineBookings.filter((booking) =>
     booking.animal_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     booking.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     booking.client_phone.includes(searchTerm)
@@ -79,7 +84,7 @@ const VetAppointments = () => {
         </div>
         <div className="flex items-center space-x-2">
           <div className="text-sm text-vet-brown">
-            Total: {bookings.length} réservations en ligne
+            Total: {onlineBookings.length} réservations en ligne
           </div>
         </div>
       </div>
