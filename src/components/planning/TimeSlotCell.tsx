@@ -70,9 +70,9 @@ export const TimeSlotCell = ({
       }
     }
     
-    // Couleurs par défaut basées sur le statut
+    // Couleurs par défaut basées sur le statut - amélioration pour les rendez-vous en attente
     switch (booking.status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-300 border-dashed';
+      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-500 border-2 border-dashed shadow-sm';
       case 'confirmed': return 'bg-green-100 text-green-800 border-green-300';
       case 'cancelled': return 'bg-red-100 text-red-800 border-red-300';
       case 'completed': return 'bg-blue-100 text-blue-800 border-blue-300';
@@ -236,7 +236,7 @@ export const TimeSlotCell = ({
               onAppointmentClick(booking);
             }}
             className={cn(
-              "absolute inset-x-0 top-0 p-1 rounded-sm border transition-shadow text-[9px] leading-tight cursor-pointer hover:shadow-sm",
+              "absolute inset-x-0 top-0 p-0.5 rounded-sm border transition-shadow text-[9px] leading-tight cursor-pointer hover:shadow-sm overflow-hidden",
               getStatusColor(booking)
             )}
             style={{ 
@@ -249,33 +249,43 @@ export const TimeSlotCell = ({
               <div className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full border border-white shadow-sm z-20" title={`Client arrivé à ${booking.arrival_time}`}></div>
             )}
             
-            {/* 1. Nom complet du client */}
-            <div className="font-medium truncate text-[9px]">
-              {booking.client_name}
-            </div>
-            
-            {/* 2. Nom de l'animal */}
-            <div className="truncate text-[8px] opacity-90 font-medium">
-              {booking.animal_name}
-            </div>
-            
-            {/* 3. Motif du RDV */}
-            <div className="truncate text-[8px] opacity-80">
-              {booking.consultation_reason}
-            </div>
-            
-            {/* 4. Durée du RDV */}
-            {booking.duration_minutes && (
-              <div className="text-[7px] opacity-70 mt-0.5 font-medium">
-                {booking.duration_minutes} min
+            {/* Affichage optimisé pour les rendez-vous en attente */}
+            {booking.status === 'pending' ? (
+              <div className="h-full flex flex-col justify-center overflow-hidden">
+                <div className="font-semibold truncate text-[8px] leading-tight">
+                  {booking.client_name}
+                </div>
+                <div className="truncate text-[7px] opacity-90 leading-tight">
+                  {booking.animal_name}
+                </div>
+                <div className="text-[6px] opacity-70 font-medium text-center mt-0.5">
+                  À VALIDER
+                </div>
               </div>
-            )}
-            
-            {/* Statut en attente */}
-            {booking.status === 'pending' && (
-              <div className="text-[7px] opacity-70 font-medium">
-                En attente
-              </div>
+            ) : (
+              <>
+                {/* 1. Nom complet du client */}
+                <div className="font-medium truncate text-[9px]">
+                  {booking.client_name}
+                </div>
+                
+                {/* 2. Nom de l'animal */}
+                <div className="truncate text-[8px] opacity-90 font-medium">
+                  {booking.animal_name}
+                </div>
+                
+                {/* 3. Motif du RDV */}
+                <div className="truncate text-[8px] opacity-80">
+                  {booking.consultation_reason}
+                </div>
+                
+                {/* 4. Durée du RDV */}
+                {booking.duration_minutes && (
+                  <div className="text-[7px] opacity-70 mt-0.5 font-medium">
+                    {booking.duration_minutes} min
+                  </div>
+                )}
+              </>
             )}
             
             {/* Indicateur de source de réservation */}
