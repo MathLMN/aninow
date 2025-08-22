@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useClinicContext } from '@/contexts/ClinicContext';
-import { format, addDays } from 'date-fns';
+import { format, addDays, isToday, parseISO } from 'date-fns';
 
 export const usePublicBookingSlots = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -56,6 +56,30 @@ export const usePublicBookingSlots = () => {
     },
     enabled: !!currentClinic?.slug,
   });
+
+  // Fonction pour filtrer les créneaux passés
+  const filterPastSlots = (slots: any[], date: string) => {
+    const slotDate = parseISO(date);
+    
+    // Si ce n'est pas aujourd'hui, garder tous les créneaux
+    if (!isToday(slotDate)) {
+      return slots;
+    }
+
+    // Pour aujourd'hui, filtrer les créneaux passés
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const currentTimeInMinutes = currentHour * 60 + currentMinute;
+
+    return slots.filter(slot => {
+      const [slotHour, slotMinute] = slot.time.split(':').map(Number);
+      const slotTimeInMinutes = slotHour * 60 + slotMinute;
+      
+      // Garder seulement les créneaux futurs (avec une marge de sécurité de 15 minutes)
+      return slotTimeInMinutes > currentTimeInMinutes + 15;
+    });
+  };
 
   // Générer les créneaux disponibles
   const { data: availableSlots = [], isLoading: slotsLoading } = useQuery({
@@ -110,7 +134,7 @@ export const usePublicBookingSlots = () => {
           
           // Générer les créneaux pour cette journée
           const timeSlots = generateTimeSlotsForDay(daySchedule, settings.default_slot_duration_minutes || 30);
-          const daySlots = [];
+          let daySlots = [];
           
           console.log(`⏰ Generated time slots for ${dateStr}:`, timeSlots);
           
@@ -133,15 +157,18 @@ export const usePublicBookingSlots = () => {
               }
             }
           }
+
+          // Filtrer les créneaux passés pour la journée en cours
+          daySlots = filterPastSlots(daySlots, dateStr);
           
           if (daySlots.length > 0) {
             slots.push({
               date: dateStr,
               slots: daySlots
             });
-            console.log(`✅ Added ${daySlots.length} slots for ${dateStr}`);
+            console.log(`✅ Added ${daySlots.length} available slots for ${dateStr} (after filtering past slots)`);
           } else {
-            console.log(`⚠️ No available slots for ${dateStr}`);
+            console.log(`⚠️ No available slots for ${dateStr} (after filtering past slots)`);
           }
         }
         
