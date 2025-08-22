@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { useClinicContext } from '@/contexts/ClinicContext'
+import { useClinicSettings } from '@/hooks/useClinicSettings'
 import type { Database } from '@/integrations/supabase/types'
 
 type BookingInsert = Database['public']['Tables']['bookings']['Insert']
@@ -17,6 +18,7 @@ export const useBookingSubmission = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
   const { currentClinic } = useClinicContext()
+  const { settings } = useClinicSettings()
 
   const submitBooking = async (bookingData: any): Promise<BookingSubmissionResult> => {
     setIsSubmitting(true)
@@ -24,6 +26,7 @@ export const useBookingSubmission = () => {
     try {
       console.log('Submitting booking data:', bookingData)
       console.log('Current clinic:', currentClinic)
+      console.log('Clinic settings for duration:', settings)
 
       if (!currentClinic) {
         throw new Error('Aucune clinique sélectionnée')
@@ -32,6 +35,10 @@ export const useBookingSubmission = () => {
       // S'assurer que le veterinarianId est correctement récupéré
       const selectedVeterinarianId = bookingData.veterinarianId || bookingData.veterinarian_id
       console.log('Selected veterinarian ID from booking data:', selectedVeterinarianId)
+      
+      // Utiliser la durée par défaut des créneaux définie dans les paramètres de la clinique
+      const defaultDurationMinutes = settings?.default_slot_duration_minutes || 30
+      console.log('Using clinic default slot duration:', defaultDurationMinutes, 'minutes')
       
       // Préparer les données avec le bon mapping des colonnes et l'ID de la clinique
       const bookingInsert: BookingInsert = {
@@ -79,13 +86,14 @@ export const useBookingSubmission = () => {
         appointment_time: bookingData.appointmentTime || bookingData.appointment_time,
         // CORRECTION : Assigner correctement le vétérinaire sélectionné
         veterinarian_id: selectedVeterinarianId || null,
-        duration_minutes: 20, // Durée par défaut
+        duration_minutes: defaultDurationMinutes, // Utiliser la durée par défaut de la clinique
         status: 'pending',
         booking_source: 'online' // Marquer explicitement comme réservation en ligne
       }
 
       console.log('Final booking insert data:', bookingInsert)
       console.log('Veterinarian ID being saved:', bookingInsert.veterinarian_id)
+      console.log('Duration minutes being saved:', bookingInsert.duration_minutes)
 
       // Insérer la réservation dans la base de données
       const { data: booking, error: bookingError } = await supabase
@@ -100,6 +108,7 @@ export const useBookingSubmission = () => {
 
       console.log('Booking created successfully:', booking)
       console.log('Saved veterinarian ID:', booking.veterinarian_id)
+      console.log('Saved duration:', booking.duration_minutes, 'minutes')
 
       // Appeler l'Edge Function pour l'analyse IA (optionnel)
       let aiAnalysis = null
