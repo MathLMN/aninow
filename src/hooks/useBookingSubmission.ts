@@ -29,6 +29,10 @@ export const useBookingSubmission = () => {
         throw new Error('Aucune clinique sélectionnée')
       }
       
+      // S'assurer que le veterinarianId est correctement récupéré
+      const selectedVeterinarianId = bookingData.veterinarianId || bookingData.veterinarian_id
+      console.log('Selected veterinarian ID from booking data:', selectedVeterinarianId)
+      
       // Préparer les données avec le bon mapping des colonnes et l'ID de la clinique
       const bookingInsert: BookingInsert = {
         clinic_id: currentClinic.id,
@@ -73,9 +77,15 @@ export const useBookingSubmission = () => {
         preferred_contact_method: bookingData.preferredContactMethod || 'phone',
         appointment_date: bookingData.appointmentDate || bookingData.appointment_date,
         appointment_time: bookingData.appointmentTime || bookingData.appointment_time,
+        // CORRECTION : Assigner correctement le vétérinaire sélectionné
+        veterinarian_id: selectedVeterinarianId || null,
         duration_minutes: 20, // Durée par défaut
-        status: 'pending'
+        status: 'pending',
+        booking_source: 'online' // Marquer explicitement comme réservation en ligne
       }
+
+      console.log('Final booking insert data:', bookingInsert)
+      console.log('Veterinarian ID being saved:', bookingInsert.veterinarian_id)
 
       // Insérer la réservation dans la base de données
       const { data: booking, error: bookingError } = await supabase
@@ -89,6 +99,7 @@ export const useBookingSubmission = () => {
       }
 
       console.log('Booking created successfully:', booking)
+      console.log('Saved veterinarian ID:', booking.veterinarian_id)
 
       // Appeler l'Edge Function pour l'analyse IA (optionnel)
       let aiAnalysis = null

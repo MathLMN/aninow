@@ -1,96 +1,220 @@
-
-import { useState } from "react";
-
-type ViewMode = 'daily' | 'weekly';
+import { useState, useCallback } from 'react';
+import { FormData, FormState } from '../types/FormDataTypes';
+import { assignAppointmentToColumn } from '@/components/planning/utils/appointmentAssignment';
 
 export const usePlanningLogic = () => {
-  const [currentDate, setCurrentDate] = useState(() => {
-    try {
-      return new Date();
-    } catch (error) {
-      console.error('Error creating current date:', error);
-      return new Date(Date.now()); // Fallback
-    }
-  });
-  
-  const [viewMode, setViewMode] = useState<ViewMode>('daily');
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [showAssignmentManager, setShowAssignmentManager] = useState(false);
-  const [filters, setFilters] = useState({
-    veterinarian: 'all',
-    status: 'all',
-    consultationType: 'all'
+  const [formData, setFormData] = useState<FormData>({
+    animalSpecies: '',
+    customSpecies: '',
+    animalName: '',
+    multipleAnimals: [],
+    secondAnimalSpecies: '',
+    secondAnimalName: '',
+    secondCustomSpecies: '',
+    vaccinationType: ''
   });
 
-  const handleAppointmentClick = (appointment: any) => {
-    try {
-      setSelectedAppointment(appointment);
-      setIsDetailsModalOpen(true);
-    } catch (error) {
-      console.error('Error handling appointment click:', error);
+  const [formState, setFormState] = useState<FormState>({
+    showNameInput: false,
+    showMultipleOptions: false,
+    showSecondAnimal: false,
+    showSecondNameInput: false,
+    showLitterOptions: false
+  });
+
+  // Vérifier si c'est une portée
+  const isLitter = formData.multipleAnimals.includes('une-portee');
+
+  // Function to initialize form data from localStorage - simplified
+  const initializeFormData = (data: Partial<FormData>) => {
+    const newFormData: FormData = {
+      animalSpecies: data.animalSpecies || '',
+      customSpecies: data.customSpecies || '',
+      animalName: data.animalName || '',
+      multipleAnimals: data.multipleAnimals || [],
+      secondAnimalSpecies: data.secondAnimalSpecies || '',
+      secondAnimalName: data.secondAnimalName || '',
+      secondCustomSpecies: data.secondCustomSpecies || '',
+      vaccinationType: data.vaccinationType || ''
+    };
+    
+    setFormData(newFormData);
+    
+    // Update form state based on the loaded data
+    const newFormState: FormState = {
+      showNameInput: !!newFormData.animalSpecies,
+      showMultipleOptions: !!newFormData.animalSpecies,
+      showSecondAnimal: newFormData.multipleAnimals.includes('2-animaux'),
+      showSecondNameInput: !!newFormData.secondAnimalSpecies,
+      showLitterOptions: newFormData.multipleAnimals.includes('une-portee')
+    };
+    
+    setFormState(newFormState);
+  };
+
+  const handleSpeciesChange = (value: string, selected: boolean) => {
+    if (selected) {
+      setFormData(prev => ({
+        ...prev,
+        animalSpecies: value,
+        customSpecies: ''
+      }));
+      setFormState(prev => ({
+        ...prev,
+        showNameInput: true,
+        showMultipleOptions: true
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        animalSpecies: '',
+        customSpecies: ''
+      }));
+      setFormState({
+        showNameInput: false,
+        showMultipleOptions: false,
+        showSecondAnimal: false,
+        showSecondNameInput: false,
+        showLitterOptions: false
+      });
     }
   };
 
-  const handleCreateAppointment = (timeSlot: { date: string; time: string; veterinarian?: string }) => {
-    try {
-      setSelectedAppointment(timeSlot);
-      setIsCreateModalOpen(true);
-    } catch (error) {
-      console.error('Error handling create appointment:', error);
-    }
+  const handleCustomSpeciesChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      customSpecies: value
+    }));
   };
 
-  // Navigation par semaine (pour la vue hebdomadaire)
-  const navigateWeek = (direction: 'prev' | 'next') => {
-    try {
-      const newDate = new Date(currentDate);
-      newDate.setDate(currentDate.getDate() + (direction === 'next' ? 7 : -7));
-      setCurrentDate(newDate);
-    } catch (error) {
-      console.error('Error navigating week:', error);
-    }
+  const handleNameChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      animalName: value
+    }));
   };
 
-  const getWeekDates = () => {
-    try {
-      const startOfWeek = new Date(currentDate);
-      const day = startOfWeek.getDay();
-      const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
-      startOfWeek.setDate(diff);
-      
-      const weekDates = [];
-      for (let i = 0; i < 7; i++) {
-        const date = new Date(startOfWeek);
-        date.setDate(startOfWeek.getDate() + i);
-        weekDates.push(date);
+  const handleMultipleAnimalsChange = (option: string, checked: boolean) => {
+    let newMultipleAnimals: string[] = [];
+    if (checked) {
+      if (option === '2-animaux') {
+        newMultipleAnimals = ['2-animaux'];
+      } else if (option === 'une-portee') {
+        newMultipleAnimals = ['une-portee'];
+        // Pour une portée, on vide le nom de l'animal car il n'est pas nécessaire
+        setFormData(prev => ({
+          ...prev,
+          animalName: ''
+        }));
       }
-      return weekDates;
-    } catch (error) {
-      console.error('Error getting week dates:', error);
-      return [new Date()]; // Fallback to current date only
+    } else {
+      newMultipleAnimals = [];
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      multipleAnimals: newMultipleAnimals
+    }));
+
+    setFormState(prev => ({
+      ...prev,
+      showSecondAnimal: newMultipleAnimals.includes('2-animaux'),
+      showLitterOptions: newMultipleAnimals.includes('une-portee')
+    }));
+  };
+
+  const handleSecondAnimalSpeciesChange = (value: string, selected: boolean) => {
+    if (selected) {
+      setFormData(prev => ({
+        ...prev,
+        secondAnimalSpecies: value,
+        secondCustomSpecies: ''
+      }));
+      setFormState(prev => ({
+        ...prev,
+        showSecondNameInput: true
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        secondAnimalSpecies: '',
+        secondCustomSpecies: ''
+      }));
+      setFormState(prev => ({
+        ...prev,
+        showSecondNameInput: false
+      }));
     }
   };
+
+  const handleSecondCustomSpeciesChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      secondCustomSpecies: value
+    }));
+  };
+
+  const handleSecondAnimalNameChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      secondAnimalName: value
+    }));
+  };
+
+  const handleVaccinationTypeChange = (value: string, selected: boolean) => {
+    if (selected) {
+      setFormData(prev => ({
+        ...prev,
+        vaccinationType: value
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        vaccinationType: ''
+      }));
+    }
+  };
+
+  // Organiser les rendez-vous par colonnes (vétérinaires + ASV)
+  const organizeBookingsByColumns = useCallback((bookings: any[], veterinarians: any[]) => {
+    const organized = new Map();
+    
+    // Initialiser les colonnes pour chaque vétérinaire
+    veterinarians.forEach(vet => {
+      organized.set(vet.id, []);
+    });
+    
+    // Initialiser la colonne ASV
+    organized.set('asv', []);
+    
+    // Répartir les rendez-vous dans les bonnes colonnes
+    bookings.forEach(booking => {
+      const columnId = assignAppointmentToColumn(booking, veterinarians);
+      
+      if (!organized.has(columnId)) {
+        console.warn(`⚠️ Column ${columnId} not found, assigning to ASV`);
+        organized.get('asv').push(booking);
+      } else {
+        organized.get(columnId).push(booking);
+      }
+    });
+    
+    return organized;
+  }, []);
 
   return {
-    currentDate,
-    setCurrentDate,
-    viewMode,
-    setViewMode,
-    selectedAppointment,
-    setSelectedAppointment,
-    isCreateModalOpen,
-    setIsCreateModalOpen,
-    isDetailsModalOpen,
-    setIsDetailsModalOpen,
-    showAssignmentManager,
-    setShowAssignmentManager,
-    filters,
-    setFilters,
-    handleAppointmentClick,
-    handleCreateAppointment,
-    navigateWeek,
-    getWeekDates
+    formData,
+    formState,
+    isLitter,
+    initializeFormData,
+    handleSpeciesChange,
+    handleCustomSpeciesChange,
+    handleNameChange,
+    handleMultipleAnimalsChange,
+    handleSecondAnimalSpeciesChange,
+    handleSecondCustomSpeciesChange,
+    handleSecondAnimalNameChange,
+    handleVaccinationTypeChange,
+    organizeBookingsByColumns,
   };
 };

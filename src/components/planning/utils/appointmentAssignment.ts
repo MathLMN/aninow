@@ -1,4 +1,3 @@
-
 // Utilitaires pour l'attribution automatique des rendez-vous
 
 /**
@@ -74,4 +73,26 @@ export const processBookingWithoutPreference = (
     veterinarian_id: assignedVetId,
     auto_assigned: true // Marqueur pour indiquer l'attribution automatique
   };
+};
+
+export const assignAppointmentToColumn = (booking: any, veterinarians: any[]) => {
+  // Si le booking a un veterinarian_id spécifique, l'assigner à ce vétérinaire
+  if (booking.veterinarian_id) {
+    const assignedVet = veterinarians.find(vet => vet.id === booking.veterinarian_id);
+    if (assignedVet) {
+      console.log(`✅ Booking ${booking.id} assigned to veterinarian: ${assignedVet.name} (${booking.veterinarian_id})`);
+      return booking.veterinarian_id;
+    } else {
+      console.warn(`⚠️ Veterinarian ${booking.veterinarian_id} not found for booking ${booking.id}`);
+    }
+  }
+
+  // Logique de fallback pour les anciens rendez-vous sans veterinarian_id
+  if (booking.is_blocked || booking.booking_source === 'blocked') {
+    return booking.veterinarian_id || 'asv';
+  }
+
+  // Si aucun vétérinaire spécifique n'est assigné, assigner à la colonne ASV
+  console.log(`📋 Booking ${booking.id} assigned to ASV (no specific veterinarian)`);
+  return 'asv';
 };
