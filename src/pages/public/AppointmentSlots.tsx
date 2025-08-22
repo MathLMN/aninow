@@ -1,32 +1,31 @@
+
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, CheckCircle, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import ProgressBar from "@/components/ProgressBar";
-import { useAvailableSlots } from "@/hooks/useAvailableSlots";
 import { useBookingFormData } from "@/hooks/useBookingFormData";
-import { useVeterinarianPreference } from "@/hooks/useVeterinarianPreference";
 import { VeterinarianPreference } from "@/components/slots/VeterinarianPreference";
 import { DateSlotCard } from "@/components/slots/DateSlotCard";
 import { useClinicContext } from "@/contexts/ClinicContext";
+import { usePublicBookingSlots } from "@/hooks/usePublicBookingSlots";
 
 const AppointmentSlots = () => {
   const navigate = useNavigate();
   const { currentClinic } = useClinicContext();
-  const { availableSlots, isLoading } = useAvailableSlots();
+  const { availableSlots, veterinarians, isLoading } = usePublicBookingSlots();
   const { updateBookingData } = useBookingFormData();
-  const { veterinarians, selectedVeterinarian, setSelectedVeterinarian, isLoading: vetsLoading } = useVeterinarianPreference();
+  const [selectedVeterinarian, setSelectedVeterinarian] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<{date: string, time: string, veterinarianId: string} | null>(null);
 
   console.log('🏥 AppointmentSlots - Current clinic:', currentClinic);
   console.log('🏥 AppointmentSlots - Available slots:', availableSlots);
-  console.log('🏥 AppointmentSlots - Veterinarians from useVeterinarianPreference:', veterinarians);
+  console.log('🏥 AppointmentSlots - Veterinarians:', veterinarians);
   console.log('🏥 AppointmentSlots - Veterinarians count:', veterinarians.length);
   console.log('🏥 AppointmentSlots - Selected veterinarian:', selectedVeterinarian);
-  console.log('🏥 AppointmentSlots - Is loading slots:', isLoading);
-  console.log('🏥 AppointmentSlots - Is loading vets:', vetsLoading);
+  console.log('🏥 AppointmentSlots - Is loading:', isLoading);
 
   const handleBack = () => {
     navigate('/booking/contact-info');
@@ -104,7 +103,7 @@ const AppointmentSlots = () => {
     };
   }).filter(daySlots => daySlots.slots.length > 0);
 
-  if (isLoading || vetsLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
         <Header />
