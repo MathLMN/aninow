@@ -39,6 +39,30 @@ export const useBookingSubmission = () => {
       // Utiliser la durée par défaut des créneaux définie dans les paramètres de la clinique
       const defaultDurationMinutes = settings?.default_slot_duration_minutes || 30
       console.log('Using clinic default slot duration:', defaultDurationMinutes, 'minutes')
+
+      // Mapper le motif de consultation correctement
+      const mapConsultationReason = (reason: string) => {
+        switch (reason) {
+          case 'symptomes-anomalie':
+            return 'Symptômes ou anomalie'
+          case 'consultation-convenance':
+            return 'Consultation de convenance'
+          default:
+            return reason
+        }
+      }
+
+      // Mapper le statut client
+      const mapClientStatus = (status: string) => {
+        switch (status) {
+          case 'existing-client':
+            return 'Déjà client'
+          case 'new-client':
+            return 'Nouveau client'
+          default:
+            return status
+        }
+      }
       
       // Préparer les données avec le bon mapping des colonnes et l'ID de la clinique
       const bookingInsert: BookingInsert = {
@@ -51,7 +75,7 @@ export const useBookingSubmission = () => {
         second_animal_name: bookingData.secondAnimalName,
         second_custom_species: bookingData.secondCustomSpecies,
         vaccination_type: bookingData.vaccinationType,
-        consultation_reason: bookingData.consultationReason || bookingData.consultation_reason,
+        consultation_reason: mapConsultationReason(bookingData.consultationReason || bookingData.consultation_reason),
         convenience_options: bookingData.convenienceOptions || [],
         custom_text: bookingData.customText,
         selected_symptoms: bookingData.selectedSymptoms || [],
@@ -82,6 +106,8 @@ export const useBookingSubmission = () => {
         client_email: bookingData.clientEmail || bookingData.email,
         client_phone: `${bookingData.phonePrefix || '+33'}${bookingData.phoneNumber || bookingData.client_phone}`,
         preferred_contact_method: bookingData.preferredContactMethod || 'phone',
+        // Mapper le statut client correctement
+        client_status: mapClientStatus(bookingData.clientStatus || ''),
         appointment_date: bookingData.appointmentDate || bookingData.appointment_date,
         appointment_time: bookingData.appointmentTime || bookingData.appointment_time,
         // CORRECTION : Assigner correctement le vétérinaire sélectionné
@@ -94,6 +120,8 @@ export const useBookingSubmission = () => {
       console.log('Final booking insert data:', bookingInsert)
       console.log('Veterinarian ID being saved:', bookingInsert.veterinarian_id)
       console.log('Duration minutes being saved:', bookingInsert.duration_minutes)
+      console.log('Mapped consultation reason:', bookingInsert.consultation_reason)
+      console.log('Mapped client status:', bookingInsert.client_status)
 
       // Insérer la réservation dans la base de données
       const { data: booking, error: bookingError } = await supabase
