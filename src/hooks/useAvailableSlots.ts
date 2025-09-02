@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
+import type { Database } from '@/integrations/supabase/types'
 
 interface TimeSlot {
   time: string
@@ -110,48 +110,22 @@ export const useAvailableSlots = ({
         currentDate.setDate(currentDate.getDate() + 1)
       }
 
-      const allSchedules = []
+      const allSchedules: { date: string; schedule: any | null }[] = []
 
       for (const date of dates) {
-        const dayOfWeek = date.getDay()
-        let dayName = ''
+        const dayOfWeek = date.getDay() // 0 (Sun) -> 6 (Sat)
 
-        switch (dayOfWeek) {
-          case 0:
-            dayName = 'sunday'
-            break
-          case 1:
-            dayName = 'monday'
-            break
-          case 2:
-            dayName = 'tuesday'
-            break
-          case 3:
-            dayName = 'wednesday'
-            break
-          case 4:
-            dayName = 'thursday'
-            break
-          case 5:
-            dayName = 'friday'
-            break
-          case 6:
-            dayName = 'saturday'
-            break
-          default:
-            console.warn('Invalid day of week:', dayOfWeek)
-            continue
-        }
-
+        // NOTE: day_of_week column is integer in DB, so we must compare with a number, not a string
         const { data: daySchedule, error: dayScheduleError } = await supabase
           .from('veterinarian_schedules')
           .select('*')
           .eq('clinic_id', clinic.id)
-          .eq('day_of_week', dayName)
+          .eq('day_of_week', dayOfWeek) // FIX: use number instead of string day name
           .single()
 
         if (dayScheduleError && dayScheduleError.message !== 'Aucun résultat unique trouvé') {
           console.error('Error fetching schedule:', dayScheduleError)
+          allSchedules.push({ date: date.toISOString().split('T')[0], schedule: null })
           continue
         }
 
@@ -284,7 +258,7 @@ export const useAvailableSlots = ({
       return processedSlots
     },
     enabled: !!clinicSlug,
-    refetchInterval: 60000, // Actualiser toutes les minutes
+    refetchInterval: 60000,
   })
 
   // Fonction utilitaire pour ajouter des minutes à une heure
@@ -314,6 +288,9 @@ export const useAvailableSlots = ({
     return slots
   }
 
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+
   const blockTimeSlotMutation = useMutation({
     mutationFn: async ({
       date,
@@ -338,18 +315,31 @@ export const useAvailableSlots = ({
         throw new Error('Clinic not found');
       }
 
+      // Build a minimal valid booking payload for a blocked slot.
+      // bookings.Insert requires several fields even for a block.
+      const blockedInsert: Database['public']['Tables']['bookings']['Insert'] = {
+        clinic_id: clinic.id,
+        veterinarian_id: veterinarianId || null,
+        appointment_date: date,
+        appointment_time: startTime,
+        appointment_end_time: endTime,
+        is_blocked: true,
+        // Required fields with placeholders for a blocked slot:
+        animal_species: 'blocked',
+        animal_name: 'Blocage',
+        consultation_reason: 'Blocage de créneau',
+        client_name: 'Blocage',
+        client_email: 'blocage@placeholder.local',
+        client_phone: '0000000000',
+        preferred_contact_method: 'phone',
+        // Status must be one of the allowed values
+        status: 'pending',
+        booking_source: 'blocked',
+      }
+
       const { data, error } = await supabase
         .from('bookings')
-        .insert({
-          clinic_id: clinic.id,
-          veterinarian_id: veterinarianId,
-          appointment_date: date,
-          appointment_time: startTime,
-          appointment_end_time: endTime,
-          is_blocked: true,
-          status: 'blocked',
-          booking_source: 'blocked'
-        })
+        .insert(blockedInsert)
         .select()
         .single();
 
