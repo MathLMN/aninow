@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useSearchParams } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DateSlotCard } from '@/components/slots/DateSlotCard'
+import { VeterinarianPreference } from '@/components/slots/VeterinarianPreference'
 import { useAvailableSlots } from '@/hooks/useAvailableSlots'
 import { useBookingFormData } from '@/hooks/useBookingFormData'
 import { useMultiTenantBookingNavigation } from '@/hooks/useMultiTenantBookingNavigation'
@@ -27,7 +27,6 @@ const AppointmentSlots = () => {
   const [selectedVeterinarianId, setSelectedVeterinarianId] = useState<string | null>(null)
   const [selectedVeterinarianName, setSelectedVeterinarianName] = useState<string | null>(null)
   const [noVeterinarianPreference, setNoVeterinarianPreference] = useState<boolean>(false)
-  const [slotsForSelectedDate, setSlotsForSelectedDate] = useState<any[] | null>(null)
 
   const clinicSlug = currentClinic?.slug || ''
 
@@ -58,14 +57,6 @@ const AppointmentSlots = () => {
       console.log('✔️ Aucune préférence de vétérinaire sélectionnée')
     }
   }, [searchParams])
-
-  useEffect(() => {
-    if (slotsData && selectedDate) {
-      setSlotsForSelectedDate(slotsData.get(selectedDate) || [])
-    } else {
-      setSlotsForSelectedDate(null)
-    }
-  }, [slotsData, selectedDate])
 
   const handleDateSelect = (date: string) => {
     setSelectedDate(date)
@@ -113,28 +104,27 @@ const AppointmentSlots = () => {
     }
   }
 
-  const handleVeterinarianChange = (veterinarianId: string) => {
-    setSelectedVeterinarianId(veterinarianId)
-    
-    // Trouver le nom du vétérinaire correspondant à l'ID
-    const veterinarian = veterinarians?.find(vet => vet.id === veterinarianId)
-    setSelectedVeterinarianName(veterinarian ? veterinarian.name : null)
-
-    // Mettre à jour l'URL
-    if (veterinarianId && veterinarian?.name) {
-      navigate(`${location.pathname}?veterinarianId=${veterinarianId}&veterinarianName=${veterinarian?.name}`)
+  const handleVeterinarianSelect = (veterinarianId: string | null) => {
+    if (veterinarianId === null) {
+      setNoVeterinarianPreference(true)
+      setSelectedVeterinarianId(null)
+      setSelectedVeterinarianName(null)
+      navigate(`${location.pathname}?noVeterinarianPreference=true`)
     } else {
-      navigate(location.pathname)
+      setNoVeterinarianPreference(false)
+      setSelectedVeterinarianId(veterinarianId)
+      
+      // Trouver le nom du vétérinaire correspondant à l'ID
+      const veterinarian = veterinarians?.find(vet => vet.id === veterinarianId)
+      setSelectedVeterinarianName(veterinarian ? veterinarian.name : null)
+
+      // Mettre à jour l'URL
+      if (veterinarian?.name) {
+        navigate(`${location.pathname}?veterinarianId=${veterinarianId}&veterinarianName=${veterinarian.name}`)
+      } else {
+        navigate(location.pathname)
+      }
     }
-  }
-
-  const handleNoVeterinarianPreference = () => {
-    setNoVeterinarianPreference(true)
-    setSelectedVeterinarianId(null)
-    setSelectedVeterinarianName(null)
-
-    // Mettre à jour l'URL
-    navigate(`${location.pathname}?noVeterinarianPreference=true`)
   }
 
   const handlePrevious = () => {
@@ -145,9 +135,10 @@ const AppointmentSlots = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-vet-beige/20 via-white to-vet-sage/10 p-4 sm:p-6">
       <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
-        <Progress value={66} className="w-full" />
+        {/* Barre de progression avec la bonne épaisseur */}
+        <Progress value={66} className="w-full h-2" />
         
-        {/* En-tête avec information sur la durée pour 2 animaux */}
+        {/* En-tête */}
         <div className="text-center space-y-2 sm:space-y-3">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-vet-navy">
             Choisissez votre créneau de rendez-vous
@@ -160,44 +151,37 @@ const AppointmentSlots = () => {
             </div>
           )}
           <p className="text-vet-brown text-base sm:text-lg">
-            {selectedVeterinarianName 
-              ? `Créneaux disponibles avec ${selectedVeterinarianName}` 
-              : 'Créneaux disponibles'}
+            Sélectionnez la date et l'heure qui vous conviennent
           </p>
         </div>
 
-        {/* Sélection du vétérinaire */}
-        <div className="space-y-3 sm:space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg sm:text-xl font-semibold text-vet-navy">
-              Choisissez votre vétérinaire
-            </h2>
-            <Button variant="link" onClick={handleNoVeterinarianPreference}>
-              Peu importe le vétérinaire
-            </Button>
-          </div>
-          
-          {/* Liste des vétérinaires disponibles */}
-          {!noVeterinarianPreference && veterinarians && (
-            <Select value={selectedVeterinarianId || ''} onValueChange={handleVeterinarianChange}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Sélectionnez un vétérinaire" />
-              </SelectTrigger>
-              <SelectContent>
-                {veterinarians.map(veterinarian => (
-                  <SelectItem key={veterinarian.id} value={veterinarian.id}>
-                    {veterinarian.name} {veterinarian.specialty ? `(${veterinarian.specialty})` : ''}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </div>
+        {/* Sélection du vétérinaire avec le composant original */}
+        <VeterinarianPreference
+          veterinarians={veterinarians || []}
+          selectedVeterinarian={selectedVeterinarianId}
+          onVeterinarianSelect={handleVeterinarianSelect}
+        />
 
         {/* Liste des créneaux disponibles par date */}
         <div className="space-y-4 sm:space-y-5">
-          {isLoading && <p className="text-center text-vet-brown">Chargement des créneaux...</p>}
-          {error && <p className="text-center text-red-500">Erreur: {error.message}</p>}
+          {isLoading && (
+            <div className="text-center py-8">
+              <p className="text-vet-brown">Chargement des créneaux disponibles...</p>
+            </div>
+          )}
+          
+          {error && (
+            <div className="text-center py-8">
+              <p className="text-red-500">Erreur lors du chargement des créneaux: {error.message}</p>
+            </div>
+          )}
+          
+          {slotsData && Array.from(slotsData.entries()).length === 0 && !isLoading && (
+            <div className="text-center py-8">
+              <p className="text-vet-brown">Aucun créneau disponible pour les critères sélectionnés.</p>
+            </div>
+          )}
+
           {slotsData && Array.from(slotsData.entries()).sort().map(([date, slots]) => (
             <DateSlotCard
               key={date}
@@ -212,11 +196,19 @@ const AppointmentSlots = () => {
         </div>
 
         {/* Navigation */}
-        <div className="flex justify-between pt-4 sm:pt-5">
-          <Button variant="secondary" onClick={handlePrevious}>
+        <div className="flex justify-between pt-6">
+          <Button 
+            variant="outline" 
+            onClick={handlePrevious}
+            className="border-vet-sage text-vet-sage hover:bg-vet-sage hover:text-white"
+          >
             Précédent
           </Button>
-          <Button onClick={handleSubmit} disabled={!selectedDate || !selectedTime}>
+          <Button 
+            onClick={handleSubmit} 
+            disabled={!selectedDate || !selectedTime}
+            className="bg-vet-sage text-white hover:bg-vet-sage/90 disabled:opacity-50"
+          >
             Continuer
           </Button>
         </div>
