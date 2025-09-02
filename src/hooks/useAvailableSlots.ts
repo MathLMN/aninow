@@ -288,9 +288,6 @@ export const useAvailableSlots = ({
     return slots
   }
 
-  const queryClient = useQueryClient()
-  const { toast } = useToast()
-
   const blockTimeSlotMutation = useMutation({
     mutationFn: async ({
       date,
