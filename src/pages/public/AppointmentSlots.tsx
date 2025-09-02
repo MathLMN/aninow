@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useSearchParams } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
-import { DateSlotCard } from '@/components/slots/DateSlotCard'
+import { Card, CardContent } from "@/components/ui/card"
 import { VeterinarianPreference } from '@/components/slots/VeterinarianPreference'
 import { useAvailableSlots } from '@/hooks/useAvailableSlots'
 import { useBookingFormData } from '@/hooks/useBookingFormData'
@@ -11,6 +11,8 @@ import { useMultiTenantBookingNavigation } from '@/hooks/useMultiTenantBookingNa
 import { Progress } from '@/components/ui/progress'
 import { useClinicContext } from '@/contexts/ClinicContext'
 import { useClinicVeterinarians } from '@/hooks/useClinicVeterinarians'
+import { Calendar, Clock, Sun, Moon, ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 const AppointmentSlots = () => {
   const { bookingData, updateBookingData } = useBookingFormData()
@@ -27,6 +29,7 @@ const AppointmentSlots = () => {
   const [selectedVeterinarianId, setSelectedVeterinarianId] = useState<string | null>(null)
   const [selectedVeterinarianName, setSelectedVeterinarianName] = useState<string | null>(null)
   const [noVeterinarianPreference, setNoVeterinarianPreference] = useState<boolean>(false)
+  const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set())
 
   const clinicSlug = currentClinic?.slug || ''
 
@@ -38,7 +41,7 @@ const AppointmentSlots = () => {
     clinicSlug: clinicSlug || '',
     selectedVeterinarianId: noVeterinarianPreference ? undefined : selectedVeterinarianId,
     noVeterinarianPreference,
-    hasTwoAnimals // Passer le paramètre
+    hasTwoAnimals
   })
 
   useEffect(() => {
@@ -132,30 +135,116 @@ const AppointmentSlots = () => {
     navigate(previousRoute)
   }
 
+  const toggleDateExpansion = (date: string) => {
+    const newExpanded = new Set(expandedDates)
+    if (newExpanded.has(date)) {
+      newExpanded.delete(date)
+    } else {
+      newExpanded.add(date)
+    }
+    setExpandedDates(newExpanded)
+  }
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr)
+    return date.toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    })
+  }
+
+  const renderSlots = (slots: any[], type: 'morning' | 'afternoon') => {
+    const filteredSlots = slots.filter(slot => {
+      const hour = parseInt(slot.time.split(':')[0])
+      return type === 'morning' ? hour < 12 : hour >= 12
+    })
+
+    if (filteredSlots.length === 0) return null
+
+    return (
+      <div className="mb-4 last:mb-0">
+        <div className="flex items-center mb-3">
+          {type === 'morning' ? (
+            <Sun className="h-4 w-4 mr-2 text-vet-brown" />
+          ) : (
+            <Moon className="h-4 w-4 mr-2 text-vet-brown" />
+          )}
+          <h4 className="text-sm font-medium text-vet-brown">
+            {type === 'morning' ? 'Matin' : 'Après-midi'}
+          </h4>
+          <span className="ml-2 text-xs text-vet-brown/70">
+            ({filteredSlots.length} créneau{filteredSlots.length > 1 ? 'x' : ''})
+          </span>
+        </div>
+        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+          {filteredSlots.map((slot) => {
+            const isSelected = selectedDate === slot.date && 
+                             selectedTime === slot.time
+            
+            return (
+              <Button
+                key={`${slot.date}-${slot.time}-${slot.veterinarian_id}`}
+                variant="outline"
+                className={cn(
+                  "h-auto p-3 flex items-center justify-center text-center transition-all duration-200 border-2",
+                  isSelected
+                    ? "bg-vet-sage hover:bg-vet-sage/90 text-white border-vet-sage shadow-md" 
+                    : "bg-vet-blue/10 border-vet-blue/30 text-vet-navy hover:bg-vet-sage/20 hover:border-vet-sage/50"
+                )}
+                onClick={() => handleSlotSelect(slot.date, slot.time, slot.veterinarian_id)}
+              >
+                <div className="flex items-center">
+                  <Clock className="h-3 w-3 mr-2" />
+                  <span className="font-semibold text-sm">{slot.time}</span>
+                </div>
+              </Button>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-vet-beige/20 via-white to-vet-sage/10 p-4 sm:p-6">
       <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
-        {/* Barre de progression avec la bonne épaisseur */}
-        <Progress value={66} className="w-full h-2" />
-        
-        {/* En-tête */}
+        {/* En-tête avec bouton retour */}
+        <div className="flex items-center mb-6">
+          <Button
+            variant="ghost"
+            onClick={handlePrevious}
+            className="mr-4 text-vet-navy hover:text-vet-sage hover:bg-vet-sage/10"
+          >
+            <ArrowLeft className="h-5 w-5 mr-2" />
+            Retour
+          </Button>
+        </div>
+
+        {/* En-tête principal */}
         <div className="text-center space-y-2 sm:space-y-3">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-vet-navy">
-            Choisissez votre créneau de rendez-vous
+            Choisissez votre créneau
           </h1>
+          <p className="text-vet-brown text-base sm:text-lg">
+            Sélectionnez votre préférence de vétérinaire et le créneau qui vous convient
+          </p>
+          {currentClinic && (
+            <p className="text-vet-brown/70 text-sm">
+              {currentClinic.name}
+            </p>
+          )}
           {hasTwoAnimals && (
-            <div className="bg-vet-blue/10 p-3 rounded-lg border border-vet-blue/20">
+            <div className="bg-vet-blue/10 p-3 rounded-lg border border-vet-blue/20 max-w-2xl mx-auto">
               <p className="text-sm text-vet-navy">
                 ℹ️ Rendez-vous pour 2 animaux : les créneaux affichés correspondent à 1h de consultation
               </p>
             </div>
           )}
-          <p className="text-vet-brown text-base sm:text-lg">
-            Sélectionnez la date et l'heure qui vous conviennent
-          </p>
         </div>
 
-        {/* Sélection du vétérinaire avec le composant original */}
+        {/* Sélection du vétérinaire */}
         <VeterinarianPreference
           veterinarians={veterinarians || []}
           selectedVeterinarian={selectedVeterinarianId}
@@ -163,7 +252,7 @@ const AppointmentSlots = () => {
         />
 
         {/* Liste des créneaux disponibles par date */}
-        <div className="space-y-4 sm:space-y-5">
+        <div className="space-y-4">
           {isLoading && (
             <div className="text-center py-8">
               <p className="text-vet-brown">Chargement des créneaux disponibles...</p>
@@ -182,36 +271,69 @@ const AppointmentSlots = () => {
             </div>
           )}
 
-          {slotsData && Array.from(slotsData.entries()).sort().map(([date, slots]) => (
-            <DateSlotCard
-              key={date}
-              date={date}
-              slots={slots}
-              veterinarians={veterinarians || []}
-              selectedSlot={{date: selectedDate || '', time: selectedTime || '', veterinarianId: selectedVeterinarianId || ''}}
-              onSlotSelect={handleSlotSelect}
-              noVeterinarianPreference={noVeterinarianPreference}
-            />
-          ))}
+          {slotsData && Array.from(slotsData.entries()).sort().map(([date, slots]) => {
+            const isExpanded = expandedDates.has(date)
+            const availableSlots = slots.filter(slot => slot.available)
+            
+            return (
+              <Card key={date} className="bg-white/95 backdrop-blur-sm border-vet-blue/20 shadow-sm">
+                <CardContent className="p-0">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-between p-4 sm:p-6 h-auto text-left hover:bg-vet-beige/30"
+                    onClick={() => toggleDateExpansion(date)}
+                  >
+                    <div className="flex flex-col items-start">
+                      <h3 className="text-base sm:text-lg font-semibold text-vet-navy">
+                        {formatDate(date)}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-vet-brown mt-1">
+                        {availableSlots.length} créneau{availableSlots.length > 1 ? 'x' : ''} disponible{availableSlots.length > 1 ? 's' : ''}
+                      </p>
+                    </div>
+                    {isExpanded ? (
+                      <ChevronUp className="h-5 w-5 text-vet-blue flex-shrink-0" />
+                    ) : (
+                      <ChevronDown className="h-5 w-5 text-vet-blue flex-shrink-0" />
+                    )}
+                  </Button>
+
+                  {isExpanded && (
+                    <div className="px-4 sm:px-6 pb-4 sm:pb-6">
+                      {renderSlots(availableSlots.map(slot => ({ ...slot, date })), 'morning')}
+                      {renderSlots(availableSlots.map(slot => ({ ...slot, date })), 'afternoon')}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )
+          })}
+
+          {/* Bouton "Voir plus de dates" si nécessaire */}
+          {slotsData && Array.from(slotsData.entries()).length > 0 && (
+            <div className="text-center pt-4">
+              <Button
+                variant="outline"
+                className="bg-vet-blue/10 border-vet-blue/30 text-vet-blue hover:bg-vet-blue hover:text-white"
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                VOIR PLUS DE DATES
+              </Button>
+            </div>
+          )}
         </div>
 
-        {/* Navigation */}
-        <div className="flex justify-between pt-6">
-          <Button 
-            variant="outline" 
-            onClick={handlePrevious}
-            className="border-vet-sage text-vet-sage hover:bg-vet-sage hover:text-white"
-          >
-            Précédent
-          </Button>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={!selectedDate || !selectedTime}
-            className="bg-vet-sage text-white hover:bg-vet-sage/90 disabled:opacity-50"
-          >
-            Continuer
-          </Button>
-        </div>
+        {/* Bouton de soumission flottant */}
+        {selectedDate && selectedTime && (
+          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+            <Button 
+              onClick={handleSubmit}
+              className="bg-vet-sage text-white hover:bg-vet-sage/90 px-8 py-3 text-lg font-semibold shadow-xl"
+            >
+              Sélectionnez un créneau →
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   )
