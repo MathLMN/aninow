@@ -1,266 +1,220 @@
-
-import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, CheckCircle, Calendar } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import Header from "@/components/Header";
-import ProgressBar from "@/components/ProgressBar";
-import { useBookingFormData } from "@/hooks/useBookingFormData";
-import { VeterinarianPreference } from "@/components/slots/VeterinarianPreference";
-import { DateSlotCard } from "@/components/slots/DateSlotCard";
-import { useClinicContext } from "@/contexts/ClinicContext";
-import { usePublicBookingSlots } from "@/hooks/usePublicBookingSlots";
+import React, { useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
+import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { DateSlotCard } from '@/components/slots/DateSlotCard'
+import { useAvailableSlots } from '@/hooks/useAvailableSlots'
+import { useBookingFormData } from '@/hooks/useBookingFormData'
+import { useMultiTenantBookingNavigation } from '@/hooks/useMultiTenantBookingNavigation'
+import { ProgressBar } from '@/components/ui/progress'
+import { useClinicContext } from '@/contexts/ClinicContext'
 
 const AppointmentSlots = () => {
-  const navigate = useNavigate();
-  const { currentClinic } = useClinicContext();
-  const { availableSlots, veterinarians, isLoading } = usePublicBookingSlots();
-  const { updateBookingData } = useBookingFormData();
-  const [selectedVeterinarian, setSelectedVeterinarian] = useState<string | null>(null);
-  const [selectedSlot, setSelectedSlot] = useState<{date: string, time: string, veterinarianId: string} | null>(null);
+  const { bookingData, updateBookingData } = useBookingFormData()
+  const { navigateNext, navigatePrevious } = useMultiTenantBookingNavigation()
+  const location = useLocation()
+  
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const { currentClinic } = useClinicContext()
 
-  console.log('🏥 AppointmentSlots - Current clinic:', currentClinic);
-  console.log('🏥 AppointmentSlots - Available slots:', availableSlots);
-  console.log('🏥 AppointmentSlots - Veterinarians:', veterinarians);
-  console.log('🏥 AppointmentSlots - Veterinarians count:', veterinarians.length);
-  console.log('🏥 AppointmentSlots - Selected veterinarian:', selectedVeterinarian);
-  console.log('🏥 AppointmentSlots - Is loading:', isLoading);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  const [selectedTime, setSelectedTime] = useState<string | null>(null)
+  const [selectedVeterinarianId, setSelectedVeterinarianId] = useState<string | null>(null)
+  const [selectedVeterinarianName, setSelectedVeterinarianName] = useState<string | null>(null)
+  const [noVeterinarianPreference, setNoVeterinarianPreference] = useState<boolean>(false)
+  const [slotsForSelectedDate, setSlotsForSelectedDate] = useState<any[] | null>(null)
 
-  const handleBack = () => {
-    navigate('/booking/contact-info');
-  };
+  const clinicSlug = currentClinic?.slug || ''
+
+  // Vérifier s'il y a 2 animaux
+  const hasTwoAnimals = bookingData.multipleAnimals?.includes('2-animaux') || false
+  console.log('🐕🐕 Has two animals:', hasTwoAnimals)
+
+  const { slotsData, isLoading, error } = useAvailableSlots({
+    clinicSlug: clinicSlug || '',
+    selectedVeterinarianId: noVeterinarianPreference ? undefined : selectedVeterinarianId,
+    noVeterinarianPreference,
+    hasTwoAnimals // Passer le paramètre
+  })
+
+  useEffect(() => {
+    const vetId = searchParams.get('veterinarianId')
+    const vetName = searchParams.get('veterinarianName')
+    const noVetPref = searchParams.get('noVeterinarianPreference') === 'true'
+
+    setSelectedVeterinarianId(vetId)
+    setSelectedVeterinarianName(vetName)
+    setNoVeterinarianPreference(noVetPref)
+
+    // Si l'URL contient un ID de vétérinaire, le sélectionner par défaut
+    if (vetId && vetName) {
+      console.log(`👨‍⚕️ Vétérinaire sélectionné par défaut: ${vetName} (ID: ${vetId})`)
+    } else if (noVetPref) {
+      console.log('✔️ Aucune préférence de vétérinaire sélectionnée')
+    }
+  }, [searchParams])
+
+  useEffect(() => {
+    if (slotsData && selectedDate) {
+      setSlotsForSelectedDate(slotsData.get(selectedDate) || [])
+    } else {
+      setSlotsForSelectedDate(null)
+    }
+  }, [slotsData, selectedDate])
+
+  const handleDateSelect = (date: string) => {
+    setSelectedDate(date)
+    setSelectedTime(null) // Reset selected time when date changes
+  }
 
   const handleSlotSelect = (date: string, time: string, veterinarianId: string) => {
-    setSelectedSlot({ date, time, veterinarianId });
-  };
-
-  const handleConfirm = () => {
-    if (selectedSlot) {
-      const updatedData = {
-        appointmentDate: selectedSlot.date,
-        appointmentTime: selectedSlot.time,
-        veterinarianId: selectedSlot.veterinarianId
-      };
-      
-      updateBookingData(updatedData);
-      console.log('Créneau sélectionné:', selectedSlot);
-      
-      navigate('/booking/confirmation');
-    }
-  };
-
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('fr-FR', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  const groupSlotsByTime = (slots: any[]) => {
-    const groupedSlots = new Map();
+    setSelectedDate(date)
+    setSelectedTime(time)
+    setSelectedVeterinarianId(veterinarianId)
     
-    slots.forEach(slot => {
-      if (!slot.available) return;
+    // Trouver le nom du vétérinaire correspondant à l'ID
+    const veterinarian = currentClinic?.veterinarians?.find(vet => vet.id === veterinarianId)
+    setSelectedVeterinarianName(veterinarian ? veterinarian.name : null)
+  }
+
+  const handleSubmit = () => {
+    if (selectedDate && selectedTime && selectedVeterinarianId) {
+      console.log('📅 Date sélectionnée:', selectedDate)
+      console.log('⏰ Heure sélectionnée:', selectedTime)
+      console.log('👨‍⚕️ Vétérinaire sélectionné (ID):', selectedVeterinarianId)
       
-      const timeKey = slot.time;
-      if (!groupedSlots.has(timeKey)) {
-        // Prendre le premier vétérinaire disponible pour ce créneau
-        groupedSlots.set(timeKey, {
-          ...slot,
-          availableVeterinarians: [slot.veterinarian_id]
-        });
-      } else {
-        // Ajouter le vétérinaire à la liste des disponibles pour ce créneau
-        const existingSlot = groupedSlots.get(timeKey);
-        existingSlot.availableVeterinarians.push(slot.veterinarian_id);
+      // Trouver le nom du vétérinaire correspondant à l'ID
+      const veterinarian = currentClinic?.veterinarians?.find(vet => vet.id === selectedVeterinarianId)
+      console.log('👨‍⚕️ Vétérinaire sélectionné (nom):', veterinarian?.name)
+
+      // Formater la date au format ISO
+      const formattedDate = new Date(selectedDate).toISOString().split('T')[0]
+
+      // Préparer les données à sauvegarder
+      const dataToSave = {
+        appointmentDate: formattedDate,
+        appointmentTime: selectedTime,
+        veterinarianId: selectedVeterinarianId,
+        veterinarianName: veterinarian?.name
       }
-    });
-    
-    return Array.from(groupedSlots.values());
-  };
 
-  const filteredSlots = availableSlots.map(daySlots => {
-    let processedSlots;
-    
-    if (!selectedVeterinarian) {
-      // Pas de préférence : regrouper les créneaux par heure
-      processedSlots = groupSlotsByTime(daySlots.slots);
+      // Mettre à jour les données de réservation
+      updateBookingData(dataToSave)
+
+      // Naviguer à l'étape suivante
+      navigateNext(location.pathname)
     } else {
-      // Préférence spécifique : filtrer par vétérinaire
-      processedSlots = daySlots.slots.filter(slot => {
-        if (!slot.available) return false;
-        return slot.veterinarian_id === selectedVeterinarian;
-      });
+      alert('Veuillez sélectionner une date et une heure de rendez-vous.')
     }
-    
-    return {
-      ...daySlots,
-      slots: processedSlots
-    };
-  }).filter(daySlots => daySlots.slots.length > 0);
+  }
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
-        <Header />
-        <main className="container mx-auto px-3 sm:px-6 pt-20 sm:pt-24 pb-8">
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="mb-4">
-              <h1 className="text-2xl sm:text-3xl font-bold text-vet-navy mb-2">
-                Chargement des créneaux disponibles...
-              </h1>
-              {currentClinic && (
-                <p className="text-vet-brown text-sm">
-                  Clinique : {currentClinic.name}
-                </p>
-              )}
-            </div>
-          </div>
-        </main>
-      </div>
-    );
+  const handleVeterinarianChange = (veterinarianId: string) => {
+    setSelectedVeterinarianId(veterinarianId)
+    
+    // Trouver le nom du vétérinaire correspondant à l'ID
+    const veterinarian = currentClinic?.veterinarians?.find(vet => vet.id === veterinarianId)
+    setSelectedVeterinarianName(veterinarian ? veterinarian.name : null)
+
+    // Mettre à jour l'URL
+    if (veterinarianId && veterinarian?.name) {
+      navigate(`${location.pathname}?veterinarianId=${veterinarianId}&veterinarianName=${veterinarian?.name}`)
+    } else {
+      navigate(location.pathname)
+    }
+  }
+
+  const handleNoVeterinarianPreference = () => {
+    setNoVeterinarianPreference(true)
+    setSelectedVeterinarianId(null)
+    setSelectedVeterinarianName(null)
+
+    // Mettre à jour l'URL
+    navigate(`${location.pathname}?noVeterinarianPreference=true`)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
-      <Header />
-
-      <main className="container mx-auto px-3 sm:px-6 pt-20 sm:pt-24 pb-8">
-        <div className="max-w-4xl mx-auto">
-          <ProgressBar currentStep={7} totalSteps={7} />
-
-          {/* Bouton retour cohérent avec les autres pages */}
-          <div className="mb-4 sm:mb-6">
-            <Button variant="ghost" onClick={handleBack} className="text-vet-navy hover:bg-vet-beige/20 p-2 text-sm sm:text-base -ml-2">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Retour
-            </Button>
-          </div>
-
-          <div className="text-center mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-vet-navy mb-2 sm:mb-4">
-              Choisissez votre créneau
-            </h1>
-            <p className="text-vet-brown text-base sm:text-lg px-2">
-              Sélectionnez votre préférence de vétérinaire et le créneau qui vous convient
-            </p>
-            {currentClinic && (
-              <p className="text-vet-brown text-sm mt-2">
-                {currentClinic.name}
+    <div className="min-h-screen bg-gradient-to-br from-vet-beige/20 via-white to-vet-sage/10 p-4 sm:p-6">
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+        <ProgressBar currentStep={4} totalSteps={6} />
+        
+        {/* En-tête avec information sur la durée pour 2 animaux */}
+        <div className="text-center space-y-2 sm:space-y-3">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-vet-navy">
+            Choisissez votre créneau de rendez-vous
+          </h1>
+          {hasTwoAnimals && (
+            <div className="bg-vet-blue/10 p-3 rounded-lg border border-vet-blue/20">
+              <p className="text-sm text-vet-navy">
+                ℹ️ Rendez-vous pour 2 animaux : les créneaux affichés correspondent à 1h de consultation
               </p>
-            )}
-          </div>
+            </div>
+          )}
+          <p className="text-vet-brown text-base sm:text-lg">
+            {selectedVeterinarianName 
+              ? `Créneaux disponibles avec ${selectedVeterinarianName}` 
+              : 'Créneaux disponibles'}
+          </p>
+        </div>
 
-          {/* Section préférence de vétérinaire - Toujours afficher */}
-          <div className="mb-6">
-            <VeterinarianPreference
-              veterinarians={veterinarians}
-              selectedVeterinarian={selectedVeterinarian}
-              onVeterinarianSelect={setSelectedVeterinarian}
-            />
-          </div>
-
-          {/* Section créneaux disponibles */}
-          <div className="space-y-3 sm:space-y-4">
-            {filteredSlots.length > 0 ? (
-              <>
-                {/* Première carte automatiquement ouverte */}
-                {filteredSlots[0] && (
-                  <DateSlotCard
-                    key={filteredSlots[0].date}
-                    date={filteredSlots[0].date}
-                    slots={filteredSlots[0].slots}
-                    veterinarians={veterinarians}
-                    selectedSlot={selectedSlot}
-                    onSlotSelect={handleSlotSelect}
-                    isExpanded={true}
-                    noVeterinarianPreference={!selectedVeterinarian}
-                  />
-                )}
-                
-                {/* Autres cartes collapsées - limité à 5 jours */}
-                {filteredSlots.slice(1, 5).map((daySlots) => (
-                  <DateSlotCard
-                    key={daySlots.date}
-                    date={daySlots.date}
-                    slots={daySlots.slots}
-                    veterinarians={veterinarians}
-                    selectedSlot={selectedSlot}
-                    onSlotSelect={handleSlotSelect}
-                    isExpanded={false}
-                    noVeterinarianPreference={!selectedVeterinarian}
-                  />
-                ))}
-
-                {/* Bouton "Voir plus de dates" si nécessaire */}
-                {filteredSlots.length > 5 && (
-                  <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/20 shadow-sm">
-                    <CardContent className="p-4">
-                      <Button
-                        variant="outline"
-                        className="w-full border-vet-blue text-vet-blue hover:bg-vet-blue hover:text-white"
-                      >
-                        <Calendar className="h-4 w-4 mr-2" />
-                        VOIR PLUS DE DATES
-                      </Button>
-                    </CardContent>
-                  </Card>
-                )}
-              </>
-            ) : (
-              <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/30 shadow-lg">
-                <CardContent className="text-center py-8 sm:py-12 px-3 sm:px-6">
-                  <div className="text-vet-brown mb-4">
-                    {veterinarians.length === 0 ? (
-                      <>
-                        <p className="mb-2 text-sm sm:text-base">Cette clinique n'a pas encore configuré ses vétérinaires.</p>
-                        <p className="text-xs sm:text-sm">Veuillez contacter directement la clinique pour prendre rendez-vous.</p>
-                      </>
-                    ) : selectedVeterinarian ? (
-                      <>
-                        <p className="mb-2 text-sm sm:text-base">Aucun créneau disponible pour le vétérinaire sélectionné.</p>
-                        <p className="text-xs sm:text-sm">Essayez de sélectionner "Pas de préférence" ou un autre vétérinaire.</p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="mb-2 text-sm sm:text-base">Aucun créneau disponible pour le moment.</p>
-                        <p className="text-xs sm:text-sm">Veuillez nous contacter directement pour prendre rendez-vous.</p>
-                      </>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Bouton de confirmation */}
-          <div className="flex justify-end mt-8 sm:mt-12">
-            <Button
-              onClick={handleConfirm}
-              disabled={!selectedSlot}
-              className="bg-vet-sage hover:bg-vet-sage/90 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm sm:text-base py-3"
-            >
-              {selectedSlot ? (
-                <>
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  <span className="truncate">
-                    Confirmer le {formatDate(selectedSlot.date)} à {selectedSlot.time}
-                  </span>
-                </>
-              ) : (
-                "Sélectionnez un créneau"
-              )}
-              <ArrowRight className="h-4 w-4 ml-2 flex-shrink-0" />
+        {/* Sélection du vétérinaire */}
+        <div className="space-y-3 sm:space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg sm:text-xl font-semibold text-vet-navy">
+              Choisissez votre vétérinaire
+            </h2>
+            <Button variant="link" onClick={handleNoVeterinarianPreference}>
+              Peu importe le vétérinaire
             </Button>
           </div>
+          
+          {/* Liste des vétérinaires disponibles */}
+          {!noVeterinarianPreference && currentClinic?.veterinarians && (
+            <Select value={selectedVeterinarianId || ''} onValueChange={handleVeterinarianChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Sélectionnez un vétérinaire" />
+              </SelectTrigger>
+              <SelectContent>
+                {currentClinic.veterinarians.map(veterinarian => (
+                  <SelectItem key={veterinarian.id} value={veterinarian.id}>
+                    {veterinarian.name} {veterinarian.specialty ? `(${veterinarian.specialty})` : ''}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
-      </main>
-    </div>
-  );
-};
 
-export default AppointmentSlots;
+        {/* Liste des créneaux disponibles par date */}
+        <div className="space-y-4 sm:space-y-5">
+          {isLoading && <p className="text-center text-vet-brown">Chargement des créneaux...</p>}
+          {error && <p className="text-center text-red-500">Erreur: {error.message}</p>}
+          {slotsData && Array.from(slotsData.entries()).sort().map(([date, slots]) => (
+            <DateSlotCard
+              key={date}
+              date={date}
+              slots={slots}
+              veterinarians={currentClinic?.veterinarians || []}
+              selectedSlot={{date: selectedDate || '', time: selectedTime || '', veterinarianId: selectedVeterinarianId || ''}}
+              onSlotSelect={handleSlotSelect}
+              noVeterinarianPreference={noVeterinarianPreference}
+            />
+          ))}
+        </div>
+
+        {/* Navigation */}
+        <div className="flex justify-between pt-4 sm:pt-5">
+          <Button variant="secondary" onClick={() => navigatePrevious(location.pathname)}>
+            Précédent
+          </Button>
+          <Button onClick={handleSubmit} disabled={!selectedDate || !selectedTime}>
+            Continuer
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default AppointmentSlots
