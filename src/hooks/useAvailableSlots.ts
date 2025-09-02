@@ -1,6 +1,8 @@
+
 import { useState, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
+import { useToast } from '@/hooks/use-toast'
 
 interface TimeSlot {
   time: string
@@ -14,7 +16,7 @@ interface UseAvailableSlotsProps {
   clinicSlug: string
   selectedVeterinarianId?: string
   noVeterinarianPreference?: boolean
-  hasTwoAnimals?: boolean // Nouveau paramètre
+  hasTwoAnimals?: boolean
 }
 
 export const useAvailableSlots = ({ 
@@ -25,6 +27,8 @@ export const useAvailableSlots = ({
 }: UseAvailableSlotsProps) => {
   const [dates, setDates] = useState<Date[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     const today = new Date()
@@ -78,7 +82,7 @@ export const useAvailableSlots = ({
       }
 
       const { data: veterinarians, error: vetsError } = await supabase
-        .from('veterinarians')
+        .from('clinic_veterinarians')
         .select('*')
         .eq('clinic_id', clinic.id)
 
@@ -140,10 +144,10 @@ export const useAvailableSlots = ({
         }
 
         const { data: daySchedule, error: dayScheduleError } = await supabase
-          .from('clinic_schedule')
+          .from('veterinarian_schedules')
           .select('*')
           .eq('clinic_id', clinic.id)
-          .eq('day', dayName)
+          .eq('day_of_week', dayName)
           .single()
 
         if (dayScheduleError && dayScheduleError.message !== 'Aucun résultat unique trouvé') {
@@ -205,24 +209,24 @@ export const useAvailableSlots = ({
 
         const daySchedule = allSchedules.find(schedule => schedule.date === dateStr)?.schedule
 
-        if (daySchedule?.isOpen) {
+        if (daySchedule?.is_available) {
           const slots: TimeSlot[] = []
           
           // Générer les créneaux du matin
-          if (daySchedule.morning?.start && daySchedule.morning?.end) {
+          if (daySchedule.morning_start && daySchedule.morning_end) {
             const morningSlots = generateTimeSlots(
-              daySchedule.morning.start, 
-              daySchedule.morning.end, 
+              daySchedule.morning_start, 
+              daySchedule.morning_end, 
               defaultDurationMinutes
             )
             slots.push(...morningSlots)
           }
 
           // Générer les créneaux de l'après-midi
-          if (daySchedule.afternoon?.start && daySchedule.afternoon?.end) {
+          if (daySchedule.afternoon_start && daySchedule.afternoon_end) {
             const afternoonSlots = generateTimeSlots(
-              daySchedule.afternoon.start, 
-              daySchedule.afternoon.end, 
+              daySchedule.afternoon_start, 
+              daySchedule.afternoon_end, 
               defaultDurationMinutes
             )
             slots.push(...afternoonSlots)
@@ -310,10 +314,93 @@ export const useAvailableSlots = ({
     return slots
   }
 
+  const blockTimeSlotMutation = useMutation({
+    mutationFn: async ({
+      date,
+      startTime,
+      endTime,
+      veterinarianId
+    }: {
+      date: string;
+      startTime: string;
+      endTime: string;
+      veterinarianId: string;
+    }) => {
+      console.log('🔄 Blocking time slot:', { date, startTime, endTime, veterinarianId });
+      
+      const { data: clinic } = await supabase
+        .from('clinics')
+        .select('id')
+        .eq('slug', clinicSlug)
+        .single();
+
+      if (!clinic) {
+        throw new Error('Clinic not found');
+      }
+
+      const { data, error } = await supabase
+        .from('bookings')
+        .insert({
+          clinic_id: clinic.id,
+          veterinarian_id: veterinarianId,
+          appointment_date: date,
+          appointment_time: startTime,
+          appointment_end_time: endTime,
+          is_blocked: true,
+          status: 'blocked',
+          booking_source: 'blocked'
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ Error blocking slot:', error);
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['available-slots'] });
+      toast({
+        title: "Créneau bloqué",
+        description: "Le créneau a été bloqué avec succès",
+      });
+    },
+    onError: (error: any) => {
+      console.error('❌ Failed to block slot:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de bloquer le créneau",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const blockTimeSlot = async (
+    date: string,
+    startTime: string,
+    endTime: string,
+    veterinarianId: string
+  ): Promise<boolean> => {
+    try {
+      await blockTimeSlotMutation.mutateAsync({
+        date,
+        startTime,
+        endTime,
+        veterinarianId
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   return {
     slotsData,
     isLoading,
     error,
-    refetch
+    refetch,
+    blockTimeSlot
   }
 }

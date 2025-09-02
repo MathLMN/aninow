@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useClinicContext } from "@/contexts/ClinicContext";
 import { useAvailableSlots } from "@/hooks/useAvailableSlots";
 
 interface BlockSlotModalProps {
@@ -48,7 +49,14 @@ export const BlockSlotModal = ({
     reason: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { blockTimeSlot } = useAvailableSlots();
+  const { currentClinic } = useClinicContext();
+  
+  const { blockTimeSlot } = useAvailableSlots({
+    clinicSlug: currentClinic?.slug || '',
+    selectedVeterinarianId: undefined,
+    noVeterinarianPreference: false,
+    hasTwoAnimals: false
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

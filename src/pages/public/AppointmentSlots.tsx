@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useSearchParams } from 'react-router-dom'
@@ -7,17 +8,19 @@ import { DateSlotCard } from '@/components/slots/DateSlotCard'
 import { useAvailableSlots } from '@/hooks/useAvailableSlots'
 import { useBookingFormData } from '@/hooks/useBookingFormData'
 import { useMultiTenantBookingNavigation } from '@/hooks/useMultiTenantBookingNavigation'
-import { ProgressBar } from '@/components/ui/progress'
+import { Progress } from '@/components/ui/progress'
 import { useClinicContext } from '@/contexts/ClinicContext'
+import { useClinicVeterinarians } from '@/hooks/useClinicVeterinarians'
 
 const AppointmentSlots = () => {
   const { bookingData, updateBookingData } = useBookingFormData()
-  const { navigateNext, navigatePrevious } = useMultiTenantBookingNavigation()
+  const { navigateNext, getPreviousRoute } = useMultiTenantBookingNavigation()
   const location = useLocation()
   
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { currentClinic } = useClinicContext()
+  const { veterinarians } = useClinicVeterinarians()
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
@@ -75,7 +78,7 @@ const AppointmentSlots = () => {
     setSelectedVeterinarianId(veterinarianId)
     
     // Trouver le nom du vétérinaire correspondant à l'ID
-    const veterinarian = currentClinic?.veterinarians?.find(vet => vet.id === veterinarianId)
+    const veterinarian = veterinarians?.find(vet => vet.id === veterinarianId)
     setSelectedVeterinarianName(veterinarian ? veterinarian.name : null)
   }
 
@@ -86,7 +89,7 @@ const AppointmentSlots = () => {
       console.log('👨‍⚕️ Vétérinaire sélectionné (ID):', selectedVeterinarianId)
       
       // Trouver le nom du vétérinaire correspondant à l'ID
-      const veterinarian = currentClinic?.veterinarians?.find(vet => vet.id === selectedVeterinarianId)
+      const veterinarian = veterinarians?.find(vet => vet.id === selectedVeterinarianId)
       console.log('👨‍⚕️ Vétérinaire sélectionné (nom):', veterinarian?.name)
 
       // Formater la date au format ISO
@@ -114,7 +117,7 @@ const AppointmentSlots = () => {
     setSelectedVeterinarianId(veterinarianId)
     
     // Trouver le nom du vétérinaire correspondant à l'ID
-    const veterinarian = currentClinic?.veterinarians?.find(vet => vet.id === veterinarianId)
+    const veterinarian = veterinarians?.find(vet => vet.id === veterinarianId)
     setSelectedVeterinarianName(veterinarian ? veterinarian.name : null)
 
     // Mettre à jour l'URL
@@ -134,10 +137,15 @@ const AppointmentSlots = () => {
     navigate(`${location.pathname}?noVeterinarianPreference=true`)
   }
 
+  const handlePrevious = () => {
+    const previousRoute = getPreviousRoute(location.pathname)
+    navigate(previousRoute)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-vet-beige/20 via-white to-vet-sage/10 p-4 sm:p-6">
       <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
-        <ProgressBar currentStep={4} totalSteps={6} />
+        <Progress value={66} className="w-full" />
         
         {/* En-tête avec information sur la durée pour 2 animaux */}
         <div className="text-center space-y-2 sm:space-y-3">
@@ -170,13 +178,13 @@ const AppointmentSlots = () => {
           </div>
           
           {/* Liste des vétérinaires disponibles */}
-          {!noVeterinarianPreference && currentClinic?.veterinarians && (
+          {!noVeterinarianPreference && veterinarians && (
             <Select value={selectedVeterinarianId || ''} onValueChange={handleVeterinarianChange}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Sélectionnez un vétérinaire" />
               </SelectTrigger>
               <SelectContent>
-                {currentClinic.veterinarians.map(veterinarian => (
+                {veterinarians.map(veterinarian => (
                   <SelectItem key={veterinarian.id} value={veterinarian.id}>
                     {veterinarian.name} {veterinarian.specialty ? `(${veterinarian.specialty})` : ''}
                   </SelectItem>
@@ -195,7 +203,7 @@ const AppointmentSlots = () => {
               key={date}
               date={date}
               slots={slots}
-              veterinarians={currentClinic?.veterinarians || []}
+              veterinarians={veterinarians || []}
               selectedSlot={{date: selectedDate || '', time: selectedTime || '', veterinarianId: selectedVeterinarianId || ''}}
               onSlotSelect={handleSlotSelect}
               noVeterinarianPreference={noVeterinarianPreference}
@@ -205,7 +213,7 @@ const AppointmentSlots = () => {
 
         {/* Navigation */}
         <div className="flex justify-between pt-4 sm:pt-5">
-          <Button variant="secondary" onClick={() => navigatePrevious(location.pathname)}>
+          <Button variant="secondary" onClick={handlePrevious}>
             Précédent
           </Button>
           <Button onClick={handleSubmit} disabled={!selectedDate || !selectedTime}>
