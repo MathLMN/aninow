@@ -17,6 +17,7 @@ interface DailyCalendarGridProps {
   columns: any[];
   daySchedule: any;
   onCreateAppointment: (timeSlot: { date: string; time: string; veterinarian?: string }) => void;
+  onCreateNote?: (timeSlot: { date: string; time: string; veterinarian?: string }) => void;
   onAppointmentClick: (appointment: any) => void;
   veterinarians: any[];
   onValidateBooking?: (bookingId: string) => void;
@@ -36,6 +37,7 @@ export const DailyCalendarGrid = ({
   columns,
   daySchedule,
   onCreateAppointment,
+  onCreateNote,
   onAppointmentClick,
   veterinarians,
   onValidateBooking,
@@ -269,6 +271,7 @@ export const DailyCalendarGrid = ({
                           isOpen={isOpen}
                           canBook={true}
                           onCreateAppointment={onCreateAppointment}
+                          onCreateNote={onCreateNote}
                           onAppointmentClick={onAppointmentClick}
                           selectedDate={selectedDate}
                           onValidateBooking={onValidateBooking}

@@ -20,6 +20,11 @@ interface DailyCalendarViewProps {
     time: string;
     veterinarian?: string;
   }) => void;
+  onCreateNote?: (timeSlot: {
+    date: string;
+    time: string;
+    veterinarian?: string;
+  }) => void;
   onAppointmentClick: (appointment: any) => void;
   onValidateBooking?: (bookingId: string) => void;
   onCancelBooking?: (bookingId: string) => void;
@@ -43,6 +48,7 @@ export const DailyCalendarView = ({
   bookings,
   veterinarians,
   onCreateAppointment,
+  onCreateNote,
   onAppointmentClick,
   onValidateBooking,
   onCancelBooking,
@@ -129,7 +135,8 @@ export const DailyCalendarView = ({
           bookings={bookings} 
           columns={columns} 
           daySchedule={daySchedule} 
-          onCreateAppointment={onCreateAppointment} 
+          onCreateAppointment={onCreateAppointment}
+          onCreateNote={onCreateNote}
           onAppointmentClick={onAppointmentClick} 
           veterinarians={veterinarians} 
           onValidateBooking={onValidateBooking} 
@@ -187,7 +194,8 @@ export const DailyCalendarView = ({
         bookings={bookings} 
         columns={columns} 
         daySchedule={daySchedule} 
-        onCreateAppointment={onCreateAppointment} 
+        onCreateAppointment={onCreateAppointment}
+        onCreateNote={onCreateNote}
         onAppointmentClick={onAppointmentClick} 
         veterinarians={veterinarians} 
         onValidateBooking={onValidateBooking} 

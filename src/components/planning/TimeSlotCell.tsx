@@ -12,6 +12,7 @@ interface TimeSlotCellProps {
   isOpen: boolean;
   canBook: boolean;
   onCreateAppointment: (timeSlot: { date: string; time: string; veterinarian?: string }) => void;
+  onCreateNote?: (timeSlot: { date: string; time: string; veterinarian?: string }) => void;
   onAppointmentClick: (appointment: any) => void;
   onBlockSlot?: (timeSlot: { date: string; time: string; veterinarian: string }) => void;
   selectedDate: Date;
@@ -39,6 +40,7 @@ export const TimeSlotCell = ({
   isOpen,
   canBook,
   onCreateAppointment,
+  onCreateNote,
   onAppointmentClick,
   selectedDate,
   onValidateBooking,
@@ -114,12 +116,14 @@ export const TimeSlotCell = ({
   };
 
   const handleCreateTask = () => {
-    // Créer une tâche même sur les créneaux fermés
-    onCreateAppointment({
-      date: formatDateLocal(selectedDate),
-      time: time,
-      veterinarian: columnId !== 'asv' ? columnId : undefined
-    });
+    // Créer une note/tâche sur les créneaux fermés
+    if (onCreateNote) {
+      onCreateNote({
+        date: formatDateLocal(selectedDate),
+        time: time,
+        veterinarian: columnId !== 'asv' ? columnId : undefined
+      });
+    }
   };
 
   const handleQuickBlock = (e: React.MouseEvent) => {

@@ -4,6 +4,7 @@ import { DailyCalendarView } from "@/components/planning/DailyCalendarView";
 import { WeeklyCalendarView } from "@/components/planning/WeeklyCalendarView";
 import { PlanningHeader } from "@/components/planning/PlanningHeader";
 import { CreateAppointmentModal } from "@/components/planning/CreateAppointmentModal";
+import { CreateNoteModal } from "@/components/planning/CreateNoteModal";
 import { PendingBookingsNotification } from "@/components/planning/PendingBookingsNotification";
 import { useVetBookings } from "@/hooks/useVetBookings";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
@@ -15,8 +16,10 @@ export default function VetPlanning() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'daily' | 'weekly'>('daily');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [appointmentToEdit, setAppointmentToEdit] = useState<any>(null);
   const [createModalDefaultData, setCreateModalDefaultData] = useState<any>(null);
+  const [noteModalDefaultData, setNoteModalDefaultData] = useState<any>(null);
 
   const { bookings, refreshBookings } = useVetBookings();
   const { veterinarians } = useClinicVeterinarians();
@@ -48,6 +51,22 @@ export default function VetPlanning() {
     });
     setAppointmentToEdit(null);
     setIsCreateModalOpen(true);
+  };
+
+  const handleCreateNote = (timeSlot: { date: string; time: string; veterinarian?: string }) => {
+    console.log('📝 Opening note modal with time slot:', timeSlot);
+    setNoteModalDefaultData({
+      date: timeSlot.date,
+      time: timeSlot.time,
+      veterinarian: timeSlot.veterinarian
+    });
+    setIsNoteModalOpen(true);
+  };
+
+  const handleCloseNoteModal = () => {
+    setIsNoteModalOpen(false);
+    setNoteModalDefaultData(null);
+    refreshBookings();
   };
 
   const handleAppointmentClick = (appointment: any) => {
@@ -169,6 +188,7 @@ export default function VetPlanning() {
                   bookings={todayBookings}
                   veterinarians={veterinarians}
                   onCreateAppointment={handleCreateAppointment}
+                  onCreateNote={handleCreateNote}
                   onAppointmentClick={handleAppointmentClick}
                   onValidateBooking={handleValidateBooking}
                   onCancelBooking={handleCancelBooking}
@@ -206,6 +226,7 @@ export default function VetPlanning() {
                 bookings={todayBookings}
                 veterinarians={veterinarians}
                 onCreateAppointment={handleCreateAppointment}
+                onCreateNote={handleCreateNote}
                 onAppointmentClick={handleAppointmentClick}
                 onValidateBooking={handleValidateBooking}
                 onCancelBooking={handleCancelBooking}
@@ -248,6 +269,13 @@ export default function VetPlanning() {
         appointmentToEdit={appointmentToEdit}
         veterinarians={veterinarians}
         consultationTypes={consultationTypes}
+      />
+
+      <CreateNoteModal
+        isOpen={isNoteModalOpen}
+        onClose={handleCloseNoteModal}
+        defaultData={noteModalDefaultData}
+        veterinarians={veterinarians}
       />
     </div>
   );
