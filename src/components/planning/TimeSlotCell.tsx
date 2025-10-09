@@ -347,7 +347,14 @@ export const TimeSlotCell = ({
           <div className="absolute inset-0 flex items-center justify-center bg-yellow-50/40 transition-opacity z-20">
             <div className="flex items-center space-x-1">
               <button
-                onClick={handleCellClick}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCreateAppointment({
+                    date: formatDateLocal(selectedDate),
+                    time: time,
+                    veterinarian: columnId !== 'asv' ? columnId : undefined
+                  });
+                }}
                 className="p-0.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
                 title="Ajouter un rendez-vous manuel"
               >
