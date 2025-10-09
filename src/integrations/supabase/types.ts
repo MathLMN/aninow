@@ -567,6 +567,51 @@ export type Database = {
           },
         ]
       }
+      form_questions: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          options: Json | null
+          order_index: number
+          parent_question_key: string | null
+          question_key: string
+          question_text: string
+          question_type: Database["public"]["Enums"]["form_question_type"]
+          trigger_conditions: Json | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          options?: Json | null
+          order_index?: number
+          parent_question_key?: string | null
+          question_key: string
+          question_text: string
+          question_type: Database["public"]["Enums"]["form_question_type"]
+          trigger_conditions?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          options?: Json | null
+          order_index?: number
+          parent_question_key?: string | null
+          question_key?: string
+          question_text?: string
+          question_type?: Database["public"]["Enums"]["form_question_type"]
+          trigger_conditions?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       prompt_performance_logs: {
         Row: {
           booking_id: string | null
@@ -972,7 +1017,12 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      form_question_type:
+        | "symptom"
+        | "conditional_question"
+        | "general_info"
+        | "animal_info"
+        | "contact_info"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1099,6 +1149,14 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      form_question_type: [
+        "symptom",
+        "conditional_question",
+        "general_info",
+        "animal_info",
+        "contact_info",
+      ],
+    },
   },
 } as const

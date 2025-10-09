@@ -1,12 +1,33 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { ManualClinicCreationModal } from './ManualClinicCreationModal';
 import { ManuallyCreatedAccountsList } from './ManuallyCreatedAccountsList';
 import ClinicsManagementSection from './ClinicsManagementSection';
-import { Building2, Users, UserPlus, BarChart3 } from "lucide-react";
+import { FormQuestionsManager } from './FormQuestionsManager';
+import { Building2, Users, UserPlus, BarChart3, FileQuestion } from "lucide-react";
 
 const AdminDashboard = () => {
+  const [showFormQuestionsManager, setShowFormQuestionsManager] = useState(false);
+
+  if (showFormQuestionsManager) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20 p-6">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <Button
+            variant="outline"
+            onClick={() => setShowFormQuestionsManager(false)}
+            className="mb-4"
+          >
+            ← Retour au tableau de bord
+          </Button>
+          <FormQuestionsManager />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -86,6 +107,33 @@ const AdminDashboard = () => {
             <ManuallyCreatedAccountsList />
           </div>
         </div>
+
+        {/* Form Questions Management */}
+        <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/20">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between text-vet-navy">
+              <div className="flex items-center">
+                <FileQuestion className="h-5 w-5 mr-2" />
+                Gestion des questions du formulaire
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <p className="text-vet-brown text-sm">
+                Gérez les questions et réponses du formulaire de prise de rendez-vous client.
+                Modifiez, ajoutez, supprimez et réorganisez les questions selon vos besoins.
+              </p>
+              <Button 
+                onClick={() => setShowFormQuestionsManager(true)}
+                className="bg-vet-sage hover:bg-vet-sage/90 w-full"
+              >
+                <FileQuestion className="h-4 w-4 mr-2" />
+                Accéder à la gestion des questions
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
