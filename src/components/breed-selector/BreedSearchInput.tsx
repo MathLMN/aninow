@@ -26,7 +26,7 @@ const BreedSearchInput: React.FC<BreedSearchInputProps> = ({
       onFocus={onFocus}
       onBlur={onBlur}
       disabled={disabled}
-      className="h-12 text-sm sm:text-base bg-white border-2 border-gray-200 rounded-lg hover:border-vet-sage/50 focus:border-vet-sage transition-colors"
+      className="h-7 text-xs"
     />
   );
 };
