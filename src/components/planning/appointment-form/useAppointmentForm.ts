@@ -19,7 +19,7 @@ interface FormData {
   clientName: string;
   clientEmail: string;
   clientPhone: string;
-  preferredContactMethod: string;
+  clientPhoneCountryCode: string;
   clientStatus: string;
   
   // Animal
@@ -49,7 +49,7 @@ const getInitialFormData = (): FormData => ({
   clientName: '',
   clientEmail: '',
   clientPhone: '',
-  preferredContactMethod: 'phone',
+  clientPhoneCountryCode: '+33',
   clientStatus: 'existing',
   animalName: '',
   animalSpecies: 'chien',
@@ -175,10 +175,10 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
         cleanData.clientPhone = phone;
       }
       
-      if (defaultData.preferredContactMethod || defaultData.preferred_contact_method) {
-        const method = defaultData.preferredContactMethod || defaultData.preferred_contact_method;
-        console.log('📱 Setting preferred contact method:', method);
-        cleanData.preferredContactMethod = method;
+      if (defaultData.clientPhoneCountryCode || defaultData.client_phone_country_code) {
+        const countryCode = defaultData.clientPhoneCountryCode || defaultData.client_phone_country_code;
+        console.log('🌍 Setting client phone country code:', countryCode);
+        cleanData.clientPhoneCountryCode = countryCode;
       }
       
       if (defaultData.clientStatus || defaultData.client_status) {
@@ -305,8 +305,8 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
         animal_vaccines_up_to_date: formData.animalVaccinesUpToDate,
         client_name: formData.clientName,
         client_email: formData.clientEmail,
-        client_phone: formData.clientPhone,
-        preferred_contact_method: formData.preferredContactMethod,
+        client_phone: formData.clientPhoneCountryCode + formData.clientPhone,
+        preferred_contact_method: 'phone',
         client_status: formData.clientStatus,
         consultation_reason: formData.consultationReason,
         client_comment: formData.clientComment,

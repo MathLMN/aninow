@@ -1,6 +1,7 @@
 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Users } from "lucide-react";
@@ -52,15 +53,32 @@ export const ClientSection = ({ formData, onFieldUpdate }: ClientSectionProps) =
 
         <div>
           <Label htmlFor="clientPhone" className="text-xs font-medium text-gray-700">Téléphone *</Label>
-          <Input
-            id="clientPhone"
-            type="tel"
-            placeholder="06 12 34 56 78"
-            value={formData.clientPhone}
-            onChange={(e) => onFieldUpdate('clientPhone', e.target.value)}
-            required
-            className="h-7 text-xs"
-          />
+          <div className="flex gap-2">
+            <Select 
+              value={formData.clientPhoneCountryCode} 
+              onValueChange={(value) => onFieldUpdate('clientPhoneCountryCode', value)}
+            >
+              <SelectTrigger className="h-7 text-xs w-[100px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="+33">🇫🇷 +33</SelectItem>
+                <SelectItem value="+32">🇧🇪 +32</SelectItem>
+                <SelectItem value="+41">🇨🇭 +41</SelectItem>
+                <SelectItem value="+352">🇱🇺 +352</SelectItem>
+                <SelectItem value="+377">🇲🇨 +377</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input
+              id="clientPhone"
+              type="tel"
+              placeholder="6 12 34 56 78"
+              value={formData.clientPhone}
+              onChange={(e) => onFieldUpdate('clientPhone', e.target.value)}
+              required
+              className="h-7 text-xs flex-1"
+            />
+          </div>
         </div>
 
         <div>
