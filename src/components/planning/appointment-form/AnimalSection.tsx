@@ -1,8 +1,11 @@
-
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Heart } from "lucide-react";
+import BreedSearchInput from "@/components/breed-selector/BreedSearchInput";
+import BreedDropdown from "@/components/breed-selector/BreedDropdown";
+import { getBreedsByAnimalSpecies } from "@/data/breedData";
+import { useBreedSearch } from "@/hooks/useBreedSearch";
 
 interface AnimalSectionProps {
   formData: any;
@@ -10,6 +13,28 @@ interface AnimalSectionProps {
 }
 
 export const AnimalSection = ({ formData, onFieldUpdate }: AnimalSectionProps) => {
+  const baseBreeds = getBreedsByAnimalSpecies(formData.animalSpecies || 'chien');
+  
+  const {
+    searchTerm,
+    isInputFocused,
+    breedsWithOther,
+    handleSearchChange,
+    handleInputFocus,
+    handleInputBlur,
+    clearSearch
+  } = useBreedSearch(baseBreeds);
+
+  const handleBreedClick = (breed: string) => {
+    if (breed === 'Autre') {
+      onFieldUpdate('animalBreed', '');
+    } else {
+      onFieldUpdate('animalBreed', breed);
+    }
+    clearSearch();
+    handleInputBlur();
+  };
+
   return (
     <div className="space-y-2">
       <div className="flex items-center mb-2">
@@ -56,14 +81,35 @@ export const AnimalSection = ({ formData, onFieldUpdate }: AnimalSectionProps) =
 
         <div>
           <Label htmlFor="animalBreed" className="text-xs font-medium text-gray-700">Race</Label>
-          <Input
-            id="animalBreed"
-            type="text"
-            placeholder="Race"
-            value={formData.animalBreed || ''}
-            onChange={(e) => onFieldUpdate('animalBreed', e.target.value)}
-            className="h-7 text-xs"
-          />
+          {(formData.animalSpecies === 'chien' || formData.animalSpecies === 'chat') ? (
+            <div className="relative">
+              <BreedSearchInput
+                searchTerm={searchTerm}
+                onSearchChange={handleSearchChange}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+              />
+              <BreedDropdown
+                breeds={breedsWithOther}
+                isVisible={isInputFocused}
+                onBreedClick={handleBreedClick}
+              />
+              {formData.animalBreed && !searchTerm && (
+                <div className="mt-1 text-xs text-gray-600">
+                  Sélectionné: <span className="font-medium">{formData.animalBreed}</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Input
+              id="animalBreed"
+              type="text"
+              placeholder="Race"
+              value={formData.animalBreed || ''}
+              onChange={(e) => onFieldUpdate('animalBreed', e.target.value)}
+              className="h-7 text-xs"
+            />
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-2">
