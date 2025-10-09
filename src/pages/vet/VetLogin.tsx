@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Heart, Mail, Lock, Loader2, Eye, EyeOff, CheckCircle, Users, Calendar, BarChart3 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ArrowLeft, Heart, Mail, Lock, Loader2, Eye, EyeOff, CheckCircle, Users, Calendar, BarChart3, AlertCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useVetAuth } from "@/hooks/useVetAuth";
 import { useFirstLoginStatus } from "@/hooks/useFirstLoginStatus";
@@ -19,6 +20,7 @@ const VetLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showResetForm, setShowResetForm] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
+  const [loginError, setLoginError] = useState("");
 
   // Redirect logic
   useEffect(() => {
@@ -66,6 +68,7 @@ const VetLogin = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoginError(""); // Réinitialiser l'erreur
     
     console.log('🔄 Starting login process for:', email);
     const { error } = await signIn(email, password);
@@ -74,6 +77,7 @@ const VetLogin = () => {
       console.log('✅ Login successful, redirection will be handled by useEffect');
     } else {
       console.log('❌ Login failed:', error);
+      setLoginError("Identifiant ou mot de passe incorrect. Veuillez réessayer.");
     }
   };
 
@@ -182,6 +186,13 @@ const VetLogin = () => {
             </CardHeader>
             <CardContent className="px-4 sm:px-6">
               <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
+                {loginError && (
+                  <Alert variant="destructive" className="bg-red-50 text-red-900 border-red-200">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{loginError}</AlertDescription>
+                  </Alert>
+                )}
+                
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-vet-navy text-sm sm:text-base">Email *</Label>
                   <div className="relative">
@@ -191,7 +202,10 @@ const VetLogin = () => {
                       type="email"
                       placeholder="votre@email.com"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setLoginError(""); // Réinitialiser l'erreur lors de la saisie
+                      }}
                       className="pl-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage text-sm sm:text-base"
                       required
                       disabled={isLoading}
@@ -208,7 +222,10 @@ const VetLogin = () => {
                       type={showPassword ? "text" : "password"}
                       placeholder="Votre mot de passe"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setLoginError(""); // Réinitialiser l'erreur lors de la saisie
+                      }}
                       className="pl-10 pr-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage text-sm sm:text-base"
                       required
                       disabled={isLoading}
