@@ -3,10 +3,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, Building2, Settings } from "lucide-react";
+import { Shield, Building2, Settings, FileText } from "lucide-react";
 import { ClinicSettingsForm } from "@/components/settings/ClinicSettingsForm";
 import { ClinicSelector } from "@/components/clinic/ClinicSelector";
 import AdminDashboard from "@/components/admin/AdminDashboard";
+import { FormQuestionsEditor } from "@/components/admin/FormQuestionsEditor";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 const VetSettings = () => {
@@ -28,10 +29,14 @@ const VetSettings = () => {
       <ClinicSelector />
 
       <Tabs defaultValue={isGlobalAdmin ? "admin" : "clinic"} className="space-y-6">
-        <TabsList className={`grid w-full ${isGlobalAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
+        <TabsList className={`grid w-full ${isGlobalAdmin ? 'grid-cols-4' : 'grid-cols-3'}`}>
           <TabsTrigger value="clinic" className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
             Configuration de la clinique
+          </TabsTrigger>
+          <TabsTrigger value="form-questions" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Questions du formulaire
           </TabsTrigger>
           {isGlobalAdmin && (
             <TabsTrigger value="admin" className="flex items-center gap-2">
@@ -47,6 +52,10 @@ const VetSettings = () => {
 
         <TabsContent value="clinic" className="space-y-6">
           <ClinicSettingsForm />
+        </TabsContent>
+
+        <TabsContent value="form-questions" className="space-y-6">
+          <FormQuestionsEditor />
         </TabsContent>
 
         {isGlobalAdmin && (
