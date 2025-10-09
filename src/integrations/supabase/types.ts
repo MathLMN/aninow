@@ -1023,6 +1023,13 @@ export type Database = {
         | "general_info"
         | "animal_info"
         | "contact_info"
+        | "booking_start"
+        | "consultation_reason"
+        | "conditional_questions"
+        | "symptom_duration"
+        | "additional_points"
+        | "client_comment"
+        | "appointment_slots"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1156,6 +1163,13 @@ export const Constants = {
         "general_info",
         "animal_info",
         "contact_info",
+        "booking_start",
+        "consultation_reason",
+        "conditional_questions",
+        "symptom_duration",
+        "additional_points",
+        "client_comment",
+        "appointment_slots",
       ],
     },
   },
