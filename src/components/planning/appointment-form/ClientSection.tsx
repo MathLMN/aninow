@@ -1,7 +1,7 @@
 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Users } from "lucide-react";
 
@@ -51,13 +51,14 @@ export const ClientSection = ({ formData, onFieldUpdate }: ClientSectionProps) =
         </div>
 
         <div>
-          <Label htmlFor="clientPhone" className="text-xs font-medium text-gray-700">Téléphone</Label>
+          <Label htmlFor="clientPhone" className="text-xs font-medium text-gray-700">Téléphone *</Label>
           <Input
             id="clientPhone"
             type="tel"
             placeholder="06 12 34 56 78"
             value={formData.clientPhone}
             onChange={(e) => onFieldUpdate('clientPhone', e.target.value)}
+            required
             className="h-7 text-xs"
           />
         </div>
@@ -72,20 +73,6 @@ export const ClientSection = ({ formData, onFieldUpdate }: ClientSectionProps) =
             onChange={(e) => onFieldUpdate('clientEmail', e.target.value)}
             className="h-7 text-xs"
           />
-        </div>
-
-        <div>
-          <Label htmlFor="preferredContactMethod" className="text-xs font-medium text-gray-700">Contact préféré</Label>
-          <Select value={formData.preferredContactMethod} onValueChange={(value) => onFieldUpdate('preferredContactMethod', value)}>
-            <SelectTrigger className="h-7 text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="phone">Téléphone</SelectItem>
-              <SelectItem value="email">Email</SelectItem>
-              <SelectItem value="sms">SMS</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
       </div>
     </div>
