@@ -21,6 +21,7 @@ const VetLogin = () => {
   const [showResetForm, setShowResetForm] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [loginError, setLoginError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Redirect logic
   useEffect(() => {
@@ -69,9 +70,12 @@ const VetLogin = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError(""); // Réinitialiser l'erreur
+    setIsSubmitting(true); // Démarrer le chargement
     
     console.log('🔄 Starting login process for:', email);
     const { error } = await signIn(email, password);
+    
+    setIsSubmitting(false); // Arrêter le chargement
     
     if (!error) {
       console.log('✅ Login successful, redirection will be handled by useEffect');
@@ -208,7 +212,7 @@ const VetLogin = () => {
                       }}
                       className="pl-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage text-sm sm:text-base"
                       required
-                      disabled={isLoading}
+                      disabled={isSubmitting}
                     />
                   </div>
                 </div>
@@ -228,7 +232,7 @@ const VetLogin = () => {
                       }}
                       className="pl-10 pr-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage text-sm sm:text-base"
                       required
-                      disabled={isLoading}
+                      disabled={isSubmitting}
                     />
                     <button
                       type="button"
@@ -254,9 +258,9 @@ const VetLogin = () => {
                 <Button 
                   type="submit" 
                   className="w-full bg-vet-sage hover:bg-vet-sage/90 text-white disabled:opacity-50 text-sm sm:text-base py-2 sm:py-3"
-                  disabled={isLoading}
+                  disabled={isSubmitting}
                 >
-                  {isLoading ? (
+                  {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Connexion en cours...
