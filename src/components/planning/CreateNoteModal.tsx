@@ -185,13 +185,13 @@ export const CreateNoteModal = ({
             </Label>
             <Select
               value={formData.veterinarianId}
-              onValueChange={(value) => setFormData({ ...formData, veterinarianId: value })}
+              onValueChange={(value) => setFormData({ ...formData, veterinarianId: value === 'none' ? '' : value })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Aucun vétérinaire" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Aucun vétérinaire</SelectItem>
+                <SelectItem value="none">Aucun vétérinaire</SelectItem>
                 {veterinarians
                   .filter(vet => vet.is_active)
                   .map(vet => (

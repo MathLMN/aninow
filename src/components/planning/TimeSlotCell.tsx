@@ -171,7 +171,7 @@ export const TimeSlotCell = ({
   };
 
   const canInteract = isOpen && !isVeterinarianAbsent && !isBlocked;
-  const canCreateTask = !isVeterinarianAbsent && !isBlocked;
+  const canCreateTask = !isOpen && !isVeterinarianAbsent && !isBlocked;
 
   return (
     <TimeSlotContextMenu
