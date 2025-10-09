@@ -82,6 +82,8 @@ const VetLogin = () => {
     } else {
       console.log('❌ Login failed:', error);
       setLoginError("Identifiant ou mot de passe incorrect. Veuillez réessayer.");
+      setEmail(""); // Vider le champ email
+      setPassword(""); // Vider le champ mot de passe
     }
   };
 
