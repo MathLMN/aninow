@@ -14,11 +14,15 @@ import { useFormQuestions, FormQuestion } from "@/hooks/useFormQuestions";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 const QUESTION_TYPES = [
-  { value: 'symptom', label: 'Symptôme' },
-  { value: 'conditional_question', label: 'Question conditionnelle' },
-  { value: 'general_info', label: 'Information générale' },
-  { value: 'animal_info', label: 'Information animal' },
-  { value: 'contact_info', label: 'Information contact' },
+  { value: 'booking_start', label: '📝 Page de démarrage' },
+  { value: 'animal_info', label: '🐾 Informations animal' },
+  { value: 'consultation_reason', label: '🏥 Motif de consultation' },
+  { value: 'conditional_questions', label: '❓ Questions conditionnelles' },
+  { value: 'symptom_duration', label: '⏱️ Durée des symptômes' },
+  { value: 'additional_points', label: '📋 Points complémentaires' },
+  { value: 'client_comment', label: '💬 Commentaire client' },
+  { value: 'contact_info', label: '📞 Coordonnées' },
+  { value: 'appointment_slots', label: '📅 Choix du créneau' },
 ];
 
 export const FormQuestionsManager = () => {
@@ -30,7 +34,7 @@ export const FormQuestionsManager = () => {
 
   const [formData, setFormData] = useState({
     question_key: '',
-    question_type: 'symptom' as FormQuestion['question_type'],
+    question_type: 'booking_start' as FormQuestion['question_type'],
     question_text: '',
     description: '',
     options: '[]',
@@ -102,7 +106,7 @@ export const FormQuestionsManager = () => {
   const resetForm = () => {
     setFormData({
       question_key: '',
-      question_type: 'symptom',
+      question_type: 'booking_start',
       question_text: '',
       description: '',
       options: '[]',

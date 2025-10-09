@@ -4,7 +4,16 @@ import { toast } from 'sonner';
 
 export interface FormQuestion {
   id: string;
-  question_type: 'symptom' | 'conditional_question' | 'general_info' | 'animal_info' | 'contact_info';
+  question_type: 
+    | 'booking_start' 
+    | 'animal_info' 
+    | 'consultation_reason' 
+    | 'conditional_questions' 
+    | 'symptom_duration' 
+    | 'additional_points' 
+    | 'client_comment' 
+    | 'contact_info' 
+    | 'appointment_slots';
   question_key: string;
   question_text: string;
   options: any[];
