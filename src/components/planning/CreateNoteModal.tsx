@@ -14,9 +14,13 @@ interface CreateNoteModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultData?: {
+    id?: string;
     date: string;
     time: string;
     veterinarian?: string;
+    title?: string;
+    description?: string;
+    noteType?: 'note' | 'reminder' | 'task';
   };
   veterinarians: any[];
 }
@@ -43,9 +47,9 @@ export const CreateNoteModal = ({
   useEffect(() => {
     if (isOpen && defaultData) {
       setFormData({
-        noteType: 'note',
-        title: '',
-        description: '',
+        noteType: defaultData.noteType || 'note',
+        title: defaultData.title || '',
+        description: defaultData.description || '',
         appointmentDate: defaultData.date,
         appointmentTime: defaultData.time,
         veterinarianId: defaultData.veterinarian || ''
@@ -74,8 +78,7 @@ export const CreateNoteModal = ({
         task: 'Tâche'
       };
 
-      // Créer une entrée "booking" spéciale pour la note
-      const { error } = await supabase.from('bookings').insert({
+      const noteData = {
         clinic_id: currentClinicId,
         booking_source: 'note',
         consultation_reason: `${noteTypeLabels[formData.noteType]}: ${formData.title}`,
@@ -93,21 +96,39 @@ export const CreateNoteModal = ({
         status: 'confirmed',
         duration_minutes: 15,
         is_blocked: false
-      });
+      };
+
+      let error;
+      if (defaultData?.id) {
+        // Mode édition
+        const { error: updateError } = await supabase
+          .from('bookings')
+          .update(noteData)
+          .eq('id', defaultData.id);
+        error = updateError;
+      } else {
+        // Mode création
+        const { error: insertError } = await supabase
+          .from('bookings')
+          .insert(noteData);
+        error = insertError;
+      }
 
       if (error) throw error;
 
       toast({
         title: "Succès",
-        description: `${noteTypeLabels[formData.noteType]} créée avec succès`,
+        description: defaultData?.id 
+          ? `${noteTypeLabels[formData.noteType]} modifiée avec succès`
+          : `${noteTypeLabels[formData.noteType]} créée avec succès`,
       });
 
       onClose();
     } catch (error) {
-      console.error('Error creating note:', error);
+      console.error('Error saving note:', error);
       toast({
         title: "Erreur",
-        description: "Impossible de créer la note",
+        description: "Impossible de sauvegarder la note",
         variant: "destructive"
       });
     } finally {
@@ -121,10 +142,13 @@ export const CreateNoteModal = ({
         <DialogHeader>
           <DialogTitle className="text-lg font-bold text-vet-navy flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            Créer une note / rappel
+            {defaultData?.id ? 'Modifier la note / rappel' : 'Créer une note / rappel'}
           </DialogTitle>
           <DialogDescription>
-            Ajouter une note, un rappel ou une tâche dans une période de fermeture
+            {defaultData?.id 
+              ? 'Modifier une note, un rappel ou une tâche existante'
+              : 'Ajouter une note, un rappel ou une tâche dans une période de fermeture'
+            }
           </DialogDescription>
         </DialogHeader>
 
@@ -237,7 +261,10 @@ export const CreateNoteModal = ({
               disabled={isSubmitting}
               className="bg-vet-sage hover:bg-vet-sage/90"
             >
-              {isSubmitting ? 'Création...' : 'Créer'}
+              {isSubmitting 
+                ? (defaultData?.id ? 'Modification...' : 'Création...')
+                : (defaultData?.id ? 'Modifier' : 'Créer')
+              }
             </Button>
           </div>
         </form>

@@ -232,73 +232,91 @@ export const TimeSlotCell = ({
           !booking.is_blocked && 
           !booking.recurring_block_id && 
           booking.booking_source !== 'blocked'
-        ).map((booking) => (
-          <div
-            key={booking.id}
-            onClick={(e) => {
-              e.stopPropagation();
-              onAppointmentClick(booking);
-            }}
-            className={cn(
-              "absolute inset-x-0 top-0 p-0.5 rounded-sm border transition-shadow text-[9px] leading-tight cursor-pointer hover:shadow-sm overflow-hidden",
-              getStatusColor(booking)
-            )}
-            style={{ 
-              height: `${getAppointmentHeight(booking)}px`,
-              zIndex: 10
-            }}
-          >
-            {/* Indicateur d'arrivée - Point rouge positionné à l'intérieur du cadre */}
-            {booking.arrival_time && (
-              <div className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full border border-white shadow-sm z-20" title={`Client arrivé à ${booking.arrival_time}`}></div>
-            )}
-            
-            {/* Affichage optimisé pour les rendez-vous en attente */}
-            {booking.status === 'pending' ? (
-              <div className="h-full flex flex-col justify-center overflow-hidden">
-                <div className="font-semibold truncate text-[8px] leading-tight">
-                  {booking.client_name}
-                </div>
-                <div className="truncate text-[7px] opacity-90 leading-tight">
-                  {booking.animal_name}
-                </div>
-                <div className="text-[6px] opacity-70 font-medium text-center mt-0.5">
-                  À VALIDER
-                </div>
-              </div>
-            ) : (
-              <>
-                {/* 1. Nom complet du client */}
-                <div className="font-medium truncate text-[9px]">
-                  {booking.client_name}
-                </div>
-                
-                {/* 2. Nom de l'animal */}
-                <div className="truncate text-[8px] opacity-90 font-medium">
-                  {booking.animal_name}
-                </div>
-                
-                {/* 3. Motif du RDV */}
-                <div className="truncate text-[8px] opacity-80">
-                  {booking.consultation_reason}
-                </div>
-                
-                {/* 4. Durée du RDV */}
-                {booking.duration_minutes && (
-                  <div className="text-[7px] opacity-70 mt-0.5 font-medium">
-                    {booking.duration_minutes} min
+        ).map((booking) => {
+          const isNote = booking.booking_source === 'note';
+          
+          return (
+            <div
+              key={booking.id}
+              onClick={(e) => {
+                e.stopPropagation();
+                onAppointmentClick(booking);
+              }}
+              className={cn(
+                "absolute inset-x-0 top-0 p-0.5 rounded-sm border transition-shadow text-[9px] leading-tight cursor-pointer hover:shadow-sm overflow-hidden",
+                isNote ? 'bg-yellow-50 text-yellow-900 border-yellow-400' : getStatusColor(booking)
+              )}
+              style={{ 
+                height: `${getAppointmentHeight(booking)}px`,
+                zIndex: 10
+              }}
+            >
+              {/* Indicateur d'arrivée - Point rouge positionné à l'intérieur du cadre */}
+              {booking.arrival_time && (
+                <div className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full border border-white shadow-sm z-20" title={`Client arrivé à ${booking.arrival_time}`}></div>
+              )}
+              
+              {/* Affichage spécifique pour les notes */}
+              {isNote ? (
+                <div className="h-full flex flex-col overflow-hidden">
+                  <div className="font-semibold truncate text-[8px] leading-tight flex items-center gap-1">
+                    {booking.client_name === 'Note' ? '📝' : booking.client_name === 'Rappel' ? '⏰' : '✅'}
+                    <span>{booking.animal_name}</span>
                   </div>
-                )}
-              </>
-            )}
-            
-            {/* Indicateur de source de réservation */}
-            <div className="text-[6px] opacity-60 absolute bottom-0 right-0">
-              {booking.booking_source === 'online' ? '🌐' : 
-               booking.booking_source === 'manual' ? '✏️' : ''}
+                  {booking.client_comment && (
+                    <div className="truncate text-[7px] opacity-80 leading-tight mt-0.5">
+                      {booking.client_comment}
+                    </div>
+                  )}
+                </div>
+              ) : booking.status === 'pending' ? (
+                <div className="h-full flex flex-col justify-center overflow-hidden">
+                  <div className="font-semibold truncate text-[8px] leading-tight">
+                    {booking.client_name}
+                  </div>
+                  <div className="truncate text-[7px] opacity-90 leading-tight">
+                    {booking.animal_name}
+                  </div>
+                  <div className="text-[6px] opacity-70 font-medium text-center mt-0.5">
+                    À VALIDER
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* 1. Nom complet du client */}
+                  <div className="font-medium truncate text-[9px]">
+                    {booking.client_name}
+                  </div>
+                  
+                  {/* 2. Nom de l'animal */}
+                  <div className="truncate text-[8px] opacity-90 font-medium">
+                    {booking.animal_name}
+                  </div>
+                  
+                  {/* 3. Motif du RDV */}
+                  <div className="truncate text-[8px] opacity-80">
+                    {booking.consultation_reason}
+                  </div>
+                  
+                  {/* 4. Durée du RDV */}
+                  {booking.duration_minutes && (
+                    <div className="text-[7px] opacity-70 mt-0.5 font-medium">
+                      {booking.duration_minutes} min
+                    </div>
+                  )}
+                </>
+              )}
+              
+              {/* Indicateur de source de réservation */}
+              {!isNote && (
+                <div className="text-[6px] opacity-60 absolute bottom-0 right-0">
+                  {booking.booking_source === 'online' ? '🌐' : 
+                   booking.booking_source === 'manual' ? '✏️' : ''}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
         
         {/* Actions au survol pour créneaux ouverts */}
         {bookings.length === 0 && canInteract && showActions && (

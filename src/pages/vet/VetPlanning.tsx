@@ -70,10 +70,26 @@ export default function VetPlanning() {
   };
 
   const handleAppointmentClick = (appointment: any) => {
-    console.log('🎯 Opening edit modal for appointment:', appointment);
-    setAppointmentToEdit(appointment);
-    setCreateModalDefaultData(null);
-    setIsCreateModalOpen(true);
+    // Détecter si c'est une note
+    if (appointment.booking_source === 'note') {
+      console.log('📝 Opening note modal for editing:', appointment);
+      setNoteModalDefaultData({
+        id: appointment.id,
+        date: appointment.appointment_date,
+        time: appointment.appointment_time,
+        veterinarian: appointment.veterinarian_id,
+        title: appointment.animal_name,
+        description: appointment.client_comment,
+        noteType: appointment.client_name === 'Note' ? 'note' : 
+                  appointment.client_name === 'Rappel' ? 'reminder' : 'task'
+      });
+      setIsNoteModalOpen(true);
+    } else {
+      console.log('🎯 Opening edit modal for appointment:', appointment);
+      setAppointmentToEdit(appointment);
+      setCreateModalDefaultData(null);
+      setIsCreateModalOpen(true);
+    }
   };
 
   const handleCloseModal = () => {
