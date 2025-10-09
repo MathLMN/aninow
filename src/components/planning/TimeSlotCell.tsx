@@ -342,16 +342,25 @@ export const TimeSlotCell = ({
           </div>
         )}
 
-        {/* Actions au survol pour créneaux fermés - création de tâches */}
+        {/* Actions au survol pour créneaux fermés - création de tâches et RDV manuels */}
         {bookings.length === 0 && !canInteract && canCreateTask && showActions && (
           <div className="absolute inset-0 flex items-center justify-center bg-yellow-50/40 transition-opacity z-20">
-            <button
-              onClick={handleCreateTask}
-              className="p-0.5 rounded-full bg-yellow-600 text-white hover:bg-yellow-700 transition-colors"
-              title="Créer une tâche / note"
-            >
-              <FileText className="h-2.5 w-2.5" />
-            </button>
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={handleCellClick}
+                className="p-0.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                title="Ajouter un rendez-vous manuel"
+              >
+                <Plus className="h-2.5 w-2.5" />
+              </button>
+              <button
+                onClick={handleCreateTask}
+                className="p-0.5 rounded-full bg-yellow-600 text-white hover:bg-yellow-700 transition-colors"
+                title="Créer une tâche / note"
+              >
+                <FileText className="h-2.5 w-2.5" />
+              </button>
+            </div>
           </div>
         )}
       </div>
