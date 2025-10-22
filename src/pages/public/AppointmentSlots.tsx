@@ -10,7 +10,7 @@ import { useBookingFormData } from '@/hooks/useBookingFormData'
 import { useMultiTenantBookingNavigation } from '@/hooks/useMultiTenantBookingNavigation'
 import { Progress } from '@/components/ui/progress'
 import { useClinicContext } from '@/contexts/ClinicContext'
-import { useClinicVeterinarians } from '@/hooks/useClinicVeterinarians'
+import { useVeterinarianPreference } from '@/hooks/useVeterinarianPreference'
 import { Calendar, Clock, Sun, Moon, ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -22,7 +22,7 @@ const AppointmentSlots = () => {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { currentClinic } = useClinicContext()
-  const { veterinarians } = useClinicVeterinarians()
+  const { veterinarians, isLoading: isLoadingVets } = useVeterinarianPreference()
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
