@@ -5,12 +5,11 @@ import { useSearchParams } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { VeterinarianPreference } from '@/components/slots/VeterinarianPreference'
-import { useAvailableSlots } from '@/hooks/useAvailableSlots'
+import { usePublicBookingSlots } from '@/hooks/usePublicBookingSlots'
 import { useBookingFormData } from '@/hooks/useBookingFormData'
 import { useMultiTenantBookingNavigation } from '@/hooks/useMultiTenantBookingNavigation'
 import { Progress } from '@/components/ui/progress'
 import { useClinicContext } from '@/contexts/ClinicContext'
-import { useVeterinarianPreference } from '@/hooks/useVeterinarianPreference'
 import { Calendar, Clock, Sun, Moon, ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -22,7 +21,6 @@ const AppointmentSlots = () => {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { currentClinic } = useClinicContext()
-  const { veterinarians, isLoading: isLoadingVets } = useVeterinarianPreference()
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
@@ -33,16 +31,15 @@ const AppointmentSlots = () => {
 
   const clinicSlug = currentClinic?.slug || ''
 
-  // Vérifier s'il y a 2 animaux
-  const hasTwoAnimals = bookingData.multipleAnimals?.includes('2-animaux') || false
-  console.log('🐕🐕 Has two animals:', hasTwoAnimals)
-
-  const { slotsData, isLoading, error } = useAvailableSlots({
-    clinicSlug: clinicSlug || '',
-    selectedVeterinarianId: noVeterinarianPreference ? undefined : selectedVeterinarianId,
-    noVeterinarianPreference,
-    hasTwoAnimals
-  })
+  const { availableSlots, veterinarians, isLoading } = usePublicBookingSlots()
+  
+  // Filtrer les créneaux en fonction du vétérinaire sélectionné
+  const filteredSlots = noVeterinarianPreference || !selectedVeterinarianId 
+    ? availableSlots 
+    : availableSlots.map(daySlot => ({
+        ...daySlot,
+        slots: daySlot.slots.filter(slot => slot.veterinarian_id === selectedVeterinarianId)
+      })).filter(daySlot => daySlot.slots.length > 0)
 
   useEffect(() => {
     const vetId = searchParams.get('veterinarianId')
@@ -235,13 +232,6 @@ const AppointmentSlots = () => {
               {currentClinic.name}
             </p>
           )}
-          {hasTwoAnimals && (
-            <div className="bg-vet-blue/10 p-3 rounded-lg border border-vet-blue/20 max-w-2xl mx-auto">
-              <p className="text-sm text-vet-navy">
-                ℹ️ Rendez-vous pour 2 animaux : les créneaux affichés correspondent à 1h de consultation
-              </p>
-            </div>
-          )}
         </div>
 
         {/* Sélection du vétérinaire */}
@@ -259,36 +249,30 @@ const AppointmentSlots = () => {
             </div>
           )}
           
-          {error && (
-            <div className="text-center py-8">
-              <p className="text-red-500">Erreur lors du chargement des créneaux: {error.message}</p>
-            </div>
-          )}
-          
-          {slotsData && Array.from(slotsData.entries()).length === 0 && !isLoading && (
+          {!isLoading && filteredSlots.length === 0 && (
             <div className="text-center py-8">
               <p className="text-vet-brown">Aucun créneau disponible pour les critères sélectionnés.</p>
             </div>
           )}
 
-          {slotsData && Array.from(slotsData.entries()).sort().map(([date, slots]) => {
-            const isExpanded = expandedDates.has(date)
-            const availableSlots = slots.filter(slot => slot.available)
+          {filteredSlots.map((daySlot) => {
+            const isExpanded = expandedDates.has(daySlot.date)
+            const dayAvailableSlots = daySlot.slots
             
             return (
-              <Card key={date} className="bg-white/95 backdrop-blur-sm border-vet-blue/20 shadow-sm">
+              <Card key={daySlot.date} className="bg-white/95 backdrop-blur-sm border-vet-blue/20 shadow-sm">
                 <CardContent className="p-0">
                   <Button
                     variant="ghost"
                     className="w-full justify-between p-4 sm:p-6 h-auto text-left hover:bg-vet-beige/30"
-                    onClick={() => toggleDateExpansion(date)}
+                    onClick={() => toggleDateExpansion(daySlot.date)}
                   >
                     <div className="flex flex-col items-start">
                       <h3 className="text-base sm:text-lg font-semibold text-vet-navy">
-                        {formatDate(date)}
+                        {formatDate(daySlot.date)}
                       </h3>
                       <p className="text-xs sm:text-sm text-vet-brown mt-1">
-                        {availableSlots.length} créneau{availableSlots.length > 1 ? 'x' : ''} disponible{availableSlots.length > 1 ? 's' : ''}
+                        {dayAvailableSlots.length} créneau{dayAvailableSlots.length > 1 ? 'x' : ''} disponible{dayAvailableSlots.length > 1 ? 's' : ''}
                       </p>
                     </div>
                     {isExpanded ? (
@@ -300,8 +284,8 @@ const AppointmentSlots = () => {
 
                   {isExpanded && (
                     <div className="px-4 sm:px-6 pb-4 sm:pb-6">
-                      {renderSlots(availableSlots.map(slot => ({ ...slot, date })), 'morning')}
-                      {renderSlots(availableSlots.map(slot => ({ ...slot, date })), 'afternoon')}
+                      {renderSlots(dayAvailableSlots, 'morning')}
+                      {renderSlots(dayAvailableSlots, 'afternoon')}
                     </div>
                   )}
                 </CardContent>
@@ -310,7 +294,7 @@ const AppointmentSlots = () => {
           })}
 
           {/* Bouton "Voir plus de dates" si nécessaire */}
-          {slotsData && Array.from(slotsData.entries()).length > 0 && (
+          {filteredSlots.length > 0 && (
             <div className="text-center pt-4">
               <Button
                 variant="outline"
