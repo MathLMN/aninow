@@ -168,17 +168,24 @@ export const useAvailableSlots = ({
         const dateStr = date.toISOString().split('T')[0]
         const dayOfWeek = date.getDay()
 
+        console.log(`📅 Processing date: ${dateStr}, day of week: ${dayOfWeek}`)
+
         // Récupérer les schedules des vétérinaires pour ce jour
         const daySchedules = allVetSchedules?.filter(
           schedule => schedule.day_of_week === dayOfWeek && schedule.is_working
         ) || []
+
+        console.log(`📋 Day schedules found for day ${dayOfWeek}:`, daySchedules.length)
 
         // Si un vétérinaire spécifique est sélectionné, ne garder que son schedule
         const relevantSchedules = selectedVeterinarianId
           ? daySchedules.filter(s => s.veterinarian_id === selectedVeterinarianId)
           : daySchedules
 
+        console.log(`✅ Relevant schedules after filtering:`, relevantSchedules.length)
+
         if (relevantSchedules.length === 0) {
+          console.log(`⚠️ No relevant schedules for ${dateStr}`)
           return
         }
 
