@@ -98,14 +98,22 @@ export const useAvailableSlots = ({
 
       const clinicSettings = settings || defaultSettings
 
+      // Utiliser la fonction RPC pour récupérer les vétérinaires (comme useVeterinarianPreference)
       const { data: veterinarians, error: vetsError } = await supabase
-        .from('clinic_veterinarians')
-        .select('*')
-        .eq('clinic_id', clinic.id)
+        .rpc('get_clinic_veterinarians_for_booking', { 
+          clinic_slug: clinicSlug 
+        })
 
       if (vetsError) {
         throw new Error(`Erreur lors de la récupération des vétérinaires: ${vetsError.message}`)
       }
+
+      if (!veterinarians || veterinarians.length === 0) {
+        console.warn('⚠️ Aucun vétérinaire trouvé pour cette clinique')
+        return new Map()
+      }
+
+      console.log('👨‍⚕️ Vétérinaires récupérés:', veterinarians)
 
       const defaultDurationMinutes = clinicSettings?.default_slot_duration_minutes || 30
       const requiredDurationMinutes = hasTwoAnimals ? defaultDurationMinutes * 2 : defaultDurationMinutes
