@@ -127,26 +127,16 @@ export const useAvailableSlots = ({
         currentDate.setDate(currentDate.getDate() + 1)
       }
 
-      const allSchedules: { date: string; schedule: any | null }[] = []
+      // Récupérer tous les schedules des vétérinaires pour la semaine
+      const { data: allVetSchedules, error: schedulesError } = await supabase
+        .from('veterinarian_schedules')
+        .select('*')
+        .eq('clinic_id', clinic.id)
+        .in('veterinarian_id', veterinarians.map(v => v.id))
 
-      for (const date of dates) {
-        const dayOfWeek = date.getDay() // 0 (Sun) -> 6 (Sat)
-
-        // NOTE: day_of_week column is integer in DB, so we must compare with a number, not a string
-        const { data: daySchedule, error: dayScheduleError } = await supabase
-          .from('veterinarian_schedules')
-          .select('*')
-          .eq('clinic_id', clinic.id)
-          .eq('day_of_week', dayOfWeek) // FIX: use number instead of string day name
-          .single()
-
-        if (dayScheduleError && dayScheduleError.message !== 'Aucun résultat unique trouvé') {
-          console.error('Error fetching schedule:', dayScheduleError)
-          allSchedules.push({ date: date.toISOString().split('T')[0], schedule: null })
-          continue
-        }
-
-        allSchedules.push({ date: date.toISOString().split('T')[0], schedule: daySchedule })
+      if (schedulesError) {
+        console.error('Error fetching veterinarian schedules:', schedulesError)
+        throw new Error(`Erreur lors de la récupération des horaires: ${schedulesError.message}`)
       }
 
       const todayDate = new Date()
@@ -169,104 +159,117 @@ export const useAvailableSlots = ({
       dates.forEach(date => {
         const dateStr = date.toISOString().split('T')[0]
         const dayOfWeek = date.getDay()
-        let dayName = ''
 
-        switch (dayOfWeek) {
-          case 0:
-            dayName = 'sunday'
-            break
-          case 1:
-            dayName = 'monday'
-            break
-          case 2:
-            dayName = 'tuesday'
-            break
-          case 3:
-            dayName = 'wednesday'
-            break
-          case 4:
-            dayName = 'thursday'
-            break
-          case 5:
-            dayName = 'friday'
-            break
-          case 6:
-            dayName = 'saturday'
-            break
-          default:
-            console.warn('Invalid day of week:', dayOfWeek)
-            return
+        // Récupérer les schedules des vétérinaires pour ce jour
+        const daySchedules = allVetSchedules?.filter(
+          schedule => schedule.day_of_week === dayOfWeek && schedule.is_working
+        ) || []
+
+        // Si un vétérinaire spécifique est sélectionné, ne garder que son schedule
+        const relevantSchedules = selectedVeterinarianId
+          ? daySchedules.filter(s => s.veterinarian_id === selectedVeterinarianId)
+          : daySchedules
+
+        if (relevantSchedules.length === 0) {
+          return
         }
 
-        const daySchedule = allSchedules.find(schedule => schedule.date === dateStr)?.schedule
+        const allDaySlots: TimeSlot[] = []
 
-        if (daySchedule?.is_available) {
-          const slots: TimeSlot[] = []
-          
+        // Générer les créneaux pour chaque vétérinaire
+        relevantSchedules.forEach(schedule => {
+          const vetSlots: TimeSlot[] = []
+
           // Générer les créneaux du matin
-          if (daySchedule.morning_start && daySchedule.morning_end) {
+          if (schedule.morning_start && schedule.morning_end) {
             const morningSlots = generateTimeSlots(
-              daySchedule.morning_start, 
-              daySchedule.morning_end, 
+              schedule.morning_start,
+              schedule.morning_end,
               defaultDurationMinutes
             )
-            slots.push(...morningSlots)
+            vetSlots.push(...morningSlots.map(slot => ({
+              ...slot,
+              veterinarian_id: schedule.veterinarian_id
+            })))
           }
 
           // Générer les créneaux de l'après-midi
-          if (daySchedule.afternoon_start && daySchedule.afternoon_end) {
+          if (schedule.afternoon_start && schedule.afternoon_end) {
             const afternoonSlots = generateTimeSlots(
-              daySchedule.afternoon_start, 
-              daySchedule.afternoon_end, 
+              schedule.afternoon_start,
+              schedule.afternoon_end,
               defaultDurationMinutes
             )
-            slots.push(...afternoonSlots)
+            vetSlots.push(...afternoonSlots.map(slot => ({
+              ...slot,
+              veterinarian_id: schedule.veterinarian_id
+            })))
           }
 
-          // Filtrer les créneaux selon les réservations existantes et la durée requise
-          const availableSlots = slots.map(slot => {
-            const slotTime = slot.time
-            
-            // Pour 2 animaux, vérifier si le créneau actuel ET le suivant sont libres
-            if (hasTwoAnimals) {
-              const currentSlotAvailable = !bookings.some(booking =>
-                booking.appointment_date === dateStr &&
-                booking.appointment_time === slotTime &&
-                (!selectedVeterinarianId || booking.veterinarian_id === selectedVeterinarianId)
-              )
+          allDaySlots.push(...vetSlots)
+        })
 
-              // Calculer l'heure du créneau suivant
-              const nextSlotTime = addMinutesToTime(slotTime, defaultDurationMinutes)
-              const nextSlotAvailable = !bookings.some(booking =>
-                booking.appointment_date === dateStr &&
-                booking.appointment_time === nextSlotTime &&
-                (!selectedVeterinarianId || booking.veterinarian_id === selectedVeterinarianId)
-              )
+        // Filtrer les créneaux selon les réservations existantes
+        const availableSlots = allDaySlots.map(slot => {
+          const slotTime = slot.time
 
-              // Le créneau n'est disponible que si les deux sont libres
-              const bothSlotsAvailable = currentSlotAvailable && nextSlotAvailable
+          // Pour 2 animaux, vérifier si le créneau actuel ET le suivant sont libres
+          if (hasTwoAnimals) {
+            const currentSlotAvailable = !bookings.some(booking =>
+              booking.appointment_date === dateStr &&
+              booking.appointment_time === slotTime &&
+              booking.veterinarian_id === slot.veterinarian_id
+            )
 
-              return {
-                ...slot,
-                available: bothSlotsAvailable,
-                veterinarian_id: selectedVeterinarianId || slot.veterinarian_id
-              }
-            } else {
-              // Pour 1 animal, logique normale
-              const isBooked = bookings.some(booking =>
-                booking.appointment_date === dateStr &&
-                booking.appointment_time === slotTime &&
-                (!selectedVeterinarianId || booking.veterinarian_id === selectedVeterinarianId)
-              )
+            const nextSlotTime = addMinutesToTime(slotTime, defaultDurationMinutes)
+            const nextSlotAvailable = !bookings.some(booking =>
+              booking.appointment_date === dateStr &&
+              booking.appointment_time === nextSlotTime &&
+              booking.veterinarian_id === slot.veterinarian_id
+            )
 
-              return {
-                ...slot,
-                available: !isBooked,
-                veterinarian_id: selectedVeterinarianId || slot.veterinarian_id
-              }
+            const bothSlotsAvailable = currentSlotAvailable && nextSlotAvailable
+
+            return {
+              ...slot,
+              available: bothSlotsAvailable
             }
-          }).filter(slot => slot.available) // Ne garder que les créneaux disponibles
+          } else {
+            // Pour 1 animal, logique normale
+            const isBooked = bookings.some(booking =>
+              booking.appointment_date === dateStr &&
+              booking.appointment_time === slotTime &&
+              booking.veterinarian_id === slot.veterinarian_id
+            )
 
+            return {
+              ...slot,
+              available: !isBooked
+            }
+          }
+        }).filter(slot => slot.available)
+
+        // Si pas de préférence de vétérinaire, grouper par créneau horaire
+        if (noVeterinarianPreference && !selectedVeterinarianId) {
+          const groupedSlots = new Map<string, TimeSlot>()
+          
+          availableSlots.forEach(slot => {
+            const existing = groupedSlots.get(slot.time)
+            if (existing) {
+              if (!existing.availableVeterinarians) {
+                existing.availableVeterinarians = [existing.veterinarian_id]
+              }
+              existing.availableVeterinarians.push(slot.veterinarian_id)
+            } else {
+              groupedSlots.set(slot.time, {
+                ...slot,
+                availableVeterinarians: [slot.veterinarian_id]
+              })
+            }
+          })
+
+          processedSlots.set(dateStr, Array.from(groupedSlots.values()))
+        } else {
           processedSlots.set(dateStr, availableSlots)
         }
       })
