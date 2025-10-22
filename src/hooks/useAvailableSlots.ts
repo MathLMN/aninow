@@ -75,11 +75,28 @@ export const useAvailableSlots = ({
         .from('clinic_settings')
         .select('*')
         .eq('clinic_id', clinic.id)
-        .single()
+        .maybeSingle()
 
       if (settingsError) {
+        console.error('Error fetching settings:', settingsError)
         throw new Error(`Erreur lors de la récupération des paramètres de la clinique: ${settingsError.message}`)
       }
+
+      // Use default settings if none found
+      const defaultSettings = {
+        default_slot_duration_minutes: 30,
+        daily_schedules: {
+          monday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+          tuesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+          wednesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+          thursday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+          friday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
+          saturday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } },
+          sunday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } }
+        }
+      }
+
+      const clinicSettings = settings || defaultSettings
 
       const { data: veterinarians, error: vetsError } = await supabase
         .from('clinic_veterinarians')
@@ -90,7 +107,7 @@ export const useAvailableSlots = ({
         throw new Error(`Erreur lors de la récupération des vétérinaires: ${vetsError.message}`)
       }
 
-      const defaultDurationMinutes = settings?.default_slot_duration_minutes || 30
+      const defaultDurationMinutes = clinicSettings?.default_slot_duration_minutes || 30
       const requiredDurationMinutes = hasTwoAnimals ? defaultDurationMinutes * 2 : defaultDurationMinutes
       console.log('⏱️ Required duration for slots:', requiredDurationMinutes, 'minutes')
 
