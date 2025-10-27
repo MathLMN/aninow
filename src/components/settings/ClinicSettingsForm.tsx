@@ -139,7 +139,7 @@ export const ClinicSettingsForm = () => {
     deleteVeterinarian
   } = useClinicVeterinarians();
   const { schedules } = useVeterinarianSchedules();
-  const { consultationTypes } = useSlotManagement();
+  const { consultationTypes, fetchConsultationTypes } = useSlotManagement();
   const { currentClinicId } = useClinicAccess();
   const { toast } = useToast();
 
@@ -327,6 +327,7 @@ export const ClinicSettingsForm = () => {
   const [editingConsultationType, setEditingConsultationType] = useState<ConsultationType | null>(null);
 
   const refreshConsultationTypes = async () => {
+    await fetchConsultationTypes();
   };
 
   const handleConsultationTypeSubmit = async (e: React.FormEvent) => {

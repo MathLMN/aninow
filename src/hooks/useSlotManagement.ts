@@ -165,6 +165,7 @@ export const useSlotManagement = () => {
     isLoading,
     error,
     fetchAvailableSlots,
+    fetchConsultationTypes,
     createSlot,
     deleteSlot
   }
