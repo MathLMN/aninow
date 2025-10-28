@@ -237,8 +237,63 @@ async function getPromptTemplate(booking: BookingData, supabaseClient: any): Pro
     return {
       id: 'fallback',
       name: 'fallback_template',
-      system_prompt: 'Tu es un assistant vétérinaire expert qui analyse les demandes de consultation. Tu dois évaluer l\'urgence d\'une consultation vétérinaire sur une échelle de 1 à 10. Réponds UNIQUEMENT en JSON avec cette structure exacte: {"urgency_score": number (1-10), "recommended_actions": ["action1", "action2"], "analysis_summary": "résumé de l\'analyse", "confidence_score": number (0-1), "ai_insights": "insights détaillés sur le cas", "priority_level": "low|medium|high|critical"}',
-      user_prompt_template: 'Analyse cette demande de consultation vétérinaire pour {{animal_name}} ({{animal_species}}):\n\nMotif: {{consultation_reason}}\nSymptômes: {{symptoms}}\nDurée: {{symptom_duration}}\nCommentaire: {{client_comment}}',
+      system_prompt: `Tu es un assistant vétérinaire expert qui analyse les demandes de consultation. 
+
+OBJECTIF: Générer un résumé concis et clair pour les vétérinaires.
+
+Le résumé doit être:
+- Concis (2-3 phrases maximum)
+- Orienté clinique vétérinaire
+- Facile à lire rapidement
+- Synthétiser les symptômes principaux et leur gravité
+- Mentionner les facteurs aggravants (âge, durée, comportement)
+
+L'évaluation d'urgence doit être basée sur:
+- La gravité des symptômes
+- La durée d'évolution
+- L'âge de l'animal
+- Les réponses aux questions conditionnelles
+- Les changements comportementaux
+
+Réponds UNIQUEMENT en JSON avec cette structure exacte:
+{
+  "urgency_score": number (1-10),
+  "recommended_actions": ["action1", "action2"],
+  "analysis_summary": "résumé concis de 2-3 phrases maximum",
+  "confidence_score": number (0-1),
+  "ai_insights": "analyse détaillée pour le dossier",
+  "priority_level": "low|medium|high|critical"
+}`,
+      user_prompt_template: `Analyse cette demande de consultation vétérinaire:
+
+ANIMAL:
+- Nom: {{animal_name}}
+- Espèce: {{animal_species}}
+- Âge: {{animal_age}}
+- Race: {{animal_breed}}
+- Poids: {{animal_weight}} kg
+
+MOTIF DE CONSULTATION:
+{{consultation_reason}}
+
+SYMPTÔMES OBSERVÉS:
+{{symptoms}}
+{{#custom_symptom}}
+Symptôme personnalisé: {{custom_symptom}}
+{{/custom_symptom}}
+
+DURÉE DES SYMPTÔMES:
+{{symptom_duration}}
+
+RÉPONSES AUX QUESTIONS CONDITIONNELLES:
+{{conditional_answers}}
+
+{{#client_comment}}
+COMMENTAIRE DU CLIENT:
+{{client_comment}}
+{{/client_comment}}
+
+Génère un résumé clinique concis (2-3 phrases) et une évaluation d'urgence précise.`,
       variables: {}
     }
   }
