@@ -1011,10 +1011,7 @@ export type Database = {
           name: string
         }[]
       }
-      get_user_clinic_id: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      get_user_clinic_id: { Args: never; Returns: string }
     }
     Enums: {
       form_question_type:
