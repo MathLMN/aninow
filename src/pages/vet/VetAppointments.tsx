@@ -161,11 +161,19 @@ const VetAppointments = () => {
                         </div>
                       </div>
                       <p className="text-xs text-vet-brown">
-                        Espèce: {booking.animal_species} | 
-                        Motif: {booking.consultation_reason === 'consultation-convenance' ? 'Convenance' :
-                                booking.consultation_reason === 'symptomes-anomalie' ? 'Symptômes' :
-                                booking.consultation_reason === 'urgence' ? 'Urgence' : 'Consultation'}
+                        Espèce: {booking.animal_species}
                       </p>
+                      {booking.ai_analysis && isValidAiAnalysis(booking.ai_analysis) ? (
+                        <p className="text-sm text-vet-navy font-medium mt-1">
+                          📋 {booking.ai_analysis.analysis_summary}
+                        </p>
+                      ) : (
+                        <p className="text-xs text-vet-brown mt-1">
+                          Motif: {booking.consultation_reason === 'consultation-convenance' ? 'Convenance' :
+                                  booking.consultation_reason === 'symptomes-anomalie' ? 'Symptômes' :
+                                  booking.consultation_reason === 'urgence' ? 'Urgence' : 'Consultation'}
+                        </p>
+                      )}
                       {booking.selected_symptoms && booking.selected_symptoms.length > 0 && (
                         <p className="text-xs text-vet-brown mt-1">
                           Symptômes: {booking.selected_symptoms.join(', ')}
