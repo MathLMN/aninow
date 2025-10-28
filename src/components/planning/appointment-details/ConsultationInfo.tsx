@@ -14,6 +14,17 @@ export const ConsultationInfo = ({ appointment }: ConsultationInfoProps) => {
     return 'text-green-600 bg-green-50';
   };
 
+  const getConsultationTypeLabel = (reason: string) => {
+    switch (reason) {
+      case 'symptomes-anomalie':
+        return 'Symptômes ou anomalie';
+      case 'consultation-convenance':
+        return 'Consultation de convenance';
+      default:
+        return reason;
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Motif de consultation */}
@@ -23,7 +34,7 @@ export const ConsultationInfo = ({ appointment }: ConsultationInfoProps) => {
           Motif de consultation
         </h4>
         <div className="text-sm space-y-2 pl-6">
-          <div><strong>Raison:</strong> {appointment.consultation_reason}</div>
+          <div><strong>Type de consultation:</strong> {getConsultationTypeLabel(appointment.consultation_reason)}</div>
           {appointment.selected_symptoms && appointment.selected_symptoms.length > 0 && (
             <div>
               <strong>Symptômes:</strong>
