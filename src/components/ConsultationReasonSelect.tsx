@@ -28,13 +28,13 @@ const ConsultationReasonSelect: React.FC<ConsultationReasonSelectProps> = ({
         <SelectContent className="bg-white border-2 border-gray-200 shadow-xl z-50 rounded-lg">
           <SelectItem 
             value="symptomes-anomalie" 
-            className="text-sm sm:text-base py-2 sm:py-3 px-3 sm:px-4 leading-tight hover:bg-vet-beige/50 cursor-pointer"
+            className="text-sm sm:text-base py-3 sm:py-3 px-2 sm:px-4 leading-normal whitespace-normal hover:bg-vet-beige/50 cursor-pointer min-h-[3rem] sm:min-h-0"
           >
             🩺 Symptômes ou anomalie (boiterie, vomissements,...)
           </SelectItem>
           <SelectItem 
             value="consultation-convenance" 
-            className="text-sm sm:text-base py-2 sm:py-3 px-3 sm:px-4 leading-tight hover:bg-vet-beige/50 cursor-pointer"
+            className="text-sm sm:text-base py-3 sm:py-3 px-2 sm:px-4 leading-normal whitespace-normal hover:bg-vet-beige/50 cursor-pointer min-h-[3rem] sm:min-h-0"
           >
             💉 Consultation de convenance (vaccins, contrôle,...)
           </SelectItem>
