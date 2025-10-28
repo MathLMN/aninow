@@ -172,7 +172,22 @@ async function analyzeBookingWithAI(booking: BookingData, supabaseClient: any): 
     console.log('Lovable AI response received:', aiResponse)
 
     // Parser la réponse JSON de l'IA
-    const aiAnalysis = JSON.parse(aiResponse)
+    let aiAnalysis
+    try {
+      // Essayer de parser directement en JSON
+      aiAnalysis = JSON.parse(aiResponse)
+    } catch (parseError) {
+      // Si l'IA retourne du texte libre, créer une structure JSON
+      console.log('AI returned text instead of JSON, converting:', parseError)
+      aiAnalysis = {
+        analysis_summary: aiResponse.trim(),
+        urgency_score: 5, // Score par défaut moyen
+        recommended_actions: ['Consultation standard', 'Préparer le carnet de santé'],
+        confidence_score: 0.7,
+        ai_insights: aiResponse.trim(),
+        priority_level: 'medium'
+      }
+    }
     
     // Logger les performances du prompt
     await logPromptPerformance(

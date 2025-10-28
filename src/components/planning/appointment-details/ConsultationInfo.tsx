@@ -62,9 +62,9 @@ export const ConsultationInfo = ({ appointment }: ConsultationInfoProps) => {
         <div className="text-sm space-y-3 pl-6">
           <div><strong>Type de consultation:</strong> {getConsultationTypeLabel(appointment.consultation_reason)}</div>
           
-          {/* Raison de la consultation */}
+          {/* Résumé de la consultation par l'IA */}
           <div>
-            <strong>Raison de la consultation:</strong>
+            <strong>Résumé de la consultation:</strong>
             {appointment.consultation_reason === 'consultation-convenance' ? (
               // Pour les consultations de convenance, afficher les options sélectionnées
               appointment.convenience_options && appointment.convenience_options.length > 0 ? (
