@@ -114,10 +114,10 @@ serve(async (req) => {
 })
 
 async function analyzeBookingWithAI(booking: BookingData, supabaseClient: any): Promise<AnalysisResult> {
-  const openAIApiKey = Deno.env.get('OPENAI_API_KEY')
+  const lovableApiKey = Deno.env.get('LOVABLE_API_KEY')
   
-  if (!openAIApiKey) {
-    console.log('OpenAI API key not found, falling back to basic analysis')
+  if (!lovableApiKey) {
+    console.log('Lovable API key not found, falling back to basic analysis')
     return analyzeBookingFallback(booking)
   }
 
@@ -128,16 +128,16 @@ async function analyzeBookingWithAI(booking: BookingData, supabaseClient: any): 
     // Préparer le prompt avec le template
     const { systemPrompt, userPrompt } = buildPromptsFromTemplate(template, booking)
     
-    console.log('Sending request to OpenAI for booking analysis with template:', template.name)
+    console.log('Sending request to Lovable AI for booking analysis with template:', template.name)
     
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        'Authorization': `Bearer ${lovableApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'google/gemini-2.5-flash',
         messages: [
           {
             role: 'system',
@@ -148,19 +148,28 @@ async function analyzeBookingWithAI(booking: BookingData, supabaseClient: any): 
             content: userPrompt
           }
         ],
-        temperature: 0.1,
         max_tokens: 1000
       }),
     })
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`)
+      const errorText = await response.text()
+      console.error('Lovable AI API error:', response.status, errorText)
+      
+      if (response.status === 429) {
+        throw new Error('Rate limit exceeded. Please try again later.')
+      }
+      if (response.status === 402) {
+        throw new Error('AI credits exhausted. Please add credits to your workspace.')
+      }
+      
+      throw new Error(`Lovable AI API error: ${response.status}`)
     }
 
     const data = await response.json()
     const aiResponse = data.choices[0].message.content
 
-    console.log('OpenAI response received:', aiResponse)
+    console.log('Lovable AI response received:', aiResponse)
 
     // Parser la réponse JSON de l'IA
     const aiAnalysis = JSON.parse(aiResponse)
