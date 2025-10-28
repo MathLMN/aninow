@@ -25,7 +25,7 @@ const ConsultationReasonSelect: React.FC<ConsultationReasonSelectProps> = ({
             className="text-gray-500"
           />
         </SelectTrigger>
-        <SelectContent className="bg-white border-2 border-gray-200 shadow-xl z-50 rounded-lg">
+        <SelectContent className="bg-white border-2 border-gray-200 shadow-xl z-50 rounded-lg w-[calc(100vw-2rem)] sm:w-auto">
           <SelectItem 
             value="symptomes-anomalie" 
             className="text-sm sm:text-base py-3 sm:py-3 px-2 sm:px-4 leading-normal whitespace-normal hover:bg-vet-beige/50 cursor-pointer min-h-[3rem] sm:min-h-0"
