@@ -1,102 +1,87 @@
-import { CheckCircle, Clock, Mail, Calendar } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 
 export const ValidationProcessTimeline = () => {
   const steps = [
     {
-      icon: CheckCircle,
+      number: 1,
       label: "Demande reçue",
       status: "completed",
-      description: "Votre demande a été enregistrée"
+      description: "Enregistrée avec succès"
     },
     {
-      icon: Clock,
-      label: "Validation en cours",
+      number: 2,
+      label: "Validation",
       status: "current",
-      description: "Notre équipe analyse votre demande"
+      description: "Analyse en cours"
     },
     {
-      icon: Mail,
-      label: "Confirmation par email",
+      number: 3,
+      label: "Email",
       status: "pending",
-      description: "Vous recevrez un email de confirmation"
+      description: "Confirmation à venir"
     },
     {
-      icon: Calendar,
-      label: "Rendez-vous confirmé",
+      number: 4,
+      label: "RDV confirmé",
       status: "pending",
-      description: "Votre rendez-vous est validé"
+      description: "Validation finale"
     }
   ];
 
   return (
-    <div className="space-y-4">
-      {/* Desktop: Timeline horizontale */}
-      <div className="hidden md:flex items-center justify-between relative">
-        {/* Ligne de connexion */}
-        <div className="absolute top-5 left-0 right-0 h-0.5 bg-vet-beige/30 -z-10" />
-        <div className="absolute top-5 left-0 w-1/4 h-0.5 bg-vet-sage -z-10" />
+    <div className="w-full">
+      {/* Frise horizontale chronologique */}
+      <div className="relative">
+        {/* Ligne de progression */}
+        <div className="absolute top-6 left-0 right-0 h-1 bg-vet-beige/30 rounded-full" />
+        <div 
+          className="absolute top-6 left-0 h-1 bg-gradient-to-r from-vet-sage to-vet-blue rounded-full transition-all duration-500"
+          style={{ width: '25%' }}
+        />
         
-        {steps.map((step, index) => {
-          const Icon = step.icon;
-          const isCompleted = step.status === "completed";
-          const isCurrent = step.status === "current";
-          
-          return (
-            <div key={index} className="flex flex-col items-center flex-1">
-              <div 
-                className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
-                  isCompleted 
-                    ? "bg-vet-sage text-white" 
-                    : isCurrent 
-                    ? "bg-vet-blue text-white animate-pulse" 
-                    : "bg-vet-beige/30 text-vet-brown/50"
-                }`}
-              >
-                <Icon className="h-5 w-5" />
+        {/* Étapes */}
+        <div className="relative flex justify-between items-start">
+          {steps.map((step, index) => {
+            const isCompleted = step.status === "completed";
+            const isCurrent = step.status === "current";
+            const isPending = step.status === "pending";
+            
+            return (
+              <div key={index} className="flex flex-col items-center" style={{ width: '25%' }}>
+                {/* Numéro / Check */}
+                <div 
+                  className={`relative z-10 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg mb-3 transition-all duration-300 ${
+                    isCompleted 
+                      ? "bg-vet-sage text-white shadow-lg scale-110" 
+                      : isCurrent 
+                      ? "bg-vet-blue text-white shadow-lg animate-pulse scale-110" 
+                      : "bg-white border-2 border-vet-beige/50 text-vet-brown/40"
+                  }`}
+                >
+                  {isCompleted ? (
+                    <CheckCircle className="h-6 w-6" />
+                  ) : (
+                    step.number
+                  )}
+                </div>
+                
+                {/* Label et description */}
+                <div className="text-center px-1">
+                  <p className={`text-sm font-semibold mb-1 ${
+                    isCompleted || isCurrent ? "text-vet-navy" : "text-vet-brown/50"
+                  }`}>
+                    {step.label}
+                  </p>
+                  <p className={`text-xs leading-tight ${
+                    isCompleted || isCurrent ? "text-vet-brown/70" : "text-vet-brown/40"
+                  }`}>
+                    {step.description}
+                  </p>
+                </div>
               </div>
-              <p className={`text-sm font-medium text-center ${
-                isCompleted || isCurrent ? "text-vet-navy" : "text-vet-brown/50"
-              }`}>
-                {step.label}
-              </p>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Mobile: Timeline verticale */}
-      <div className="md:hidden space-y-3">
-        {steps.map((step, index) => {
-          const Icon = step.icon;
-          const isCompleted = step.status === "completed";
-          const isCurrent = step.status === "current";
-          
-          return (
-            <div key={index} className="flex items-start gap-3">
-              <div 
-                className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  isCompleted 
-                    ? "bg-vet-sage text-white" 
-                    : isCurrent 
-                    ? "bg-vet-blue text-white" 
-                    : "bg-vet-beige/30 text-vet-brown/50"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-              </div>
-              <div className="flex-1">
-                <p className={`text-sm font-medium ${
-                  isCompleted || isCurrent ? "text-vet-navy" : "text-vet-brown/50"
-                }`}>
-                  {step.label}
-                </p>
-                <p className="text-xs text-vet-brown/70 mt-0.5">
-                  {step.description}
-                </p>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );
