@@ -66,6 +66,7 @@ export interface CompleteBookingData {
   appointmentDate?: string
   appointmentTime?: string
   veterinarianId?: string
+  veterinarianName?: string
 }
 
 export const useBookingFormData = () => {

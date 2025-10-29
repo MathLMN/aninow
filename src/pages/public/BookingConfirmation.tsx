@@ -29,7 +29,9 @@ const BookingConfirmation = () => {
   } = usePublicClinicSettings();
   const [submissionResult, setSubmissionResult] = useState<any>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const [veterinarianName, setVeterinarianName] = useState<string | null>(null);
+  const [veterinarianName, setVeterinarianName] = useState<string | null>(
+    bookingData.veterinarianName || null
+  );
   const [showAdvice, setShowAdvice] = useState(false);
   console.log('BookingConfirmation - bookingData:', bookingData);
 
@@ -104,18 +106,28 @@ const BookingConfirmation = () => {
   // Récupérer le nom du vétérinaire si assigné
   useEffect(() => {
     const fetchVeterinarian = async () => {
+      // Si on a déjà le nom du vétérinaire dans bookingData, l'utiliser
+      if (bookingData.veterinarianName) {
+        setVeterinarianName(bookingData.veterinarianName);
+        return;
+      }
+      
+      // Sinon, récupérer depuis la base de données si un vétérinaire est assigné
       const booking = submissionResult?.booking;
       if (booking?.veterinarian_id) {
-        const {
-          data
-        } = await supabase.from('clinic_veterinarians').select('name').eq('id', booking.veterinarian_id).single();
+        const { data } = await supabase
+          .from('clinic_veterinarians')
+          .select('name')
+          .eq('id', booking.veterinarian_id)
+          .maybeSingle();
+        
         if (data) {
           setVeterinarianName(data.name);
         }
       }
     };
     fetchVeterinarian();
-  }, [submissionResult]);
+  }, [submissionResult, bookingData.veterinarianName]);
 
   // Affichage pendant le chargement
   if (isSubmitting) {
