@@ -30,6 +30,7 @@ const BookingConfirmation = () => {
   const [submissionResult, setSubmissionResult] = useState<any>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [veterinarianName, setVeterinarianName] = useState<string | null>(null);
+  const [showAdvice, setShowAdvice] = useState(false);
   console.log('BookingConfirmation - bookingData:', bookingData);
 
   // Récupérer depuis localStorage si pas de submissionResult
@@ -195,14 +196,14 @@ const BookingConfirmation = () => {
   return <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
       <Header />
 
-      <main className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
         <div className="max-w-3xl mx-auto">
           {/* Hero - Confirmation visuelle */}
-          <div className="text-center mb-8 mt-20 sm:mt-24 animate-fade-in">
-            <CheckCircle className="h-16 sm:h-20 w-16 sm:w-20 text-vet-sage mx-auto mb-4" />
-            <h1 className="text-3xl sm:text-4xl font-bold text-vet-navy mb-2">Demande envoyée !</h1>
-            <p className="text-vet-brown text-sm sm:text-base">
-              On s'occupe de tout. Vous recevrez un email de confirmation dans quelques minutes.
+          <div className="text-center mb-4 mt-16 sm:mt-20 animate-fade-in">
+            <CheckCircle className="h-12 sm:h-16 w-12 sm:w-16 text-vet-sage mx-auto mb-3" />
+            <h1 className="text-2xl sm:text-3xl font-bold text-vet-navy mb-1">Demande envoyée !</h1>
+            <p className="text-vet-brown text-sm">
+              Vous recevrez un email de confirmation dans quelques minutes.
             </p>
           </div>
 
@@ -221,40 +222,59 @@ const BookingConfirmation = () => {
           )}
 
           {/* Prochaines étapes - Timeline */}
-          <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-lg mb-6">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg text-vet-navy">Comment ça se passe maintenant ?</CardTitle>
+          <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-lg mb-4">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base text-vet-navy">Comment ça se passe maintenant ?</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3">
               <ValidationProcessTimeline />
               
-              <p className="text-sm text-vet-brown leading-relaxed">
-                Notre équipe vétérinaire valide votre demande en fonction de l'urgence de la situation 
-                et de nos disponibilités. Vous recevrez une confirmation définitive par email dans les 
-                plus brefs délais.
+              <p className="text-xs text-vet-brown leading-relaxed">
+                Notre équipe valide votre demande et vous recevrez une confirmation définitive par email.
               </p>
-
-              <div className="bg-vet-beige/20 p-4 rounded-lg">
-                <p className="font-semibold text-vet-navy text-sm mb-2">Pensez à apporter :</p>
-                <ul className="text-sm text-vet-brown space-y-1">
-                  <li>• Carnet de santé de {bookingData.animalName || 'votre animal'}</li>
-                  <li>• Liste des traitements en cours</li>
-                  <li>• Résultats d'examens récents (si applicable)</li>
-                </ul>
-              </div>
             </CardContent>
           </Card>
 
-          {/* Analyse IA - Résumé de la situation */}
-          {aiAnalysis && <div className="mb-6">
-              <AnalysisDisplay aiAnalysis={aiAnalysis} />
-            </div>}
+          {/* Bouton pour afficher les conseils */}
+          <div className="text-center mb-4">
+            <Button
+              onClick={() => setShowAdvice(!showAdvice)}
+              variant="outline"
+              className="border-vet-sage text-vet-sage hover:bg-vet-sage hover:text-white transition-all"
+            >
+              {showAdvice ? "Masquer les conseils" : "Voir nos conseils"}
+            </Button>
+          </div>
 
-          {/* Alerte d'urgence (si applicable) */}
-          {aiAnalysis && <UrgencyAlert urgencyScore={aiAnalysis.urgency_score} priorityLevel={aiAnalysis.priority_level} clinicPhone={displaySettings.clinic_phone} />}
+          {/* Contenu additionnel (masqué par défaut) */}
+          {showAdvice && (
+            <div className="space-y-4 animate-fade-in">
+              {/* Analyse IA - Résumé de la situation */}
+              {aiAnalysis && <div className="mb-4">
+                  <AnalysisDisplay aiAnalysis={aiAnalysis} />
+                </div>}
+
+              {/* Alerte d'urgence (si applicable) */}
+              {aiAnalysis && <UrgencyAlert urgencyScore={aiAnalysis.urgency_score} priorityLevel={aiAnalysis.priority_level} clinicPhone={displaySettings.clinic_phone} />}
+
+              {/* Conseils pour le rendez-vous */}
+              <Card className="bg-white/90 backdrop-blur-sm border-vet-sage/30 shadow-lg mb-4">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base text-vet-navy">Pensez à apporter</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="text-sm text-vet-brown space-y-1.5">
+                    <li>• Carnet de santé de {bookingData.animalName || 'votre animal'}</li>
+                    <li>• Liste des traitements en cours</li>
+                    <li>• Résultats d'examens récents (si applicable)</li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           {/* Actions CTA */}
-          <div className="text-center space-y-3">
+          <div className="text-center space-y-3 pb-4">
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link to="/" className="w-full sm:w-auto">
                 <Button className="w-full sm:w-auto bg-vet-sage hover:bg-vet-sage/90 text-white">
