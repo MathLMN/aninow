@@ -268,20 +268,6 @@ const BookingConfirmation = () => {
 
               {/* Alerte d'urgence (si applicable) */}
               {aiAnalysis && <UrgencyAlert urgencyScore={aiAnalysis.urgency_score} priorityLevel={aiAnalysis.priority_level} clinicPhone={displaySettings.clinic_phone} />}
-
-              {/* Conseils pour le rendez-vous */}
-              <Card className="bg-white/90 backdrop-blur-sm border-vet-sage/30 shadow-lg mb-4">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base text-vet-navy">Pensez à apporter</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="text-sm text-vet-brown space-y-1.5">
-                    <li>• Carnet de santé de {bookingData.animalName || 'votre animal'}</li>
-                    <li>• Liste des traitements en cours</li>
-                    <li>• Résultats d'examens récents (si applicable)</li>
-                  </ul>
-                </CardContent>
-              </Card>
             </div>
           )}
 
