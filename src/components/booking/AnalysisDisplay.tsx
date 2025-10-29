@@ -40,8 +40,8 @@ export const AnalysisDisplay = ({ aiAnalysis }: AnalysisDisplayProps) => {
 
   const PriorityIcon = getPriorityIcon(aiAnalysis.priority_level)
   
-  // Afficher le badge uniquement si score >= 5
-  const showPriorityBadge = aiAnalysis.urgency_score >= 5;
+  // Afficher le badge seulement si urgence >= 7 (haute urgence)
+  const showPriorityBadge = aiAnalysis.urgency_score >= 7;
 
   return (
     <Card className="bg-white/95 backdrop-blur-sm border-vet-blue/30 shadow-lg">
