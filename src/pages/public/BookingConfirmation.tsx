@@ -10,10 +10,12 @@ import { AnalysisDisplay } from "@/components/booking/AnalysisDisplay";
 import { UrgencyAlert } from "@/components/booking/UrgencyAlert";
 import { BookingSummaryCard } from "@/components/booking/BookingSummaryCard";
 import { ValidationProcessTimeline } from "@/components/booking/ValidationProcessTimeline";
-import { useClinicSettings } from "@/hooks/useClinicSettings";
+import { usePublicClinicSettings } from "@/hooks/usePublicClinicSettings";
 import { supabase } from "@/integrations/supabase/client";
+import { useClinicContext } from "@/contexts/ClinicContext";
 const BookingConfirmation = () => {
   const navigate = useNavigate();
+  const { currentClinic } = useClinicContext();
   const {
     submitBooking,
     isSubmitting
@@ -22,8 +24,9 @@ const BookingConfirmation = () => {
     bookingData
   } = useBookingFormData();
   const {
-    settings
-  } = useClinicSettings();
+    settings,
+    isLoading: isLoadingSettings
+  } = usePublicClinicSettings();
   const [submissionResult, setSubmissionResult] = useState<any>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [veterinarianName, setVeterinarianName] = useState<string | null>(null);
