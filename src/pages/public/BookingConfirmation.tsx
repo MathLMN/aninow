@@ -224,7 +224,7 @@ const BookingConfirmation = () => {
           {/* Prochaines étapes - Timeline */}
           <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-lg mb-4">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base text-vet-navy">Comment ça se passe maintenant ?</CardTitle>
+              <CardTitle className="text-base text-vet-navy">Attendez notre confirmation</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <ValidationProcessTimeline />
