@@ -5,9 +5,10 @@ import { TrendingUp, AlertTriangle, CheckCircle } from "lucide-react";
 
 interface AnalysisDisplayProps {
   aiAnalysis: any;
+  bookingData?: any;
 }
 
-export const AnalysisDisplay = ({ aiAnalysis }: AnalysisDisplayProps) => {
+export const AnalysisDisplay = ({ aiAnalysis, bookingData }: AnalysisDisplayProps) => {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'critical': return 'bg-red-500 text-white'
@@ -59,10 +60,52 @@ export const AnalysisDisplay = ({ aiAnalysis }: AnalysisDisplayProps) => {
       <CardContent className="space-y-4 px-4 sm:px-6">
         {/* Résumé de l'analyse */}
         <div>
-          <h4 className="font-semibold text-vet-navy mb-2 text-sm">Ce que nous avons compris :</h4>
-          <p className="text-vet-brown text-sm leading-relaxed">
-            {aiAnalysis.analysis_summary}
-          </p>
+          <h4 className="font-semibold text-vet-navy mb-2 text-sm">Récapitulatif de votre demande :</h4>
+          
+          {/* Motif de consultation généré par l'IA */}
+          <div className="bg-vet-beige/30 p-3 rounded-md mb-3">
+            <p className="text-vet-brown text-sm leading-relaxed font-medium">
+              {aiAnalysis.analysis_summary}
+            </p>
+          </div>
+
+          {/* Symptômes sélectionnés */}
+          {bookingData?.selectedSymptoms && bookingData.selectedSymptoms.length > 0 && (
+            <div className="mb-2">
+              <p className="text-xs font-semibold text-vet-navy mb-1">Symptômes signalés :</p>
+              <div className="flex flex-wrap gap-1.5">
+                {bookingData.selectedSymptoms.map((symptom: string, index: number) => (
+                  <span key={index} className="text-xs bg-vet-sage/20 text-vet-navy px-2 py-0.5 rounded-full">
+                    {symptom}
+                  </span>
+                ))}
+                {bookingData.customSymptom && (
+                  <span className="text-xs bg-vet-sage/20 text-vet-navy px-2 py-0.5 rounded-full">
+                    {bookingData.customSymptom}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Durée des symptômes */}
+          {bookingData?.symptomDuration && (
+            <p className="text-xs text-vet-brown mb-1">
+              <span className="font-semibold">Depuis :</span> {bookingData.symptomDuration}
+            </p>
+          )}
+
+          {/* Points additionnels */}
+          {bookingData?.additionalPoints && bookingData.additionalPoints.length > 0 && (
+            <div className="mt-2">
+              <p className="text-xs font-semibold text-vet-navy mb-1">Informations complémentaires :</p>
+              <ul className="text-xs text-vet-brown space-y-0.5">
+                {bookingData.additionalPoints.map((point: string, index: number) => (
+                  <li key={index}>• {point}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
         
         {/* Actions recommandées - Limité à 3 */}

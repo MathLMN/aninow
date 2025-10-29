@@ -263,7 +263,7 @@ const BookingConfirmation = () => {
             <div className="space-y-4 animate-fade-in">
               {/* Analyse IA - Résumé de la situation */}
               {aiAnalysis && <div className="mb-4">
-                  <AnalysisDisplay aiAnalysis={aiAnalysis} />
+                  <AnalysisDisplay aiAnalysis={aiAnalysis} bookingData={bookingData} />
                 </div>}
 
               {/* Alerte d'urgence (si applicable) */}
