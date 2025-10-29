@@ -188,8 +188,8 @@ const BookingConfirmation = () => {
             </p>
           </div>
 
-          {/* Numéro de référence */}
-          {booking?.id && bookingData.appointmentDate && bookingData.appointmentTime && <BookingReferenceCard bookingId={booking.id} appointmentDate={bookingData.appointmentDate} appointmentTime={bookingData.appointmentTime} />}
+          {/* Récapitulatif du créneau */}
+          {bookingData.appointmentDate && bookingData.appointmentTime && <BookingReferenceCard appointmentDate={bookingData.appointmentDate} appointmentTime={bookingData.appointmentTime} />}
 
           {/* Détails du RDV (clinique, vétérinaire, animal) */}
           {settings && <ClinicDetailsCard clinicName={settings.clinic_name} clinicAddress={clinicAddress} clinicPhone={settings.clinic_phone} veterinarianName={veterinarianName || undefined} animalName={bookingData.animalName || ''} animalSpecies={bookingData.animalSpecies || ''} />}
