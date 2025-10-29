@@ -8,8 +8,7 @@ import { useBookingSubmission } from "@/hooks/useBookingSubmission";
 import { useBookingFormData } from "@/hooks/useBookingFormData";
 import { AnalysisDisplay } from "@/components/booking/AnalysisDisplay";
 import { UrgencyAlert } from "@/components/booking/UrgencyAlert";
-import { BookingReferenceCard } from "@/components/booking/BookingReferenceCard";
-import { ClinicDetailsCard } from "@/components/booking/ClinicDetailsCard";
+import { BookingSummaryCard } from "@/components/booking/BookingSummaryCard";
 import { ValidationProcessTimeline } from "@/components/booking/ValidationProcessTimeline";
 import { useClinicSettings } from "@/hooks/useClinicSettings";
 import { supabase } from "@/integrations/supabase/client";
@@ -188,11 +187,19 @@ const BookingConfirmation = () => {
             </p>
           </div>
 
-          {/* Récapitulatif du créneau */}
-          {bookingData.appointmentDate && bookingData.appointmentTime && <BookingReferenceCard appointmentDate={bookingData.appointmentDate} appointmentTime={bookingData.appointmentTime} />}
-
-          {/* Détails du RDV (clinique, vétérinaire, animal) */}
-          {settings && <ClinicDetailsCard clinicName={settings.clinic_name} clinicAddress={clinicAddress} clinicPhone={settings.clinic_phone} veterinarianName={veterinarianName || undefined} animalName={bookingData.animalName || ''} animalSpecies={bookingData.animalSpecies || ''} />}
+          {/* Récapitulatif complet */}
+          {bookingData.appointmentDate && bookingData.appointmentTime && settings && (
+            <BookingSummaryCard 
+              appointmentDate={bookingData.appointmentDate}
+              appointmentTime={bookingData.appointmentTime}
+              clinicName={settings.clinic_name}
+              clinicAddress={clinicAddress}
+              clinicPhone={settings.clinic_phone}
+              veterinarianName={veterinarianName || undefined}
+              animalName={bookingData.animalName || ''}
+              animalSpecies={bookingData.animalSpecies || ''}
+            />
+          )}
 
           {/* Analyse IA - Résumé de la situation */}
           {aiAnalysis && <div className="mb-6">
