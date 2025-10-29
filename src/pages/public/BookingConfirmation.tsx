@@ -220,14 +220,6 @@ const BookingConfirmation = () => {
             />
           )}
 
-          {/* Analyse IA - Résumé de la situation */}
-          {aiAnalysis && <div className="mb-6">
-              <AnalysisDisplay aiAnalysis={aiAnalysis} />
-            </div>}
-
-          {/* Alerte d'urgence (si applicable) */}
-          {aiAnalysis && <UrgencyAlert urgencyScore={aiAnalysis.urgency_score} priorityLevel={aiAnalysis.priority_level} clinicPhone={displaySettings.clinic_phone} />}
-
           {/* Prochaines étapes - Timeline */}
           <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-lg mb-6">
             <CardHeader className="pb-3">
@@ -252,6 +244,14 @@ const BookingConfirmation = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Analyse IA - Résumé de la situation */}
+          {aiAnalysis && <div className="mb-6">
+              <AnalysisDisplay aiAnalysis={aiAnalysis} />
+            </div>}
+
+          {/* Alerte d'urgence (si applicable) */}
+          {aiAnalysis && <UrgencyAlert urgencyScore={aiAnalysis.urgency_score} priorityLevel={aiAnalysis.priority_level} clinicPhone={displaySettings.clinic_phone} />}
 
           {/* Actions CTA */}
           <div className="text-center space-y-3">
