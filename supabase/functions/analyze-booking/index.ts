@@ -182,7 +182,7 @@ async function analyzeBookingWithAI(booking: BookingData, supabaseClient: any): 
       aiAnalysis = {
         analysis_summary: aiResponse.trim(),
         urgency_score: 5, // Score par défaut moyen
-        recommended_actions: ['Consultation standard', 'Préparer le carnet de santé', 'Noter les observations'],
+        recommended_actions: ['Consultation standard', 'Préparer le carnet de santé'],
         confidence_score: 0.7,
         ai_insights: aiResponse.trim(),
         priority_level: 'medium'
@@ -286,34 +286,10 @@ L'évaluation d'urgence (1-10) doit considérer:
 - Réponses conditionnelles
 - Changements comportementaux
 
-CONSEILS PRATIQUES (recommended_actions):
-Tu dois générer EXACTEMENT 3 à 5 conseils pratiques et actionnables pour aider le client avant le rendez-vous.
-
-RÈGLES POUR LES CONSEILS:
-- Courts et précis (maximum 15 mots par conseil)
-- Commencer par un verbe d'action
-- Adaptés à la situation spécifique de l'animal
-- Pratiques et facilement réalisables par le propriétaire
-- Variés et couvrant différents aspects
-
-TYPES DE CONSEILS À INCLURE:
-1. Surveillance des symptômes (observer, noter, mesurer)
-2. Mesures de confort pour l'animal (repos, calme, température)
-3. Actions préventives immédiates (hydratation, alimentation)
-4. Préparation pour la consultation (documents, observations)
-5. Quand contacter en urgence (si aggravation, nouveaux symptômes)
-
-EXEMPLES DE BONS CONSEILS:
-- "Surveiller l'état d'hydratation et proposer de l'eau fraîche régulièrement"
-- "Noter les moments et la fréquence des vomissements"
-- "Garder l'animal au calme dans un endroit confortable"
-- "Préparer le carnet de santé et la liste des traitements en cours"
-- "Contacter immédiatement si difficultés respiratoires ou aggravation"
-
 RÉPONSE OBLIGATOIRE - JSON UNIQUEMENT:
 {
   "urgency_score": number (1-10),
-  "recommended_actions": ["conseil1", "conseil2", "conseil3", "conseil4", "conseil5"],
+  "recommended_actions": ["action1", "action2"],
   "analysis_summary": "résumé incluant nom, espèce, TOUS les symptômes et durée",
   "confidence_score": number (0-1),
   "ai_insights": "analyse détaillée pour le dossier",
@@ -348,7 +324,7 @@ COMMENTAIRE DU CLIENT:
 {{client_comment}}
 {{/client_comment}}
 
-Génère un résumé clinique concis (2-3 phrases) et une évaluation d'urgence précise avec 3 à 5 conseils pratiques.`,
+Génère un résumé clinique concis (2-3 phrases) et une évaluation d'urgence précise.`,
       variables: {}
     }
   }
@@ -462,7 +438,7 @@ async function logPromptPerformance(
     if (response.urgency_score && response.urgency_score >= 1 && response.urgency_score <= 10) {
       qualityScore += 0.1
     }
-    if (response.recommended_actions && Array.isArray(response.recommended_actions) && response.recommended_actions.length >= 3) {
+    if (response.recommended_actions && Array.isArray(response.recommended_actions) && response.recommended_actions.length > 0) {
       qualityScore += 0.1
     }
     if (response.analysis_summary && response.analysis_summary.length > 10) {
@@ -497,58 +473,15 @@ function validateAndCompleteAnalysis(aiAnalysis: any, booking: BookingData): Ana
   else if (urgencyScore >= 6) priorityLevel = 'high'
   else if (urgencyScore <= 3) priorityLevel = 'low'
   
-  // Valider et améliorer les conseils
-  let recommendedActions = Array.isArray(aiAnalysis.recommended_actions) 
-    ? aiAnalysis.recommended_actions.filter((action: string) => action && action.trim().length > 0)
-    : []
+  const recommendedActions = aiAnalysis.recommended_actions || ['Consultation standard']
   
-  // Dédupliquer les conseils
-  recommendedActions = [...new Set(recommendedActions)]
-  
-  // Conseils par défaut selon l'urgence si moins de 3 conseils
-  const defaultActionsByUrgency: Record<string, string[]> = {
-    critical: [
-      "Surveiller attentivement les signes vitaux de l'animal",
-      "Préparer le transport d'urgence si aggravation",
-      "Contacter immédiatement si nouveaux symptômes apparaissent"
-    ],
-    high: [
-      "Observer et noter l'évolution des symptômes",
-      "Garder l'animal au calme et bien hydraté",
-      "Préparer le carnet de santé et les traitements en cours"
-    ],
-    medium: [
-      "Surveiller le comportement et l'appétit de l'animal",
-      "Maintenir un environnement calme et confortable",
-      "Préparer les documents médicaux pour la consultation"
-    ],
-    low: [
-      "Préparer le carnet de santé et l'historique médical",
-      "Noter toute observation inhabituelle",
-      "Rassembler les questions à poser au vétérinaire"
-    ]
+  if (!recommendedActions.includes('Préparer le carnet de santé')) {
+    recommendedActions.push('Préparer le carnet de santé')
   }
   
-  // Ajouter des conseils par défaut si nécessaire
-  const defaultActions = defaultActionsByUrgency[priorityLevel] || defaultActionsByUrgency.medium
-  
-  while (recommendedActions.length < 3 && defaultActions.length > 0) {
-    const nextDefault = defaultActions[recommendedActions.length]
-    if (nextDefault && !recommendedActions.includes(nextDefault)) {
-      recommendedActions.push(nextDefault)
-    } else {
-      break
-    }
+  if (booking.animal_vaccines_up_to_date === false) {
+    recommendedActions.push('Vérifier les vaccinations')
   }
-  
-  // Ajouter conseil vaccination si pertinent
-  if (booking.animal_vaccines_up_to_date === false && 
-      !recommendedActions.some(a => a.toLowerCase().includes('vaccin'))) {
-    recommendedActions.push('Vérifier et mettre à jour les vaccinations')
-  }
-  
-  // Limiter à 5 conseils maximum
-  recommendedActions = recommendedActions.slice(0, 5)
 
   return {
     urgency_score: urgencyScore,
@@ -595,10 +528,8 @@ async function analyzeBookingFallback(booking: BookingData): Promise<AnalysisRes
 
   if (hasCriticalSymptoms) {
     urgencyScore = 9
-    recommendedActions.push('Surveiller attentivement les signes vitaux')
-    recommendedActions.push('Préparer le transport d\'urgence si aggravation')
-    recommendedActions.push('Contacter immédiatement si nouveaux symptômes')
-    recommendedActions.push('Noter l\'heure d\'apparition et l\'évolution')
+    recommendedActions.push('Urgence vétérinaire immédiate')
+    recommendedActions.push('Préparer le transport d\'urgence')
     analysisSummary = 'Symptômes critiques détectés - intervention d\'urgence requise'
     confidenceScore = 0.95
   } else {
@@ -608,23 +539,19 @@ async function analyzeBookingFallback(booking: BookingData): Promise<AnalysisRes
 
     if (hasUrgentSymptoms) {
       urgencyScore = 6
-      recommendedActions.push('Observer et noter l\'évolution des symptômes')
-      recommendedActions.push('Garder l\'animal au calme et bien hydraté')
-      recommendedActions.push('Préparer le carnet de santé et les traitements')
-      recommendedActions.push('Contacter si aggravation dans les 24h')
+      recommendedActions.push('Consultation dans les 24h')
+      recommendedActions.push('Surveiller l\'évolution des symptômes')
       analysisSummary = 'Symptômes préoccupants - consultation rapide recommandée'
       confidenceScore = 0.85
     } else {
       if (booking.symptom_duration) {
         if (booking.symptom_duration.includes('plus-une-semaine')) {
           urgencyScore = Math.max(urgencyScore, 4)
-          recommendedActions.push('Noter l\'historique complet des symptômes')
-          recommendedActions.push('Préparer les questions pour le vétérinaire')
+          recommendedActions.push('Consultation recommandée')
           analysisSummary = 'Symptômes persistants - évaluation nécessaire'
         } else if (booking.symptom_duration.includes('quelques-jours')) {
           urgencyScore = Math.max(urgencyScore, 3)
-          recommendedActions.push('Surveiller le comportement et l\'appétit')
-          recommendedActions.push('Maintenir un environnement calme')
+          recommendedActions.push('Consultation si aggravation')
         }
       }
     }
@@ -632,11 +559,7 @@ async function analyzeBookingFallback(booking: BookingData): Promise<AnalysisRes
 
   if (booking.animal_age === 'moins-1-an' || booking.animal_age === 'plus-10-ans') {
     urgencyScore = Math.min(urgencyScore + 1, 10)
-    if (booking.animal_age === 'moins-1-an') {
-      recommendedActions.push('Surveiller l\'hydratation particulièrement pour un jeune animal')
-    } else {
-      recommendedActions.push('Attention particulière due à l\'âge avancé')
-    }
+    recommendedActions.push('Attention particulière due à l\'âge')
   }
 
   if (booking.conditional_answers) {
@@ -644,17 +567,18 @@ async function analyzeBookingFallback(booking: BookingData): Promise<AnalysisRes
     
     if (answers.symptoms_worsening === 'oui' || answers.general_worsening === 'oui') {
       urgencyScore = Math.min(urgencyScore + 2, 10)
-      recommendedActions.push('Noter la progression des symptômes en détail')
+      recommendedActions.push('Symptômes en aggravation - consultation prioritaire')
     }
 
     if (answers.behavioral_changes === 'oui' || answers.appetite_loss === 'oui') {
       urgencyScore = Math.min(urgencyScore + 1, 10)
-      recommendedActions.push('Observer les changements de comportement')
+      recommendedActions.push('Changements comportementaux détectés')
     }
   }
 
   if (booking.consultation_reason === 'urgence') {
     urgencyScore = Math.max(urgencyScore, 7)
+    recommendedActions.push('Consultation d\'urgence demandée')
     analysisSummary = 'Consultation d\'urgence explicitement demandée'
   }
 
@@ -665,27 +589,14 @@ async function analyzeBookingFallback(booking: BookingData): Promise<AnalysisRes
     }
   }
 
-  // S'assurer d'avoir au moins 3 conseils
-  if (recommendedActions.length < 3) {
-    const defaultActions = [
-      'Préparer le carnet de santé et l\'historique médical',
-      'Maintenir un environnement calme et confortable',
-      'Noter toute observation inhabituelle'
-    ]
-    
-    for (const action of defaultActions) {
-      if (!recommendedActions.includes(action) && recommendedActions.length < 5) {
-        recommendedActions.push(action)
-      }
-    }
+  if (recommendedActions.length === 0) {
+    recommendedActions.push('Consultation standard')
   }
 
+  recommendedActions.push('Préparer le carnet de santé')
   if (booking.animal_vaccines_up_to_date === false) {
-    recommendedActions.push('Vérifier et mettre à jour les vaccinations')
+    recommendedActions.push('Vérifier les vaccinations')
   }
-
-  // Limiter à 5 conseils
-  const finalActions = recommendedActions.slice(0, 5)
 
   if (!analysisSummary) {
     analysisSummary = `Consultation de routine - Score d'urgence: ${urgencyScore}/10`
@@ -698,7 +609,7 @@ async function analyzeBookingFallback(booking: BookingData): Promise<AnalysisRes
 
   return {
     urgency_score: urgencyScore,
-    recommended_actions: finalActions,
+    recommended_actions: recommendedActions,
     analysis_summary: analysisSummary,
     confidence_score: confidenceScore,
     ai_insights: 'Analyse de base effectuée',
