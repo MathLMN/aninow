@@ -182,7 +182,7 @@ const BookingConfirmation = () => {
           {/* Hero - Confirmation visuelle */}
           <div className="text-center mb-6 animate-fade-in">
             <CheckCircle className="h-16 sm:h-20 w-16 sm:w-20 text-vet-sage mx-auto mb-4" />
-            <h1 className="text-3xl sm:text-4xl font-bold text-vet-navy mb-2">Demande envoyée ! ✓</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold text-vet-navy mb-2">Demande envoyée !</h1>
             <p className="text-vet-brown text-sm sm:text-base">
               On s'occupe de tout. Vous recevrez un email de confirmation dans quelques minutes.
             </p>
