@@ -3,85 +3,70 @@ import { CheckCircle } from "lucide-react";
 export const ValidationProcessTimeline = () => {
   const steps = [
     {
-      number: 1,
+      number: "1",
       label: "Demande reçue",
-      status: "completed",
-      description: "Enregistrée avec succès"
+      status: "completed"
     },
     {
-      number: 2,
-      label: "Validation",
-      status: "current",
-      description: "Analyse en cours"
+      number: "2",
+      label: "En validation",
+      status: "current"
     },
     {
-      number: 3,
-      label: "Email",
-      status: "pending",
-      description: "Confirmation à venir"
+      number: "3",
+      label: "Email envoyé",
+      status: "pending"
     },
     {
-      number: 4,
-      label: "RDV confirmé",
-      status: "pending",
-      description: "Validation finale"
+      number: "4",
+      label: "Confirmé",
+      status: "pending"
     }
   ];
 
   return (
-    <div className="w-full py-2">
-      {/* Frise horizontale chronologique */}
-      <div className="relative px-2">
+    <div className="w-full max-w-2xl mx-auto py-4">
+      <div className="relative flex items-center justify-between px-4">
+        {/* Ligne de fond */}
+        <div className="absolute top-5 left-8 right-8 h-0.5 bg-vet-beige/40" />
         {/* Ligne de progression */}
-        <div className="absolute top-8 left-0 right-0 h-1.5 bg-vet-beige/30 rounded-full" />
         <div 
-          className="absolute top-8 left-0 h-1.5 bg-gradient-to-r from-vet-sage to-vet-blue rounded-full transition-all duration-500"
-          style={{ width: '25%' }}
+          className="absolute top-5 left-8 h-0.5 bg-vet-sage transition-all duration-700 ease-out"
+          style={{ width: 'calc(25% - 2rem)' }}
         />
         
-        {/* Étapes */}
-        <div className="relative flex justify-between items-start gap-1">
-          {steps.map((step, index) => {
-            const isCompleted = step.status === "completed";
-            const isCurrent = step.status === "current";
-            const isPending = step.status === "pending";
-            
-            return (
-              <div key={index} className="flex flex-col items-center flex-1 min-w-0">
-                {/* Numéro / Check */}
-                <div 
-                  className={`relative z-10 w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl mb-4 transition-all duration-300 ${
-                    isCompleted 
-                      ? "bg-vet-sage text-white shadow-lg" 
-                      : isCurrent 
-                      ? "bg-vet-blue text-white shadow-xl animate-pulse ring-4 ring-vet-blue/20" 
-                      : "bg-white border-2 border-vet-beige/50 text-vet-brown/40"
-                  }`}
-                >
-                  {isCompleted ? (
-                    <CheckCircle className="h-8 w-8" />
-                  ) : (
-                    <span className="text-2xl">{step.number}</span>
-                  )}
-                </div>
-                
-                {/* Label et description */}
-                <div className="text-center px-1 w-full">
-                  <p className={`text-sm sm:text-base font-bold mb-1 leading-tight ${
-                    isCompleted || isCurrent ? "text-vet-navy" : "text-vet-brown/50"
-                  }`}>
-                    {step.label}
-                  </p>
-                  <p className={`text-xs sm:text-sm leading-snug ${
-                    isCompleted || isCurrent ? "text-vet-brown/80" : "text-vet-brown/40"
-                  }`}>
-                    {step.description}
-                  </p>
-                </div>
+        {steps.map((step, index) => {
+          const isCompleted = step.status === "completed";
+          const isCurrent = step.status === "current";
+          
+          return (
+            <div key={index} className="relative flex flex-col items-center z-10 flex-1">
+              {/* Badge numéroté */}
+              <div 
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
+                  isCompleted 
+                    ? "bg-vet-sage text-white shadow-md" 
+                    : isCurrent 
+                    ? "bg-vet-blue text-white shadow-lg scale-110" 
+                    : "bg-vet-beige/30 text-vet-brown/50"
+                }`}
+              >
+                {isCompleted ? (
+                  <CheckCircle className="h-5 w-5" strokeWidth={2.5} />
+                ) : (
+                  step.number
+                )}
               </div>
-            );
-          })}
-        </div>
+              
+              {/* Label */}
+              <p className={`mt-2 text-xs font-medium text-center leading-tight px-1 ${
+                isCompleted || isCurrent ? "text-vet-navy" : "text-vet-brown/50"
+              }`}>
+                {step.label}
+              </p>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
