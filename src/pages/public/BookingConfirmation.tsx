@@ -8,6 +8,7 @@ import { useBookingSubmission } from "@/hooks/useBookingSubmission";
 import { useBookingFormData } from "@/hooks/useBookingFormData";
 import { AnalysisDisplay } from "@/components/booking/AnalysisDisplay";
 import { UrgencyAlert } from "@/components/booking/UrgencyAlert";
+import { RecommendedActionsCard } from "@/components/booking/RecommendedActionsCard";
 import { BookingSummaryCard } from "@/components/booking/BookingSummaryCard";
 import { ValidationProcessTimeline } from "@/components/booking/ValidationProcessTimeline";
 import { usePublicClinicSettings } from "@/hooks/usePublicClinicSettings";
@@ -32,7 +33,7 @@ const BookingConfirmation = () => {
   const [veterinarianName, setVeterinarianName] = useState<string | null>(
     bookingData.veterinarianName || null
   );
-  const [showAdvice, setShowAdvice] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   console.log('BookingConfirmation - bookingData:', bookingData);
 
   // Récupérer depuis localStorage si pas de submissionResult
@@ -233,6 +234,17 @@ const BookingConfirmation = () => {
             />
           )}
 
+          {/* Alerte d'urgence (si applicable) */}
+          {aiAnalysis && <UrgencyAlert urgencyScore={aiAnalysis.urgency_score} priorityLevel={aiAnalysis.priority_level} clinicPhone={displaySettings.clinic_phone} />}
+
+          {/* Conseils pratiques - Prioritaire et toujours visible */}
+          {aiAnalysis?.recommended_actions && aiAnalysis.recommended_actions.length > 0 && (
+            <RecommendedActionsCard 
+              actions={aiAnalysis.recommended_actions}
+              urgencyScore={aiAnalysis.urgency_score}
+            />
+          )}
+
           {/* Prochaines étapes - Timeline */}
           <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-lg mb-4">
             <CardHeader className="pb-2">
@@ -247,27 +259,23 @@ const BookingConfirmation = () => {
             </CardContent>
           </Card>
 
-          {/* Bouton pour afficher les conseils */}
-          <div className="text-center mb-4">
-            <Button
-              onClick={() => setShowAdvice(!showAdvice)}
-              variant="outline"
-              className="border-vet-sage text-vet-sage hover:bg-vet-sage hover:text-white transition-all"
-            >
-              {showAdvice ? "Masquer les conseils" : "Voir nos conseils"}
-            </Button>
-          </div>
+          {/* Bouton pour afficher/masquer les détails */}
+          {aiAnalysis && (
+            <div className="text-center mb-4">
+              <Button
+                onClick={() => setShowDetails(!showDetails)}
+                variant="outline"
+                className="border-vet-sage text-vet-sage hover:bg-vet-sage hover:text-white transition-all"
+              >
+                {showDetails ? "Masquer les détails de ma demande" : "Voir les détails de ma demande"}
+              </Button>
+            </div>
+          )}
 
-          {/* Contenu additionnel (masqué par défaut) */}
-          {showAdvice && (
-            <div className="space-y-4 animate-fade-in">
-              {/* Analyse IA - Résumé de la situation */}
-              {aiAnalysis && <div className="mb-4">
-                  <AnalysisDisplay aiAnalysis={aiAnalysis} bookingData={bookingData} />
-                </div>}
-
-              {/* Alerte d'urgence (si applicable) */}
-              {aiAnalysis && <UrgencyAlert urgencyScore={aiAnalysis.urgency_score} priorityLevel={aiAnalysis.priority_level} clinicPhone={displaySettings.clinic_phone} />}
+          {/* Récapitulatif détaillé (masqué par défaut) */}
+          {aiAnalysis && showDetails && (
+            <div className="animate-fade-in">
+              <AnalysisDisplay aiAnalysis={aiAnalysis} bookingData={bookingData} />
             </div>
           )}
 
