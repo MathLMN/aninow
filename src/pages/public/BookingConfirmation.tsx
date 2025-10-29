@@ -13,16 +13,21 @@ import { ClinicDetailsCard } from "@/components/booking/ClinicDetailsCard";
 import { ValidationProcessTimeline } from "@/components/booking/ValidationProcessTimeline";
 import { useClinicSettings } from "@/hooks/useClinicSettings";
 import { supabase } from "@/integrations/supabase/client";
-
 const BookingConfirmation = () => {
   const navigate = useNavigate();
-  const { submitBooking, isSubmitting } = useBookingSubmission();
-  const { bookingData } = useBookingFormData();
-  const { settings } = useClinicSettings();
+  const {
+    submitBooking,
+    isSubmitting
+  } = useBookingSubmission();
+  const {
+    bookingData
+  } = useBookingFormData();
+  const {
+    settings
+  } = useClinicSettings();
   const [submissionResult, setSubmissionResult] = useState<any>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [veterinarianName, setVeterinarianName] = useState<string | null>(null);
-
   console.log('BookingConfirmation - bookingData:', bookingData);
 
   // Récupérer depuis localStorage si pas de submissionResult
@@ -31,11 +36,19 @@ const BookingConfirmation = () => {
       const savedConfirmation = localStorage.getItem('lastBookingConfirmation');
       if (savedConfirmation) {
         try {
-          const { booking, aiAnalysis, timestamp } = JSON.parse(savedConfirmation);
+          const {
+            booking,
+            aiAnalysis,
+            timestamp
+          } = JSON.parse(savedConfirmation);
           // Vérifier que la confirmation date de moins de 24h
           const confirmationAge = Date.now() - new Date(timestamp).getTime();
           if (confirmationAge < 24 * 60 * 60 * 1000) {
-            setSubmissionResult({ booking, aiAnalysis, error: null });
+            setSubmissionResult({
+              booking,
+              aiAnalysis,
+              error: null
+            });
             setHasSubmitted(true);
           }
         } catch (error) {
@@ -44,7 +57,6 @@ const BookingConfirmation = () => {
       }
     }
   }, [submissionResult, isSubmitting]);
-
   useEffect(() => {
     // Vérifier si on a les données minimales requises pour la soumission
     if (!bookingData.animalSpecies || !bookingData.clientName || hasSubmitted) {
@@ -55,14 +67,10 @@ const BookingConfirmation = () => {
       });
       return;
     }
-
     const submitData = async () => {
       console.log('BookingConfirmation - Starting submission...');
       setHasSubmitted(true);
-      
-      if (bookingData.animalSpecies && bookingData.clientName && bookingData.clientEmail && 
-          bookingData.clientPhone && bookingData.consultationReason && bookingData.preferredContactMethod) {
-        
+      if (bookingData.animalSpecies && bookingData.clientName && bookingData.clientEmail && bookingData.clientPhone && bookingData.consultationReason && bookingData.preferredContactMethod) {
         const completeBookingData = {
           ...bookingData,
           animalSpecies: bookingData.animalSpecies,
@@ -72,12 +80,10 @@ const BookingConfirmation = () => {
           consultationReason: bookingData.consultationReason,
           preferredContactMethod: bookingData.preferredContactMethod
         };
-
         console.log('BookingConfirmation - Submitting data:', completeBookingData);
         const result = await submitBooking(completeBookingData);
         console.log('BookingConfirmation - Submission result:', result);
         setSubmissionResult(result);
-        
         if (result.booking) {
           // Sauvegarder la confirmation dans localStorage
           localStorage.setItem('lastBookingConfirmation', JSON.stringify({
@@ -89,7 +95,6 @@ const BookingConfirmation = () => {
         }
       }
     };
-
     submitData();
   }, [bookingData, submitBooking, hasSubmitted]);
 
@@ -98,12 +103,9 @@ const BookingConfirmation = () => {
     const fetchVeterinarian = async () => {
       const booking = submissionResult?.booking;
       if (booking?.veterinarian_id) {
-        const { data } = await supabase
-          .from('clinic_veterinarians')
-          .select('name')
-          .eq('id', booking.veterinarian_id)
-          .single();
-        
+        const {
+          data
+        } = await supabase.from('clinic_veterinarians').select('name').eq('id', booking.veterinarian_id).single();
         if (data) {
           setVeterinarianName(data.name);
         }
@@ -114,8 +116,7 @@ const BookingConfirmation = () => {
 
   // Affichage pendant le chargement
   if (isSubmitting) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
+    return <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
         <Header />
         <main className="container mx-auto px-6 py-12">
           <div className="max-w-3xl mx-auto text-center">
@@ -141,14 +142,12 @@ const BookingConfirmation = () => {
             </div>
           </div>
         </main>
-      </div>
-    );
+      </div>;
   }
 
   // Affichage en cas d'erreur
   if (submissionResult?.error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
+    return <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
         <Header />
         <main className="container mx-auto px-6 py-12">
           <div className="max-w-2xl mx-auto text-center">
@@ -166,8 +165,7 @@ const BookingConfirmation = () => {
             </Link>
           </div>
         </main>
-      </div>
-    );
+      </div>;
   }
 
   // Affichage de confirmation
@@ -175,14 +173,8 @@ const BookingConfirmation = () => {
   const aiAnalysis = submissionResult?.aiAnalysis;
 
   // Construire l'adresse complète de la clinique
-  const clinicAddress = settings ? [
-    settings.clinic_address_street,
-    settings.clinic_address_postal_code,
-    settings.clinic_address_city
-  ].filter(Boolean).join(', ') : undefined;
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
+  const clinicAddress = settings ? [settings.clinic_address_street, settings.clinic_address_postal_code, settings.clinic_address_city].filter(Boolean).join(', ') : undefined;
+  return <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
       <Header />
 
       <main className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -190,50 +182,25 @@ const BookingConfirmation = () => {
           {/* Hero - Confirmation visuelle */}
           <div className="text-center mb-6 animate-fade-in">
             <CheckCircle className="h-16 sm:h-20 w-16 sm:w-20 text-vet-sage mx-auto mb-4" />
-            <h1 className="text-3xl sm:text-4xl font-bold text-vet-navy mb-2">
-              C'est confirmé ! ✓
-            </h1>
+            <h1 className="text-3xl sm:text-4xl font-bold text-vet-navy mb-2">Demande envoyée ! ✓</h1>
             <p className="text-vet-brown text-sm sm:text-base">
               On s'occupe de tout. Vous recevrez un email de confirmation dans quelques minutes.
             </p>
           </div>
 
           {/* Numéro de référence */}
-          {booking?.id && bookingData.appointmentDate && bookingData.appointmentTime && (
-            <BookingReferenceCard
-              bookingId={booking.id}
-              appointmentDate={bookingData.appointmentDate}
-              appointmentTime={bookingData.appointmentTime}
-            />
-          )}
+          {booking?.id && bookingData.appointmentDate && bookingData.appointmentTime && <BookingReferenceCard bookingId={booking.id} appointmentDate={bookingData.appointmentDate} appointmentTime={bookingData.appointmentTime} />}
 
           {/* Détails du RDV (clinique, vétérinaire, animal) */}
-          {settings && (
-            <ClinicDetailsCard
-              clinicName={settings.clinic_name}
-              clinicAddress={clinicAddress}
-              clinicPhone={settings.clinic_phone}
-              veterinarianName={veterinarianName || undefined}
-              animalName={bookingData.animalName || ''}
-              animalSpecies={bookingData.animalSpecies || ''}
-            />
-          )}
+          {settings && <ClinicDetailsCard clinicName={settings.clinic_name} clinicAddress={clinicAddress} clinicPhone={settings.clinic_phone} veterinarianName={veterinarianName || undefined} animalName={bookingData.animalName || ''} animalSpecies={bookingData.animalSpecies || ''} />}
 
           {/* Analyse IA - Résumé de la situation */}
-          {aiAnalysis && (
-            <div className="mb-6">
+          {aiAnalysis && <div className="mb-6">
               <AnalysisDisplay aiAnalysis={aiAnalysis} />
-            </div>
-          )}
+            </div>}
 
           {/* Alerte d'urgence (si applicable) */}
-          {aiAnalysis && (
-            <UrgencyAlert 
-              urgencyScore={aiAnalysis.urgency_score}
-              priorityLevel={aiAnalysis.priority_level}
-              clinicPhone={settings?.clinic_phone}
-            />
-          )}
+          {aiAnalysis && <UrgencyAlert urgencyScore={aiAnalysis.urgency_score} priorityLevel={aiAnalysis.priority_level} clinicPhone={settings?.clinic_phone} />}
 
           {/* Prochaines étapes - Timeline */}
           <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-lg mb-6">
@@ -269,25 +236,17 @@ const BookingConfirmation = () => {
                 </Button>
               </Link>
               <Link to="/booking" className="w-full sm:w-auto">
-                <Button 
-                  variant="outline" 
-                  className="w-full sm:w-auto border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white"
-                  onClick={() => localStorage.removeItem('lastBookingConfirmation')}
-                >
+                <Button variant="outline" className="w-full sm:w-auto border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white" onClick={() => localStorage.removeItem('lastBookingConfirmation')}>
                   Prendre un autre RDV
                 </Button>
               </Link>
             </div>
-            {settings?.clinic_phone && (
-              <p className="text-xs sm:text-sm text-vet-brown/70">
+            {settings?.clinic_phone && <p className="text-xs sm:text-sm text-vet-brown/70">
                 Besoin d'aide ? Appelez-nous au {settings.clinic_phone}
-              </p>
-            )}
+              </p>}
           </div>
         </div>
       </main>
-    </div>
-  );
+    </div>;
 };
-
 export default BookingConfirmation;
