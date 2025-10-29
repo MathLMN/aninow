@@ -174,8 +174,24 @@ const BookingConfirmation = () => {
   const booking = submissionResult?.booking;
   const aiAnalysis = submissionResult?.aiAnalysis;
 
+  // Données fictives pour la démo (clinique de test)
+  const demoSettings = {
+    clinic_name: 'Clinique Vétérinaire Démo',
+    clinic_phone: '01 23 45 67 89',
+    clinic_address_street: '123 Avenue des Animaux',
+    clinic_address_city: 'Paris',
+    clinic_address_postal_code: '75001'
+  };
+
+  // Utiliser les vraies settings ou les données de démo
+  const displaySettings = settings || demoSettings;
+
   // Construire l'adresse complète de la clinique
-  const clinicAddress = settings ? [settings.clinic_address_street, settings.clinic_address_postal_code, settings.clinic_address_city].filter(Boolean).join(', ') : undefined;
+  const clinicAddress = [
+    displaySettings.clinic_address_street, 
+    displaySettings.clinic_address_postal_code, 
+    displaySettings.clinic_address_city
+  ].filter(Boolean).join(', ');
   return <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
       <Header />
 
@@ -191,13 +207,13 @@ const BookingConfirmation = () => {
           </div>
 
           {/* Récapitulatif complet */}
-          {bookingData.appointmentDate && bookingData.appointmentTime && settings && (
+          {bookingData.appointmentDate && bookingData.appointmentTime && (
             <BookingSummaryCard 
               appointmentDate={bookingData.appointmentDate}
               appointmentTime={bookingData.appointmentTime}
-              clinicName={settings.clinic_name}
+              clinicName={displaySettings.clinic_name}
               clinicAddress={clinicAddress}
-              clinicPhone={settings.clinic_phone}
+              clinicPhone={displaySettings.clinic_phone}
               veterinarianName={veterinarianName || undefined}
               animalName={bookingData.animalName || ''}
               animalSpecies={bookingData.animalSpecies || ''}
@@ -210,7 +226,7 @@ const BookingConfirmation = () => {
             </div>}
 
           {/* Alerte d'urgence (si applicable) */}
-          {aiAnalysis && <UrgencyAlert urgencyScore={aiAnalysis.urgency_score} priorityLevel={aiAnalysis.priority_level} clinicPhone={settings?.clinic_phone} />}
+          {aiAnalysis && <UrgencyAlert urgencyScore={aiAnalysis.urgency_score} priorityLevel={aiAnalysis.priority_level} clinicPhone={displaySettings.clinic_phone} />}
 
           {/* Prochaines étapes - Timeline */}
           <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-lg mb-6">
@@ -251,8 +267,8 @@ const BookingConfirmation = () => {
                 </Button>
               </Link>
             </div>
-            {settings?.clinic_phone && <p className="text-xs sm:text-sm text-vet-brown/70">
-                Besoin d'aide ? Appelez-nous au {settings.clinic_phone}
+            {displaySettings.clinic_phone && <p className="text-xs sm:text-sm text-vet-brown/70">
+                Besoin d'aide ? Appelez-nous au {displaySettings.clinic_phone}
               </p>}
           </div>
         </div>
