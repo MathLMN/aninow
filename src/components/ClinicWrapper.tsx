@@ -14,6 +14,7 @@ export const ClinicWrapper: React.FC<ClinicWrapperProps> = ({ children }) => {
 
   useEffect(() => {
     if (clinicSlug && (!currentClinic || currentClinic.slug !== clinicSlug)) {
+      console.log('🔄 Loading clinic from slug:', clinicSlug);
       setCurrentClinicBySlug(clinicSlug);
     }
   }, [clinicSlug, currentClinic, setCurrentClinicBySlug]);
