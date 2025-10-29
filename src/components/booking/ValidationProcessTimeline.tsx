@@ -9,17 +9,12 @@ export const ValidationProcessTimeline = () => {
     },
     {
       number: "2",
-      label: "En validation",
+      label: "Validation ou rappel si urgence",
       status: "current"
     },
     {
       number: "3",
-      label: "Email envoyé",
-      status: "pending"
-    },
-    {
-      number: "4",
-      label: "Confirmé",
+      label: "SMS & Email de confirmation",
       status: "pending"
     }
   ];
@@ -32,7 +27,7 @@ export const ValidationProcessTimeline = () => {
         {/* Ligne de progression */}
         <div 
           className="absolute top-5 left-8 h-0.5 bg-vet-sage transition-all duration-700 ease-out"
-          style={{ width: 'calc(25% - 2rem)' }}
+          style={{ width: 'calc(33.33% - 2rem)' }}
         />
         
         {steps.map((step, index) => {
