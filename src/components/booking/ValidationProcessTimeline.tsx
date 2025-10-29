@@ -29,51 +29,51 @@ export const ValidationProcessTimeline = () => {
   ];
 
   return (
-    <div className="w-full">
+    <div className="w-full py-2">
       {/* Frise horizontale chronologique */}
-      <div className="relative">
+      <div className="relative px-2">
         {/* Ligne de progression */}
-        <div className="absolute top-6 left-0 right-0 h-1 bg-vet-beige/30 rounded-full" />
+        <div className="absolute top-8 left-0 right-0 h-1.5 bg-vet-beige/30 rounded-full" />
         <div 
-          className="absolute top-6 left-0 h-1 bg-gradient-to-r from-vet-sage to-vet-blue rounded-full transition-all duration-500"
+          className="absolute top-8 left-0 h-1.5 bg-gradient-to-r from-vet-sage to-vet-blue rounded-full transition-all duration-500"
           style={{ width: '25%' }}
         />
         
         {/* Étapes */}
-        <div className="relative flex justify-between items-start">
+        <div className="relative flex justify-between items-start gap-1">
           {steps.map((step, index) => {
             const isCompleted = step.status === "completed";
             const isCurrent = step.status === "current";
             const isPending = step.status === "pending";
             
             return (
-              <div key={index} className="flex flex-col items-center" style={{ width: '25%' }}>
+              <div key={index} className="flex flex-col items-center flex-1 min-w-0">
                 {/* Numéro / Check */}
                 <div 
-                  className={`relative z-10 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg mb-3 transition-all duration-300 ${
+                  className={`relative z-10 w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl mb-4 transition-all duration-300 ${
                     isCompleted 
-                      ? "bg-vet-sage text-white shadow-lg scale-110" 
+                      ? "bg-vet-sage text-white shadow-lg" 
                       : isCurrent 
-                      ? "bg-vet-blue text-white shadow-lg animate-pulse scale-110" 
+                      ? "bg-vet-blue text-white shadow-xl animate-pulse ring-4 ring-vet-blue/20" 
                       : "bg-white border-2 border-vet-beige/50 text-vet-brown/40"
                   }`}
                 >
                   {isCompleted ? (
-                    <CheckCircle className="h-6 w-6" />
+                    <CheckCircle className="h-8 w-8" />
                   ) : (
-                    step.number
+                    <span className="text-2xl">{step.number}</span>
                   )}
                 </div>
                 
                 {/* Label et description */}
-                <div className="text-center px-1">
-                  <p className={`text-sm font-semibold mb-1 ${
+                <div className="text-center px-1 w-full">
+                  <p className={`text-sm sm:text-base font-bold mb-1 leading-tight ${
                     isCompleted || isCurrent ? "text-vet-navy" : "text-vet-brown/50"
                   }`}>
                     {step.label}
                   </p>
-                  <p className={`text-xs leading-tight ${
-                    isCompleted || isCurrent ? "text-vet-brown/70" : "text-vet-brown/40"
+                  <p className={`text-xs sm:text-sm leading-snug ${
+                    isCompleted || isCurrent ? "text-vet-brown/80" : "text-vet-brown/40"
                   }`}>
                     {step.description}
                   </p>
