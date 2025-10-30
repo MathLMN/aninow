@@ -61,6 +61,7 @@ export const CreateAppointmentModal = ({
           consultationTypeId: appointmentToEdit.consultation_type_id,
           duration: appointmentToEdit.duration_minutes,
           arrival_time: appointmentToEdit.arrival_time,
+          booking_source: appointmentToEdit.booking_source,
           
           // Données client
           clientName: appointmentToEdit.client_name,
