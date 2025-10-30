@@ -170,9 +170,20 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
       }
       
       if (defaultData.clientPhone || defaultData.client_phone) {
-        const phone = defaultData.clientPhone || defaultData.client_phone;
-        console.log('📞 Setting client phone:', phone);
-        cleanData.clientPhone = phone;
+        const fullPhone = defaultData.clientPhone || defaultData.client_phone;
+        console.log('📞 Parsing client phone:', fullPhone);
+        
+        // Parser le numéro complet pour séparer le code pays du numéro
+        const phoneMatch = fullPhone.match(/^(\+\d{2,3})(.+)$/);
+        if (phoneMatch) {
+          const [, countryCode, phoneNumber] = phoneMatch;
+          console.log('📞 Extracted country code:', countryCode, 'number:', phoneNumber);
+          cleanData.clientPhoneCountryCode = countryCode;
+          cleanData.clientPhone = phoneNumber;
+        } else {
+          // Si le format n'est pas reconnu, utiliser tel quel
+          cleanData.clientPhone = fullPhone;
+        }
       }
       
       if (defaultData.clientPhoneCountryCode || defaultData.client_phone_country_code) {
