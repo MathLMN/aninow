@@ -362,7 +362,7 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
       setValidationErrors(errors);
       toast({
         title: "Champs obligatoires manquants",
-        description: "Veuillez remplir tous les champs obligatoires : Vétérinaire, Type de consultation et Durée",
+        description: "Veuillez remplir tous les champs obligatoires",
         variant: "destructive"
       });
       return;
