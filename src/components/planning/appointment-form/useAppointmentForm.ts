@@ -363,7 +363,8 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
       toast({
         title: "Champs obligatoires manquants",
         description: "Veuillez remplir tous les champs obligatoires",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 10000
       });
       return;
     }
