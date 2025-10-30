@@ -267,7 +267,7 @@ export const TimeSlotCell = ({
               {/* Badge d'urgence pour les rendez-vous en ligne - AMÉLIORATION VISIBILITÉ */}
               {!isNote && booking.booking_source === 'online' && booking.urgency_score && (
                 <div 
-                  className="absolute -top-1 -right-1 flex items-center justify-center rounded-full border-2 border-white shadow-md font-bold z-30"
+                  className="absolute top-0.5 right-0.5 flex items-center justify-center rounded-full border-2 border-white shadow-md font-bold z-30"
                   style={{ 
                     width: booking.urgency_score >= 8 ? '20px' : '18px',
                     height: booking.urgency_score >= 8 ? '20px' : '18px',
