@@ -81,7 +81,9 @@ export const CreateAppointmentModal = ({
           animalVaccinesUpToDate: appointmentToEdit.animal_vaccines_up_to_date,
           
           // Consultation
+          consultation_reason: appointmentToEdit.consultation_reason,
           consultationReason: appointmentToEdit.consultation_reason,
+          ai_analysis: appointmentToEdit.ai_analysis,
           clientComment: appointmentToEdit.client_comment,
         });
       } else if (defaultData) {

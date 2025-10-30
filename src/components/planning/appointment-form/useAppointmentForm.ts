@@ -273,11 +273,16 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
         const aiSummary = defaultData.ai_analysis.analysis_summary;
         console.log('🤖 Setting AI analysis summary as consultation reason:', aiSummary);
         cleanData.consultationReason = aiSummary;
-      } else if (defaultData.consultationReason && !defaultData.consultation_reason?.includes('-')) {
-        // Pour les RDV créés manuellement, utiliser la raison saisie (mais ignorer les codes comme "symptomes-anomalie")
-        const reason = defaultData.consultationReason;
-        console.log('🩺 Setting consultation reason:', reason);
-        cleanData.consultationReason = reason;
+      } else if (defaultData.consultationReason || defaultData.consultation_reason) {
+        // Pour les RDV créés manuellement, utiliser la raison saisie
+        const reason = defaultData.consultationReason || defaultData.consultation_reason;
+        // Mais ignorer les codes bruts comme "symptomes-anomalie" ou "consultation-convenance"
+        if (!reason.includes('-')) {
+          console.log('🩺 Setting consultation reason:', reason);
+          cleanData.consultationReason = reason;
+        } else {
+          console.log('⚠️ Skipping code-based consultation reason:', reason);
+        }
       }
       
       if (defaultData.clientComment || defaultData.client_comment) {
