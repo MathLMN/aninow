@@ -174,8 +174,18 @@ async function analyzeBookingWithAI(booking: BookingData, supabaseClient: any): 
     // Parser la réponse JSON de l'IA
     let aiAnalysis
     try {
-      // Essayer de parser directement en JSON
-      aiAnalysis = JSON.parse(aiResponse)
+      // Nettoyer la réponse si elle contient des balises markdown
+      let cleanResponse = aiResponse.trim()
+      
+      // Retirer les balises ```json et ``` si présentes
+      if (cleanResponse.startsWith('```json')) {
+        cleanResponse = cleanResponse.replace(/^```json\s*\n?/, '').replace(/\n?```\s*$/, '')
+      } else if (cleanResponse.startsWith('```')) {
+        cleanResponse = cleanResponse.replace(/^```\s*\n?/, '').replace(/\n?```\s*$/, '')
+      }
+      
+      // Essayer de parser en JSON
+      aiAnalysis = JSON.parse(cleanResponse)
     } catch (parseError) {
       // Si l'IA retourne du texte libre, créer une structure JSON
       console.log('AI returned text instead of JSON, converting:', parseError)
