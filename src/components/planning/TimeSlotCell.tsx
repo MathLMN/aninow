@@ -97,6 +97,14 @@ export const TimeSlotCell = ({
     return colorMap[color] || 'bg-blue-500';
   };
 
+  // Obtenir le symbole et la couleur pour le niveau d'urgence
+  const getUrgencyIndicator = (score: number) => {
+    if (score >= 8) return { symbol: '🔴', color: 'bg-red-500', label: 'URGENT' };
+    if (score >= 6) return { symbol: '🟠', color: 'bg-orange-500', label: 'Élevé' };
+    if (score >= 4) return { symbol: '🟡', color: 'bg-yellow-500', label: 'Moyen' };
+    return { symbol: '🟢', color: 'bg-green-500', label: 'Faible' };
+  };
+
   // Calculer la hauteur du rendez-vous en fonction de sa durée
   const getAppointmentHeight = (booking: any) => {
     const duration = booking.duration_minutes || 15;
@@ -254,6 +262,22 @@ export const TimeSlotCell = ({
               {/* Indicateur d'arrivée - Point rouge positionné à l'intérieur du cadre */}
               {booking.arrival_time && (
                 <div className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full border border-white shadow-sm z-20" title={`Client arrivé à ${booking.arrival_time}`}></div>
+              )}
+              
+              {/* Badge d'urgence pour les rendez-vous en ligne */}
+              {!isNote && booking.booking_source === 'online' && booking.urgency_score && (
+                <div 
+                  className="absolute top-0 left-0 text-[7px] font-bold px-1 rounded-br"
+                  style={{ 
+                    backgroundColor: booking.urgency_score >= 8 ? '#DC2626' : 
+                                    booking.urgency_score >= 6 ? '#F97316' :
+                                    booking.urgency_score >= 4 ? '#EAB308' : '#10B981',
+                    color: 'white'
+                  }}
+                  title={`Urgence: ${getUrgencyIndicator(booking.urgency_score).label} (${booking.urgency_score}/10)`}
+                >
+                  {booking.urgency_score}
+                </div>
               )}
               
               {/* Affichage spécifique pour les notes */}
