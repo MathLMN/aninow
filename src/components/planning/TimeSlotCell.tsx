@@ -264,11 +264,14 @@ export const TimeSlotCell = ({
                 <div className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full border border-white shadow-sm z-20" title={`Client arrivé à ${booking.arrival_time}`}></div>
               )}
               
-              {/* Badge d'urgence pour les rendez-vous en ligne */}
+              {/* Badge d'urgence pour les rendez-vous en ligne - AMÉLIORATION VISIBILITÉ */}
               {!isNote && booking.booking_source === 'online' && booking.urgency_score && (
                 <div 
-                  className="absolute top-0 left-0 text-[7px] font-bold px-1 rounded-br"
+                  className="absolute -top-1 -right-1 flex items-center justify-center rounded-full border-2 border-white shadow-md font-bold z-30"
                   style={{ 
+                    width: booking.urgency_score >= 8 ? '20px' : '18px',
+                    height: booking.urgency_score >= 8 ? '20px' : '18px',
+                    fontSize: booking.urgency_score >= 8 ? '9px' : '8px',
                     backgroundColor: booking.urgency_score >= 8 ? '#DC2626' : 
                                     booking.urgency_score >= 6 ? '#F97316' :
                                     booking.urgency_score >= 4 ? '#EAB308' : '#10B981',
@@ -276,7 +279,7 @@ export const TimeSlotCell = ({
                   }}
                   title={`Urgence: ${getUrgencyIndicator(booking.urgency_score).label} (${booking.urgency_score}/10)`}
                 >
-                  {booking.urgency_score}
+                  {booking.urgency_score >= 8 ? '⚠' : booking.urgency_score}
                 </div>
               )}
               
