@@ -184,7 +184,14 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
         if (phoneMatch) {
           const [, countryCode, phoneNumber] = phoneMatch;
           // Nettoyer le numéro en enlevant les espaces
-          const cleanNumber = phoneNumber.replace(/\s/g, '');
+          let cleanNumber = phoneNumber.replace(/\s/g, '');
+          
+          // Ignorer "undefined" ou les valeurs invalides
+          if (cleanNumber === 'undefined' || cleanNumber === 'null' || cleanNumber === '') {
+            console.log('⚠️ Invalid phone number detected, skipping');
+            cleanNumber = '';
+          }
+          
           console.log('📞 Extracted country code:', countryCode, 'number:', cleanNumber);
           cleanData.clientPhoneCountryCode = countryCode;
           cleanData.clientPhone = cleanNumber;
