@@ -151,9 +151,15 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
 
       // Source de réservation
       if (defaultData.booking_source) {
+        console.log('📱 Setting booking source:', defaultData.booking_source);
         cleanData.booking_source = defaultData.booking_source;
       } else if (defaultData.status === 'pending' || defaultData.status === 'confirmed') {
+        // Si c'est un booking en ligne (pending ou confirmed sans source explicite)
+        console.log('📱 Detected online booking from status');
         cleanData.booking_source = 'online';
+      } else {
+        // Par défaut pour les créations manuelles
+        cleanData.booking_source = 'phone';
       }
       
       // Données client - seulement si elles existent dans defaultData
