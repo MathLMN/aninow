@@ -1,6 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Heart } from "lucide-react";
 import BreedSearchInput from "@/components/breed-selector/BreedSearchInput";
 import BreedDropdown from "@/components/breed-selector/BreedDropdown";
@@ -9,7 +10,7 @@ import { useBreedSearch } from "@/hooks/useBreedSearch";
 
 interface AnimalSectionProps {
   formData: any;
-  onFieldUpdate: (field: string, value: string | number) => void;
+  onFieldUpdate: (field: string, value: string | number | boolean) => void;
 }
 
 export const AnimalSection = ({ formData, onFieldUpdate }: AnimalSectionProps) => {
@@ -105,6 +106,20 @@ export const AnimalSection = ({ formData, onFieldUpdate }: AnimalSectionProps) =
               className="h-7 text-xs"
             />
           )}
+          
+          <div className="flex items-center space-x-2 mt-2">
+            <Checkbox
+              id="isNoBreed"
+              checked={formData.isNoBreed || false}
+              onCheckedChange={(checked) => onFieldUpdate('isNoBreed', checked)}
+            />
+            <Label
+              htmlFor="isNoBreed"
+              className="text-xs font-normal text-gray-600 cursor-pointer"
+            >
+              Croisement / sans race
+            </Label>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-2">

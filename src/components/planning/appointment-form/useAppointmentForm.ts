@@ -31,6 +31,7 @@ interface FormData {
   animalSex: string | null;
   animalSterilized: boolean | null;
   animalVaccinesUpToDate: boolean | null;
+  isNoBreed: boolean;
   
   // Consultation
   consultationReason: string;
@@ -59,6 +60,7 @@ const getInitialFormData = (): FormData => ({
   animalSex: null,
   animalSterilized: null,
   animalVaccinesUpToDate: null,
+  isNoBreed: false,
   consultationReason: '',
   clientComment: null,
 });
@@ -254,6 +256,7 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
         const breed = defaultData.animalBreed || defaultData.animal_breed;
         console.log('🏷️ Setting animal breed:', breed);
         cleanData.animalBreed = breed;
+        cleanData.isNoBreed = breed === 'no-breed';
       }
       
       if (defaultData.animalAge || defaultData.animal_age) {
@@ -388,7 +391,7 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
         clinic_id: currentClinicId,
         animal_name: formData.animalName,
         animal_species: formData.animalSpecies,
-        animal_breed: formData.animalBreed || null,
+        animal_breed: formData.isNoBreed ? 'no-breed' : (formData.animalBreed || null),
         animal_age: formData.animalAge || null,
         animal_weight: formData.animalWeight || null,
         animal_sex: formData.animalSex || null,
