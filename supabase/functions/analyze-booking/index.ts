@@ -284,8 +284,11 @@ OBJECTIF: Générer un résumé concis qui inclut OBLIGATOIREMENT:
 - La durée d'évolution des symptômes
 - Une synthèse clinique rapide
 
+RÈGLE IMPÉRATIVE - ORDRE DU RÉSUMÉ:
+Le résumé DOIT TOUJOURS commencer par la liste complète des symptômes sélectionnés.
+
 Format du résumé (2-3 phrases maximum):
-"[Nom] ([espèce] [race]) : [Liste des symptômes] depuis [durée]. [Observation clinique supplémentaire si pertinente]."
+"[Nom] ([espèce] [race]) : [LISTE COMPLÈTE DES SYMPTÔMES EN PREMIER] depuis [durée]. [Observation clinique supplémentaire si pertinente]."
 
 Exemple: "Mila (chienne Whippet) : Perte d'appétit, soif excessive et léthargie depuis 3-5 jours. Comportement inhabituel nécessitant une évaluation rapide."
 
