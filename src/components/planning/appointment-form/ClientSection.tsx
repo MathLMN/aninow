@@ -12,6 +12,9 @@ interface ClientSectionProps {
 }
 
 export const ClientSection = ({ formData, onFieldUpdate }: ClientSectionProps) => {
+  console.log('🔍 ClientSection - formData.clientPhoneCountryCode:', formData.clientPhoneCountryCode);
+  console.log('🔍 ClientSection - formData.clientPhone:', formData.clientPhone);
+  
   return (
     <div className="space-y-2">
       <div className="flex items-center mb-2">
