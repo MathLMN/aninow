@@ -84,7 +84,7 @@ export const AnimalSection = ({ formData, onFieldUpdate }: AnimalSectionProps) =
           {(formData.animalSpecies === 'chien' || formData.animalSpecies === 'chat') ? (
             <div className="relative">
               <BreedSearchInput
-                searchTerm={searchTerm}
+                searchTerm={searchTerm || formData.animalBreed || ''}
                 onSearchChange={handleSearchChange}
                 onFocus={handleInputFocus}
                 onBlur={handleInputBlur}
@@ -94,11 +94,6 @@ export const AnimalSection = ({ formData, onFieldUpdate }: AnimalSectionProps) =
                 isVisible={isInputFocused}
                 onBreedClick={handleBreedClick}
               />
-              {formData.animalBreed && !searchTerm && (
-                <div className="mt-1 text-xs text-gray-600">
-                  Sélectionné: <span className="font-medium">{formData.animalBreed}</span>
-                </div>
-              )}
             </div>
           ) : (
             <Input
