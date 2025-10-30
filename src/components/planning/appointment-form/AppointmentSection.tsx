@@ -9,6 +9,7 @@ interface AppointmentSectionProps {
   formData: any;
   veterinarians: any[];
   consultationTypes: any[];
+  validationErrors?: Record<string, boolean>;
   onFieldUpdate: (field: string, value: string | number) => void;
   onConsultationTypeChange: (consultationTypeId: string) => void;
   onTimeChange: (time: string) => void;
@@ -19,6 +20,7 @@ export const AppointmentSection = ({
   formData,
   veterinarians,
   consultationTypes,
+  validationErrors = {},
   onFieldUpdate,
   onConsultationTypeChange,
   onTimeChange,
@@ -64,9 +66,11 @@ export const AppointmentSection = ({
         </div>
 
         <div>
-          <Label htmlFor="veterinarianId" className="text-xs font-medium text-gray-700">Vétérinaire</Label>
+          <Label htmlFor="veterinarianId" className="text-xs font-medium text-gray-700">
+            Vétérinaire *
+          </Label>
           <Select value={formData.veterinarianId} onValueChange={(value) => onFieldUpdate('veterinarianId', value)}>
-            <SelectTrigger className="h-7 text-xs">
+            <SelectTrigger className={`h-7 text-xs ${validationErrors.veterinarianId ? 'border-red-500 border-2' : ''}`}>
               <SelectValue placeholder="Sélectionnez..." />
             </SelectTrigger>
             <SelectContent>
@@ -80,9 +84,11 @@ export const AppointmentSection = ({
         </div>
 
         <div>
-          <Label htmlFor="consultationTypeId" className="text-xs font-medium text-gray-700">Type de consultation</Label>
+          <Label htmlFor="consultationTypeId" className="text-xs font-medium text-gray-700">
+            Type de consultation *
+          </Label>
           <Select value={formData.consultationTypeId} onValueChange={onConsultationTypeChange}>
-            <SelectTrigger className="h-7 text-xs">
+            <SelectTrigger className={`h-7 text-xs ${validationErrors.consultationTypeId ? 'border-red-500 border-2' : ''}`}>
               <SelectValue placeholder="Sélectionnez..." />
             </SelectTrigger>
             <SelectContent>
@@ -97,7 +103,9 @@ export const AppointmentSection = ({
 
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <Label htmlFor="duration" className="text-xs font-medium text-gray-700">Durée (min)</Label>
+            <Label htmlFor="duration" className="text-xs font-medium text-gray-700">
+              Durée (min) *
+            </Label>
             <Input
               id="duration"
               type="number"
@@ -105,7 +113,7 @@ export const AppointmentSection = ({
               step="5"
               value={formData.duration}
               onChange={(e) => onFieldUpdate('duration', parseInt(e.target.value) || 15)}
-              className="h-7 text-xs"
+              className={`h-7 text-xs ${validationErrors.duration ? 'border-red-500 border-2' : ''}`}
             />
           </div>
           <div>

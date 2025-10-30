@@ -67,6 +67,7 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
   const { toast } = useToast();
   const { currentClinicId } = useClinicAccess();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, boolean>>({});
   
   // Toujours commencer avec des données vierges
   const [formData, setFormData] = useState<FormData>(getInitialFormData());
@@ -341,6 +342,35 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validation des champs obligatoires
+    const errors: Record<string, boolean> = {};
+    
+    if (!formData.veterinarianId) {
+      errors.veterinarianId = true;
+    }
+    
+    if (!formData.consultationTypeId) {
+      errors.consultationTypeId = true;
+    }
+    
+    if (!formData.duration || formData.duration < 5) {
+      errors.duration = true;
+    }
+    
+    // Si des erreurs, afficher les bordures rouges et ne pas soumettre
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      toast({
+        title: "Champs obligatoires manquants",
+        description: "Veuillez remplir tous les champs obligatoires : Vétérinaire, Type de consultation et Durée",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Réinitialiser les erreurs si tout est valide
+    setValidationErrors({});
+    
     if (!currentClinicId) {
       toast({
         title: "Erreur",
@@ -461,6 +491,7 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
   return {
     formData,
     isSubmitting,
+    validationErrors,
     updateField,
     handleConsultationTypeChange,
     handleSubmit,

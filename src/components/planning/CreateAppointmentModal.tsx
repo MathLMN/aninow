@@ -36,6 +36,7 @@ export const CreateAppointmentModal = ({
   const {
     formData,
     isSubmitting,
+    validationErrors,
     updateField,
     handleConsultationTypeChange,
     handleSubmit,
@@ -151,6 +152,7 @@ export const CreateAppointmentModal = ({
                   formData={formData}
                   veterinarians={veterinarians}
                   consultationTypes={consultationTypes}
+                  validationErrors={validationErrors}
                   onFieldUpdate={updateField}
                   onConsultationTypeChange={onConsultationTypeChange}
                   onTimeChange={handleTimeChange}
