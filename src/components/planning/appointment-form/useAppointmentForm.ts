@@ -247,15 +247,15 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
         cleanData.animalVaccinesUpToDate = vaccines;
       }
       
-      // Consultation - Utiliser le résumé de l'IA si disponible (RDV en ligne), sinon utiliser consultation_reason
+      // Consultation - Utiliser UNIQUEMENT le résumé généré par l'IA
       if (defaultData.ai_analysis?.analysis_summary) {
         // Pour les RDV en ligne, utiliser le résumé généré par l'IA
         const aiSummary = defaultData.ai_analysis.analysis_summary;
         console.log('🤖 Setting AI analysis summary as consultation reason:', aiSummary);
         cleanData.consultationReason = aiSummary;
-      } else if (defaultData.consultationReason || defaultData.consultation_reason) {
-        // Pour les RDV créés manuellement, utiliser la raison saisie
-        const reason = defaultData.consultationReason || defaultData.consultation_reason;
+      } else if (defaultData.consultationReason && !defaultData.consultation_reason?.includes('-')) {
+        // Pour les RDV créés manuellement, utiliser la raison saisie (mais ignorer les codes comme "symptomes-anomalie")
+        const reason = defaultData.consultationReason;
         console.log('🩺 Setting consultation reason:', reason);
         cleanData.consultationReason = reason;
       }
