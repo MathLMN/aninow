@@ -176,25 +176,30 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
       }
       
       if (defaultData.clientPhone || defaultData.client_phone) {
-        const fullPhone = defaultData.clientPhone || defaultData.client_phone;
+        const fullPhone = (defaultData.clientPhone || defaultData.client_phone).toString().trim();
         console.log('📞 Parsing client phone:', fullPhone);
         
         // Parser le numéro complet pour séparer le code pays du numéro
         const phoneMatch = fullPhone.match(/^(\+\d{2,3})(.+)$/);
         if (phoneMatch) {
           const [, countryCode, phoneNumber] = phoneMatch;
-          console.log('📞 Extracted country code:', countryCode, 'number:', phoneNumber);
+          // Nettoyer le numéro en enlevant les espaces
+          const cleanNumber = phoneNumber.replace(/\s/g, '');
+          console.log('📞 Extracted country code:', countryCode, 'number:', cleanNumber);
           cleanData.clientPhoneCountryCode = countryCode;
-          cleanData.clientPhone = phoneNumber;
+          cleanData.clientPhone = cleanNumber;
         } else {
-          // Si le format n'est pas reconnu, utiliser tel quel
-          cleanData.clientPhone = fullPhone;
+          // Si le format n'est pas reconnu (pas de code pays), utiliser le numéro tel quel
+          console.log('📞 No country code found, using default +33');
+          cleanData.clientPhone = fullPhone.replace(/\s/g, '');
+          // Garder le code pays par défaut (+33)
         }
       }
       
+      // Permettre l'écrasement du code pays si explicitement fourni
       if (defaultData.clientPhoneCountryCode || defaultData.client_phone_country_code) {
         const countryCode = defaultData.clientPhoneCountryCode || defaultData.client_phone_country_code;
-        console.log('🌍 Setting client phone country code:', countryCode);
+        console.log('🌍 Overriding client phone country code:', countryCode);
         cleanData.clientPhoneCountryCode = countryCode;
       }
       
