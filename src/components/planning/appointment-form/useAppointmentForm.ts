@@ -193,8 +193,17 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
       }
       
       if (defaultData.clientStatus || defaultData.client_status) {
-        const status = defaultData.clientStatus || defaultData.client_status;
-        console.log('👥 Setting client status:', status);
+        let status = defaultData.clientStatus || defaultData.client_status;
+        console.log('👥 Raw client status:', status);
+        
+        // Mapper les valeurs textuelles vers les valeurs du formulaire
+        if (status === 'Déjà client') {
+          status = 'existing';
+        } else if (status === 'Nouveau client') {
+          status = 'new';
+        }
+        
+        console.log('👥 Mapped client status:', status);
         cleanData.clientStatus = status;
       }
       
