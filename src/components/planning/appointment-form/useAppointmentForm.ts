@@ -190,6 +190,12 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
           if (cleanNumber === 'undefined' || cleanNumber === 'null' || cleanNumber === '') {
             console.log('⚠️ Invalid phone number detected, skipping');
             cleanNumber = '';
+          } else {
+            // Pour les numéros français (+33), ajouter le 0 initial si manquant
+            if (countryCode === '+33' && cleanNumber && !cleanNumber.startsWith('0')) {
+              cleanNumber = '0' + cleanNumber;
+              console.log('🇫🇷 Added leading 0 for French number:', cleanNumber);
+            }
           }
           
           console.log('📞 Extracted country code:', countryCode, 'number:', cleanNumber);
@@ -198,7 +204,12 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
         } else {
           // Si le format n'est pas reconnu (pas de code pays), utiliser le numéro tel quel
           console.log('📞 No country code found, using default +33');
-          cleanData.clientPhone = fullPhone.replace(/\s/g, '');
+          let cleanNumber = fullPhone.replace(/\s/g, '');
+          // Pour les numéros français sans indicatif, ajouter le 0 si manquant
+          if (cleanNumber && !cleanNumber.startsWith('0') && !cleanNumber.startsWith('+')) {
+            cleanNumber = '0' + cleanNumber;
+          }
+          cleanData.clientPhone = cleanNumber;
           // Garder le code pays par défaut (+33)
         }
       }
