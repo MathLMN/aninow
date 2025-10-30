@@ -19,14 +19,15 @@ export const ConsultationSection = ({ formData, onFieldUpdate }: ConsultationSec
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
-          <Label htmlFor="consultationReason" className="text-xs font-medium text-gray-700">Raison de la consultation *</Label>
-          <Input
+          <Label htmlFor="consultationReason" className="text-xs font-medium text-gray-700">Résumé de la demande (généré automatiquement) *</Label>
+          <Textarea
             id="consultationReason"
             value={formData.consultationReason}
             onChange={(e) => onFieldUpdate('consultationReason', e.target.value)}
-            placeholder="ex: Consultation de routine, Problème de peau..."
+            placeholder="Le résumé des réponses du client apparaîtra ici..."
             required
-            className="h-7 text-xs"
+            rows={4}
+            className="text-xs resize-none bg-muted/30"
           />
         </div>
         <div>
