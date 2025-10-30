@@ -1,6 +1,7 @@
 
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, User, Phone, Mail } from "lucide-react";
+import { Calendar, Clock, User, Phone, Mail, AlertTriangle, AlertCircle, TrendingUp } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface AppointmentInfoProps {
   appointment: any;
@@ -27,6 +28,33 @@ export const AppointmentInfo = ({ appointment }: AppointmentInfoProps) => {
     }
   };
 
+  const getUrgencyConfig = (score: number) => {
+    if (score >= 8) return {
+      color: 'bg-red-100 text-red-800 border-red-300',
+      icon: AlertTriangle,
+      label: 'URGENCE ÉLEVÉE'
+    };
+    if (score >= 6) return {
+      color: 'bg-orange-100 text-orange-800 border-orange-300',
+      icon: AlertCircle,
+      label: 'Urgence modérée'
+    };
+    if (score >= 4) return {
+      color: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+      icon: TrendingUp,
+      label: 'Priorité moyenne'
+    };
+    return {
+      color: 'bg-green-100 text-green-800 border-green-300',
+      icon: TrendingUp,
+      label: 'Priorité faible'
+    };
+  };
+
+  const isOnlineBooking = appointment.booking_source === 'online';
+  const urgencyConfig = appointment.urgency_score ? getUrgencyConfig(appointment.urgency_score) : null;
+  const UrgencyIcon = urgencyConfig?.icon;
+
   return (
     <div className="space-y-4">
       {/* En-tête avec statut */}
@@ -36,6 +64,25 @@ export const AppointmentInfo = ({ appointment }: AppointmentInfoProps) => {
           {getStatusLabel(appointment.status)}
         </Badge>
       </div>
+
+      {/* Indicateur d'urgence pour les RDV en ligne */}
+      {isOnlineBooking && urgencyConfig && UrgencyIcon && (
+        <div className={cn(
+          "p-4 rounded-lg border-2 flex items-start gap-3",
+          urgencyConfig.color
+        )}>
+          <UrgencyIcon className="h-5 w-5 mt-0.5 flex-shrink-0" />
+          <div className="flex-1">
+            <div className="font-semibold text-sm">{urgencyConfig.label}</div>
+            <div className="text-xs mt-1">Score d'urgence: {appointment.urgency_score}/10</div>
+            {appointment.ai_analysis?.analysis_summary && (
+              <div className="text-xs mt-2 opacity-90">
+                {appointment.ai_analysis.analysis_summary}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Informations de base */}
       <div className="grid grid-cols-2 gap-4">

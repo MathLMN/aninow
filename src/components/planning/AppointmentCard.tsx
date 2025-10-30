@@ -1,7 +1,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Clock, User, PawPrint, AlertTriangle, TrendingUp } from "lucide-react";
+import { Clock, User, PawPrint, AlertTriangle, TrendingUp, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AppointmentCardProps {
@@ -28,12 +28,28 @@ export const AppointmentCard = ({ appointment, onClick, className }: Appointment
     return 'text-green-600';
   };
 
+  const getUrgencyBadgeColor = (score: number) => {
+    if (score >= 8) return 'bg-red-100 text-red-800 border-red-300';
+    if (score >= 6) return 'bg-orange-100 text-orange-800 border-orange-300';
+    if (score >= 4) return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+    return 'bg-green-100 text-green-800 border-green-300';
+  };
+
+  const getUrgencyLabel = (score: number) => {
+    if (score >= 8) return 'URGENT';
+    if (score >= 6) return 'Élevé';
+    if (score >= 4) return 'Moyen';
+    return 'Faible';
+  };
+
   const getUrgencyIcon = (score: number) => {
     if (score >= 8) return AlertTriangle;
+    if (score >= 6) return AlertCircle;
     return TrendingUp;
   };
 
   const UrgencyIcon = appointment.urgency_score ? getUrgencyIcon(appointment.urgency_score) : TrendingUp;
+  const isOnlineBooking = appointment.booking_source === 'online';
 
   return (
     <Card 
@@ -46,13 +62,27 @@ export const AppointmentCard = ({ appointment, onClick, className }: Appointment
     >
       <CardContent className="p-3">
         <div className="space-y-2">
-          {/* En-tête avec heure et urgence */}
+          {/* Badge d'urgence visible pour les RDV en ligne */}
+          {isOnlineBooking && appointment.urgency_score && (
+            <Badge 
+              variant="outline" 
+              className={cn(
+                "text-xs font-semibold border-2 flex items-center gap-1 w-fit",
+                getUrgencyBadgeColor(appointment.urgency_score)
+              )}
+            >
+              <UrgencyIcon className="h-3 w-3" />
+              {getUrgencyLabel(appointment.urgency_score)} ({appointment.urgency_score}/10)
+            </Badge>
+          )}
+
+          {/* En-tête avec heure */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Clock className="h-4 w-4 text-vet-sage" />
               <span className="font-medium text-sm">{appointment.appointment_time}</span>
             </div>
-            {appointment.urgency_score && (
+            {!isOnlineBooking && appointment.urgency_score && (
               <div className={cn(
                 "flex items-center space-x-1 text-xs",
                 getUrgencyColor(appointment.urgency_score)
