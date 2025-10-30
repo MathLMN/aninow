@@ -45,11 +45,14 @@ const VetAppointments = () => {
   );
 
   // Appliquer la recherche uniquement sur les réservations en ligne
-  const filteredBookings = onlineBookings.filter((booking) =>
-    booking.animal_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    booking.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    booking.client_phone.includes(searchTerm)
-  );
+  const filteredBookings = onlineBookings
+    .filter((booking) =>
+      booking.animal_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.client_phone.includes(searchTerm)
+    )
+    // Trier par date de création décroissante (les plus récentes en premier)
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const handleStatusChange = (bookingId: string, newStatus: 'pending' | 'confirmed' | 'cancelled' | 'completed') => {
     updateBookingStatus({ id: bookingId, status: newStatus });
