@@ -21,7 +21,8 @@ const BookingConfirmation = () => {
     isSubmitting
   } = useBookingSubmission();
   const {
-    bookingData
+    bookingData,
+    resetBookingData
   } = useBookingFormData();
   const {
     settings,
@@ -280,7 +281,10 @@ const BookingConfirmation = () => {
                 </Button>
               </Link>
               <Link to="/booking" className="w-full sm:w-auto">
-                <Button variant="outline" className="w-full sm:w-auto border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white" onClick={() => localStorage.removeItem('lastBookingConfirmation')}>
+                <Button variant="outline" className="w-full sm:w-auto border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white" onClick={() => {
+                  localStorage.removeItem('lastBookingConfirmation');
+                  resetBookingData();
+                }}>
                   Prendre un autre RDV
                 </Button>
               </Link>
