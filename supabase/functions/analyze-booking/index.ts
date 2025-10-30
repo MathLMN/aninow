@@ -284,13 +284,21 @@ OBJECTIF: Générer un résumé concis qui inclut OBLIGATOIREMENT:
 - La durée d'évolution des symptômes
 - Une synthèse clinique rapide
 
-RÈGLE IMPÉRATIVE - ORDRE DU RÉSUMÉ:
-Le résumé DOIT TOUJOURS commencer par la liste complète des symptômes sélectionnés.
+RÈGLE IMPÉRATIVE - CONTENU DU RÉSUMÉ:
+Le résumé DOIT TOUJOURS inclure dans cet ordre:
+1. Pour "Symptômes ou anomalie": Commencer par la LISTE COMPLÈTE DES SYMPTÔMES sélectionnés
+2. Pour "Consultation de convenance": Commencer par TOUTES LES OPTIONS DE CONVENANCE sélectionnées (vaccination, coupe de griffes, etc.)
+3. Inclure les POINTS ADDITIONNELS si présents (bilan de santé, comportement, etc.)
+4. La durée si applicable
+5. Une observation clinique si pertinente
 
 Format du résumé (2-3 phrases maximum):
-"[Nom] ([espèce] [race]) : [LISTE COMPLÈTE DES SYMPTÔMES EN PREMIER] depuis [durée]. [Observation clinique supplémentaire si pertinente]."
+- Symptômes: "[Nom] ([espèce] [race]) : [LISTE COMPLÈTE DES SYMPTÔMES] depuis [durée]. [Points additionnels]. [Observation]."
+- Convenance: "[Nom] ([espèce] [race]) : [TOUTES LES OPTIONS DE CONVENANCE]. [Points additionnels]."
 
-Exemple: "Mila (chienne Whippet) : Perte d'appétit, soif excessive et léthargie depuis 3-5 jours. Comportement inhabituel nécessitant une évaluation rapide."
+Exemples: 
+- "Mila (chienne Whippet) : Perte d'appétit, soif excessive et léthargie depuis 3-5 jours. Bilan de santé annuel souhaité."
+- "Lou (Dogue allemand) : Vaccination, coupe de griffes et vermifuge. Conseils alimentaires demandés."
 
 L'évaluation d'urgence (1-10) doit considérer:
 - Gravité des symptômes
@@ -320,6 +328,7 @@ ANIMAL:
 MOTIF DE CONSULTATION:
 {{consultation_reason}}
 
+{{#symptoms}}
 SYMPTÔMES OBSERVÉS:
 {{symptoms}}
 {{#custom_symptom}}
@@ -331,11 +340,32 @@ DURÉE DES SYMPTÔMES:
 
 RÉPONSES AUX QUESTIONS CONDITIONNELLES:
 {{conditional_answers}}
+{{/symptoms}}
+
+{{#convenience_options}}
+OPTIONS DE CONVENANCE SÉLECTIONNÉES:
+{{convenience_options}}
+{{/convenience_options}}
+
+{{#custom_text}}
+DEMANDE SPÉCIFIQUE:
+{{custom_text}}
+{{/custom_text}}
+
+{{#additional_points}}
+POINTS ADDITIONNELS:
+{{additional_points}}
+{{/additional_points}}
 
 {{#client_comment}}
 COMMENTAIRE DU CLIENT:
 {{client_comment}}
 {{/client_comment}}
+
+IMPORTANT: Le résumé doit inclure EXPLICITEMENT:
+- Si symptômes: tous les symptômes listés
+- Si convenance: toutes les options sélectionnées (vaccination, coupe de griffes, etc.)
+- Les points additionnels (bilan de santé, conseils, etc.)
 
 Génère un résumé clinique concis (2-3 phrases) et une évaluation d'urgence précise.`,
       variables: {}
@@ -386,6 +416,36 @@ function evaluateRuleConditions(conditions: any, booking: BookingData): boolean 
 
 function buildPromptsFromTemplate(template: PromptTemplate, booking: BookingData): { systemPrompt: string, userPrompt: string } {
   try {
+    // Mapper les options de convenance vers des labels clairs
+    const convenienceLabels: Record<string, string> = {
+      'vaccination': 'Vaccination',
+      'rappel-vaccin': 'Rappel de vaccin',
+      'vermifuge': 'Vermifuge',
+      'antipuce': 'Antipuce',
+      'antiparasite': 'Antiparasite',
+      'coupe-griffes': 'Coupe de griffes',
+      'vidange-glandes': 'Vidange des glandes anales',
+      'autre-convenance': 'Autre soin de convenance'
+    }
+    
+    // Mapper les points additionnels vers des labels clairs
+    const additionalPointsLabels: Record<string, string> = {
+      'bilan-sante': 'Bilan de santé annuel',
+      'comportement': 'Questions sur le comportement',
+      'alimentation': 'Conseils alimentaires',
+      'autre': 'Autre demande'
+    }
+    
+    // Construire la liste des options de convenance
+    const convenienceOptions = (booking.convenience_options || [])
+      .map((opt: string) => convenienceLabels[opt] || opt)
+      .filter(Boolean)
+    
+    // Construire la liste des points additionnels
+    const additionalPoints = (booking.additional_points || [])
+      .map((point: string) => additionalPointsLabels[point] || point)
+      .filter(Boolean)
+    
     // Préparer les variables pour le template
     const variables = {
       animal_species: booking.animal_species || 'Non spécifié',
@@ -403,7 +463,10 @@ function buildPromptsFromTemplate(template: PromptTemplate, booking: BookingData
       custom_symptom: booking.custom_symptom || '',
       symptom_duration: booking.symptom_duration || 'Non spécifié',
       conditional_answers: booking.conditional_answers ? JSON.stringify(booking.conditional_answers, null, 2) : 'Aucune réponse conditionnelle',
-      client_comment: booking.client_comment || 'Aucun commentaire'
+      client_comment: booking.client_comment || 'Aucun commentaire',
+      convenience_options: convenienceOptions.length > 0 ? convenienceOptions.join(', ') : '',
+      additional_points: additionalPoints.length > 0 ? additionalPoints.join(', ') : '',
+      custom_text: booking.custom_text || ''
     }
 
     // Remplacer les variables dans le template utilisateur
