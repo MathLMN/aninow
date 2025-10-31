@@ -41,7 +41,7 @@ export const CreateAppointmentModal = ({
     isSubmitting,
     validationErrors,
     updateField,
-    handleConsultationTypeChange,
+    handleConsultationTypesChange,
     handleSubmit,
     calculateEndTime,
     initializeFormData,
@@ -98,8 +98,8 @@ export const CreateAppointmentModal = ({
     }
   }, [isOpen, defaultData, appointmentToEdit]);
 
-  const onConsultationTypeChange = (consultationTypeId: string) => {
-    handleConsultationTypeChange(consultationTypeId, consultationTypes);
+  const onConsultationTypesChangeWrapper = (consultationTypeIds: string[]) => {
+    handleConsultationTypesChange(consultationTypeIds, consultationTypes);
   };
 
   const handleDelete = async () => {
@@ -200,7 +200,7 @@ export const CreateAppointmentModal = ({
                   consultationTypes={consultationTypes}
                   validationErrors={validationErrors}
                   onFieldUpdate={updateField}
-                  onConsultationTypeChange={onConsultationTypeChange}
+                  onConsultationTypesChange={onConsultationTypesChangeWrapper}
                   onTimeChange={handleTimeChange}
                   calculateEndTime={calculateEndTime}
                 />

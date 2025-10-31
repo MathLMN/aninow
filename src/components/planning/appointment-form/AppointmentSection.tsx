@@ -3,15 +3,18 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, UserCheck } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Calendar, Clock, UserCheck, ChevronDown, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface AppointmentSectionProps {
   formData: any;
   veterinarians: any[];
   consultationTypes: any[];
   validationErrors?: Record<string, boolean>;
-  onFieldUpdate: (field: string, value: string | number) => void;
-  onConsultationTypeChange: (consultationTypeId: string) => void;
+  onFieldUpdate: (field: string, value: string | number | string[]) => void;
+  onConsultationTypesChange: (consultationTypeIds: string[]) => void;
   onTimeChange: (time: string) => void;
   calculateEndTime: (startTime: string, duration: number) => string;
 }
@@ -22,7 +25,7 @@ export const AppointmentSection = ({
   consultationTypes,
   validationErrors = {},
   onFieldUpdate,
-  onConsultationTypeChange,
+  onConsultationTypesChange,
   onTimeChange,
   calculateEndTime
 }: AppointmentSectionProps) => {
@@ -31,6 +34,24 @@ export const AppointmentSection = ({
     const timeString = now.toTimeString().slice(0, 5); // Format HH:MM
     onFieldUpdate('arrival_time', timeString);
   };
+
+  const handleConsultationTypeToggle = (typeId: string) => {
+    const currentIds = formData.consultationTypeIds || [];
+    const newIds = currentIds.includes(typeId)
+      ? currentIds.filter((id: string) => id !== typeId)
+      : [...currentIds, typeId];
+    onConsultationTypesChange(newIds);
+  };
+
+  const handleRemoveConsultationType = (typeId: string) => {
+    const currentIds = formData.consultationTypeIds || [];
+    const newIds = currentIds.filter((id: string) => id !== typeId);
+    onConsultationTypesChange(newIds);
+  };
+
+  const selectedTypes = consultationTypes.filter(type => 
+    (formData.consultationTypeIds || []).includes(type.id)
+  );
 
   return (
     <div className="space-y-2">
@@ -85,20 +106,60 @@ export const AppointmentSection = ({
 
         <div>
           <Label htmlFor="consultationTypeId" className="text-xs font-medium text-gray-700">
-            Type de consultation *
+            Type(s) de consultation *
           </Label>
-          <Select value={formData.consultationTypeId} onValueChange={onConsultationTypeChange}>
-            <SelectTrigger className={`h-7 text-xs ${validationErrors.consultationTypeId ? 'border-red-500 border-2' : ''}`}>
-              <SelectValue placeholder="Sélectionnez..." />
-            </SelectTrigger>
-            <SelectContent>
-              {consultationTypes.map((type) => (
-                <SelectItem key={type.id} value={type.id} className="text-xs">
-                  {type.name} ({type.duration_minutes} min)
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                className={`w-full h-auto min-h-7 justify-between text-xs ${
+                  validationErrors.consultationTypeIds ? 'border-red-500 border-2' : ''
+                }`}
+              >
+                <div className="flex flex-wrap gap-1 flex-1">
+                  {selectedTypes.length === 0 ? (
+                    <span className="text-muted-foreground">Sélectionnez...</span>
+                  ) : (
+                    selectedTypes.map((type) => (
+                      <Badge
+                        key={type.id}
+                        variant="secondary"
+                        className="text-xs gap-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveConsultationType(type.id);
+                        }}
+                      >
+                        {type.name} ({type.duration_minutes} min)
+                        <X className="h-3 w-3" />
+                      </Badge>
+                    ))
+                  )}
+                </div>
+                <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-2" align="start">
+              <div className="space-y-2">
+                {consultationTypes.map((type) => (
+                  <div key={type.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`type-${type.id}`}
+                      checked={(formData.consultationTypeIds || []).includes(type.id)}
+                      onCheckedChange={() => handleConsultationTypeToggle(type.id)}
+                    />
+                    <label
+                      htmlFor={`type-${type.id}`}
+                      className="text-xs font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                    >
+                      {type.name} ({type.duration_minutes} min)
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
         <div className="grid grid-cols-2 gap-2">

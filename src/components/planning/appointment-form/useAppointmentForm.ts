@@ -10,7 +10,7 @@ interface FormData {
   appointmentTime: string;
   appointmentEndTime: string;
   veterinarianId: string;
-  consultationTypeId: string;
+  consultationTypeIds: string[];
   duration: number;
   arrival_time: string | null;
   booking_source: string;
@@ -43,7 +43,7 @@ const getInitialFormData = (): FormData => ({
   appointmentTime: '',
   appointmentEndTime: '',
   veterinarianId: '',
-  consultationTypeId: '',
+  consultationTypeIds: [],
   duration: 30,
   arrival_time: null,
   booking_source: 'phone',
@@ -79,22 +79,25 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleConsultationTypeChange = (consultationTypeId: string, consultationTypes: any[]) => {
-    console.log('🔄 Consultation type changed:', consultationTypeId);
-    const selectedType = consultationTypes.find(type => type.id === consultationTypeId);
-    if (selectedType) {
-      const duration = selectedType.duration_minutes;
-      console.log('📊 Selected consultation type:', selectedType.name, 'Duration:', duration);
-      
-      updateField('consultationTypeId', consultationTypeId);
-      updateField('duration', duration);
-      
-      // Recalculer l'heure de fin si on a une heure de début
-      if (formData.appointmentTime) {
-        const endTime = calculateEndTime(formData.appointmentTime, duration);
-        console.log('⏰ Calculated end time:', endTime);
-        updateField('appointmentEndTime', endTime);
-      }
+  const handleConsultationTypesChange = (consultationTypeIds: string[], consultationTypes: any[]) => {
+    console.log('🔄 Consultation types changed:', consultationTypeIds);
+    
+    // Calculer la durée totale en additionnant les durées de tous les types sélectionnés
+    const totalDuration = consultationTypeIds.reduce((sum, typeId) => {
+      const type = consultationTypes.find(t => t.id === typeId);
+      return sum + (type?.duration_minutes || 0);
+    }, 0);
+    
+    console.log('📊 Selected consultation types count:', consultationTypeIds.length, 'Total duration:', totalDuration);
+    
+    updateField('consultationTypeIds', consultationTypeIds);
+    updateField('duration', totalDuration || 30); // Par défaut 30 min si aucun type sélectionné
+    
+    // Recalculer l'heure de fin si on a une heure de début
+    if (formData.appointmentTime) {
+      const endTime = calculateEndTime(formData.appointmentTime, totalDuration || 30);
+      console.log('⏰ Calculated end time:', endTime);
+      updateField('appointmentEndTime', endTime);
     }
   };
 
@@ -140,8 +143,12 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
         cleanData.veterinarianId = vetId;
       }
       
-      if (defaultData.consultationTypeId) {
-        cleanData.consultationTypeId = defaultData.consultationTypeId;
+      // Gestion de la compatibilité avec l'ancien champ unique et le nouveau champ multiple
+      if (defaultData.consultationTypeIds && Array.isArray(defaultData.consultationTypeIds)) {
+        cleanData.consultationTypeIds = defaultData.consultationTypeIds;
+      } else if (defaultData.consultationTypeId) {
+        // Migration depuis l'ancien format
+        cleanData.consultationTypeIds = [defaultData.consultationTypeId];
       }
       
       if (defaultData.duration) {
@@ -352,8 +359,8 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
       errors.veterinarianId = true;
     }
     
-    if (!formData.consultationTypeId) {
-      errors.consultationTypeId = true;
+    if (!formData.consultationTypeIds || formData.consultationTypeIds.length === 0) {
+      errors.consultationTypeIds = true;
     }
     
     if (!formData.duration || formData.duration < 5) {
@@ -408,7 +415,8 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
         appointment_time: formData.appointmentTime,
         appointment_end_time: formData.appointmentEndTime,
         veterinarian_id: formData.veterinarianId || null,
-        consultation_type_id: formData.consultationTypeId || null,
+        consultation_type_id: formData.consultationTypeIds?.[0] || null, // Premier type pour compatibilité
+        consultation_type_ids: formData.consultationTypeIds || [],
         duration_minutes: formData.duration,
         arrival_time: formData.arrival_time || null,
         booking_source: formData.booking_source,
@@ -497,7 +505,7 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
     isSubmitting,
     validationErrors,
     updateField,
-    handleConsultationTypeChange,
+    handleConsultationTypesChange,
     handleSubmit,
     calculateEndTime,
     initializeFormData,
