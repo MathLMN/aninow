@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, AlertCircle, TrendingUp } from "lucide-react";
+import { AlertTriangle, AlertCircle, TrendingUp, UserX, CheckCircle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AppointmentSection } from "./appointment-form/AppointmentSection";
 import { ClientSection } from "./appointment-form/ClientSection";
@@ -48,7 +48,7 @@ export const CreateAppointmentModal = ({
     handleTimeChange
   } = useAppointmentForm(onClose, appointmentToEdit?.id);
 
-  const { deleteBooking, isLoading: isDeletingBooking } = usePlanningActions();
+  const { deleteBooking, updateBookingStatus, isLoading: isDeletingBooking } = usePlanningActions();
 
   // Initialize form data when modal opens
   useEffect(() => {
@@ -158,6 +158,33 @@ export const CreateAppointmentModal = ({
   const urgencyConfig = urgencyScore ? getUrgencyConfig(urgencyScore) : null;
   const UrgencyIcon = urgencyConfig?.icon;
 
+  // Check if appointment has passed
+  const isAppointmentPassed = () => {
+    if (!appointmentToEdit?.appointment_date || !appointmentToEdit?.appointment_time) return false;
+    const appointmentDateTime = new Date(`${appointmentToEdit.appointment_date}T${appointmentToEdit.appointment_time}`);
+    return appointmentDateTime < new Date();
+  };
+
+  // Check if we can mark as no-show
+  const canMarkNoShow = () => {
+    return isAppointmentPassed() && 
+           appointmentToEdit?.status && 
+           (appointmentToEdit.status === 'confirmed' || appointmentToEdit.status === 'pending');
+  };
+
+  // Handle status update
+  const handleStatusUpdate = async (newStatus: string) => {
+    if (appointmentToEdit?.id) {
+      const success = await updateBookingStatus(appointmentToEdit.id, newStatus);
+      if (success) {
+        onClose();
+        if (onRefreshPlanning) {
+          onRefreshPlanning();
+        }
+      }
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl max-h-[95vh] p-0 overflow-hidden flex flex-col">
@@ -234,67 +261,114 @@ export const CreateAppointmentModal = ({
 
           {/* Boutons d'action - fixés en bas avec moins d'espacement */}
           <div className="flex justify-between items-center border-t bg-gray-50/50 px-3 py-2 flex-shrink-0">
-            <div className="flex space-x-2">
+            <div className="flex flex-wrap gap-2">
               <Button type="button" variant="outline" onClick={onClose} className="px-3 py-1 text-xs h-8">
-                Annuler
+                Fermer
               </Button>
               {isEditMode && (
-                <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-                  <AlertDialogTrigger asChild>
-                    <Button 
-                      type="button" 
-                      variant="destructive"
+                <>
+                  {/* Actions de statut */}
+                  {appointmentToEdit.status !== 'confirmed' && (
+                    <Button
+                      type="button"
+                      onClick={() => handleStatusUpdate('confirmed')}
                       disabled={isDeletingBooking}
-                      className="px-3 py-1 text-xs h-8"
+                      className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs h-8"
                     >
-                      {isDeletingBooking ? 'Suppression...' : 'Supprimer'}
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Confirmer
                     </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Êtes-vous sûr de vouloir supprimer définitivement ce rendez-vous ?
-                        <br />
-                        <strong>Client :</strong> {appointmentToEdit?.client_name}
-                        <br />
-                        <strong>Animal :</strong> {appointmentToEdit?.animal_name}
-                        <br />
-                        <strong>Date :</strong> {appointmentToEdit?.appointment_date} à {appointmentToEdit?.appointment_time}
-                        <br />
-                        <br />
-                        Cette action est irréversible.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel 
-                        className="text-xs h-8"
+                  )}
+                  {appointmentToEdit.status !== 'completed' && appointmentToEdit.status !== 'cancelled' && (
+                    <Button
+                      type="button"
+                      onClick={() => handleStatusUpdate('completed')}
+                      disabled={isDeletingBooking}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-xs h-8"
+                    >
+                      Marquer terminé
+                    </Button>
+                  )}
+                  {canMarkNoShow() && (
+                    <Button
+                      type="button"
+                      onClick={() => handleStatusUpdate('no-show')}
+                      disabled={isDeletingBooking}
+                      className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1 text-xs h-8"
+                    >
+                      <UserX className="h-3 w-3 mr-1" />
+                      Marquer absent
+                    </Button>
+                  )}
+                  {appointmentToEdit.status !== 'cancelled' && appointmentToEdit.status !== 'completed' && (
+                    <Button
+                      type="button"
+                      onClick={() => handleStatusUpdate('cancelled')}
+                      disabled={isDeletingBooking}
+                      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 text-xs h-8"
+                    >
+                      <XCircle className="h-3 w-3 mr-1" />
+                      Annuler RDV
+                    </Button>
+                  )}
+                  
+                  {/* Supprimer */}
+                  <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        type="button" 
+                        variant="destructive"
                         disabled={isDeletingBooking}
+                        className="px-3 py-1 text-xs h-8"
                       >
-                        Annuler
-                      </AlertDialogCancel>
-                      <AlertDialogAction 
-                        onClick={handleDelete}
-                        disabled={isDeletingBooking}
-                        className="bg-red-600 hover:bg-red-700 text-xs h-8"
-                      >
-                        {isDeletingBooking ? 'Suppression...' : 'Supprimer définitivement'}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                        {isDeletingBooking ? 'Suppression...' : 'Supprimer'}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Êtes-vous sûr de vouloir supprimer définitivement ce rendez-vous ?
+                          <br />
+                          <strong>Client :</strong> {appointmentToEdit?.client_name}
+                          <br />
+                          <strong>Animal :</strong> {appointmentToEdit?.animal_name}
+                          <br />
+                          <strong>Date :</strong> {appointmentToEdit?.appointment_date} à {appointmentToEdit?.appointment_time}
+                          <br />
+                          <br />
+                          Cette action est irréversible.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel 
+                          className="text-xs h-8"
+                          disabled={isDeletingBooking}
+                        >
+                          Annuler
+                        </AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={handleDelete}
+                          disabled={isDeletingBooking}
+                          className="bg-red-600 hover:bg-red-700 text-xs h-8"
+                        >
+                          {isDeletingBooking ? 'Suppression...' : 'Supprimer définitivement'}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </>
               )}
             </div>
-            <Button 
-              type="submit" 
-              disabled={isSubmitting}
-              className="bg-vet-sage hover:bg-vet-sage/90 text-white px-3 py-1 text-xs h-8"
-            >
-              {isSubmitting 
-                ? (isEditMode ? 'Modification...' : 'Création...') 
-                : 'Valider'
-              }
-            </Button>
+            {!isEditMode && (
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="bg-vet-sage hover:bg-vet-sage/90 text-white px-3 py-1 text-xs h-8"
+              >
+                {isSubmitting ? 'Création...' : 'Créer le rendez-vous'}
+              </Button>
+            )}
           </div>
         </form>
       </DialogContent>

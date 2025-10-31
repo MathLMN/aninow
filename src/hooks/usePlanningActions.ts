@@ -144,6 +144,47 @@ export const usePlanningActions = () => {
     }
   };
 
+  const updateBookingStatus = async (bookingId: string, status: string, notes?: string): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      const updateData: any = { status };
+      if (notes) {
+        updateData.client_comment = notes;
+      }
+
+      const { error } = await supabase
+        .from('bookings')
+        .update(updateData)
+        .eq('id', bookingId);
+
+      if (error) throw error;
+
+      const statusLabels: Record<string, string> = {
+        'pending': 'en attente',
+        'confirmed': 'confirmé',
+        'cancelled': 'annulé',
+        'completed': 'terminé',
+        'no-show': 'absent'
+      };
+
+      toast({
+        title: "Statut mis à jour",
+        description: `Le rendez-vous a été marqué comme ${statusLabels[status] || status}`,
+      });
+      return true;
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du statut:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour le statut",
+        variant: "destructive"
+      });
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleBlockSlot = async (timeSlot: { date: string; time: string; veterinarian: string }): Promise<boolean> => {
     return true;
   };
@@ -154,6 +195,7 @@ export const usePlanningActions = () => {
     cancelBooking,
     moveAppointment,
     deleteBooking,
+    updateBookingStatus,
     handleBlockSlot
   };
 };
