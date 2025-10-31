@@ -17,6 +17,7 @@ interface AppointmentSectionProps {
   onConsultationTypesChange: (consultationTypeIds: string[]) => void;
   onTimeChange: (time: string) => void;
   calculateEndTime: (startTime: string, duration: number) => string;
+  onMarkArrival: () => void;
 }
 
 export const AppointmentSection = ({
@@ -27,13 +28,9 @@ export const AppointmentSection = ({
   onFieldUpdate,
   onConsultationTypesChange,
   onTimeChange,
-  calculateEndTime
+  calculateEndTime,
+  onMarkArrival
 }: AppointmentSectionProps) => {
-  const handleMarkArrival = () => {
-    const now = new Date();
-    const timeString = now.toTimeString().slice(0, 5); // Format HH:MM
-    onFieldUpdate('arrival_time', timeString);
-  };
 
   const handleConsultationTypeToggle = (typeId: string) => {
     const currentIds = formData.consultationTypeIds || [];
@@ -197,7 +194,7 @@ export const AppointmentSection = ({
               <Button
                 type="button"
                 size="sm"
-                onClick={handleMarkArrival}
+                onClick={onMarkArrival}
                 className="bg-green-600 hover:bg-green-700 text-white h-6 px-2 text-xs"
               >
                 Arrivé

@@ -43,7 +43,8 @@ export const CreateAppointmentModal = ({
     handleSubmit,
     calculateEndTime,
     initializeFormData,
-    handleTimeChange
+    handleTimeChange,
+    handleMarkArrival
   } = useAppointmentForm(onClose, appointmentToEdit?.id);
 
   const { updateBookingStatus, isLoading: isDeletingBooking } = usePlanningActions();
@@ -203,6 +204,7 @@ export const CreateAppointmentModal = ({
                   onConsultationTypesChange={onConsultationTypesChangeWrapper}
                   onTimeChange={handleTimeChange}
                   calculateEndTime={calculateEndTime}
+                  onMarkArrival={handleMarkArrival}
                 />
               </div>
 

@@ -349,6 +349,41 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
     }
   };
 
+  const handleMarkArrival = async () => {
+    const now = new Date();
+    const timeString = now.toTimeString().slice(0, 5); // Format HH:MM
+    
+    // Mettre à jour le state local
+    updateField('arrival_time', timeString);
+    
+    // Si on est en mode édition, sauvegarder immédiatement en base de données
+    if (appointmentId) {
+      try {
+        const { error } = await supabase
+          .from('bookings')
+          .update({ arrival_time: timeString })
+          .eq('id', appointmentId);
+
+        if (error) {
+          console.error('❌ Error updating arrival time:', error);
+          toast({
+            title: "Erreur",
+            description: "Impossible de sauvegarder l'heure d'arrivée",
+            variant: "destructive"
+          });
+        } else {
+          console.log('✅ Arrival time saved:', timeString);
+          toast({
+            title: "Client marqué comme arrivé",
+            description: `Heure d'arrivée: ${timeString}`,
+          });
+        }
+      } catch (error) {
+        console.error('❌ Exception updating arrival time:', error);
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -508,6 +543,7 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
     handleSubmit,
     calculateEndTime,
     initializeFormData,
-    handleTimeChange
+    handleTimeChange,
+    handleMarkArrival
   };
 };
