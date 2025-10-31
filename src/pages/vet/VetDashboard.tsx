@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Users, Clock, TrendingUp, AlertTriangle, CheckCircle, XCircle, Activity } from "lucide-react";
+import { Calendar, Users, Clock, TrendingUp, AlertTriangle, CheckCircle, XCircle, Activity, UserX } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useVetBookings } from "@/hooks/useVetBookings";
 import { PendingBookingsNotification } from "@/components/planning/PendingBookingsNotification";
@@ -19,6 +19,7 @@ const VetDashboard = () => {
   const confirmedBookings = bookings.filter(b => b.status === 'confirmed').length;
   const cancelledBookings = bookings.filter(b => b.status === 'cancelled').length;
   const completedBookings = bookings.filter(b => b.status === 'completed').length;
+  const noShowBookings = bookings.filter(b => b.status === 'no-show').length;
   
   // Répartition par type de consultation
   const convenienceBookings = bookings.filter(b => b.consultation_reason === 'consultation-convenance').length;
@@ -33,6 +34,15 @@ const VetDashboard = () => {
   // Score d'urgence moyen
   const avgUrgencyScore = bookings.length > 0
     ? Math.round(bookings.reduce((sum, b) => sum + (b.urgency_score || 0), 0) / bookings.length)
+    : 0;
+
+  // Taux de présence et d'absentéisme
+  const totalAttendable = confirmedBookings + noShowBookings + completedBookings;
+  const presenceRate = totalAttendable > 0
+    ? Math.round(((confirmedBookings + completedBookings) / totalAttendable) * 100)
+    : 0;
+  const absenteeismRate = totalAttendable > 0
+    ? Math.round((noShowBookings / totalAttendable) * 100)
     : 0;
 
   if (isLoading) {
@@ -66,7 +76,7 @@ const VetDashboard = () => {
       </div>
 
       {/* Statistiques principales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-vet-brown">RDV Aujourd'hui</CardTitle>
@@ -86,6 +96,17 @@ const VetDashboard = () => {
           <CardContent>
             <div className="text-2xl font-bold text-vet-navy">{stats.pending}</div>
             <p className="text-xs text-vet-brown">À confirmer</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-vet-brown">Absents</CardTitle>
+            <UserX className="h-4 w-4 text-orange-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-vet-navy">{noShowBookings}</div>
+            <p className="text-xs text-vet-brown">Non présentés</p>
           </CardContent>
         </Card>
 
@@ -149,6 +170,13 @@ const VetDashboard = () => {
                     <span className="text-sm text-vet-brown">Terminés</span>
                   </div>
                   <span className="font-semibold text-vet-navy">{completedBookings}</span>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-vet-beige/30 rounded">
+                  <div className="flex items-center space-x-2">
+                    <UserX className="h-4 w-4 text-orange-600" />
+                    <span className="text-sm text-vet-brown">Non présentés</span>
+                  </div>
+                  <span className="font-semibold text-vet-navy">{noShowBookings}</span>
                 </div>
                 <div className="flex items-center justify-between p-2 bg-vet-beige/30 rounded">
                   <div className="flex items-center space-x-2">
@@ -230,6 +258,20 @@ const VetDashboard = () => {
                     {stats.highUrgency} RDV avec score ≥ 7
                   </div>
                 </div>
+                <div className="p-3 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
+                  <div className="text-xs text-emerald-700 font-medium">Taux de présence</div>
+                  <div className="text-2xl font-bold text-emerald-800 mt-1">{presenceRate}%</div>
+                  <div className="text-xs text-emerald-600 mt-1">
+                    {confirmedBookings + completedBookings} présents / {totalAttendable} RDV
+                  </div>
+                </div>
+                <div className="p-3 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200">
+                  <div className="text-xs text-orange-700 font-medium">Taux d'absentéisme</div>
+                  <div className="text-2xl font-bold text-orange-800 mt-1">{absenteeismRate}%</div>
+                  <div className="text-xs text-orange-600 mt-1">
+                    {noShowBookings} absents / {totalAttendable} RDV
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -272,9 +314,10 @@ const VetDashboard = () => {
                       booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
                       booking.status === 'pending' ? 'bg-amber-100 text-amber-700' :
                       booking.status === 'completed' ? 'bg-blue-100 text-blue-700' :
+                      booking.status === 'no-show' ? 'bg-orange-100 text-orange-700' :
                       'bg-gray-100 text-gray-700'
                     }`}>
-                      {booking.status}
+                      {booking.status === 'no-show' ? 'absent' : booking.status}
                     </p>
                     <p className="text-xs text-vet-brown mt-1">
                       {booking.consultation_reason === 'consultation-convenance' ? 'Convenance' :

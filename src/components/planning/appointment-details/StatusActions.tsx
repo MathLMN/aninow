@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { UserX } from "lucide-react";
 
 interface StatusActionsProps {
   appointment: any;
@@ -51,8 +52,20 @@ export const StatusActions = ({ appointment, onUpdateStatus, onClose }: StatusAc
       case 'confirmed': return 'confirmé';
       case 'cancelled': return 'annulé';
       case 'completed': return 'terminé';
+      case 'no-show': return 'absent';
       default: return status;
     }
+  };
+
+  const isAppointmentPassed = () => {
+    if (!appointment.appointment_date || !appointment.appointment_time) return false;
+    const appointmentDateTime = new Date(`${appointment.appointment_date}T${appointment.appointment_time}`);
+    return appointmentDateTime < new Date();
+  };
+
+  const canMarkNoShow = () => {
+    return isAppointmentPassed() && 
+           (appointment.status === 'confirmed' || appointment.status === 'pending');
   };
 
   return (
@@ -96,6 +109,16 @@ export const StatusActions = ({ appointment, onUpdateStatus, onClose }: StatusAc
               variant="destructive"
             >
               Annuler
+            </Button>
+          )}
+          {canMarkNoShow() && (
+            <Button
+              onClick={() => handleStatusUpdate('no-show')}
+              disabled={isUpdating}
+              className="bg-orange-600 hover:bg-orange-700 text-white"
+            >
+              <UserX className="h-4 w-4 mr-2" />
+              Marquer absent
             </Button>
           )}
           {appointment.status === 'cancelled' && (
