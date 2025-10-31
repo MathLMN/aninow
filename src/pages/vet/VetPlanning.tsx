@@ -6,6 +6,7 @@ import { PlanningHeader } from "@/components/planning/PlanningHeader";
 import { CreateAppointmentModal } from "@/components/planning/CreateAppointmentModal";
 import { CreateNoteModal } from "@/components/planning/CreateNoteModal";
 import { PendingBookingsNotification } from "@/components/planning/PendingBookingsNotification";
+import { WaitingList } from "@/components/planning/WaitingList";
 import { useVetBookings } from "@/hooks/useVetBookings";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { usePlanningActions } from "@/hooks/usePlanningActions";
@@ -196,37 +197,44 @@ export default function VetPlanning() {
             </div>
             
             {/* Contenu de navigation optimisé */}
-            <div className="flex-1 p-2 overflow-hidden">
-              {viewMode === 'daily' ? (
-                <DailyCalendarView
-                  selectedDate={selectedDate}
-                  onDateChange={setSelectedDate}
-                  bookings={todayBookings}
-                  veterinarians={veterinarians}
-                  onCreateAppointment={handleCreateAppointment}
-                  onCreateNote={handleCreateNote}
-                  onAppointmentClick={handleAppointmentClick}
-                  onValidateBooking={handleValidateBooking}
-                  onCancelBooking={handleCancelBooking}
-                  onCopyBooking={handleCopyBooking}
-                  onCutBooking={handleCutBooking}
-                  onPasteBooking={handlePasteBooking}
-                  onDeleteBooking={handleDeleteBooking}
-                  onBlockSlot={handleBlockSlot}
-                  hasClipboard={hasClipboard()}
-                  sidebarMode={true}
-                />
-              ) : (
-                <WeeklyCalendarView
-                  weekDates={weekDates}
-                  bookings={bookings}
-                  veterinarians={veterinarians}
-                  filters={{ veterinarian: 'all', status: 'all' }}
-                  isLoading={false}
-                  onCreateAppointment={handleCreateAppointment}
-                  onAppointmentClick={handleAppointmentClick}
-                />
-              )}
+            <div className="flex-1 p-2 overflow-hidden flex flex-col">
+              <div className="flex-shrink-0">
+                {viewMode === 'daily' ? (
+                  <DailyCalendarView
+                    selectedDate={selectedDate}
+                    onDateChange={setSelectedDate}
+                    bookings={todayBookings}
+                    veterinarians={veterinarians}
+                    onCreateAppointment={handleCreateAppointment}
+                    onCreateNote={handleCreateNote}
+                    onAppointmentClick={handleAppointmentClick}
+                    onValidateBooking={handleValidateBooking}
+                    onCancelBooking={handleCancelBooking}
+                    onCopyBooking={handleCopyBooking}
+                    onCutBooking={handleCutBooking}
+                    onPasteBooking={handlePasteBooking}
+                    onDeleteBooking={handleDeleteBooking}
+                    onBlockSlot={handleBlockSlot}
+                    hasClipboard={hasClipboard()}
+                    sidebarMode={true}
+                  />
+                ) : (
+                  <WeeklyCalendarView
+                    weekDates={weekDates}
+                    bookings={bookings}
+                    veterinarians={veterinarians}
+                    filters={{ veterinarian: 'all', status: 'all' }}
+                    isLoading={false}
+                    onCreateAppointment={handleCreateAppointment}
+                    onAppointmentClick={handleAppointmentClick}
+                  />
+                )}
+              </div>
+              
+              {/* Liste d'attente */}
+              <div className="flex-shrink-0">
+                <WaitingList bookings={bookings} />
+              </div>
             </div>
           </div>
         </div>
