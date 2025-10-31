@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { AlertTriangle, AlertCircle, TrendingUp } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { AppointmentSection } from "./appointment-form/AppointmentSection";
 import { ClientSection } from "./appointment-form/ClientSection";
 import { AnimalSection } from "./appointment-form/AnimalSection";
@@ -126,20 +129,63 @@ export const CreateAppointmentModal = ({
   };
 
   const isEditMode = !!appointmentToEdit;
+  const isOnlineBooking = appointmentToEdit?.booking_source === 'online';
+  const urgencyScore = appointmentToEdit?.urgency_score;
+
+  const getUrgencyConfig = (score: number) => {
+    if (score >= 8) return {
+      color: 'bg-red-100 text-red-800 border-red-300',
+      icon: AlertTriangle,
+      label: 'URGENCE ÉLEVÉE'
+    };
+    if (score >= 6) return {
+      color: 'bg-orange-100 text-orange-800 border-orange-300',
+      icon: AlertCircle,
+      label: 'Urgence modérée'
+    };
+    if (score >= 4) return {
+      color: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+      icon: TrendingUp,
+      label: 'Priorité moyenne'
+    };
+    return {
+      color: 'bg-green-100 text-green-800 border-green-300',
+      icon: TrendingUp,
+      label: 'Priorité faible'
+    };
+  };
+
+  const urgencyConfig = urgencyScore ? getUrgencyConfig(urgencyScore) : null;
+  const UrgencyIcon = urgencyConfig?.icon;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl max-h-[95vh] p-0 overflow-hidden flex flex-col">
         <DialogHeader className="px-4 py-2 border-b bg-gradient-to-r from-vet-navy/5 to-vet-sage/5 flex-shrink-0">
-          <DialogTitle className="text-base font-bold text-vet-navy">
-            {isEditMode ? 'Modifier le rendez-vous' : 'Créer un nouveau rendez-vous'}
-          </DialogTitle>
-          <DialogDescription className="text-xs text-vet-brown">
-            {isEditMode 
-              ? 'Modifier les informations du rendez-vous et marquer l\'arrivée du client'
-              : 'Saisir les informations pour un rendez-vous pris par téléphone ou sur place'
-            }
-          </DialogDescription>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1">
+              <DialogTitle className="text-base font-bold text-vet-navy">
+                {isEditMode ? 'Modifier le rendez-vous' : 'Créer un nouveau rendez-vous'}
+              </DialogTitle>
+              <DialogDescription className="text-xs text-vet-brown">
+                {isEditMode 
+                  ? 'Modifier les informations du rendez-vous et marquer l\'arrivée du client'
+                  : 'Saisir les informations pour un rendez-vous pris par téléphone ou sur place'
+                }
+              </DialogDescription>
+            </div>
+            {/* Indicateur d'urgence pour les RDV en ligne */}
+            {isEditMode && isOnlineBooking && urgencyConfig && UrgencyIcon && (
+              <Badge className={cn(
+                "px-3 py-1.5 text-xs font-bold border-2 flex items-center gap-1.5 flex-shrink-0",
+                urgencyConfig.color,
+                urgencyScore >= 8 && "animate-pulse"
+              )}>
+                <UrgencyIcon className="h-3.5 w-3.5" />
+                {urgencyConfig.label} ({urgencyScore}/10)
+              </Badge>
+            )}
+          </div>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
