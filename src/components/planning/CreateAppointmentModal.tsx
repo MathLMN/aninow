@@ -62,7 +62,7 @@ export const CreateAppointmentModal = ({
           appointmentTime: appointmentToEdit.appointment_time,
           appointmentEndTime: appointmentToEdit.appointment_end_time,
           veterinarianId: appointmentToEdit.veterinarian_id,
-          consultationTypeIds: appointmentToEdit.consultation_type_ids || (appointmentToEdit.consultation_type_id ? [appointmentToEdit.consultation_type_id] : []),
+          consultationTypeId: appointmentToEdit.consultation_type_id,
           duration: appointmentToEdit.duration_minutes,
           arrival_time: appointmentToEdit.arrival_time,
           booking_source: appointmentToEdit.booking_source,
@@ -98,8 +98,8 @@ export const CreateAppointmentModal = ({
     }
   }, [isOpen, defaultData, appointmentToEdit]);
 
-  const onConsultationTypeChange = (consultationTypeIds: string[]) => {
-    handleConsultationTypeChange(consultationTypeIds, consultationTypes);
+  const onConsultationTypeChange = (consultationTypeId: string) => {
+    handleConsultationTypeChange(consultationTypeId, consultationTypes);
   };
 
   const handleDelete = async () => {
