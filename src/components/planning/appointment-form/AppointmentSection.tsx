@@ -3,15 +3,16 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, UserCheck } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Calendar, Clock, UserCheck, Package } from "lucide-react";
 
 interface AppointmentSectionProps {
   formData: any;
   veterinarians: any[];
   consultationTypes: any[];
   validationErrors?: Record<string, boolean>;
-  onFieldUpdate: (field: string, value: string | number) => void;
-  onConsultationTypeChange: (consultationTypeId: string) => void;
+  onFieldUpdate: (field: string, value: string | number | string[]) => void;
+  onConsultationTypeChange: (consultationTypeIds: string[]) => void;
   onTimeChange: (time: string) => void;
   calculateEndTime: (startTime: string, duration: number) => string;
 }
@@ -84,21 +85,61 @@ export const AppointmentSection = ({
         </div>
 
         <div>
-          <Label htmlFor="consultationTypeId" className="text-xs font-medium text-gray-700">
-            Type de consultation *
-          </Label>
-          <Select value={formData.consultationTypeId} onValueChange={onConsultationTypeChange}>
-            <SelectTrigger className={`h-7 text-xs ${validationErrors.consultationTypeId ? 'border-red-500 border-2' : ''}`}>
-              <SelectValue placeholder="Sélectionnez..." />
-            </SelectTrigger>
-            <SelectContent>
-              {consultationTypes.map((type) => (
-                <SelectItem key={type.id} value={type.id} className="text-xs">
-                  {type.name} ({type.duration_minutes} min)
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <Package className="h-3.5 w-3.5 text-blue-600" />
+            <Label className="text-xs font-medium text-gray-700">
+              Types de consultation * (plusieurs choix possibles)
+            </Label>
+          </div>
+          <div className={`border rounded-md p-2 space-y-1.5 bg-white ${validationErrors.consultationTypeIds ? 'border-red-500 border-2' : 'border-gray-200'}`}>
+            {consultationTypes.map((type) => {
+              const isSelected = formData.consultationTypeIds?.includes(type.id) || false;
+              return (
+                <div key={type.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`consultation-${type.id}`}
+                    checked={isSelected}
+                    onCheckedChange={(checked) => {
+                      const currentIds = formData.consultationTypeIds || [];
+                      const newIds = checked
+                        ? [...currentIds, type.id]
+                        : currentIds.filter((id: string) => id !== type.id);
+                      onFieldUpdate('consultationTypeIds', newIds);
+                      
+                      // Recalculer la durée totale
+                      const totalDuration = consultationTypes
+                        .filter(ct => newIds.includes(ct.id))
+                        .reduce((sum, ct) => sum + ct.duration_minutes, 0);
+                      onFieldUpdate('duration', totalDuration || 15);
+                      
+                      // Recalculer l'heure de fin
+                      if (formData.appointmentTime) {
+                        const endTime = calculateEndTime(formData.appointmentTime, totalDuration || 15);
+                        onFieldUpdate('appointmentEndTime', endTime);
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor={`consultation-${type.id}`}
+                    className="text-xs cursor-pointer flex-1 flex items-center justify-between"
+                  >
+                    <span className={isSelected ? 'font-medium text-blue-700' : 'text-gray-700'}>
+                      {type.name}
+                    </span>
+                    <span className={`text-xs ${isSelected ? 'text-blue-600 font-medium' : 'text-gray-500'}`}>
+                      {type.duration_minutes} min
+                    </span>
+                  </label>
+                </div>
+              );
+            })}
+          </div>
+          {formData.consultationTypeIds?.length > 0 && (
+            <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
+              <Package className="h-3 w-3" />
+              {formData.consultationTypeIds.length} prestation{formData.consultationTypeIds.length > 1 ? 's' : ''} sélectionnée{formData.consultationTypeIds.length > 1 ? 's' : ''}
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-2">
