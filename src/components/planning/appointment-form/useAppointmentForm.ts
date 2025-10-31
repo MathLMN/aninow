@@ -415,8 +415,7 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
         appointment_time: formData.appointmentTime,
         appointment_end_time: formData.appointmentEndTime,
         veterinarian_id: formData.veterinarianId || null,
-        consultation_type_id: formData.consultationTypeIds?.[0] || null, // Premier type pour compatibilité
-        consultation_type_ids: formData.consultationTypeIds || [],
+        consultation_type_id: formData.consultationTypeIds?.[0] || null,
         duration_minutes: formData.duration,
         arrival_time: formData.arrival_time || null,
         booking_source: formData.booking_source,
