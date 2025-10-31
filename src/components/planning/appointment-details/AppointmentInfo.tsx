@@ -57,29 +57,31 @@ export const AppointmentInfo = ({ appointment }: AppointmentInfoProps) => {
 
   return (
     <div className="space-y-4">
-      {/* En-tête avec statut */}
-      <div className="flex items-center justify-between">
+      {/* En-tête avec statut et urgence */}
+      <div className="flex items-start justify-between gap-3 flex-wrap">
         <h3 className="text-lg font-semibold text-vet-navy">Informations du rendez-vous</h3>
-        <Badge className={getStatusColor(appointment.status)}>
-          {getStatusLabel(appointment.status)}
-        </Badge>
+        <div className="flex items-center gap-2">
+          {isOnlineBooking && urgencyConfig && UrgencyIcon && (
+            <Badge className={cn(
+              "px-3 py-1.5 text-xs font-bold border-2 flex items-center gap-1.5",
+              urgencyConfig.color,
+              appointment.urgency_score >= 8 && "animate-pulse"
+            )}>
+              <UrgencyIcon className="h-3.5 w-3.5" />
+              {urgencyConfig.label} ({appointment.urgency_score}/10)
+            </Badge>
+          )}
+          <Badge className={getStatusColor(appointment.status)}>
+            {getStatusLabel(appointment.status)}
+          </Badge>
+        </div>
       </div>
 
-      {/* Indicateur d'urgence pour les RDV en ligne */}
-      {isOnlineBooking && urgencyConfig && UrgencyIcon && (
-        <div className={cn(
-          "p-4 rounded-lg border-2 flex items-start gap-3",
-          urgencyConfig.color
-        )}>
-          <UrgencyIcon className="h-5 w-5 mt-0.5 flex-shrink-0" />
-          <div className="flex-1">
-            <div className="font-semibold text-sm">{urgencyConfig.label}</div>
-            <div className="text-xs mt-1">Score d'urgence: {appointment.urgency_score}/10</div>
-            {appointment.ai_analysis?.analysis_summary && (
-              <div className="text-xs mt-2 opacity-90">
-                {appointment.ai_analysis.analysis_summary}
-              </div>
-            )}
+      {/* Détails de l'analyse d'urgence pour les RDV en ligne */}
+      {isOnlineBooking && appointment.ai_analysis?.analysis_summary && (
+        <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
+          <div className="text-sm text-blue-900">
+            <span className="font-semibold">Analyse AI:</span> {appointment.ai_analysis.analysis_summary}
           </div>
         </div>
       )}
