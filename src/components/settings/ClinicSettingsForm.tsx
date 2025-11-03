@@ -25,6 +25,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { cn } from "@/lib/utils";
 import { useSlotManagement } from "@/hooks/useSlotManagement";
 import { supabase } from '@/integrations/supabase/client';
+import { EmailPreviewModal } from "./EmailPreviewModal";
 
 interface ClinicSettings {
   clinic_name: string;
@@ -153,6 +154,7 @@ export const ClinicSettingsForm = () => {
   const [openVeterinarianSchedules, setOpenVeterinarianSchedules] = useState<Set<string>>(new Set());
   const [isClinicScheduleOpen, setIsClinicScheduleOpen] = useState(false);
   const [tempDailySchedules, setTempDailySchedules] = useState(getDefaultDailySchedules());
+  const [isEmailPreviewOpen, setIsEmailPreviewOpen] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -453,21 +455,17 @@ export const ClinicSettingsForm = () => {
                   )}
                 />
                 
-                {/* Aperçu de l'adresse d'envoi des emails */}
-                <div className="col-span-2 rounded-lg bg-blue-50 p-4 border border-blue-200">
-                  <p className="text-sm text-blue-900 font-medium mb-1">
-                    📧 Aperçu des emails de confirmation :
-                  </p>
-                  <p className="text-sm text-blue-700">
-                    Les emails seront envoyés depuis :{" "}
-                    <strong>
-                      {form.watch("clinicName") || "Votre clinique"} &lt;notifications@aninow.fr&gt;
-                    </strong>
-                  </p>
-                  <p className="text-xs text-blue-600 mt-2">
-                    ⚠️ Email automatique - Les clients ne pourront pas y répondre directement.
-                    Assurez-vous que votre numéro de téléphone est bien renseigné ci-dessous.
-                  </p>
+                {/* Bouton aperçu email */}
+                <div className="col-span-2">
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    onClick={() => setIsEmailPreviewOpen(true)}
+                    className="w-full"
+                  >
+                    <Mail className="mr-2 h-4 w-4" />
+                    Voir l'aperçu de l'email de confirmation
+                  </Button>
                 </div>
                 
                 <FormField
@@ -1185,6 +1183,18 @@ export const ClinicSettingsForm = () => {
       </Card>
 
       <VeterinarianAbsenceManager veterinarians={veterinarians.filter(vet => vet.is_active)} />
+      
+      <EmailPreviewModal 
+        open={isEmailPreviewOpen}
+        onOpenChange={setIsEmailPreviewOpen}
+        clinicName={form.watch("clinicName")}
+        clinicPhone={form.watch("clinicPhone")}
+        clinicAddress={
+          form.watch("clinicAddressStreet") && form.watch("clinicAddressCity") && form.watch("clinicAddressPostalCode")
+            ? `${form.watch("clinicAddressStreet")}, ${form.watch("clinicAddressPostalCode")} ${form.watch("clinicAddressCity")}`
+            : undefined
+        }
+      />
     </div>
   );
 };
