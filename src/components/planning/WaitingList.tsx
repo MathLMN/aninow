@@ -19,7 +19,7 @@ export const WaitingList = ({ bookings }: WaitingListProps) => {
       <div className="mt-2 bg-white/50 backdrop-blur-sm border border-vet-blue/20 rounded-lg p-3">
         <h3 className="text-xs font-semibold text-vet-blue mb-2 flex items-center gap-1">
           <Clock className="h-3 w-3" />
-          Liste d'attente
+          Salle d'attente
         </h3>
         <p className="text-xs text-muted-foreground text-center py-2">
           Aucun client en attente
@@ -32,7 +32,7 @@ export const WaitingList = ({ bookings }: WaitingListProps) => {
     <div className="mt-2 bg-white/50 backdrop-blur-sm border border-vet-blue/20 rounded-lg p-3">
       <h3 className="text-xs font-semibold text-vet-blue mb-2 flex items-center gap-1">
         <Clock className="h-3 w-3" />
-        Liste d'attente ({arrivedClients.length})
+        Salle d'attente ({arrivedClients.length})
       </h3>
       <ScrollArea className="max-h-32">
         <div className="space-y-2">
