@@ -82,6 +82,26 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
     if (!appointmentId) return false; // En mode création, pas de détection de changements
     return JSON.stringify(formData) !== JSON.stringify(initialFormData);
   };
+  
+  // Valider si tous les champs obligatoires sont remplis
+  const validateRequiredFields = (): boolean => {
+    // Champs obligatoires du rendez-vous
+    if (!formData.appointmentDate || !formData.appointmentTime) return false;
+    if (!formData.veterinarianId) return false;
+    if (!formData.consultationTypeIds || formData.consultationTypeIds.length === 0) return false;
+    if (!formData.duration || formData.duration < 5) return false;
+    
+    // Champs obligatoires du client
+    if (!formData.clientStatus) return false;
+    if (!formData.clientName || formData.clientName.trim() === '') return false;
+    if (!formData.clientPhone || formData.clientPhone.trim() === '') return false;
+    
+    // Champs obligatoires de l'animal
+    if (!formData.animalName || formData.animalName.trim() === '') return false;
+    if (!formData.animalSpecies) return false;
+    
+    return true;
+  };
 
   const updateField = (field: keyof FormData, value: any) => {
     console.log(`🔄 Updating field ${field} with value:`, value);
@@ -559,6 +579,7 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
     initializeFormData,
     handleTimeChange,
     handleMarkArrival,
-    hasChanges
+    hasChanges,
+    validateRequiredFields
   };
 };

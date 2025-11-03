@@ -11,6 +11,7 @@ import { AnimalSection } from "./appointment-form/AnimalSection";
 import { ConsultationSection } from "./appointment-form/ConsultationSection";
 import { useAppointmentForm } from "./appointment-form/useAppointmentForm";
 import { usePlanningActions } from "@/hooks/usePlanningActions";
+import { useToast } from "@/hooks/use-toast";
 
 interface CreateAppointmentModalProps {
   isOpen: boolean;
@@ -45,10 +46,12 @@ export const CreateAppointmentModal = ({
     initializeFormData,
     handleTimeChange,
     handleMarkArrival,
-    hasChanges
+    hasChanges,
+    validateRequiredFields
   } = useAppointmentForm(onClose, appointmentToEdit?.id);
 
   const { updateBookingStatus, moveAppointment, isLoading: isDeletingBooking } = usePlanningActions();
+  const { toast } = useToast();
 
   // Initialize form data when modal opens
   useEffect(() => {
@@ -149,6 +152,17 @@ export const CreateAppointmentModal = ({
 
   // Handle status update
   const handleStatusUpdate = async (newStatus: string) => {
+    // Vérifier les champs obligatoires avant de confirmer
+    if (newStatus === 'confirmed' && !validateRequiredFields()) {
+      toast({
+        title: "Champs obligatoires manquants",
+        description: "Veuillez remplir tous les champs obligatoires (marqués avec *) avant de confirmer le rendez-vous.",
+        variant: "destructive",
+        duration: 5000
+      });
+      return;
+    }
+    
     if (appointmentToEdit?.id) {
       const success = await updateBookingStatus(appointmentToEdit.id, newStatus);
       if (success) {
@@ -163,6 +177,17 @@ export const CreateAppointmentModal = ({
   // Handle save changes in edit mode
   const handleSaveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Vérifier les champs obligatoires avant d'enregistrer
+    if (!validateRequiredFields()) {
+      toast({
+        title: "Champs obligatoires manquants",
+        description: "Veuillez remplir tous les champs obligatoires (marqués avec *) avant d'enregistrer.",
+        variant: "destructive",
+        duration: 5000
+      });
+      return;
+    }
     
     if (!appointmentToEdit?.id) return;
     
@@ -279,8 +304,8 @@ export const CreateAppointmentModal = ({
                     <Button
                       type="button"
                       onClick={() => handleStatusUpdate('confirmed')}
-                      disabled={isDeletingBooking}
-                      className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs h-8"
+                      disabled={isDeletingBooking || !validateRequiredFields()}
+                      className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs h-8 disabled:opacity-50"
                     >
                       <CheckCircle className="h-3 w-3 mr-1" />
                       Confirmer
@@ -317,7 +342,7 @@ export const CreateAppointmentModal = ({
               <Button 
                 type="button"
                 onClick={handleSaveChanges}
-                disabled={isSubmitting || !hasChanges()}
+                disabled={isSubmitting || !hasChanges() || !validateRequiredFields()}
                 className="bg-vet-sage hover:bg-vet-sage/90 text-white px-3 py-1 text-xs h-8 disabled:opacity-50"
               >
                 {isSubmitting ? 'Enregistrement...' : 'Enregistrer les modifications'}
@@ -325,8 +350,8 @@ export const CreateAppointmentModal = ({
             ) : (
               <Button 
                 type="submit" 
-                disabled={isSubmitting}
-                className="bg-vet-sage hover:bg-vet-sage/90 text-white px-3 py-1 text-xs h-8"
+                disabled={isSubmitting || !validateRequiredFields()}
+                className="bg-vet-sage hover:bg-vet-sage/90 text-white px-3 py-1 text-xs h-8 disabled:opacity-50"
               >
                 {isSubmitting ? 'Création...' : 'Créer le rendez-vous'}
               </Button>
