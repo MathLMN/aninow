@@ -4,7 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useClinicContext } from '@/contexts/ClinicContext';
-import { format, addDays, isToday, parseISO } from 'date-fns';
+import { format, addDays, isToday, parseISO, addHours, isAfter, startOfDay } from 'date-fns';
+import { isVeterinarianAbsent } from '@/components/planning/utils/veterinarianAbsenceUtils';
 
 export const usePublicBookingSlots = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -57,27 +58,21 @@ export const usePublicBookingSlots = () => {
     enabled: !!currentClinic?.slug,
   });
 
-  // Fonction pour filtrer les créneaux passés
-  const filterPastSlots = (slots: any[], date: string) => {
+  // Fonction pour filtrer les créneaux selon le délai minimum et les créneaux passés
+  const filterSlotsByMinimumDelay = (slots: any[], date: string, minimumDelayHours: number) => {
     const slotDate = parseISO(date);
-    
-    // Si ce n'est pas aujourd'hui, garder tous les créneaux
-    if (!isToday(slotDate)) {
-      return slots;
-    }
-
-    // Pour aujourd'hui, filtrer les créneaux passés
     const now = new Date();
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
-    const currentTimeInMinutes = currentHour * 60 + currentMinute;
-
+    
+    // Calculer la date/heure minimum autorisée
+    const minimumAllowedDateTime = addHours(now, minimumDelayHours);
+    
     return slots.filter(slot => {
       const [slotHour, slotMinute] = slot.time.split(':').map(Number);
-      const slotTimeInMinutes = slotHour * 60 + slotMinute;
+      const slotDateTime = new Date(slotDate);
+      slotDateTime.setHours(slotHour, slotMinute, 0, 0);
       
-      // Garder seulement les créneaux futurs (avec une marge de sécurité de 15 minutes)
-      return slotTimeInMinutes > currentTimeInMinutes + 15;
+      // Garder seulement les créneaux après le délai minimum (avec marge de sécurité de 15 min)
+      return isAfter(slotDateTime, addHours(minimumAllowedDateTime, 0.25));
     });
   };
 
@@ -100,6 +95,46 @@ export const usePublicBookingSlots = () => {
         const slots = [];
         const today = new Date();
         const settings = clinicData.settings;
+        const minimumDelayHours = settings.minimum_booking_delay_hours || 0;
+        
+        // Récupérer les horaires des vétérinaires
+        const { data: vetSchedules, error: schedError } = await supabase
+          .from('veterinarian_schedules')
+          .select('*')
+          .eq('clinic_id', currentClinic.id);
+          
+        if (schedError) {
+          console.error('❌ Error fetching vet schedules:', schedError);
+        }
+        
+        // Récupérer les absences des vétérinaires
+        const { data: vetAbsences, error: absError } = await supabase
+          .from('veterinarian_absences')
+          .select('*')
+          .eq('clinic_id', currentClinic.id)
+          .gte('end_date', format(today, 'yyyy-MM-dd'));
+          
+        if (absError) {
+          console.error('❌ Error fetching vet absences:', absError);
+        }
+        
+        // Récupérer les blocs récurrents
+        const { data: recurringBlocks, error: blocksError } = await supabase
+          .from('recurring_slot_blocks')
+          .select('*')
+          .eq('clinic_id', currentClinic.id)
+          .eq('is_active', true);
+          
+        if (blocksError) {
+          console.error('❌ Error fetching recurring blocks:', blocksError);
+        }
+        
+        console.log('📊 Loaded scheduling data:', {
+          vetSchedules: vetSchedules?.length || 0,
+          vetAbsences: vetAbsences?.length || 0,
+          recurringBlocks: recurringBlocks?.length || 0,
+          minimumDelayHours
+        });
         
         // Générer les créneaux pour les 14 prochains jours
         for (let dayOffset = 0; dayOffset < 14; dayOffset++) {
@@ -132,7 +167,7 @@ export const usePublicBookingSlots = () => {
           
           console.log(`📋 Existing bookings for ${dateStr}:`, existingBookings);
           
-          // Générer les créneaux pour cette journée
+          // Générer les créneaux pour cette journée selon les horaires de la clinique
           const timeSlots = generateTimeSlotsForDay(daySchedule, settings.default_slot_duration_minutes || 30);
           let daySlots = [];
           
@@ -140,7 +175,83 @@ export const usePublicBookingSlots = () => {
           
           for (const timeSlot of timeSlots) {
             for (const vet of veterinarians.filter(v => v.is_active)) {
-              // Vérifier si ce créneau est déjà réservé ou bloqué
+              // 1. Vérifier si le vétérinaire est absent ce jour
+              if (vetAbsences && isVeterinarianAbsent(vet.id, date, vetAbsences)) {
+                console.log(`🚫 Vet ${vet.name} is absent on ${dateStr}`);
+                continue;
+              }
+              
+              // 2. Vérifier les horaires de travail du vétérinaire
+              const vetDaySchedule = vetSchedules?.find(
+                s => s.veterinarian_id === vet.id && s.day_of_week === dayOfWeek
+              );
+              
+              if (vetDaySchedule && !vetDaySchedule.is_working) {
+                continue;
+              }
+              
+              // Vérifier si le créneau est dans les horaires de travail du vétérinaire
+              if (vetDaySchedule) {
+                const [slotHour, slotMinute] = timeSlot.split(':').map(Number);
+                const slotTimeInMinutes = slotHour * 60 + slotMinute;
+                
+                let isInVetSchedule = false;
+                
+                // Vérifier matin
+                if (vetDaySchedule.morning_start && vetDaySchedule.morning_end) {
+                  const [mStartH, mStartM] = vetDaySchedule.morning_start.split(':').map(Number);
+                  const [mEndH, mEndM] = vetDaySchedule.morning_end.split(':').map(Number);
+                  const morningStart = mStartH * 60 + mStartM;
+                  const morningEnd = mEndH * 60 + mEndM;
+                  
+                  if (slotTimeInMinutes >= morningStart && slotTimeInMinutes < morningEnd) {
+                    isInVetSchedule = true;
+                  }
+                }
+                
+                // Vérifier après-midi
+                if (vetDaySchedule.afternoon_start && vetDaySchedule.afternoon_end) {
+                  const [aStartH, aStartM] = vetDaySchedule.afternoon_start.split(':').map(Number);
+                  const [aEndH, aEndM] = vetDaySchedule.afternoon_end.split(':').map(Number);
+                  const afternoonStart = aStartH * 60 + aStartM;
+                  const afternoonEnd = aEndH * 60 + aEndM;
+                  
+                  if (slotTimeInMinutes >= afternoonStart && slotTimeInMinutes < afternoonEnd) {
+                    isInVetSchedule = true;
+                  }
+                }
+                
+                if (!isInVetSchedule) {
+                  continue;
+                }
+              }
+              
+              // 3. Vérifier les blocs récurrents
+              const isBlockedByRecurring = recurringBlocks?.some(block => {
+                if (block.veterinarian_id !== vet.id) return false;
+                if (block.day_of_week !== dayOfWeek) return false;
+                
+                // Vérifier si le bloc est actif pour cette date
+                if (block.start_date && new Date(block.start_date) > date) return false;
+                if (block.end_date && new Date(block.end_date) < date) return false;
+                
+                const [slotHour, slotMinute] = timeSlot.split(':').map(Number);
+                const [blockStartH, blockStartM] = block.start_time.split(':').map(Number);
+                const [blockEndH, blockEndM] = block.end_time.split(':').map(Number);
+                
+                const slotTime = slotHour * 60 + slotMinute;
+                const blockStart = blockStartH * 60 + blockStartM;
+                const blockEnd = blockEndH * 60 + blockEndM;
+                
+                return slotTime >= blockStart && slotTime < blockEnd;
+              });
+              
+              if (isBlockedByRecurring) {
+                console.log(`🚫 Slot ${timeSlot} blocked by recurring block for vet ${vet.name}`);
+                continue;
+              }
+              
+              // 4. Vérifier si ce créneau est déjà réservé ou bloqué
               const isSlotTaken = existingBookings?.some(booking => 
                 booking.appointment_time === timeSlot && 
                 booking.veterinarian_id === vet.id
@@ -158,17 +269,17 @@ export const usePublicBookingSlots = () => {
             }
           }
 
-          // Filtrer les créneaux passés pour la journée en cours
-          daySlots = filterPastSlots(daySlots, dateStr);
+          // Filtrer selon le délai minimum de réservation
+          daySlots = filterSlotsByMinimumDelay(daySlots, dateStr, minimumDelayHours);
           
           if (daySlots.length > 0) {
             slots.push({
               date: dateStr,
               slots: daySlots
             });
-            console.log(`✅ Added ${daySlots.length} available slots for ${dateStr} (after filtering past slots)`);
+            console.log(`✅ Added ${daySlots.length} available slots for ${dateStr} (after all filters)`);
           } else {
-            console.log(`⚠️ No available slots for ${dateStr} (after filtering past slots)`);
+            console.log(`⚠️ No available slots for ${dateStr} (after all filters)`);
           }
         }
         

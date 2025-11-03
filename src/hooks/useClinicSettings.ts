@@ -38,6 +38,7 @@ interface ClinicSettings {
   asv_enabled: boolean
   daily_schedules: DailySchedules
   default_slot_duration_minutes?: number
+  minimum_booking_delay_hours?: number
   clinic_id?: string
   created_at?: string
   updated_at?: string
@@ -98,6 +99,7 @@ const getDefaultSettings = (): ClinicSettings => ({
   clinic_address_country: 'France',
   asv_enabled: true,
   default_slot_duration_minutes: 30,
+  minimum_booking_delay_hours: 0,
   daily_schedules: {
     monday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
     tuesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
@@ -154,6 +156,7 @@ export const useClinicSettings = () => {
           ...data,
           daily_schedules: convertToDailySchedules(data.daily_schedules),
           default_slot_duration_minutes: data.default_slot_duration_minutes || 30,
+          minimum_booking_delay_hours: data.minimum_booking_delay_hours || 0,
           clinic_phone: data.clinic_phone || '',
           clinic_email: data.clinic_email || '',
           clinic_address_street: data.clinic_address_street || '',
@@ -208,6 +211,7 @@ export const useClinicSettings = () => {
         asv_enabled: updatedSettings.asv_enabled,
         daily_schedules: JSON.parse(JSON.stringify(updatedSettings.daily_schedules)),
         default_slot_duration_minutes: updatedSettings.default_slot_duration_minutes || 30,
+        minimum_booking_delay_hours: updatedSettings.minimum_booking_delay_hours || 0,
         clinic_id: currentClinicId
       };
       
@@ -257,6 +261,7 @@ export const useClinicSettings = () => {
         ...data,
         daily_schedules: convertToDailySchedules(data.daily_schedules),
         default_slot_duration_minutes: data.default_slot_duration_minutes || 30,
+        minimum_booking_delay_hours: data.minimum_booking_delay_hours || 0,
         clinic_phone: data.clinic_phone || '',
         clinic_email: data.clinic_email || '',
         clinic_address_street: data.clinic_address_street || '',

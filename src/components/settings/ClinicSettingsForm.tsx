@@ -64,7 +64,8 @@ const formSchema = z.object({
   clinicAddressPostalCode: z.string().optional(),
   clinicAddressCountry: z.string().optional(),
   asvEnabled: z.boolean().default(true),
-  defaultSlotDurationMinutes: z.number().min(5).max(60).default(15)
+  defaultSlotDurationMinutes: z.number().min(5).max(60).default(15),
+  minimumBookingDelayHours: z.number().min(0).default(0)
 });
 
 interface Veterinarian {
@@ -167,7 +168,8 @@ export const ClinicSettingsForm = () => {
       clinicAddressPostalCode: settings?.clinic_address_postal_code || defaultSettings.clinic_address_postal_code,
       clinicAddressCountry: settings?.clinic_address_country || defaultSettings.clinic_address_country,
       asvEnabled: settings?.asv_enabled || defaultSettings.asv_enabled,
-      defaultSlotDurationMinutes: settings?.default_slot_duration_minutes || defaultSettings.default_slot_duration_minutes
+      defaultSlotDurationMinutes: settings?.default_slot_duration_minutes || defaultSettings.default_slot_duration_minutes,
+      minimumBookingDelayHours: 0
     }
   });
 
@@ -182,7 +184,8 @@ export const ClinicSettingsForm = () => {
         clinicAddressPostalCode: settings.clinic_address_postal_code,
         clinicAddressCountry: settings.clinic_address_country,
         asvEnabled: settings.asv_enabled,
-        defaultSlotDurationMinutes: settings.default_slot_duration_minutes
+        defaultSlotDurationMinutes: settings.default_slot_duration_minutes,
+        minimumBookingDelayHours: settings.minimum_booking_delay_hours || 0
       });
       setTempDailySchedules(settings.daily_schedules || getDefaultDailySchedules());
     }
@@ -236,7 +239,8 @@ export const ClinicSettingsForm = () => {
       clinic_address_postal_code: values.clinicAddressPostalCode || '',
       clinic_address_country: values.clinicAddressCountry || 'France',
       asv_enabled: values.asvEnabled,
-      default_slot_duration_minutes: values.defaultSlotDurationMinutes
+      default_slot_duration_minutes: values.defaultSlotDurationMinutes,
+      minimum_booking_delay_hours: values.minimumBookingDelayHours || 0
     });
 
     if (success) {
@@ -596,6 +600,40 @@ export const ClinicSettingsForm = () => {
                         ))}
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="minimumBookingDelayHours"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Délai minimum de prise de RDV en ligne</FormLabel>
+                    <Select 
+                      onValueChange={(value) => field.onChange(parseInt(value))} 
+                      defaultValue={field.value?.toString() || "0"}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner un délai" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="0">Immédiat (jour même autorisé)</SelectItem>
+                        <SelectItem value="1">1 heure minimum</SelectItem>
+                        <SelectItem value="2">2 heures minimum</SelectItem>
+                        <SelectItem value="4">4 heures minimum</SelectItem>
+                        <SelectItem value="12">12 heures minimum</SelectItem>
+                        <SelectItem value="24">24 heures minimum (à partir de demain)</SelectItem>
+                        <SelectItem value="48">48 heures minimum</SelectItem>
+                        <SelectItem value="72">72 heures minimum</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-vet-brown/70 mt-1">
+                      Définit le délai minimum avant lequel un client peut prendre rendez-vous en ligne
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
