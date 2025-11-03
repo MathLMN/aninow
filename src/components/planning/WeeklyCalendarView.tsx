@@ -1,10 +1,12 @@
 
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, User, Plus, Calendar, Stethoscope } from "lucide-react";
 import { formatDateLocal } from "@/utils/date";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface WeeklyCalendarViewProps {
   weekDates: Date[];
@@ -25,6 +27,8 @@ export const WeeklyCalendarView = ({
   onAppointmentClick,
   onCreateAppointment
 }: WeeklyCalendarViewProps) => {
+  const [selectedVetId, setSelectedVetId] = useState<string>("all");
+
   // Heures de consultation (7h à 21h par créneaux de 30min pour meilleure lisibilité)
   const timeSlots = [];
   for (let hour = 7; hour < 21; hour++) {
@@ -48,7 +52,14 @@ export const WeeklyCalendarView = ({
     return '30 min';
   };
 
-  const getBookingsForDateAndVet = (date: Date, veterinarianId?: string) => {
+  // Obtenir le nom du vétérinaire
+  const getVeterinarianName = (vetId: string | null) => {
+    if (!vetId) return 'Non assigné';
+    const vet = veterinarians.find(v => v.id === vetId);
+    return vet ? vet.name : 'Vétérinaire inconnu';
+  };
+
+  const getBookingsForDateAndVet = (date: Date) => {
     const dateStr = formatDateLocal(date);
     return bookings.filter(booking => {
       // Exclure les créneaux bloqués de la vue semaine
@@ -57,11 +68,14 @@ export const WeeklyCalendarView = ({
       }
       
       const matchesDate = booking.appointment_date === dateStr;
-      const matchesVet = !veterinarianId || booking.veterinarian_id === veterinarianId;
+      
+      // Filtre par vétérinaire sélectionné
+      const matchesSelectedVet = selectedVetId === 'all' || booking.veterinarian_id === selectedVetId;
+      
       const matchesFilters = 
-        (filters.veterinarian === 'all' || booking.veterinarian_id === filters.veterinarian) &&
         (filters.status === 'all' || booking.status === filters.status);
-      return matchesDate && matchesVet && matchesFilters;
+      
+      return matchesDate && matchesSelectedVet && matchesFilters;
     });
   };
 
@@ -105,6 +119,37 @@ export const WeeklyCalendarView = ({
     <Card className="bg-white backdrop-blur-sm border-vet-blue/20 shadow-lg">
       <CardContent className="p-0">
         <div className="overflow-hidden">
+          {/* Filtre par vétérinaire */}
+          <div className="p-4 border-b border-vet-blue/20 bg-vet-beige/10">
+            <div className="flex items-center gap-3">
+              <Stethoscope className="h-5 w-5 text-vet-sage" />
+              <span className="text-sm font-semibold text-vet-navy">Vue par vétérinaire :</span>
+              <Select value={selectedVetId} onValueChange={setSelectedVetId}>
+                <SelectTrigger className="w-64">
+                  <SelectValue placeholder="Sélectionner un vétérinaire" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      <span className="font-semibold">Tous les vétérinaires</span>
+                    </div>
+                  </SelectItem>
+                  {veterinarians
+                    .filter(vet => vet.is_active)
+                    .map(vet => (
+                      <SelectItem key={vet.id} value={vet.id}>
+                        <div className="flex items-center gap-2">
+                          <Stethoscope className="h-4 w-4 text-vet-sage" />
+                          <span>{vet.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           {/* En-tête des colonnes - Sticky */}
           <div className="sticky top-0 z-20 bg-white border-b-2 border-vet-blue/30 shadow-sm">
             <div className="grid grid-cols-8 min-w-[1200px]">
@@ -231,6 +276,16 @@ export const WeeklyCalendarView = ({
                                     {booking.animal_name} • {booking.animal_species}
                                   </span>
                                 </div>
+
+                                {/* Vétérinaire assigné (si mode "Tous") */}
+                                {selectedVetId === 'all' && booking.veterinarian_id && (
+                                  <div className="flex items-center gap-1.5 mb-1.5">
+                                    <Stethoscope className="h-3.5 w-3.5 text-vet-sage flex-shrink-0" />
+                                    <span className="text-xs font-medium text-vet-sage truncate">
+                                      {getVeterinarianName(booking.veterinarian_id)}
+                                    </span>
+                                  </div>
+                                )}
 
                                 {/* Motif */}
                                 <div className="text-xs text-vet-brown/80 truncate italic border-t border-vet-blue/10 pt-1.5 mt-1.5">
