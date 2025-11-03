@@ -93,15 +93,6 @@ export const StatusActions = ({ appointment, onUpdateStatus, onClose }: StatusAc
               Confirmer
             </Button>
           )}
-          {appointment.status !== 'completed' && appointment.status !== 'cancelled' && (
-            <Button
-              onClick={() => handleStatusUpdate('completed')}
-              disabled={isUpdating}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              Marquer terminé
-            </Button>
-          )}
           {appointment.status !== 'cancelled' && appointment.status !== 'completed' && (
             <Button
               onClick={() => handleStatusUpdate('cancelled')}

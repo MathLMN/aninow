@@ -292,15 +292,6 @@ const VetAppointments = () => {
                       </Button>
                     )}
                     
-                    {booking.status === "confirmed" && (
-                      <Button 
-                        size="sm" 
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                        onClick={() => handleStatusChange(booking.id, 'completed')}
-                      >
-                        ✓ Terminé
-                      </Button>
-                    )}
                     
                     {booking.status !== "cancelled" && booking.status !== "completed" && (
                       <Button 
