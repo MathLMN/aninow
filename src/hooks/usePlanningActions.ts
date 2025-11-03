@@ -103,7 +103,8 @@ export const usePlanningActions = () => {
     try {
       const updateData: any = {
         appointment_date: newDate,
-        appointment_time: newTime
+        appointment_time: newTime,
+        status: 'pending' // Reset status to pending to require re-confirmation
       };
 
       if (newVetId) {
@@ -119,7 +120,7 @@ export const usePlanningActions = () => {
 
       toast({
         title: "Rendez-vous déplacé",
-        description: "Le rendez-vous a été déplacé avec succès",
+        description: "Le rendez-vous a été déplacé. Veuillez le confirmer à nouveau pour envoyer l'email de confirmation au client.",
       });
       return true;
     } catch (error) {
