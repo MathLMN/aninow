@@ -163,7 +163,7 @@ export const CreateAppointmentModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl max-h-[95vh] p-0 overflow-hidden flex flex-col">
         <DialogHeader className="px-4 py-2 border-b bg-gradient-to-r from-vet-navy/5 to-vet-sage/5 flex-shrink-0">
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3 mr-8">
             <div className="flex-1">
               <DialogTitle className="text-base font-bold text-vet-navy">
                 {isEditMode ? 'Modifier le rendez-vous' : 'Créer un nouveau rendez-vous'}
