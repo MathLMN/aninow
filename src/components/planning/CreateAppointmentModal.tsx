@@ -44,10 +44,11 @@ export const CreateAppointmentModal = ({
     calculateEndTime,
     initializeFormData,
     handleTimeChange,
-    handleMarkArrival
+    handleMarkArrival,
+    hasChanges
   } = useAppointmentForm(onClose, appointmentToEdit?.id);
 
-  const { updateBookingStatus, isLoading: isDeletingBooking } = usePlanningActions();
+  const { updateBookingStatus, moveAppointment, isLoading: isDeletingBooking } = usePlanningActions();
 
   // Initialize form data when modal opens
   useEffect(() => {
@@ -156,6 +157,37 @@ export const CreateAppointmentModal = ({
           onRefreshPlanning();
         }
       }
+    }
+  };
+
+  // Handle save changes in edit mode
+  const handleSaveChanges = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!appointmentToEdit?.id) return;
+    
+    // Vérifier si la date ou l'heure ont changé
+    const dateChanged = formData.appointmentDate !== appointmentToEdit.appointment_date;
+    const timeChanged = formData.appointmentTime !== appointmentToEdit.appointment_time;
+    const vetChanged = formData.veterinarianId !== appointmentToEdit.veterinarian_id;
+    
+    if (dateChanged || timeChanged) {
+      // Si la date ou l'heure ont changé, utiliser moveAppointment
+      const success = await moveAppointment(
+        appointmentToEdit.id, 
+        formData.appointmentDate, 
+        formData.appointmentTime,
+        vetChanged ? formData.veterinarianId : undefined
+      );
+      if (success) {
+        onClose();
+        if (onRefreshPlanning) {
+          onRefreshPlanning();
+        }
+      }
+    } else {
+      // Sinon, utiliser la soumission normale pour mettre à jour les autres champs
+      await handleSubmit(e);
     }
   };
 
@@ -279,7 +311,18 @@ export const CreateAppointmentModal = ({
                 </>
               )}
             </div>
-            {!isEditMode && (
+            
+            {/* Bouton d'action principal */}
+            {isEditMode ? (
+              <Button 
+                type="button"
+                onClick={handleSaveChanges}
+                disabled={isSubmitting || !hasChanges()}
+                className="bg-vet-sage hover:bg-vet-sage/90 text-white px-3 py-1 text-xs h-8 disabled:opacity-50"
+              >
+                {isSubmitting ? 'Enregistrement...' : 'Enregistrer les modifications'}
+              </Button>
+            ) : (
               <Button 
                 type="submit" 
                 disabled={isSubmitting}

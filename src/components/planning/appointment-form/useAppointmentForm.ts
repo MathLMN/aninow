@@ -73,6 +73,15 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
   
   // Toujours commencer avec des données vierges
   const [formData, setFormData] = useState<FormData>(getInitialFormData());
+  
+  // Données initiales pour détecter les changements en mode édition
+  const [initialFormData, setInitialFormData] = useState<FormData>(getInitialFormData());
+  
+  // Détecter si le formulaire a été modifié
+  const hasChanges = () => {
+    if (!appointmentId) return false; // En mode création, pas de détection de changements
+    return JSON.stringify(formData) !== JSON.stringify(initialFormData);
+  };
 
   const updateField = (field: keyof FormData, value: any) => {
     console.log(`🔄 Updating field ${field} with value:`, value);
@@ -335,6 +344,11 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
     
     console.log('✅ Final clean form data:', cleanData);
     setFormData(cleanData);
+    
+    // En mode édition, sauvegarder les données initiales pour détecter les changements
+    if (appointmentId) {
+      setInitialFormData(cleanData);
+    }
   };
 
   const handleTimeChange = (time: string) => {
@@ -544,6 +558,7 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
     calculateEndTime,
     initializeFormData,
     handleTimeChange,
-    handleMarkArrival
+    handleMarkArrival,
+    hasChanges
   };
 };
