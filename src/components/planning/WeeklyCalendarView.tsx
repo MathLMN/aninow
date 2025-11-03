@@ -123,10 +123,10 @@ export const WeeklyCalendarView = ({
   const weekEnd = weekDates[6];
 
   return (
-    <div className="h-full bg-gradient-to-br from-vet-blue/5 via-white to-vet-sage/5 p-4 overflow-hidden flex flex-col">
-      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-lg flex-1 flex flex-col overflow-hidden">
+    <div className="h-full p-4 overflow-hidden flex flex-col">
+      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 flex-1 flex flex-col overflow-hidden">
         {/* En-tête avec navigation et filtres */}
-        <CardHeader className="border-b border-vet-blue/20 bg-gradient-to-r from-vet-beige/30 to-vet-sage/10 space-y-4 flex-shrink-0">
+        <CardHeader className="border-b border-vet-blue/20 bg-vet-beige/30 space-y-4 flex-shrink-0">
           {/* Navigation de semaine */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -197,11 +197,10 @@ export const WeeklyCalendarView = ({
 
         <CardContent className="p-0 flex-1 overflow-hidden flex flex-col">
           {/* En-tête des colonnes - Sticky */}
-          <div className="flex-shrink-0 sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b-2 border-vet-blue/30 shadow-sm">
-            <div className="grid grid-cols-8 min-w-[1200px]">
-              <div className="p-4 font-bold text-vet-navy text-center border-r border-vet-blue/20 bg-gradient-to-br from-vet-beige/40 to-vet-sage/20">
-                <Clock className="h-5 w-5 mx-auto mb-1 text-vet-sage" />
-                <span className="text-sm">Horaires</span>
+          <div className="flex-shrink-0 sticky top-0 z-20 bg-vet-beige/30 border-b border-vet-blue/20">
+            <div className="grid grid-cols-8 min-w-[1200px] h-12">
+              <div className="p-2 text-vet-brown text-center border-r border-vet-blue/20 flex items-center justify-center">
+                <span className="text-xs font-medium">Horaires</span>
               </div>
               {weekDates.map((date, index) => {
                 const today = isToday(date);
@@ -209,25 +208,17 @@ export const WeeklyCalendarView = ({
                 return (
                   <div 
                     key={index} 
-                    className={`p-3 text-center border-l border-vet-blue/20 transition-all duration-200 ${
-                      today 
-                        ? 'bg-gradient-to-br from-vet-sage/30 to-vet-sage/10 border-l-4 border-l-vet-sage' 
-                        : 'bg-gradient-to-br from-vet-beige/20 to-white'
-                    }`}
+                    className="p-2 text-center border-l border-vet-blue/20 flex flex-col justify-center"
                   >
-                    <div className={`font-bold capitalize ${today ? 'text-vet-sage' : 'text-vet-navy'}`}>
-                      {date.toLocaleDateString('fr-FR', { weekday: 'long' })}
+                    <div className={`font-semibold text-sm capitalize leading-tight ${today ? 'text-vet-sage' : 'text-vet-navy'}`}>
+                      {date.toLocaleDateString('fr-FR', { weekday: 'short' })}
                     </div>
-                    <div className="text-sm text-vet-brown font-medium mt-1">
-                      {date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
+                    <div className="text-xs text-vet-brown mt-1">
+                      {date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                     </div>
-                    <Badge 
-                      variant={today ? "default" : "outline"} 
-                      className={`mt-2 ${today ? 'bg-vet-sage text-white hover:bg-vet-sage/90' : 'border-vet-blue/40 bg-white'}`}
-                    >
-                      <Calendar className="h-3 w-3 mr-1" />
+                    <div className="text-xs text-vet-brown mt-1">
                       {dayBookings.length} RDV
-                    </Badge>
+                    </div>
                   </div>
                 );
               })}
@@ -239,20 +230,15 @@ export const WeeklyCalendarView = ({
             <div className="min-w-[1200px]">
               {timeSlots.map((time, timeIndex) => {
                 const isFullHour = time.endsWith(':00');
-                const isAlternateRow = Math.floor(timeIndex / 2) % 2 === 0;
                 
                 return (
                   <div 
                     key={time} 
-                    className={`grid grid-cols-8 border-b transition-colors ${
-                      isFullHour ? 'border-vet-blue/30 min-h-[90px]' : 'border-vet-blue/10 min-h-[80px]'
-                    } ${isAlternateRow ? 'bg-white' : 'bg-gradient-to-r from-vet-beige/5 to-transparent'}`}
+                    className="grid grid-cols-8 h-20 border-b border-gray-200/50"
                   >
                     {/* Colonne horaire */}
-                    <div className={`p-3 text-center border-r border-vet-blue/20 flex items-center justify-center ${
-                      isFullHour ? 'bg-gradient-to-br from-vet-beige/30 to-vet-sage/10 font-bold text-vet-navy' : 'bg-vet-beige/5 text-vet-brown'
-                    }`}>
-                      <span className={isFullHour ? 'text-base' : 'text-sm'}>{time}</span>
+                    <div className="text-xs text-center font-medium border-r border-vet-blue/20 flex items-center justify-center bg-white text-gray-700">
+                      <span className="text-[10px]">{time}</span>
                     </div>
                     
                     {/* Colonnes par jour */}
@@ -266,9 +252,7 @@ export const WeeklyCalendarView = ({
                       return (
                         <div
                           key={`${dayIndex}-${time}`}
-                          className={`p-2 border-l relative group transition-all duration-200 ${
-                            today ? 'border-l-vet-sage/30 bg-gradient-to-br from-vet-sage/5 to-transparent' : 'border-l-vet-blue/10'
-                          } hover:bg-gradient-to-br hover:from-vet-sage/10 hover:to-transparent`}
+                          className="p-1 border-l border-vet-blue/20 relative group bg-white hover:bg-gray-50/50"
                         >
                           {timeBookings.map((booking) => {
                             const hasCustomColor = booking.status === 'confirmed' && booking.consultation_type_color;
@@ -276,74 +260,62 @@ export const WeeklyCalendarView = ({
                               <div
                                 key={booking.id}
                                 onClick={() => onAppointmentClick(booking)}
-                                className={`mb-2 p-3 rounded-lg border-l-4 cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] animate-fade-in backdrop-blur-sm ${
+                                className={`mb-1 p-2 rounded border-l-4 cursor-pointer hover:shadow-md ${
                                   getStatusColor(booking)
                                 }`}
                                 style={
                                   hasCustomColor
                                     ? {
                                         backgroundColor: `${booking.consultation_type_color}15`,
-                                        borderLeftColor: booking.consultation_type_color,
-                                        boxShadow: `0 2px 8px ${booking.consultation_type_color}20`
+                                        borderLeftColor: booking.consultation_type_color
                                       }
                                     : {
                                         borderLeftColor: 'hsl(var(--vet-sage))',
-                                        backgroundColor: 'rgba(255, 255, 255, 0.9)'
+                                        backgroundColor: 'white'
                                       }
                                 }
                               >
                                 {/* En-tête de la carte */}
-                                <div className="flex items-start justify-between mb-2">
-                                  <div className="flex items-center gap-1.5">
-                                    <Clock className="h-3.5 w-3.5 text-vet-sage flex-shrink-0" />
-                                    <span className="text-xs font-bold text-vet-navy">
+                                <div className="flex items-start justify-between mb-1">
+                                  <div className="flex items-center gap-1">
+                                    <Clock className="h-3 w-3 text-vet-sage flex-shrink-0" />
+                                    <span className="text-[10px] font-bold text-vet-navy">
                                       {booking.appointment_time}
                                     </span>
                                   </div>
-                                  <Badge 
-                                    variant="secondary" 
-                                    className="text-[10px] px-1.5 py-0 h-5"
-                                  >
-                                    {getAppointmentDuration(booking)}
-                                  </Badge>
                                 </div>
 
                                 {/* Client */}
-                                <div className="flex items-center gap-1.5 mb-1">
-                                  <User className="h-3.5 w-3.5 text-vet-brown flex-shrink-0" />
-                                  <span className="text-sm font-semibold text-vet-navy truncate">
+                                <div className="flex items-center gap-1 mb-0.5">
+                                  <User className="h-3 w-3 text-vet-brown flex-shrink-0" />
+                                  <span className="text-[11px] font-semibold text-vet-navy truncate">
                                     {booking.client_name}
                                   </span>
                                 </div>
 
                                 {/* Animal */}
-                                <div className="flex items-center gap-1.5 mb-1.5">
-                                  <Stethoscope className="h-3.5 w-3.5 text-vet-sage flex-shrink-0" />
-                                  <span className="text-xs text-vet-brown truncate">
-                                    {booking.animal_name} • {booking.animal_species}
+                                <div className="flex items-center gap-1 mb-0.5">
+                                  <Stethoscope className="h-3 w-3 text-vet-sage flex-shrink-0" />
+                                  <span className="text-[10px] text-vet-brown truncate">
+                                    {booking.animal_name}
                                   </span>
                                 </div>
 
                                 {/* Vétérinaire assigné (si mode "Tous") */}
                                 {selectedVetId === 'all' && booking.veterinarian_id && (
-                                  <div className="flex items-center gap-1.5 mb-1.5">
-                                    <Stethoscope className="h-3.5 w-3.5 text-vet-sage flex-shrink-0" />
-                                    <span className="text-xs font-medium text-vet-sage truncate">
+                                  <div className="flex items-center gap-1 mb-0.5">
+                                    <Stethoscope className="h-3 w-3 text-vet-sage flex-shrink-0" />
+                                    <span className="text-[10px] font-medium text-vet-sage truncate">
                                       {getVeterinarianName(booking.veterinarian_id)}
                                     </span>
                                   </div>
                                 )}
 
-                                {/* Motif */}
-                                <div className="text-xs text-vet-brown/80 truncate italic border-t border-vet-blue/10 pt-1.5 mt-1.5">
-                                  {booking.consultation_reason}
-                                </div>
-
                                 {/* Badge statut si non confirmé */}
                                 {booking.status !== 'confirmed' && (
                                   <Badge 
                                     variant="outline" 
-                                    className="text-[10px] px-1.5 py-0 h-4 mt-2"
+                                    className="text-[9px] px-1 py-0 h-3.5 mt-1"
                                   >
                                     {getStatusLabel(booking.status)}
                                   </Badge>
@@ -357,16 +329,13 @@ export const WeeklyCalendarView = ({
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center bg-gradient-to-br from-vet-sage/5 to-vet-sage/10 hover:from-vet-sage/15 hover:to-vet-sage/20 border-2 border-dashed border-transparent group-hover:border-vet-sage/30 rounded-lg"
+                              className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-50 transition-opacity flex items-center justify-center"
                               onClick={() => onCreateAppointment({
                                 date: date.toISOString().split('T')[0],
                                 time: time
                               })}
                             >
-                              <div className="flex flex-col items-center gap-1">
-                                <Plus className="h-5 w-5 text-vet-sage" />
-                                <span className="text-xs text-vet-sage font-medium">Ajouter</span>
-                              </div>
+                              <Plus className="h-4 w-4 text-vet-sage" />
                             </Button>
                           )}
                         </div>
