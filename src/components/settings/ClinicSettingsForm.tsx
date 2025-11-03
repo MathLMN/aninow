@@ -452,6 +452,24 @@ export const ClinicSettingsForm = () => {
                     </FormItem>
                   )}
                 />
+                
+                {/* Aperçu de l'adresse d'envoi des emails */}
+                <div className="col-span-2 rounded-lg bg-blue-50 p-4 border border-blue-200">
+                  <p className="text-sm text-blue-900 font-medium mb-1">
+                    📧 Aperçu des emails de confirmation :
+                  </p>
+                  <p className="text-sm text-blue-700">
+                    Les emails seront envoyés depuis :{" "}
+                    <strong>
+                      {form.watch("clinicName") || "Votre clinique"} &lt;notifications@aninow.fr&gt;
+                    </strong>
+                  </p>
+                  <p className="text-xs text-blue-600 mt-2">
+                    ⚠️ Email automatique - Les clients ne pourront pas y répondre directement.
+                    Assurez-vous que votre numéro de téléphone est bien renseigné ci-dessous.
+                  </p>
+                </div>
+                
                 <FormField
                   control={form.control}
                   name="clinicPhone"

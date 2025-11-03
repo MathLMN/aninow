@@ -144,6 +144,14 @@ const handler = async (req: Request): Promise<Response> => {
             <h1>✓ Rendez-vous confirmé</h1>
           </div>
           <div class="content">
+            <!-- Message d'avertissement "ne pas répondre" -->
+            <div style="background-color: #FEF3C7; padding: 12px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #F59E0B;">
+              <p style="margin: 0; font-size: 14px; color: #92400E;">
+                ⚠️ <strong>Email automatique - Ne pas répondre</strong><br>
+                Pour toute question, contactez directement votre clinique${clinicPhone ? ` au <strong>${clinicPhone}</strong>` : ''}
+              </p>
+            </div>
+            
             <p>Bonjour <strong>${client_name}</strong>,</p>
             
             <p>Nous avons le plaisir de confirmer votre rendez-vous pour <strong>${animal_name}</strong>.</p>
@@ -193,13 +201,16 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email via Resend
     const emailResponse = await resend.emails.send({
-      from: "Rendez-vous Vétérinaire <onboarding@resend.dev>",
+      from: `${clinicName} <notifications@aninow.fr>`,
+      replyTo: "noreply@aninow.fr",
       to: [client_email],
       subject: `Confirmation de votre rendez-vous - ${animal_name}`,
       html: emailHtml,
     });
 
     console.log("Email sent successfully:", emailResponse);
+    console.log("Clinic name used as sender:", clinicName);
+    console.log("From address:", `${clinicName} <notifications@aninow.fr>`);
 
     // Log the email in database
     const { error: logError } = await supabase
