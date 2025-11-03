@@ -22,7 +22,7 @@ interface DateSlotCardProps {
     specialty?: string;
   }>;
   selectedSlot: {date: string, time: string, veterinarianId: string} | null;
-  onSlotSelect: (date: string, time: string, veterinarianId: string) => void;
+  onSlotSelect: (date: string, time: string, veterinarianId: string | string[]) => void;
   isExpanded?: boolean;
   noVeterinarianPreference?: boolean; // Nouveau : indique si aucune préférence de vétérinaire
 }
@@ -55,13 +55,11 @@ export const DateSlotCard = ({
   const availableSlots = slots.filter(slot => slot.available);
 
   const handleSlotClick = (slot: TimeSlot) => {
-    if (noVeterinarianPreference && slot.availableVeterinarians && slot.availableVeterinarians.length > 0) {
-      // Si pas de préférence, prendre le premier vétérinaire disponible
-      onSlotSelect(date, slot.time, slot.availableVeterinarians[0]);
-    } else {
-      // Si préférence spécifique, utiliser le vétérinaire du créneau
-      onSlotSelect(date, slot.time, slot.veterinarian_id);
-    }
+    if (!slot.available || slot.blocked) return;
+    
+    // Passer tous les vétérinaires disponibles ou juste l'ID
+    const vetId = slot.availableVeterinarians || slot.veterinarian_id;
+    onSlotSelect(date, slot.time, vetId);
   };
 
   // Séparer les créneaux en matin et après-midi
@@ -102,10 +100,10 @@ export const DateSlotCard = ({
             
             return (
               <Button
-                key={`${date}-${slot.time}-${slot.veterinarian_id}`}
+                key={slot.availableVeterinarians ? `${slot.time}-multi` : `${slot.time}-${slot.veterinarian_id}`}
                 variant="outline"
                 className={cn(
-                  "h-auto p-3 flex items-center justify-center text-center transition-all duration-200 border-2",
+                  "h-auto p-3 flex flex-col items-center justify-center text-center transition-all duration-200 border-2",
                   isSelected
                     ? "bg-vet-sage hover:bg-vet-sage/90 text-white border-vet-sage shadow-md" 
                     : "bg-vet-blue/10 border-vet-blue/30 text-vet-navy hover:bg-vet-sage/20 hover:border-vet-sage/50"
@@ -113,9 +111,14 @@ export const DateSlotCard = ({
                 onClick={() => handleSlotClick(slot)}
               >
                 <div className="flex items-center">
-                  <Clock className="h-3 w-3 mr-2" />
+                  <Clock className="h-3 w-3 mr-1" />
                   <span className="font-semibold text-sm">{slot.time}</span>
                 </div>
+                {slot.availableVeterinarians && slot.availableVeterinarians.length > 1 && noVeterinarianPreference && (
+                  <span className="text-[10px] opacity-60 mt-0.5">
+                    {slot.availableVeterinarians.length} dispos
+                  </span>
+                )}
               </Button>
             );
           })}

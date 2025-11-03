@@ -38,7 +38,10 @@ const AppointmentSlots = () => {
     ? availableSlots 
     : availableSlots.map(daySlot => ({
         ...daySlot,
-        slots: daySlot.slots.filter(slot => slot.veterinarian_id === selectedVeterinarianId)
+        slots: daySlot.slots.filter(slot => 
+          slot.veterinarian_id === selectedVeterinarianId ||
+          slot.availableVeterinarians?.includes(selectedVeterinarianId)
+        )
       })).filter(daySlot => daySlot.slots.length > 0)
 
   useEffect(() => {
@@ -63,14 +66,27 @@ const AppointmentSlots = () => {
     setSelectedTime(null) // Reset selected time when date changes
   }
 
-  const handleSlotSelect = (date: string, time: string, veterinarianId: string) => {
+  const handleSlotSelect = (date: string, time: string, veterinarianId: string | string[]) => {
     setSelectedDate(date)
     setSelectedTime(time)
-    setSelectedVeterinarianId(veterinarianId)
     
-    // Trouver le nom du vétérinaire correspondant à l'ID
-    const veterinarian = veterinarians?.find(vet => vet.id === veterinarianId)
-    setSelectedVeterinarianName(veterinarian ? veterinarian.name : null)
+    // Si plusieurs vétérinaires disponibles et pas de préférence, choisir aléatoirement
+    let finalVetId: string;
+    
+    if (Array.isArray(veterinarianId) && veterinarianId.length > 1 && noVeterinarianPreference) {
+      // Sélection aléatoire parmi les vétérinaires disponibles
+      const randomIndex = Math.floor(Math.random() * veterinarianId.length);
+      finalVetId = veterinarianId[randomIndex];
+      console.log(`🎲 Attribution aléatoire: vétérinaire ${randomIndex + 1}/${veterinarianId.length} sélectionné`);
+    } else if (Array.isArray(veterinarianId)) {
+      finalVetId = veterinarianId[0];
+    } else {
+      finalVetId = veterinarianId;
+    }
+    
+    setSelectedVeterinarianId(finalVetId);
+    const vet = veterinarians?.find((v: any) => v.id === finalVetId);
+    setSelectedVeterinarianName(vet?.name || '');
   }
 
   const handleSubmit = () => {

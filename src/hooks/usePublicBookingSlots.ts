@@ -269,6 +269,25 @@ export const usePublicBookingSlots = () => {
             }
           }
 
+          // Regrouper les créneaux par heure pour éviter les doublons
+          const groupedSlots: { [key: string]: any } = {};
+          daySlots.forEach(slot => {
+            const timeKey = slot.time;
+            
+            if (!groupedSlots[timeKey]) {
+              groupedSlots[timeKey] = {
+                ...slot,
+                availableVeterinarians: [slot.veterinarian_id]
+              };
+            } else {
+              // Ajouter ce vétérinaire à la liste des vétérinaires disponibles
+              groupedSlots[timeKey].availableVeterinarians.push(slot.veterinarian_id);
+            }
+          });
+
+          // Convertir les créneaux groupés en tableau
+          daySlots = Object.values(groupedSlots);
+
           // Filtrer selon le délai minimum de réservation
           daySlots = filterSlotsByMinimumDelay(daySlots, dateStr, minimumDelayHours);
           
