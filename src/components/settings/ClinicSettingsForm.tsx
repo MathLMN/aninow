@@ -459,19 +459,6 @@ export const ClinicSettingsForm = () => {
                   )}
                 />
                 
-                {/* Bouton aperçu email */}
-                <div className="col-span-2">
-                  <Button 
-                    type="button"
-                    variant="outline" 
-                    onClick={() => setIsEmailPreviewOpen(true)}
-                    className="w-full"
-                  >
-                    <Mail className="mr-2 h-4 w-4" />
-                    Voir l'aperçu de l'email de confirmation
-                  </Button>
-                </div>
-                
                 <FormField
                   control={form.control}
                   name="clinicPhone"
@@ -558,6 +545,27 @@ export const ClinicSettingsForm = () => {
                   </FormItem>
                 )}
               />
+
+              <Separator className="my-4" />
+
+              {/* Bouton aperçu email */}
+              <div className="space-y-2">
+                <Label className="text-sm text-muted-foreground">
+                  Prévisualisation
+                </Label>
+                <Button 
+                  type="button"
+                  variant="outline" 
+                  onClick={() => setIsEmailPreviewOpen(true)}
+                  className="w-full"
+                >
+                  <Mail className="mr-2 h-4 w-4" />
+                  Voir l'aperçu de l'email de confirmation
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  Visualisez comment les informations de la clinique apparaîtront dans l'email envoyé aux clients
+                </p>
+              </div>
 
               <Button type="submit" className="bg-vet-blue hover:bg-vet-blue/90 text-white">
                 Enregistrer les modifications
