@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ArrowLeft, Heart, Mail, Lock, Loader2, Eye, EyeOff, CheckCircle, Users, Calendar, BarChart3, AlertCircle } from "lucide-react";
+import { ArrowLeft, Mail, Lock, Loader2, Eye, EyeOff, CheckCircle, Users, Calendar, BarChart3, AlertCircle } from "lucide-react";
+import logoAninow from "@/assets/logo-aninow-new.png";
 import { Link, useNavigate } from "react-router-dom";
 import { useVetAuth } from "@/hooks/useVetAuth";
 import { useFirstLoginStatus } from "@/hooks/useFirstLoginStatus";
@@ -98,9 +99,8 @@ const VetLogin = () => {
       <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20 flex items-center justify-center p-4">
         <div className="w-full max-w-md mx-auto">
           <div className="text-center mb-8">
-            <Link to="/" className="inline-flex items-center space-x-3 hover:opacity-80 transition-opacity">
-              <Heart className="h-8 w-8 sm:h-10 sm:w-10 text-vet-sage" />
-              <span className="text-xl sm:text-2xl font-bold text-vet-navy">AniNow</span>
+            <Link to="/" className="inline-flex items-center hover:opacity-80 transition-opacity">
+              <img src={logoAninow} alt="AniNow" className="h-8 sm:h-10 w-auto" />
             </Link>
             <p className="text-vet-brown mt-2 text-sm sm:text-base">Réinitialisation du mot de passe</p>
           </div>
@@ -160,9 +160,8 @@ const VetLogin = () => {
       {/* Mobile Header - Only visible on small screens */}
       <div className="lg:hidden bg-gradient-to-r from-vet-navy to-vet-blue p-4">
         <div className="text-center">
-          <Link to="/" className="inline-flex items-center space-x-3 hover:opacity-80 transition-opacity">
-            <Heart className="h-8 w-8 text-vet-sage" />
-            <span className="text-xl font-bold text-white">AniNow</span>
+          <Link to="/" className="inline-flex items-center hover:opacity-80 transition-opacity">
+            <img src={logoAninow} alt="AniNow" className="h-8 w-auto" />
           </Link>
           <p className="text-white/90 mt-2 text-sm">Espace Vétérinaire</p>
         </div>
@@ -173,9 +172,8 @@ const VetLogin = () => {
         <div className="w-full max-w-md mx-auto">
           {/* Logo - Hidden on mobile (shown in header instead) */}
           <div className="text-center mb-6 sm:mb-8 hidden lg:block">
-            <Link to="/" className="inline-flex items-center space-x-3 hover:opacity-80 transition-opacity">
-              <Heart className="h-8 w-8 sm:h-10 sm:w-10 text-vet-sage" />
-              <span className="text-xl sm:text-2xl font-bold text-vet-navy">AniNow</span>
+            <Link to="/" className="inline-flex items-center hover:opacity-80 transition-opacity">
+              <img src={logoAninow} alt="AniNow" className="h-8 sm:h-10 w-auto" />
             </Link>
             <p className="text-vet-brown mt-2 text-sm sm:text-base">Espace Vétérinaire</p>
           </div>
@@ -355,7 +353,7 @@ const VetLogin = () => {
 
         {/* Decorative element */}
         <div className="absolute bottom-8 right-8 opacity-20">
-          <Heart className="h-24 w-24 lg:h-32 lg:w-32 text-vet-sage" />
+          <img src={logoAninow} alt="" className="h-24 w-24 lg:h-32 lg:w-32" />
         </div>
       </div>
     </div>
