@@ -23,40 +23,51 @@ export const useVetBookings = () => {
       
       console.log('🔄 Fetching ALL bookings for clinic:', currentClinicId);
       
-      const { data, error } = await supabase
+      // Récupérer les rendez-vous
+      const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
-        .select(`
-          *,
-          consultation_types!consultation_type_id (
-            id,
-            name,
-            color,
-            duration_minutes
-          )
-        `)
+        .select('*')
         .eq('clinic_id', currentClinicId)
         .order('appointment_date', { ascending: true })
         .order('appointment_time', { ascending: true });
 
-      if (error) {
-        console.error('❌ Error fetching bookings:', error);
-        throw error;
+      if (bookingsError) {
+        console.error('❌ Error fetching bookings:', bookingsError);
+        throw bookingsError;
       }
 
-      console.log('✅ All bookings fetched:', data?.length || 0, 'records');
+      // Récupérer les types de consultation de la clinique
+      const { data: consultationTypesData, error: typesError } = await supabase
+        .from('consultation_types')
+        .select('id, name, color, duration_minutes')
+        .eq('clinic_id', currentClinicId);
+
+      if (typesError) {
+        console.error('❌ Error fetching consultation types:', typesError);
+      }
+
+      console.log('✅ All bookings fetched:', bookingsData?.length || 0, 'records');
+      console.log('✅ Consultation types fetched:', consultationTypesData?.length || 0, 'types');
       console.log('🏥 Fetched for clinic ID:', currentClinicId);
-      console.log('📋 Sample bookings:', data?.slice(0, 3));
-      console.log('📊 Booking sources:', data?.reduce((acc, booking) => {
+      console.log('📋 Sample bookings:', bookingsData?.slice(0, 3));
+      console.log('📊 Booking sources:', bookingsData?.reduce((acc, booking) => {
         acc[booking.booking_source || 'unknown'] = (acc[booking.booking_source || 'unknown'] || 0) + 1;
         return acc;
       }, {} as Record<string, number>));
       
-      // Transformer les données pour ajouter consultation_type_color directement
-      const transformedData = data?.map(booking => ({
-        ...booking,
-        consultation_type_color: booking.consultation_types?.color || null,
-        consultation_type_name: booking.consultation_types?.name || null,
-      })) || [];
+      // Mapper les types de consultation aux rendez-vous
+      const typesMap = new Map(consultationTypesData?.map(ct => [ct.id, ct]) || []);
+      
+      const transformedData = bookingsData?.map(booking => {
+        const consultationType = booking.consultation_type_id ? typesMap.get(booking.consultation_type_id) : null;
+        return {
+          ...booking,
+          consultation_type_color: consultationType?.color || null,
+          consultation_type_name: consultationType?.name || null,
+        };
+      }) || [];
+      
+      console.log('🎨 Sample booking with colors:', transformedData[0]);
       
       return transformedData;
     },
