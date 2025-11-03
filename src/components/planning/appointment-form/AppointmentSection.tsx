@@ -114,43 +114,88 @@ export const AppointmentSection = ({
                   validationErrors.consultationTypeIds ? 'border-red-500 border-2' : ''
                 }`}
               >
-                <div className="flex flex-wrap gap-1 flex-1">
+                <div className="flex flex-wrap gap-1 flex-1 overflow-hidden max-w-[90%]">
                   {selectedTypes.length === 0 ? (
                     <span className="text-muted-foreground">Sélectionnez...</span>
+                  ) : selectedTypes.length === 1 ? (
+                    <Badge
+                      variant="secondary"
+                      className="text-[10px] px-1.5 py-0.5 gap-1 hover:bg-secondary/80 cursor-pointer flex items-center max-w-full"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveConsultationType(selectedTypes[0].id);
+                      }}
+                    >
+                      <span className="truncate">
+                        {selectedTypes[0].name} ({selectedTypes[0].duration_minutes} min)
+                      </span>
+                      <X className="h-2.5 w-2.5 shrink-0" />
+                    </Badge>
                   ) : (
-                    selectedTypes.map((type) => (
+                    <>
                       <Badge
-                        key={type.id}
                         variant="secondary"
-                        className="text-xs gap-1"
+                        className="text-[10px] px-1.5 py-0.5 gap-1 hover:bg-secondary/80 cursor-pointer flex items-center"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleRemoveConsultationType(type.id);
+                          handleRemoveConsultationType(selectedTypes[0].id);
                         }}
                       >
-                        {type.name} ({type.duration_minutes} min)
-                        <X className="h-3 w-3" />
+                        <span className="truncate max-w-[120px]">
+                          {selectedTypes[0].name}
+                        </span>
+                        <X className="h-2.5 w-2.5 shrink-0" />
                       </Badge>
-                    ))
+                      <Badge
+                        variant="secondary"
+                        className="text-[10px] px-1.5 py-0.5 bg-blue-100 text-blue-700 border-blue-200"
+                      >
+                        +{selectedTypes.length - 1} autre{selectedTypes.length > 2 ? 's' : ''}
+                      </Badge>
+                    </>
                   )}
                 </div>
-                <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
+                <ChevronDown className="h-4 w-4 shrink-0 opacity-50 ml-1" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-full p-2" align="start">
-              <div className="space-y-2">
+            <PopoverContent className="w-[320px] p-2 bg-white z-50" align="start">
+              <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                {selectedTypes.length > 0 && (
+                  <div className="pb-2 border-b mb-2">
+                    <div className="text-[10px] font-medium text-gray-500 mb-2">
+                      Sélectionné{selectedTypes.length > 1 ? 's' : ''} ({selectedTypes.reduce((sum, t) => sum + t.duration_minutes, 0)} min total)
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {selectedTypes.map((type) => (
+                        <Badge
+                          key={type.id}
+                          variant="secondary"
+                          className="text-[10px] px-1.5 py-0.5 gap-1 hover:bg-secondary/80 cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveConsultationType(type.id);
+                          }}
+                        >
+                          {type.name} ({type.duration_minutes}m)
+                          <X className="h-2.5 w-2.5" />
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {consultationTypes.map((type) => (
-                  <div key={type.id} className="flex items-center space-x-2">
+                  <div key={type.id} className="flex items-center space-x-2 hover:bg-gray-50 p-1.5 rounded">
                     <Checkbox
                       id={`type-${type.id}`}
                       checked={(formData.consultationTypeIds || []).includes(type.id)}
                       onCheckedChange={() => handleConsultationTypeToggle(type.id)}
+                      className="h-3.5 w-3.5"
                     />
                     <label
                       htmlFor={`type-${type.id}`}
-                      className="text-xs font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      className="text-xs font-normal leading-none cursor-pointer flex-1"
                     >
-                      {type.name} ({type.duration_minutes} min)
+                      {type.name} <span className="text-gray-500">({type.duration_minutes} min)</span>
                     </label>
                   </div>
                 ))}
