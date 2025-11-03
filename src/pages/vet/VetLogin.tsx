@@ -351,10 +351,6 @@ const VetLogin = () => {
           </div>
         </div>
 
-        {/* Decorative element */}
-        <div className="absolute bottom-8 right-8 opacity-20">
-          <img src={logoAninow} alt="" className="h-24 w-24 lg:h-32 lg:w-32" />
-        </div>
       </div>
     </div>
   );
