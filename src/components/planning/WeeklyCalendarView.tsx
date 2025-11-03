@@ -169,8 +169,7 @@ export const WeeklyCalendarView = ({
                       const today = isToday(date);
                       const dayBookings = getBookingsForDateAndVet(date);
                       const timeBookings = dayBookings.filter(booking => 
-                        booking.appointment_time === time || 
-                        (booking.appointment_time && booking.appointment_time.startsWith(time.split(':')[0]))
+                        booking.appointment_time === time
                       );
 
                       return (
