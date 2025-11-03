@@ -25,7 +25,15 @@ export const useVetBookings = () => {
       
       const { data, error } = await supabase
         .from('bookings')
-        .select('*')
+        .select(`
+          *,
+          consultation_types!consultation_type_id (
+            id,
+            name,
+            color,
+            duration_minutes
+          )
+        `)
         .eq('clinic_id', currentClinicId)
         .order('appointment_date', { ascending: true })
         .order('appointment_time', { ascending: true });
@@ -43,7 +51,14 @@ export const useVetBookings = () => {
         return acc;
       }, {} as Record<string, number>));
       
-      return data || [];
+      // Transformer les données pour ajouter consultation_type_color directement
+      const transformedData = data?.map(booking => ({
+        ...booking,
+        consultation_type_color: booking.consultation_types?.color || null,
+        consultation_type_name: booking.consultation_types?.name || null,
+      })) || [];
+      
+      return transformedData;
     },
     enabled: !!currentClinicId,
     staleTime: 10000, // 10 secondes seulement

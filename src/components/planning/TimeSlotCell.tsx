@@ -64,7 +64,15 @@ export const TimeSlotCell = ({
       return 'bg-gray-400 text-gray-800 border-gray-500';
     }
 
-    // Couleur basée sur le type de consultation
+    // Pour les rendez-vous confirmés, utiliser la couleur du type de consultation si disponible
+    if (booking.status === 'confirmed' && booking.consultation_type_id && consultationTypes.length > 0) {
+      const consultationType = consultationTypes.find(ct => ct.id === booking.consultation_type_id);
+      if (consultationType?.color) {
+        return ''; // Retourner vide car on va utiliser le style inline
+      }
+    }
+
+    // Couleur basée sur le type de consultation pour les autres statuts
     if (booking.consultation_type_id && consultationTypes.length > 0) {
       const consultationType = consultationTypes.find(ct => ct.id === booking.consultation_type_id);
       if (consultationType?.color) {
@@ -75,7 +83,7 @@ export const TimeSlotCell = ({
     // Couleurs par défaut basées sur le statut - amélioration pour les rendez-vous en attente
     switch (booking.status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-500 border-2 border-dashed shadow-sm';
-      case 'confirmed': return 'bg-green-100 text-green-800 border-green-300';
+      case 'confirmed': return 'bg-blue-100 text-blue-800 border-blue-300'; // Fallback bleu
       case 'cancelled': return 'bg-red-100 text-red-800 border-red-300';
       case 'completed': return 'bg-blue-100 text-blue-800 border-blue-300';
       default: return 'bg-gray-100 text-gray-800 border-gray-300';
@@ -256,7 +264,23 @@ export const TimeSlotCell = ({
               )}
               style={{ 
                 height: `${getAppointmentHeight(booking)}px`,
-                zIndex: 10
+                zIndex: 10,
+                ...(
+                  !isNote && booking.status === 'confirmed' && booking.consultation_type_id && consultationTypes.length > 0
+                    ? (() => {
+                        const consultationType = consultationTypes.find(ct => ct.id === booking.consultation_type_id);
+                        if (consultationType?.color) {
+                          return {
+                            backgroundColor: `${consultationType.color}20`,
+                            borderColor: consultationType.color,
+                            borderWidth: '2px',
+                            color: '#1f2937'
+                          };
+                        }
+                        return {};
+                      })()
+                    : {}
+                )
               }}
             >
               {/* Indicateur d'arrivée - Point rouge positionné à l'intérieur du cadre */}

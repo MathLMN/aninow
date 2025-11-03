@@ -11,10 +11,18 @@ interface AppointmentCardProps {
 }
 
 export const AppointmentCard = ({ appointment, onClick, className }: AppointmentCardProps) => {
-  const getStatusColor = (status: string) => {
-    switch (status) {
+  const getCardColor = () => {
+    // Pour les rendez-vous confirmés, utiliser la couleur du type de consultation
+    if (appointment.status === 'confirmed' && appointment.consultation_type_color) {
+      const color = appointment.consultation_type_color;
+      // Convertir la couleur hex en classes Tailwind appropriées
+      return `border-[${color}] bg-[${color}]/10 text-gray-800`;
+    }
+    
+    // Sinon, utiliser les couleurs de statut
+    switch (appointment.status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'confirmed': return 'bg-green-100 text-green-800 border-green-200';
+      case 'confirmed': return 'bg-blue-100 text-blue-800 border-blue-200'; // Fallback bleu
       case 'cancelled': return 'bg-red-100 text-red-800 border-red-200';
       case 'completed': return 'bg-blue-100 text-blue-800 border-blue-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -55,9 +63,17 @@ export const AppointmentCard = ({ appointment, onClick, className }: Appointment
     <Card 
       className={cn(
         "cursor-pointer hover:shadow-md transition-all duration-200 border-l-4",
-        getStatusColor(appointment.status),
+        getCardColor(),
         className
       )}
+      style={
+        appointment.status === 'confirmed' && appointment.consultation_type_color
+          ? {
+              borderLeftColor: appointment.consultation_type_color,
+              backgroundColor: `${appointment.consultation_type_color}15`,
+            }
+          : undefined
+      }
       onClick={onClick}
     >
       <CardContent className="p-3">
