@@ -581,7 +581,7 @@ export const ClinicSettingsForm = () => {
                 name="defaultSlotDurationMinutes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Durée par défaut d'un créneau (minutes)</FormLabel>
+                    <FormLabel>Durée d'un créneau en ligne (minutes)</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
                       <FormControl>
                         <SelectTrigger>
