@@ -1,9 +1,9 @@
 
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, User, Plus, Calendar, Stethoscope } from "lucide-react";
+import { Clock, User, Plus, Calendar, Stethoscope, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatDateLocal } from "@/utils/date";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,6 +16,7 @@ interface WeeklyCalendarViewProps {
   isLoading: boolean;
   onAppointmentClick: (appointment: any) => void;
   onCreateAppointment: (timeSlot: { date: string; time: string; veterinarian?: string }) => void;
+  onWeekChange?: (direction: 'prev' | 'next') => void;
 }
 
 export const WeeklyCalendarView = ({
@@ -25,7 +26,8 @@ export const WeeklyCalendarView = ({
   filters,
   isLoading,
   onAppointmentClick,
-  onCreateAppointment
+  onCreateAppointment,
+  onWeekChange
 }: WeeklyCalendarViewProps) => {
   const [selectedVetId, setSelectedVetId] = useState<string>("all");
 
@@ -107,53 +109,97 @@ export const WeeklyCalendarView = ({
 
   if (isLoading) {
     return (
-      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-        <CardContent className="p-8">
-          <div className="text-center text-vet-brown">Chargement du planning...</div>
-        </CardContent>
-      </Card>
+      <div className="h-full bg-gradient-to-br from-vet-blue/5 via-white to-vet-sage/5 flex items-center justify-center">
+        <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
+          <CardContent className="p-8">
+            <div className="text-center text-vet-brown">Chargement du planning...</div>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
+  const weekStart = weekDates[0];
+  const weekEnd = weekDates[6];
+
   return (
-    <Card className="bg-white backdrop-blur-sm border-vet-blue/20 shadow-lg">
-      <CardContent className="p-0">
-        <div className="overflow-hidden">
-          {/* Filtre par vétérinaire */}
-          <div className="p-4 border-b border-vet-blue/20 bg-vet-beige/10">
+    <div className="h-full bg-gradient-to-br from-vet-blue/5 via-white to-vet-sage/5 p-4 overflow-hidden flex flex-col">
+      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-lg flex-1 flex flex-col overflow-hidden">
+        {/* En-tête avec navigation et filtres */}
+        <CardHeader className="border-b border-vet-blue/20 bg-gradient-to-r from-vet-beige/30 to-vet-sage/10 space-y-4 flex-shrink-0">
+          {/* Navigation de semaine */}
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Stethoscope className="h-5 w-5 text-vet-sage" />
-              <span className="text-sm font-semibold text-vet-navy">Vue par vétérinaire :</span>
-              <Select value={selectedVetId} onValueChange={setSelectedVetId}>
-                <SelectTrigger className="w-64">
-                  <SelectValue placeholder="Sélectionner un vétérinaire" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4" />
-                      <span className="font-semibold">Tous les vétérinaires</span>
-                    </div>
-                  </SelectItem>
-                  {veterinarians
-                    .filter(vet => vet.is_active)
-                    .map(vet => (
-                      <SelectItem key={vet.id} value={vet.id}>
-                        <div className="flex items-center gap-2">
-                          <Stethoscope className="h-4 w-4 text-vet-sage" />
-                          <span>{vet.name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+              <Calendar className="h-6 w-6 text-vet-sage" />
+              <div>
+                <h2 className="text-xl font-bold text-vet-navy">
+                  Semaine du {weekStart.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })} au {weekEnd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </h2>
+                <p className="text-sm text-vet-brown">
+                  {bookings.filter(b => !b.is_blocked && b.client_name !== 'CRÉNEAU BLOQUÉ').length} rendez-vous cette semaine
+                </p>
+              </div>
             </div>
+            
+            {onWeekChange && (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onWeekChange('prev')}
+                  className="border-vet-blue/30 hover:bg-vet-sage/10"
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Semaine précédente
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onWeekChange('next')}
+                  className="border-vet-blue/30 hover:bg-vet-sage/10"
+                >
+                  Semaine suivante
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            )}
           </div>
 
+          {/* Filtre par vétérinaire */}
+          <div className="flex items-center gap-3">
+            <Stethoscope className="h-5 w-5 text-vet-sage" />
+            <span className="text-sm font-semibold text-vet-navy">Vue par vétérinaire :</span>
+            <Select value={selectedVetId} onValueChange={setSelectedVetId}>
+              <SelectTrigger className="w-64 bg-white border-vet-blue/30">
+                <SelectValue placeholder="Sélectionner un vétérinaire" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    <span className="font-semibold">Tous les vétérinaires</span>
+                  </div>
+                </SelectItem>
+                {veterinarians
+                  .filter(vet => vet.is_active)
+                  .map(vet => (
+                    <SelectItem key={vet.id} value={vet.id}>
+                      <div className="flex items-center gap-2">
+                        <Stethoscope className="h-4 w-4 text-vet-sage" />
+                        <span>{vet.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-0 flex-1 overflow-hidden flex flex-col">
           {/* En-tête des colonnes - Sticky */}
-          <div className="sticky top-0 z-20 bg-white border-b-2 border-vet-blue/30 shadow-sm">
+          <div className="flex-shrink-0 sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b-2 border-vet-blue/30 shadow-sm">
             <div className="grid grid-cols-8 min-w-[1200px]">
-              <div className="p-4 font-bold text-vet-navy text-center border-r border-vet-blue/20 bg-vet-beige/40">
+              <div className="p-4 font-bold text-vet-navy text-center border-r border-vet-blue/20 bg-gradient-to-br from-vet-beige/40 to-vet-sage/20">
                 <Clock className="h-5 w-5 mx-auto mb-1 text-vet-sage" />
                 <span className="text-sm">Horaires</span>
               </div>
@@ -165,11 +211,11 @@ export const WeeklyCalendarView = ({
                     key={index} 
                     className={`p-3 text-center border-l border-vet-blue/20 transition-all duration-200 ${
                       today 
-                        ? 'bg-vet-sage/20 border-l-4 border-l-vet-sage shadow-inner' 
-                        : 'bg-vet-beige/20'
+                        ? 'bg-gradient-to-br from-vet-sage/30 to-vet-sage/10 border-l-4 border-l-vet-sage' 
+                        : 'bg-gradient-to-br from-vet-beige/20 to-white'
                     }`}
                   >
-                    <div className={`font-bold ${today ? 'text-vet-sage' : 'text-vet-navy'}`}>
+                    <div className={`font-bold capitalize ${today ? 'text-vet-sage' : 'text-vet-navy'}`}>
                       {date.toLocaleDateString('fr-FR', { weekday: 'long' })}
                     </div>
                     <div className="text-sm text-vet-brown font-medium mt-1">
@@ -177,7 +223,7 @@ export const WeeklyCalendarView = ({
                     </div>
                     <Badge 
                       variant={today ? "default" : "outline"} 
-                      className={`mt-2 ${today ? 'bg-vet-sage text-white' : 'border-vet-blue/40'}`}
+                      className={`mt-2 ${today ? 'bg-vet-sage text-white hover:bg-vet-sage/90' : 'border-vet-blue/40 bg-white'}`}
                     >
                       <Calendar className="h-3 w-3 mr-1" />
                       {dayBookings.length} RDV
@@ -189,7 +235,7 @@ export const WeeklyCalendarView = ({
           </div>
 
           {/* Grille horaire - Scrollable */}
-          <ScrollArea className="h-[calc(100vh-280px)]">
+          <ScrollArea className="flex-1">
             <div className="min-w-[1200px]">
               {timeSlots.map((time, timeIndex) => {
                 const isFullHour = time.endsWith(':00');
@@ -200,11 +246,11 @@ export const WeeklyCalendarView = ({
                     key={time} 
                     className={`grid grid-cols-8 border-b transition-colors ${
                       isFullHour ? 'border-vet-blue/30 min-h-[90px]' : 'border-vet-blue/10 min-h-[80px]'
-                    } ${isAlternateRow ? 'bg-white' : 'bg-vet-beige/5'}`}
+                    } ${isAlternateRow ? 'bg-white' : 'bg-gradient-to-r from-vet-beige/5 to-transparent'}`}
                   >
                     {/* Colonne horaire */}
                     <div className={`p-3 text-center border-r border-vet-blue/20 flex items-center justify-center ${
-                      isFullHour ? 'bg-vet-beige/30 font-bold text-vet-navy' : 'bg-vet-beige/10 text-vet-brown'
+                      isFullHour ? 'bg-gradient-to-br from-vet-beige/30 to-vet-sage/10 font-bold text-vet-navy' : 'bg-vet-beige/5 text-vet-brown'
                     }`}>
                       <span className={isFullHour ? 'text-base' : 'text-sm'}>{time}</span>
                     </div>
@@ -221,8 +267,8 @@ export const WeeklyCalendarView = ({
                         <div
                           key={`${dayIndex}-${time}`}
                           className={`p-2 border-l relative group transition-all duration-200 ${
-                            today ? 'border-l-vet-sage/30 bg-vet-sage/5' : 'border-l-vet-blue/10'
-                          } hover:bg-vet-sage/10`}
+                            today ? 'border-l-vet-sage/30 bg-gradient-to-br from-vet-sage/5 to-transparent' : 'border-l-vet-blue/10'
+                          } hover:bg-gradient-to-br hover:from-vet-sage/10 hover:to-transparent`}
                         >
                           {timeBookings.map((booking) => {
                             const hasCustomColor = booking.status === 'confirmed' && booking.consultation_type_color;
@@ -230,7 +276,7 @@ export const WeeklyCalendarView = ({
                               <div
                                 key={booking.id}
                                 onClick={() => onAppointmentClick(booking)}
-                                className={`mb-2 p-3 rounded-lg border-l-4 cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] animate-fade-in ${
+                                className={`mb-2 p-3 rounded-lg border-l-4 cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] animate-fade-in backdrop-blur-sm ${
                                   getStatusColor(booking)
                                 }`}
                                 style={
@@ -241,7 +287,8 @@ export const WeeklyCalendarView = ({
                                         boxShadow: `0 2px 8px ${booking.consultation_type_color}20`
                                       }
                                     : {
-                                        borderLeftColor: 'hsl(var(--vet-sage))'
+                                        borderLeftColor: 'hsl(var(--vet-sage))',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.9)'
                                       }
                                 }
                               >
@@ -310,7 +357,7 @@ export const WeeklyCalendarView = ({
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center bg-vet-sage/5 hover:bg-vet-sage/15 border-2 border-dashed border-transparent group-hover:border-vet-sage/30"
+                              className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center bg-gradient-to-br from-vet-sage/5 to-vet-sage/10 hover:from-vet-sage/15 hover:to-vet-sage/20 border-2 border-dashed border-transparent group-hover:border-vet-sage/30 rounded-lg"
                               onClick={() => onCreateAppointment({
                                 date: date.toISOString().split('T')[0],
                                 time: time
@@ -330,8 +377,8 @@ export const WeeklyCalendarView = ({
               })}
             </div>
           </ScrollArea>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };

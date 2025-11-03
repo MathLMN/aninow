@@ -183,6 +183,13 @@ export default function VetPlanning() {
 
   const weekDates = getWeekDates(selectedDate);
 
+  const handleWeekChange = (direction: 'prev' | 'next') => {
+    const newDate = new Date(selectedDate);
+    const daysToAdd = direction === 'next' ? 7 : -7;
+    newDate.setDate(newDate.getDate() + daysToAdd);
+    setSelectedDate(newDate);
+  };
+
   return (
     <div className="h-screen bg-gradient-to-br from-vet-blue/5 via-white to-vet-sage/5 flex flex-col overflow-hidden">
       {/* Layout container optimisé pour écran complet */}
@@ -258,6 +265,7 @@ export default function VetPlanning() {
                 isLoading={false}
                 onCreateAppointment={handleCreateAppointment}
                 onAppointmentClick={handleAppointmentClick}
+                onWeekChange={handleWeekChange}
               />
             )}
           </div>
