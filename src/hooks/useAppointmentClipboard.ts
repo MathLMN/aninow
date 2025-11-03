@@ -30,39 +30,38 @@ export const useAppointmentClipboard = () => {
 
     console.log('📌 Pasting appointment from clipboard to:', targetTimeSlot);
     
-    // Créer les données pour le nouveau rendez-vous
-    const pastedData = {
-      // Nouvelles données de rendez-vous (du créneau cible)
-      appointmentDate: targetTimeSlot.date,
-      appointmentTime: targetTimeSlot.time,
-      veterinarianId: targetTimeSlot.veterinarian,
-      
-      // Données copiées (sans les métadonnées système)
-      clientName: clipboard.data.client_name,
-      clientEmail: clipboard.data.client_email,
-      clientPhone: clipboard.data.client_phone,
-      preferredContactMethod: clipboard.data.preferred_contact_method,
-      clientStatus: clipboard.data.client_status,
-      
-      animalName: clipboard.data.animal_name,
-      animalSpecies: clipboard.data.animal_species,
-      animalBreed: clipboard.data.animal_breed,
-      animalAge: clipboard.data.animal_age,
-      animalWeight: clipboard.data.animal_weight,
-      animalSex: clipboard.data.animal_sex,
-      animalSterilized: clipboard.data.animal_sterilized,
-      animalVaccinesUpToDate: clipboard.data.animal_vaccines_up_to_date,
-      
-      consultationReason: clipboard.data.consultation_reason,
-      clientComment: clipboard.data.client_comment,
-      consultationTypeId: clipboard.data.consultation_type_id,
-      duration: clipboard.data.duration_minutes,
-    };
-
     const result = {
-      data: pastedData,
-      originalId: clipboard.action === 'cut' ? clipboard.data.id : null,
-      action: clipboard.action
+      appointmentId: clipboard.data.id,
+      newDate: targetTimeSlot.date,
+      newTime: targetTimeSlot.time,
+      newVetId: targetTimeSlot.veterinarian,
+      action: clipboard.action,
+      // Données complètes pour copy (création)
+      copyData: clipboard.action === 'copy' ? {
+        appointmentDate: targetTimeSlot.date,
+        appointmentTime: targetTimeSlot.time,
+        veterinarianId: targetTimeSlot.veterinarian,
+        
+        clientName: clipboard.data.client_name,
+        clientEmail: clipboard.data.client_email,
+        clientPhone: clipboard.data.client_phone,
+        preferredContactMethod: clipboard.data.preferred_contact_method,
+        clientStatus: clipboard.data.client_status,
+        
+        animalName: clipboard.data.animal_name,
+        animalSpecies: clipboard.data.animal_species,
+        animalBreed: clipboard.data.animal_breed,
+        animalAge: clipboard.data.animal_age,
+        animalWeight: clipboard.data.animal_weight,
+        animalSex: clipboard.data.animal_sex,
+        animalSterilized: clipboard.data.animal_sterilized,
+        animalVaccinesUpToDate: clipboard.data.animal_vaccines_up_to_date,
+        
+        consultationReason: clipboard.data.consultation_reason,
+        clientComment: clipboard.data.client_comment,
+        consultationTypeId: clipboard.data.consultation_type_id,
+        duration: clipboard.data.duration_minutes,
+      } : null
     };
 
     // Si c'était un "couper", vider le clipboard après utilisation

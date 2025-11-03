@@ -29,6 +29,7 @@ export default function VetPlanning() {
   const {
     validateBooking,
     cancelBooking,
+    moveAppointment,
     deleteBooking,
     handleBlockSlot
   } = usePlanningActions();
@@ -121,32 +122,30 @@ export default function VetPlanning() {
   const handleCutBooking = async (booking: any) => {
     console.log('✂️ Cutting booking:', booking.id);
     cutAppointment(booking);
-    
-    // Supprimer immédiatement le rendez-vous du planning
-    const success = await deleteBooking(booking.id);
-    if (success) {
-      console.log('✅ Appointment cut and removed from original slot');
-      refreshBookings();
-    } else {
-      console.error('❌ Failed to cut appointment');
-      clearClipboard(); // Nettoyer le clipboard si la suppression a échoué
-    }
   };
 
   const handlePasteBooking = async (timeSlot: { date: string; time: string; veterinarian?: string }) => {
     const pasteResult = pasteAppointment(timeSlot);
     if (pasteResult) {
-      console.log('📌 Opening create modal with pasted data:', pasteResult.data);
-      
       if (pasteResult.action === 'cut') {
-        console.log('🔄 This is a move operation (cut/paste)');
+        // Déplacer le rendez-vous existant
+        console.log('🔄 Moving appointment:', pasteResult.appointmentId);
+        const success = await moveAppointment(
+          pasteResult.appointmentId,
+          pasteResult.newDate,
+          pasteResult.newTime,
+          pasteResult.newVetId
+        );
+        if (success) {
+          refreshBookings();
+        }
       } else {
-        console.log('📋 This is a copy operation');
+        // Copier = créer un nouveau rendez-vous
+        console.log('📋 Creating copy of appointment');
+        setCreateModalDefaultData(pasteResult.copyData);
+        setAppointmentToEdit(null);
+        setIsCreateModalOpen(true);
       }
-      
-      setCreateModalDefaultData(pasteResult.data);
-      setAppointmentToEdit(null);
-      setIsCreateModalOpen(true);
     }
   };
 
