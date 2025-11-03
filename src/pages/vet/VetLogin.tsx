@@ -306,10 +306,10 @@ const VetLogin = () => {
         <div className="max-w-lg text-center text-white space-y-6 lg:space-y-8">
           <div>
             <h1 className="text-2xl lg:text-4xl font-bold mb-4 leading-tight">
-              La nouvelle génération de solutions pour les vétérinaires
+              Simplifiez la gestion de vos rendez-vous vétérinaires
             </h1>
             <p className="text-lg lg:text-xl text-white/90">
-              Équipez-vous d'AniNow et gagnez du temps au quotidien
+              Une solution intelligente pour optimiser votre temps et améliorer l'expérience client
             </p>
           </div>
 
@@ -317,28 +317,28 @@ const VetLogin = () => {
             <div className="flex items-start space-x-4">
               <CheckCircle className="h-5 w-5 lg:h-6 lg:w-6 text-vet-sage mt-1 flex-shrink-0" />
               <div>
-                <p className="text-base lg:text-lg font-medium">Plus de 150 cliniques vétérinaires utilisent AniNow</p>
+                <p className="text-base lg:text-lg font-medium">Réduisez le temps passé au téléphone grâce à la prise de rendez-vous en ligne 24/7</p>
               </div>
             </div>
 
             <div className="flex items-start space-x-4">
               <Users className="h-5 w-5 lg:h-6 lg:w-6 text-vet-sage mt-1 flex-shrink-0" />
               <div>
-                <p className="text-base lg:text-lg font-medium">Plus de 5 000 clients gèrent leurs rendez-vous avec AniNow</p>
+                <p className="text-base lg:text-lg font-medium">Améliorez la satisfaction client avec un système moderne et accessible</p>
               </div>
             </div>
 
             <div className="flex items-start space-x-4">
               <Calendar className="h-5 w-5 lg:h-6 lg:w-6 text-vet-sage mt-1 flex-shrink-0" />
               <div>
-                <p className="text-base lg:text-lg font-medium">Planification intelligente et automatisée des créneaux</p>
+                <p className="text-base lg:text-lg font-medium">Optimisez votre planning avec une gestion intelligente et automatisée des créneaux</p>
               </div>
             </div>
 
             <div className="flex items-start space-x-4">
               <BarChart3 className="h-5 w-5 lg:h-6 lg:w-6 text-vet-sage mt-1 flex-shrink-0" />
               <div>
-                <p className="text-base lg:text-lg font-medium">Analyses prédictives pour optimiser votre activité</p>
+                <p className="text-base lg:text-lg font-medium">Concentrez-vous sur l'essentiel : soigner vos patients, pas gérer l'administratif</p>
               </div>
             </div>
           </div>
