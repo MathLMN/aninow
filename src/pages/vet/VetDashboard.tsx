@@ -9,22 +9,25 @@ import { PendingBookingsNotification } from "@/components/planning/PendingBookin
 const VetDashboard = () => {
   const { bookings, isLoading, stats } = useVetBookings();
 
+  // Filtrer uniquement les vrais rendez-vous (exclure les blocs récurrents)
+  const realBookings = bookings.filter(b => !b.is_blocked);
+
   // Filtrer les rendez-vous d'aujourd'hui
-  const todayBookings = bookings.filter(booking => {
+  const todayBookings = realBookings.filter(booking => {
     const today = new Date().toISOString().split('T')[0];
     return booking.appointment_date === today || booking.created_at.split('T')[0] === today;
   }).slice(0, 5);
 
   // Calculer des statistiques avancées
-  const confirmedBookings = bookings.filter(b => b.status === 'confirmed').length;
-  const cancelledBookings = bookings.filter(b => b.status === 'cancelled').length;
-  const completedBookings = bookings.filter(b => b.status === 'completed').length;
-  const noShowBookings = bookings.filter(b => b.status === 'no-show').length;
+  const confirmedBookings = realBookings.filter(b => b.status === 'confirmed').length;
+  const cancelledBookings = realBookings.filter(b => b.status === 'cancelled').length;
+  const completedBookings = realBookings.filter(b => b.status === 'completed').length;
+  const noShowBookings = realBookings.filter(b => b.status === 'no-show').length;
   
   // Répartition par type de consultation
-  const convenienceBookings = bookings.filter(b => b.consultation_reason === 'consultation-convenance').length;
-  const symptomsBookings = bookings.filter(b => b.consultation_reason === 'symptomes-anomalie').length;
-  const emergencyBookings = bookings.filter(b => b.consultation_reason === 'urgence').length;
+  const convenienceBookings = realBookings.filter(b => b.consultation_reason === 'consultation-convenance').length;
+  const symptomsBookings = realBookings.filter(b => b.consultation_reason === 'symptomes-anomalie').length;
+  const emergencyBookings = realBookings.filter(b => b.consultation_reason === 'urgence').length;
   
   // Taux de confirmation (bookings confirmés / total non-cancelled)
   const confirmationRate = stats.total > 0 
@@ -32,8 +35,8 @@ const VetDashboard = () => {
     : 0;
   
   // Score d'urgence moyen
-  const avgUrgencyScore = bookings.length > 0
-    ? Math.round(bookings.reduce((sum, b) => sum + (b.urgency_score || 0), 0) / bookings.length)
+  const avgUrgencyScore = realBookings.length > 0
+    ? Math.round(realBookings.reduce((sum, b) => sum + (b.urgency_score || 0), 0) / realBookings.length)
     : 0;
 
   // Taux de présence et d'absentéisme
