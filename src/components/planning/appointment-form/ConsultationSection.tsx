@@ -19,7 +19,7 @@ export const ConsultationSection = ({ formData, onFieldUpdate }: ConsultationSec
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
-          <Label htmlFor="consultationReason" className="text-xs font-medium text-gray-700">Résumé de la demande (généré automatiquement) *</Label>
+          <Label htmlFor="consultationReason" className="text-xs font-medium text-gray-700">Résumé de la demande *</Label>
           <Textarea
             id="consultationReason"
             value={formData.consultationReason}
