@@ -58,10 +58,15 @@ const handler = async (req: Request): Promise<Response> => {
         )
       `)
       .eq("id", booking_id)
-      .single();
+      .maybeSingle();
 
-    if (bookingError || !booking) {
+    if (bookingError) {
       console.error("Error fetching booking details:", bookingError);
+      throw new Error(`Database error: ${bookingError.message}`);
+    }
+
+    if (!booking) {
+      console.error("Booking not found for ID:", booking_id);
       throw new Error("Booking not found");
     }
 

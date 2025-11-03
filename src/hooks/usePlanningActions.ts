@@ -31,7 +31,7 @@ export const usePlanningActions = () => {
       try {
         const { error: emailError } = await supabase.functions.invoke('send-confirmation-email', {
           body: {
-            bookingId: bookingId,
+            booking_id: bookingId,
             client_name: bookingData.client_name,
             client_email: bookingData.client_email,
             animal_name: bookingData.animal_name,
@@ -206,17 +206,17 @@ export const usePlanningActions = () => {
       // Si le statut devient 'confirmed', envoyer l'email de confirmation
       if (status === 'confirmed') {
         try {
-          const { error: emailError } = await supabase.functions.invoke('send-confirmation-email', {
-            body: {
-              bookingId: bookingId,
-              client_name: bookingData.client_name,
-              client_email: bookingData.client_email,
-              animal_name: bookingData.animal_name,
-              appointment_date: bookingData.appointment_date,
-              appointment_time: bookingData.appointment_time,
-              clinic_id: bookingData.clinic_id
-            }
-          });
+        const { error: emailError } = await supabase.functions.invoke('send-confirmation-email', {
+          body: {
+            booking_id: bookingId,
+            client_name: bookingData.client_name,
+            client_email: bookingData.client_email,
+            animal_name: bookingData.animal_name,
+            appointment_date: bookingData.appointment_date,
+            appointment_time: bookingData.appointment_time,
+            clinic_id: bookingData.clinic_id
+          }
+        });
 
           if (emailError) {
             console.error('⚠️ Erreur lors de l\'envoi de l\'email:', emailError);
