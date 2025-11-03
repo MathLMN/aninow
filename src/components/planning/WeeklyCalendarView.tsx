@@ -45,12 +45,18 @@ export const WeeklyCalendarView = ({
     });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
+  const getStatusColor = (booking: any) => {
+    // Pour les rendez-vous confirmés, utiliser la couleur du type de consultation
+    if (booking.status === 'confirmed' && booking.consultation_type_color) {
+      return ''; // Style inline sera appliqué
+    }
+    
+    // Couleurs par statut pour les autres cas
+    switch (booking.status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'confirmed': return 'bg-green-100 text-green-800 border-green-300';
+      case 'confirmed': return 'bg-gray-100 text-gray-800 border-gray-300'; // Fallback neutre
       case 'cancelled': return 'bg-red-100 text-red-800 border-red-300';
-      case 'completed': return 'bg-blue-100 text-blue-800 border-blue-300';
+      case 'completed': return 'bg-gray-100 text-gray-800 border-gray-300';
       default: return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
@@ -123,7 +129,17 @@ export const WeeklyCalendarView = ({
                           <div
                             key={booking.id}
                             onClick={() => onAppointmentClick(booking)}
-                            className={`mb-1 p-2 rounded-md border cursor-pointer hover:shadow-md transition-shadow ${getStatusColor(booking.status)}`}
+                            className={`mb-1 p-2 rounded-md border cursor-pointer hover:shadow-md transition-shadow ${getStatusColor(booking)}`}
+                            style={
+                              booking.status === 'confirmed' && booking.consultation_type_color
+                                ? {
+                                    backgroundColor: `${booking.consultation_type_color}20`,
+                                    borderColor: booking.consultation_type_color,
+                                    borderWidth: '2px',
+                                    color: '#1f2937'
+                                  }
+                                : undefined
+                            }
                           >
                             <div className="text-xs font-medium truncate">
                               {booking.client_name}
