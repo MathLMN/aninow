@@ -3,7 +3,6 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
-  Heart, 
   Calendar, 
   Users, 
   Settings, 
@@ -12,6 +11,7 @@ import {
   BarChart3
 } from "lucide-react";
 import { useVetAuth } from "@/hooks/useVetAuth";
+import logoAninow from "@/assets/logo-aninow.png";
 
 export const VetNavigation = () => {
   const navigate = useNavigate();
@@ -58,7 +58,7 @@ export const VetNavigation = () => {
           <div className="flex items-center">
             {/* Logo */}
             <Link to="/vet/dashboard" className="flex items-center space-x-3">
-              <Heart className="h-8 w-8 text-vet-sage" />
+              <img src={logoAninow} alt="AniNow Logo" className="h-8 w-auto" />
               <span className="text-xl font-bold text-vet-navy">AniNow Pro</span>
             </Link>
 
