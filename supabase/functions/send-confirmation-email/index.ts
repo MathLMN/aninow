@@ -42,20 +42,13 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Fetch booking with clinic and veterinarian
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
       .select(`
         *,
         clinic:clinics (name, slug),
-        veterinarian:clinic_veterinarians (name),
-        clinic_settings:clinic_settings (
-          clinic_name,
-          clinic_phone,
-          clinic_email,
-          clinic_address_street,
-          clinic_address_city,
-          clinic_address_postal_code
-        )
+        veterinarian:clinic_veterinarians (name)
       `)
       .eq("id", booking_id)
       .maybeSingle();
@@ -70,6 +63,18 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Booking not found");
     }
 
+    // Fetch clinic settings separately using the clinic_id from booking
+    const { data: clinicSettings, error: settingsError } = await supabase
+      .from("clinic_settings")
+      .select("*")
+      .eq("clinic_id", booking.clinic_id)
+      .maybeSingle();
+
+    if (settingsError) {
+      console.error("Error fetching clinic settings:", settingsError);
+      // Don't fail, just log the error and continue with default values
+    }
+
     // Format date
     const formattedDate = new Date(appointment_date).toLocaleDateString("fr-FR", {
       weekday: "long",
@@ -78,13 +83,12 @@ const handler = async (req: Request): Promise<Response> => {
       day: "numeric",
     });
 
-    // Get clinic settings
-    const clinicSettings = booking.clinic_settings?.[0] || {};
-    const clinicName = clinicSettings.clinic_name || booking.clinic?.name || "Clinique Vétérinaire";
-    const clinicAddress = clinicSettings.clinic_address_street
+    // Get clinic information
+    const clinicName = clinicSettings?.clinic_name || booking.clinic?.name || "Clinique Vétérinaire";
+    const clinicAddress = clinicSettings?.clinic_address_street
       ? `${clinicSettings.clinic_address_street}, ${clinicSettings.clinic_address_postal_code} ${clinicSettings.clinic_address_city}`
       : "";
-    const clinicPhone = clinicSettings.clinic_phone || "";
+    const clinicPhone = clinicSettings?.clinic_phone || "";
     const vetName = booking.veterinarian?.name || "votre vétérinaire";
 
     // Build email HTML
