@@ -10,12 +10,47 @@ export const usePlanningActions = () => {
   const validateBooking = async (bookingId: string): Promise<boolean> => {
     setIsLoading(true);
     try {
+      // Récupérer les détails complets du booking avant de confirmer
+      const { data: bookingData, error: fetchError } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('id', bookingId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Mettre à jour le statut
       const { error } = await supabase
         .from('bookings')
         .update({ status: 'confirmed' })
         .eq('id', bookingId);
 
       if (error) throw error;
+
+      // Envoyer l'email de confirmation via l'edge function
+      try {
+        const { error: emailError } = await supabase.functions.invoke('send-confirmation-email', {
+          body: {
+            bookingId: bookingId,
+            client_name: bookingData.client_name,
+            client_email: bookingData.client_email,
+            animal_name: bookingData.animal_name,
+            appointment_date: bookingData.appointment_date,
+            appointment_time: bookingData.appointment_time,
+            clinic_id: bookingData.clinic_id
+          }
+        });
+
+        if (emailError) {
+          console.error('⚠️ Erreur lors de l\'envoi de l\'email:', emailError);
+          // On continue quand même, l'email n'est pas critique
+        } else {
+          console.log('✅ Email de confirmation envoyé avec succès');
+        }
+      } catch (emailError) {
+        console.error('⚠️ Exception lors de l\'envoi de l\'email:', emailError);
+        // On continue quand même
+      }
 
       toast({
         title: "Rendez-vous validé",
