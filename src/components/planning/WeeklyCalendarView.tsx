@@ -51,6 +51,11 @@ export const WeeklyCalendarView = ({
   const getBookingsForDateAndVet = (date: Date, veterinarianId?: string) => {
     const dateStr = formatDateLocal(date);
     return bookings.filter(booking => {
+      // Exclure les créneaux bloqués de la vue semaine
+      if (booking.booking_source === 'blocked_slot') {
+        return false;
+      }
+      
       const matchesDate = booking.appointment_date === dateStr;
       const matchesVet = !veterinarianId || booking.veterinarian_id === veterinarianId;
       const matchesFilters = 
