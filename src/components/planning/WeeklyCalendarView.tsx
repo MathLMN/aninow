@@ -2,8 +2,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, User, Plus } from "lucide-react";
+import { Clock, User, Plus, Calendar, Stethoscope } from "lucide-react";
 import { formatDateLocal } from "@/utils/date";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface WeeklyCalendarViewProps {
   weekDates: Date[];
@@ -24,14 +25,28 @@ export const WeeklyCalendarView = ({
   onAppointmentClick,
   onCreateAppointment
 }: WeeklyCalendarViewProps) => {
-  // Heures de consultation (7h à 21h par créneaux de 15min)
+  // Heures de consultation (7h à 21h par créneaux de 30min pour meilleure lisibilité)
   const timeSlots = [];
   for (let hour = 7; hour < 21; hour++) {
-    for (let minute = 0; minute < 60; minute += 15) {
+    for (let minute = 0; minute < 60; minute += 30) {
       const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
       timeSlots.push(time);
     }
   }
+
+  // Vérifier si une date est aujourd'hui
+  const isToday = (date: Date) => {
+    const today = new Date();
+    return date.getDate() === today.getDate() &&
+           date.getMonth() === today.getMonth() &&
+           date.getFullYear() === today.getFullYear();
+  };
+
+  // Calculer la durée d'un RDV
+  const getAppointmentDuration = (booking: any) => {
+    // Durée par défaut: 30 minutes
+    return '30 min';
+  };
 
   const getBookingsForDateAndVet = (date: Date, veterinarianId?: string) => {
     const dateStr = formatDateLocal(date);
@@ -82,96 +97,180 @@ export const WeeklyCalendarView = ({
   }
 
   return (
-    <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
+    <Card className="bg-white backdrop-blur-sm border-vet-blue/20 shadow-lg">
       <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <div className="min-w-full">
-            {/* En-tête des colonnes */}
-            <div className="grid grid-cols-8 border-b border-vet-blue/20 bg-vet-beige/30">
-              <div className="p-4 font-semibold text-vet-navy text-center">Horaires</div>
-              {weekDates.map((date, index) => (
-                <div key={index} className="p-4 text-center border-l border-vet-blue/20">
-                  <div className="font-semibold text-vet-navy">
-                    {date.toLocaleDateString('fr-FR', { weekday: 'short' })}
+        <div className="overflow-hidden">
+          {/* En-tête des colonnes - Sticky */}
+          <div className="sticky top-0 z-20 bg-white border-b-2 border-vet-blue/30 shadow-sm">
+            <div className="grid grid-cols-8 min-w-[1200px]">
+              <div className="p-4 font-bold text-vet-navy text-center border-r border-vet-blue/20 bg-vet-beige/40">
+                <Clock className="h-5 w-5 mx-auto mb-1 text-vet-sage" />
+                <span className="text-sm">Horaires</span>
+              </div>
+              {weekDates.map((date, index) => {
+                const today = isToday(date);
+                const dayBookings = getBookingsForDateAndVet(date);
+                return (
+                  <div 
+                    key={index} 
+                    className={`p-3 text-center border-l border-vet-blue/20 transition-all duration-200 ${
+                      today 
+                        ? 'bg-vet-sage/20 border-l-4 border-l-vet-sage shadow-inner' 
+                        : 'bg-vet-beige/20'
+                    }`}
+                  >
+                    <div className={`font-bold ${today ? 'text-vet-sage' : 'text-vet-navy'}`}>
+                      {date.toLocaleDateString('fr-FR', { weekday: 'long' })}
+                    </div>
+                    <div className="text-sm text-vet-brown font-medium mt-1">
+                      {date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
+                    </div>
+                    <Badge 
+                      variant={today ? "default" : "outline"} 
+                      className={`mt-2 ${today ? 'bg-vet-sage text-white' : 'border-vet-blue/40'}`}
+                    >
+                      <Calendar className="h-3 w-3 mr-1" />
+                      {dayBookings.length} RDV
+                    </Badge>
                   </div>
-                  <div className="text-sm text-vet-brown">
-                    {date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                  </div>
-                  <div className="text-xs text-vet-brown mt-1">
-                    {getBookingsForDateAndVet(date).length} RDV
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Grille horaire */}
-            <div className="relative">
-              {timeSlots.map((time, timeIndex) => (
-                <div key={time} className={`grid grid-cols-8 border-b border-vet-blue/10 min-h-[60px] ${timeIndex % 4 === 0 ? 'border-vet-blue/20' : ''}`}>
-                  {/* Colonne horaire */}
-                  <div className="p-2 text-sm text-vet-brown text-center font-medium bg-vet-beige/10 border-r border-vet-blue/20">
-                    {time}
-                  </div>
-                  
-                  {/* Colonnes par jour */}
-                  {weekDates.map((date, dayIndex) => {
-                    const dayBookings = getBookingsForDateAndVet(date);
-                    const timeBookings = dayBookings.filter(booking => 
-                      booking.appointment_time === time
-                    );
-
-                    return (
-                      <div
-                        key={`${dayIndex}-${time}`}
-                        className="p-1 border-l border-vet-blue/10 relative group hover:bg-vet-sage/5 transition-colors"
-                      >
-                        {timeBookings.map((booking, bookingIndex) => (
-                          <div
-                            key={booking.id}
-                            onClick={() => onAppointmentClick(booking)}
-                            className={`mb-1 p-2 rounded-md border cursor-pointer hover:shadow-md transition-shadow ${getStatusColor(booking)}`}
-                            style={
-                              booking.status === 'confirmed' && booking.consultation_type_color
-                                ? {
-                                    backgroundColor: `${booking.consultation_type_color}20`,
-                                    borderColor: booking.consultation_type_color,
-                                    borderWidth: '2px',
-                                    color: '#1f2937'
-                                  }
-                                : undefined
-                            }
-                          >
-                            <div className="text-xs font-medium truncate">
-                              {booking.client_name}
-                            </div>
-                            <div className="text-xs truncate">
-                              {booking.animal_name} - {booking.animal_species}
-                            </div>
-                            <div className="text-xs opacity-75">
-                              {booking.consultation_reason}
-                            </div>
-                          </div>
-                        ))}
-                        
-                        {/* Bouton d'ajout au survol */}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center bg-vet-sage/10 hover:bg-vet-sage/20"
-                          onClick={() => onCreateAppointment({
-                            date: date.toISOString().split('T')[0],
-                            time: time
-                          })}
-                        >
-                          <Plus className="h-4 w-4 text-vet-sage" />
-                        </Button>
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
+
+          {/* Grille horaire - Scrollable */}
+          <ScrollArea className="h-[calc(100vh-280px)]">
+            <div className="min-w-[1200px]">
+              {timeSlots.map((time, timeIndex) => {
+                const isFullHour = time.endsWith(':00');
+                const isAlternateRow = Math.floor(timeIndex / 2) % 2 === 0;
+                
+                return (
+                  <div 
+                    key={time} 
+                    className={`grid grid-cols-8 border-b transition-colors ${
+                      isFullHour ? 'border-vet-blue/30 min-h-[90px]' : 'border-vet-blue/10 min-h-[80px]'
+                    } ${isAlternateRow ? 'bg-white' : 'bg-vet-beige/5'}`}
+                  >
+                    {/* Colonne horaire */}
+                    <div className={`p-3 text-center border-r border-vet-blue/20 flex items-center justify-center ${
+                      isFullHour ? 'bg-vet-beige/30 font-bold text-vet-navy' : 'bg-vet-beige/10 text-vet-brown'
+                    }`}>
+                      <span className={isFullHour ? 'text-base' : 'text-sm'}>{time}</span>
+                    </div>
+                    
+                    {/* Colonnes par jour */}
+                    {weekDates.map((date, dayIndex) => {
+                      const today = isToday(date);
+                      const dayBookings = getBookingsForDateAndVet(date);
+                      const timeBookings = dayBookings.filter(booking => 
+                        booking.appointment_time === time || 
+                        (booking.appointment_time && booking.appointment_time.startsWith(time.split(':')[0]))
+                      );
+
+                      return (
+                        <div
+                          key={`${dayIndex}-${time}`}
+                          className={`p-2 border-l relative group transition-all duration-200 ${
+                            today ? 'border-l-vet-sage/30 bg-vet-sage/5' : 'border-l-vet-blue/10'
+                          } hover:bg-vet-sage/10`}
+                        >
+                          {timeBookings.map((booking) => {
+                            const hasCustomColor = booking.status === 'confirmed' && booking.consultation_type_color;
+                            return (
+                              <div
+                                key={booking.id}
+                                onClick={() => onAppointmentClick(booking)}
+                                className={`mb-2 p-3 rounded-lg border-l-4 cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] animate-fade-in ${
+                                  getStatusColor(booking)
+                                }`}
+                                style={
+                                  hasCustomColor
+                                    ? {
+                                        backgroundColor: `${booking.consultation_type_color}15`,
+                                        borderLeftColor: booking.consultation_type_color,
+                                        boxShadow: `0 2px 8px ${booking.consultation_type_color}20`
+                                      }
+                                    : {
+                                        borderLeftColor: 'hsl(var(--vet-sage))'
+                                      }
+                                }
+                              >
+                                {/* En-tête de la carte */}
+                                <div className="flex items-start justify-between mb-2">
+                                  <div className="flex items-center gap-1.5">
+                                    <Clock className="h-3.5 w-3.5 text-vet-sage flex-shrink-0" />
+                                    <span className="text-xs font-bold text-vet-navy">
+                                      {booking.appointment_time}
+                                    </span>
+                                  </div>
+                                  <Badge 
+                                    variant="secondary" 
+                                    className="text-[10px] px-1.5 py-0 h-5"
+                                  >
+                                    {getAppointmentDuration(booking)}
+                                  </Badge>
+                                </div>
+
+                                {/* Client */}
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <User className="h-3.5 w-3.5 text-vet-brown flex-shrink-0" />
+                                  <span className="text-sm font-semibold text-vet-navy truncate">
+                                    {booking.client_name}
+                                  </span>
+                                </div>
+
+                                {/* Animal */}
+                                <div className="flex items-center gap-1.5 mb-1.5">
+                                  <Stethoscope className="h-3.5 w-3.5 text-vet-sage flex-shrink-0" />
+                                  <span className="text-xs text-vet-brown truncate">
+                                    {booking.animal_name} • {booking.animal_species}
+                                  </span>
+                                </div>
+
+                                {/* Motif */}
+                                <div className="text-xs text-vet-brown/80 truncate italic border-t border-vet-blue/10 pt-1.5 mt-1.5">
+                                  {booking.consultation_reason}
+                                </div>
+
+                                {/* Badge statut si non confirmé */}
+                                {booking.status !== 'confirmed' && (
+                                  <Badge 
+                                    variant="outline" 
+                                    className="text-[10px] px-1.5 py-0 h-4 mt-2"
+                                  >
+                                    {getStatusLabel(booking.status)}
+                                  </Badge>
+                                )}
+                              </div>
+                            );
+                          })}
+                          
+                          {/* Bouton d'ajout au survol */}
+                          {timeBookings.length === 0 && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center bg-vet-sage/5 hover:bg-vet-sage/15 border-2 border-dashed border-transparent group-hover:border-vet-sage/30"
+                              onClick={() => onCreateAppointment({
+                                date: date.toISOString().split('T')[0],
+                                time: time
+                              })}
+                            >
+                              <div className="flex flex-col items-center gap-1">
+                                <Plus className="h-5 w-5 text-vet-sage" />
+                                <span className="text-xs text-vet-sage font-medium">Ajouter</span>
+                              </div>
+                            </Button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          </ScrollArea>
         </div>
       </CardContent>
     </Card>
