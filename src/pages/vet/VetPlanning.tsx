@@ -198,36 +198,24 @@ export default function VetPlanning() {
             {/* Contenu de navigation optimisé */}
             <div className="flex-1 p-2 overflow-hidden flex flex-col">
               <div className="flex-shrink-0">
-                {viewMode === 'daily' ? (
-                  <DailyCalendarView
-                    selectedDate={selectedDate}
-                    onDateChange={setSelectedDate}
-                    bookings={todayBookings}
-                    veterinarians={veterinarians}
-                    onCreateAppointment={handleCreateAppointment}
-                    onCreateNote={handleCreateNote}
-                    onAppointmentClick={handleAppointmentClick}
-                    onValidateBooking={handleValidateBooking}
-                    onCancelBooking={handleCancelBooking}
-                    onCopyBooking={handleCopyBooking}
-                    onCutBooking={handleCutBooking}
-                    onPasteBooking={handlePasteBooking}
-                    onDeleteBooking={handleDeleteBooking}
-                    onBlockSlot={handleBlockSlot}
-                    hasClipboard={hasClipboard()}
-                    sidebarMode={true}
-                  />
-                ) : (
-                  <WeeklyCalendarView
-                    weekDates={weekDates}
-                    bookings={bookings}
-                    veterinarians={veterinarians}
-                    filters={{ veterinarian: 'all', status: 'all' }}
-                    isLoading={false}
-                    onCreateAppointment={handleCreateAppointment}
-                    onAppointmentClick={handleAppointmentClick}
-                  />
-                )}
+                <DailyCalendarView
+                  selectedDate={selectedDate}
+                  onDateChange={setSelectedDate}
+                  bookings={todayBookings}
+                  veterinarians={veterinarians}
+                  onCreateAppointment={handleCreateAppointment}
+                  onCreateNote={handleCreateNote}
+                  onAppointmentClick={handleAppointmentClick}
+                  onValidateBooking={handleValidateBooking}
+                  onCancelBooking={handleCancelBooking}
+                  onCopyBooking={handleCopyBooking}
+                  onCutBooking={handleCutBooking}
+                  onPasteBooking={handlePasteBooking}
+                  onDeleteBooking={handleDeleteBooking}
+                  onBlockSlot={handleBlockSlot}
+                  hasClipboard={hasClipboard()}
+                  sidebarMode={true}
+                />
               </div>
               
               {/* Liste d'attente */}
