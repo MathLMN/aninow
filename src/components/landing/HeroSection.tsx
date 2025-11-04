@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Calendar, Smartphone } from "lucide-react";
+import { ArrowRight, Calendar, Smartphone, FileText, AlertTriangle, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 import ClinicAppointmentButton from "./ClinicAppointmentButton";
 
@@ -19,30 +19,29 @@ const HeroSection = () => {
             </h1>
             
             <p className="mt-4 sm:mt-6 text-lg max-w-3xl text-left text-[#1b1b3a] font-medium sm:text-lg">
-              Notre système de prise de rendez-vous en ligne simplifie vos démarches 
-              et améliore le suivi de la santé de vos animaux.
+              Décrivez les symptômes de votre animal en ligne et bénéficiez d'une prise en charge adaptée par votre équipe vétérinaire, disponible 24h/24.
             </p>
             
             <div className="mt-6 sm:mt-8 text-base sm:text-lg text-gray-600 max-w-3xl text-left space-y-3">
               <div className="flex items-start gap-4">
                 <div className="p-2 bg-[#4D9380]/10 rounded-full">
-                  <Calendar className="w-5 h-5 text-[#4D9380]" />
+                  <FileText className="w-5 h-5 text-[#4D9380]" />
                 </div>
-                <span>Prise de rendez-vous 24h/24 et 7j/7</span>
+                <span>Détaillez l'état et les symptômes de votre compagnon</span>
               </div>
               
               <div className="flex items-start gap-4">
                 <div className="p-2 bg-[#4D9380]/10 rounded-full">
-                  <Smartphone className="w-5 h-5 text-[#4D9380]" />
+                  <AlertTriangle className="w-5 h-5 text-[#4D9380]" />
                 </div>
-                <span>Interface simple et intuitive</span>
+                <span>L'équipe priorise selon l'urgence de chaque situation</span>
               </div>
               
               <div className="flex items-start gap-4">
                 <div className="p-2 bg-[#4D9380]/10 rounded-full">
-                  <ArrowRight className="w-5 h-5 text-[#4D9380]" />
+                  <MessageSquare className="w-5 h-5 text-[#4D9380]" />
                 </div>
-                <span>Confirmation immédiate de votre rendez-vous</span>
+                <span>Recevez des conseils adaptés en attendant votre rendez-vous</span>
               </div>
             </div>
 
