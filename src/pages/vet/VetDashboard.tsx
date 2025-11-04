@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Users, Clock, TrendingUp, AlertTriangle, CheckCircle, XCircle, Activity, UserX, CalendarDays } from "lucide-react";
+import { Calendar, Users, Clock, TrendingUp, AlertTriangle, CheckCircle, XCircle, Activity, UserX, CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useVetBookings } from "@/hooks/useVetBookings";
 import { PendingBookingsNotification } from "@/components/planning/PendingBookingsNotification";
@@ -14,6 +14,7 @@ import { format } from "date-fns";
 const VetDashboard = () => {
   const { bookings, isLoading, stats } = useVetBookings();
   const [viewMode, setViewMode] = useState<'day' | 'month'>('day');
+  const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
 
   // Filtrer uniquement les vrais rendez-vous (exclure les blocs récurrents)
   const realBookings = bookings.filter(b => !b.is_blocked);
@@ -29,10 +30,27 @@ const VetDashboard = () => {
     return booking.appointment_date === today || booking.created_at.split('T')[0] === today;
   });
 
-  // Calculer les statistiques du mois en cours
+  // Calculer les statistiques du mois sélectionné
   const now = new Date();
-  const monthStart = startOfMonth(now);
-  const monthEnd = endOfMonth(now);
+  const monthStart = startOfMonth(selectedMonth);
+  const monthEnd = endOfMonth(selectedMonth);
+
+  // Fonctions de navigation entre les mois
+  const goToPreviousMonth = () => {
+    setSelectedMonth(prev => {
+      const newDate = new Date(prev);
+      newDate.setMonth(newDate.getMonth() - 1);
+      return newDate;
+    });
+  };
+
+  const goToNextMonth = () => {
+    setSelectedMonth(prev => {
+      const newDate = new Date(prev);
+      newDate.setMonth(newDate.getMonth() + 1);
+      return newDate;
+    });
+  };
   
   const monthBookings = realBookings.filter(booking => {
     if (!booking.created_at) return false;
@@ -194,10 +212,34 @@ const VetDashboard = () => {
               </TabsTrigger>
               <TabsTrigger value="month" className="flex items-center gap-2">
                 <CalendarDays className="h-4 w-4" />
-                Vue mensuelle ({format(now, 'MMMM yyyy', { locale: fr })})
+                Vue mensuelle
               </TabsTrigger>
             </TabsList>
           </Tabs>
+          
+          {viewMode === 'month' && (
+            <div className="flex items-center justify-center gap-4 mt-4">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={goToPreviousMonth}
+                className="h-8 w-8"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-lg font-semibold text-vet-navy min-w-[200px] text-center">
+                {format(selectedMonth, 'MMMM yyyy', { locale: fr })}
+              </span>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={goToNextMonth}
+                className="h-8 w-8"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
