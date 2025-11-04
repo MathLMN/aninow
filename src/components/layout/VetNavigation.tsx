@@ -48,16 +48,16 @@ export const VetNavigation = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm z-50 border-b shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            {/* Logo */}
-            <Link to="/vet/dashboard" className="flex items-center space-x-3">
-              <img src={logoAninow} alt="AniNow Logo" className="h-8 w-auto" />
-              <span className="text-xl font-bold text-vet-navy">AniNow Pro</span>
-            </Link>
+        <div className="flex items-center justify-between h-16 gap-8">
+          {/* Logo - Toujours fixe à gauche */}
+          <Link to="/vet/dashboard" className="flex items-center space-x-3 flex-shrink-0">
+            <img src={logoAninow} alt="AniNow Logo" className="h-8 w-auto" />
+            <span className="text-xl font-bold text-vet-navy whitespace-nowrap">AniNow Pro</span>
+          </Link>
 
-            {/* Navigation Links */}
-            <div className="hidden md:ml-10 md:flex md:space-x-8">
+          {/* Navigation Links - Bien répartis dans l'espace */}
+          <div className="hidden md:flex md:flex-1 md:justify-center md:items-center">
+            <div className="flex space-x-1 lg:space-x-4">
               {navigationItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
@@ -66,7 +66,7 @@ export const VetNavigation = () => {
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors ${
+                    className={`inline-flex items-center px-3 lg:px-4 py-2 border-b-2 text-sm font-medium transition-colors whitespace-nowrap ${
                       isActive
                         ? "border-vet-sage text-vet-sage"
                         : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
@@ -80,11 +80,11 @@ export const VetNavigation = () => {
             </div>
           </div>
 
-          {/* User Menu */}
-          <div className="flex items-center space-x-4">
+          {/* User Menu - Fixé à droite */}
+          <div className="flex items-center space-x-4 flex-shrink-0">
             {veterinarian && (
-              <div className="hidden md:flex md:items-center md:space-x-4">
-                <span className="text-sm text-gray-700">
+              <div className="hidden lg:flex lg:items-center lg:space-x-3">
+                <span className="text-sm text-gray-700 font-medium">
                   Dr. {veterinarian.name}
                 </span>
                 {veterinarian.specialty && (
@@ -99,10 +99,10 @@ export const VetNavigation = () => {
               variant="ghost" 
               size="sm"
               onClick={handleSignOut}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-500 hover:text-gray-700 whitespace-nowrap"
             >
               <LogOut className="h-4 w-4 mr-2" />
-              Déconnexion
+              <span className="hidden sm:inline">Déconnexion</span>
             </Button>
           </div>
         </div>
