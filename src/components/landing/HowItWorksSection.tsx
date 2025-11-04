@@ -1,3 +1,4 @@
+import shibaInusDuo from "@/assets/shiba-inus-duo.png";
 
 const HowItWorksSection = () => {
   const steps = [
@@ -35,21 +36,33 @@ const HowItWorksSection = () => {
           </p>
         </div>
         
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {steps.map((step, index) => (
-              <div key={index} className="text-center animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
-                <div className="bg-vet-sage text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 font-bold text-base sm:text-lg">
-                  {step.number}
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center mb-8">
+            {/* Image des shiba inus */}
+            <div className="hidden lg:flex justify-center items-center">
+              <img 
+                src={shibaInusDuo} 
+                alt="Deux adorables shiba inus" 
+                className="w-full max-w-sm h-auto object-contain"
+              />
+            </div>
+            
+            {/* Étapes */}
+            <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              {steps.map((step, index) => (
+                <div key={index} className="text-center animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <div className="bg-vet-sage text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 font-bold text-base sm:text-lg">
+                    {step.number}
+                  </div>
+                  <h3 className="font-semibold text-vet-navy mb-2 text-sm sm:text-base">
+                    {step.title}
+                  </h3>
+                  <p className="text-vet-brown text-xs sm:text-sm leading-relaxed">
+                    {step.description}
+                  </p>
                 </div>
-                <h3 className="font-semibold text-vet-navy mb-2 text-sm sm:text-base">
-                  {step.title}
-                </h3>
-                <p className="text-vet-brown text-xs sm:text-sm leading-relaxed">
-                  {step.description}
-                </p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
