@@ -60,13 +60,13 @@ const VetAppointments = () => {
     (booking) => booking.booking_source === "online" && booking?.is_blocked !== true
   );
 
-  // Filtrer par date sélectionnée et recherche
+  // Filtrer par date de création (created_at) et recherche
   const bookingsForSelectedDate = onlineBookings.filter((booking) => {
-    if (!booking.appointment_date) return false;
+    if (!booking.created_at) return false;
     
     try {
-      const bookingDate = parseISO(booking.appointment_date);
-      const matchesDate = isSameDay(bookingDate, selectedDate);
+      const createdDate = new Date(booking.created_at);
+      const matchesDate = isSameDay(createdDate, selectedDate);
       const matchesSearch = 
         booking.animal_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         booking.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -78,19 +78,21 @@ const VetAppointments = () => {
     }
   });
 
-  // Séparer les réservations à confirmer et confirmées
+  // Séparer les réservations à confirmer et confirmées - Tri par date de création (plus anciennes en haut)
   const pendingBookings = bookingsForSelectedDate
     .filter((booking) => booking.status === 'pending')
     .sort((a, b) => {
-      if (!a.appointment_time || !b.appointment_time) return 0;
-      return a.appointment_time.localeCompare(b.appointment_time);
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return dateA - dateB; // Plus anciennes en premier
     });
 
   const confirmedBookings = bookingsForSelectedDate
     .filter((booking) => booking.status === 'confirmed')
     .sort((a, b) => {
-      if (!a.appointment_time || !b.appointment_time) return 0;
-      return a.appointment_time.localeCompare(b.appointment_time);
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return dateA - dateB; // Plus anciennes en premier
     });
 
   const handleStatusChange = (bookingId: string, newStatus: 'pending' | 'confirmed' | 'cancelled' | 'completed') => {
