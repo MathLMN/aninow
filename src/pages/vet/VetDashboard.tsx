@@ -169,13 +169,6 @@ const VetDashboard = () => {
                 </div>
                 <div className="flex items-center justify-between p-2 bg-vet-beige/30 rounded">
                   <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm text-vet-brown">Terminés</span>
-                  </div>
-                  <span className="font-semibold text-vet-navy">{completedBookings}</span>
-                </div>
-                <div className="flex items-center justify-between p-2 bg-vet-beige/30 rounded">
-                  <div className="flex items-center space-x-2">
                     <UserX className="h-4 w-4 text-orange-600" />
                     <span className="text-sm text-vet-brown">Non présentés</span>
                   </div>
