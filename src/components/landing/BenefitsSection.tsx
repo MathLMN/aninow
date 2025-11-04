@@ -1,38 +1,38 @@
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Clock, Calendar, Heart, CheckCircle, Users, Shield } from "lucide-react";
+import { Clock, Calendar, Heart, CheckCircle, Users, Shield, AlertTriangle } from "lucide-react";
 
 const BenefitsSection = () => {
   const benefits = [
     {
-      icon: Clock,
-      title: "Gain de temps", 
-      description: "Prenez rendez-vous 24h/24, 7j/7 sans attendre au téléphone"
-    },
-    {
-      icon: Calendar,
-      title: "Planning optimisé",
-      description: "Visualisez les créneaux disponibles en temps réel"
-    },
-    {
       icon: Heart,
-      title: "Suivi personnalisé",
-      description: "Un questionnaire adapté aux besoins de votre animal"
+      title: "Détaillez les symptômes de votre animal", 
+      description: "Décrivez précisément l'état et les symptômes de votre compagnon directement en ligne"
     },
     {
-      icon: CheckCircle,
-      title: "Confirmation immédiate",
-      description: "Recevez instantanément votre confirmation de RDV"
+      icon: AlertTriangle,
+      title: "Une équipe qui priorise selon l'urgence",
+      description: "L'équipe vétérinaire prend connaissance des symptômes et adapte la prise en charge"
     },
     {
       icon: Users,
-      title: "Simplicité",
-      description: "Interface intuitive pour tous les propriétaires d'animaux"
+      title: "L'expertise des auxiliaires vétérinaires",
+      description: "Bénéficiez de la même qualité de service qu'un appel téléphonique, disponible à tout moment"
     },
     {
-      icon: Shield,
-      title: "Sécurisé",
-      description: "Vos données sont protégées et confidentielles"
+      icon: CheckCircle,
+      title: "Des conseils en attendant votre rendez-vous",
+      description: "Recevez des recommandations adaptées à la situation de votre animal"
+    },
+    {
+      icon: Clock,
+      title: "Disponible 24h/24, 7j/7",
+      description: "Prenez rendez-vous quand vous le souhaitez, sans attendre l'ouverture de la clinique"
+    },
+    {
+      icon: Calendar,
+      title: "Une meilleure organisation pour votre clinique",
+      description: "Aidez votre établissement vétérinaire à mieux gérer les rendez-vous et les urgences"
     }
   ];
 
