@@ -4,7 +4,6 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   Calendar, 
-  Users, 
   Settings, 
   LogOut, 
   Clock,
@@ -38,11 +37,6 @@ export const VetNavigation = () => {
       path: "/vet/planning",
       label: "Planning",
       icon: Clock
-    },
-    {
-      path: "/vet/schedule",
-      label: "Horaires",
-      icon: Users
     },
     {
       path: "/vet/settings",

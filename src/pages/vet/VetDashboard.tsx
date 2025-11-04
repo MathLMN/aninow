@@ -69,7 +69,7 @@ const VetDashboard = () => {
         </div>
         <div className="flex space-x-3">
           <PendingBookingsNotification />
-          <Link to="/vet/schedule">
+          <Link to="/vet/planning">
             <Button className="bg-vet-sage hover:bg-vet-sage/90 text-white">
               <Calendar className="h-4 w-4 mr-2" />
               Voir le planning

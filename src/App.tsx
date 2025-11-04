@@ -28,7 +28,6 @@ import VetLogin from '@/pages/vet/VetLogin';
 import VetDashboard from '@/pages/vet/VetDashboard';
 import VetAppointments from '@/pages/vet/VetAppointments';
 import VetPlanning from '@/pages/vet/VetPlanning';
-import VetSchedule from '@/pages/vet/VetSchedule';
 import VetSettings from '@/pages/vet/VetSettings';
 import VetResetPassword from '@/pages/vet/VetResetPassword';
 import VetLayout from '@/components/layout/VetLayout';
@@ -122,7 +121,6 @@ function App() {
               <Route path="dashboard" element={<VetDashboard />} />
               <Route path="appointments" element={<VetAppointments />} />
               <Route path="planning" element={<VetPlanning />} />
-              <Route path="schedule" element={<VetSchedule />} />
               <Route path="settings" element={<VetSettings />} />
               <Route path="advanced-settings" element={<VetAdvancedSettings />} />
             </Route>
