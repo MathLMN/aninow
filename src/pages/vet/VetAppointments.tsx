@@ -185,6 +185,16 @@ const VetAppointments = () => {
                       {booking.client_email}
                     </div>
                   </div>
+                  <div className="mt-2">
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
+                      booking.client_status === 'new' 
+                        ? 'bg-purple-100 text-purple-800 border border-purple-200' 
+                        : 'bg-blue-100 text-blue-800 border border-blue-200'
+                    }`}>
+                      <Users className="h-3 w-3" />
+                      {booking.client_status === 'new' ? 'Nouveau client' : 'Déjà client'}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -215,14 +225,14 @@ const VetAppointments = () => {
                   </div>
                 )}
 
-                {/* Symptômes et actions recommandées */}
-                <div className="flex flex-col sm:flex-row gap-3">
+                {/* Symptômes et commentaire */}
+                <div className="flex flex-col gap-2">
                   {booking.selected_symptoms && booking.selected_symptoms.length > 0 && (
-                    <div className="flex-1 bg-amber-50/50 border border-amber-200/50 rounded-lg p-2.5">
+                    <div className="bg-amber-50/50 border border-amber-200/50 rounded-lg p-2">
                       <p className="text-xs font-bold text-amber-900 mb-1">Symptômes signalés</p>
                       <div className="flex flex-wrap gap-1">
                         {booking.selected_symptoms.map((symptom, idx) => (
-                          <span key={idx} className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">
+                          <span key={idx} className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-full">
                             {symptom}
                           </span>
                         ))}
@@ -230,17 +240,10 @@ const VetAppointments = () => {
                     </div>
                   )}
 
-                  {booking.recommended_actions && booking.recommended_actions.length > 0 && (
-                    <div className="flex-1 bg-green-50/50 border border-green-200/50 rounded-lg p-2.5">
-                      <p className="text-xs font-bold text-green-900 mb-1">Actions recommandées</p>
-                      <ul className="text-xs text-green-800 space-y-0.5">
-                        {booking.recommended_actions.slice(0, 2).map((action, index) => (
-                          <li key={index} className="flex items-start gap-1">
-                            <span className="text-green-600">•</span>
-                            <span>{action}</span>
-                          </li>
-                        ))}
-                      </ul>
+                  {booking.client_comment && (
+                    <div className="bg-slate-50/50 border border-slate-200/50 rounded-lg p-2">
+                      <p className="text-xs font-bold text-slate-900 mb-1">Commentaire client</p>
+                      <p className="text-xs text-slate-700 italic">"{booking.client_comment}"</p>
                     </div>
                   )}
                 </div>
@@ -265,14 +268,6 @@ const VetAppointments = () => {
             </div>
             
             <div className="flex items-center gap-2">
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="border-vet-navy/30 text-vet-navy hover:bg-vet-navy hover:text-white"
-              >
-                Détails
-              </Button>
-              
               {booking.status === "pending" && (
                 <Button 
                   size="sm" 
