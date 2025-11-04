@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Search, Calendar, AlertTriangle, Clock, Phone, Mail, Globe, ChevronLeft, ChevronRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Users, Search, Calendar, AlertTriangle, Clock, Phone, Mail, Globe, ChevronLeft, ChevronRight, ArrowUpDown, Flame } from "lucide-react";
 import { useVetBookings } from "@/hooks/useVetBookings";
 import { format, addDays, subDays, isSameDay, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -11,6 +12,8 @@ import { fr } from "date-fns/locale";
 const VetAppointments = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [urgencyFilter, setUrgencyFilter] = useState<'all' | 'critical' | 'high' | 'medium' | 'low'>('all');
+  const [sortBy, setSortBy] = useState<'urgency' | 'date'>('urgency');
   const { bookings, isLoading, updateBookingStatus } = useVetBookings();
 
   const goToPreviousDay = () => {
@@ -60,7 +63,7 @@ const VetAppointments = () => {
     (booking) => booking.booking_source === "online" && booking?.is_blocked !== true
   );
 
-  // Filtrer par date de création (created_at) et recherche
+  // Filtrer par date de création (created_at), recherche et urgence
   const bookingsForSelectedDate = onlineBookings.filter((booking) => {
     if (!booking.created_at) return false;
     
@@ -72,28 +75,53 @@ const VetAppointments = () => {
         booking.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         booking.client_phone.includes(searchTerm);
       
-      return matchesDate && matchesSearch;
+      // Filtrer par niveau d'urgence
+      let matchesUrgency = true;
+      const urgencyScore = booking.urgency_score || 0;
+      
+      if (urgencyFilter === 'critical') {
+        matchesUrgency = urgencyScore >= 8;
+      } else if (urgencyFilter === 'high') {
+        matchesUrgency = urgencyScore >= 6 && urgencyScore < 8;
+      } else if (urgencyFilter === 'medium') {
+        matchesUrgency = urgencyScore >= 4 && urgencyScore < 6;
+      } else if (urgencyFilter === 'low') {
+        matchesUrgency = urgencyScore < 4;
+      }
+      
+      return matchesDate && matchesSearch && matchesUrgency;
     } catch (error) {
       return false;
     }
   });
 
-  // Séparer les réservations à confirmer et confirmées - Tri par date de création (plus anciennes en haut)
-  const pendingBookings = bookingsForSelectedDate
-    .filter((booking) => booking.status === 'pending')
-    .sort((a, b) => {
-      const dateA = new Date(a.created_at).getTime();
-      const dateB = new Date(b.created_at).getTime();
-      return dateA - dateB; // Plus anciennes en premier
+  // Fonction de tri
+  const sortBookings = (bookingsList: typeof bookingsForSelectedDate) => {
+    return [...bookingsList].sort((a, b) => {
+      if (sortBy === 'urgency') {
+        // Tri par urgence décroissante (plus urgent en premier)
+        const urgencyA = a.urgency_score || 0;
+        const urgencyB = b.urgency_score || 0;
+        if (urgencyB !== urgencyA) {
+          return urgencyB - urgencyA;
+        }
+        // Si même urgence, trier par date (plus ancien en premier)
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      } else {
+        // Tri par date de création (plus ancien en premier)
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      }
     });
+  };
 
-  const confirmedBookings = bookingsForSelectedDate
-    .filter((booking) => booking.status === 'confirmed')
-    .sort((a, b) => {
-      const dateA = new Date(a.created_at).getTime();
-      const dateB = new Date(b.created_at).getTime();
-      return dateA - dateB; // Plus anciennes en premier
-    });
+  // Séparer les réservations à confirmer et confirmées avec tri
+  const pendingBookings = sortBookings(
+    bookingsForSelectedDate.filter((booking) => booking.status === 'pending')
+  );
+
+  const confirmedBookings = sortBookings(
+    bookingsForSelectedDate.filter((booking) => booking.status === 'confirmed')
+  );
 
   const handleStatusChange = (bookingId: string, newStatus: 'pending' | 'confirmed' | 'cancelled' | 'completed') => {
     updateBookingStatus({ id: bookingId, status: newStatus });
@@ -357,9 +385,10 @@ const VetAppointments = () => {
         </CardContent>
       </Card>
 
-      {/* Barre de recherche */}
+      {/* Barre de recherche et filtres */}
       <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-        <CardContent className="p-4">
+        <CardContent className="p-4 space-y-4">
+          {/* Recherche */}
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-vet-brown" />
             <Input
@@ -368,6 +397,82 @@ const VetAppointments = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage"
             />
+          </div>
+
+          {/* Filtres par urgence et tri */}
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            {/* Filtres d'urgence */}
+            <div className="flex flex-wrap gap-2">
+              <span className="text-sm font-medium text-vet-brown flex items-center gap-1">
+                <Flame className="h-4 w-4" />
+                Niveau d'urgence:
+              </span>
+              <Button
+                size="sm"
+                variant={urgencyFilter === 'all' ? 'default' : 'outline'}
+                onClick={() => setUrgencyFilter('all')}
+                className={urgencyFilter === 'all' ? 'bg-vet-sage hover:bg-vet-sage/90' : ''}
+              >
+                Tous
+              </Button>
+              <Button
+                size="sm"
+                variant={urgencyFilter === 'critical' ? 'default' : 'outline'}
+                onClick={() => setUrgencyFilter('critical')}
+                className={urgencyFilter === 'critical' ? 'bg-red-500 hover:bg-red-600' : 'border-red-300 text-red-600 hover:bg-red-50'}
+              >
+                <AlertTriangle className="h-3 w-3 mr-1" />
+                Critique (≥8)
+              </Button>
+              <Button
+                size="sm"
+                variant={urgencyFilter === 'high' ? 'default' : 'outline'}
+                onClick={() => setUrgencyFilter('high')}
+                className={urgencyFilter === 'high' ? 'bg-orange-500 hover:bg-orange-600' : 'border-orange-300 text-orange-600 hover:bg-orange-50'}
+              >
+                Élevée (6-7)
+              </Button>
+              <Button
+                size="sm"
+                variant={urgencyFilter === 'medium' ? 'default' : 'outline'}
+                onClick={() => setUrgencyFilter('medium')}
+                className={urgencyFilter === 'medium' ? 'bg-yellow-500 hover:bg-yellow-600' : 'border-yellow-300 text-yellow-600 hover:bg-yellow-50'}
+              >
+                Moyenne (4-5)
+              </Button>
+              <Button
+                size="sm"
+                variant={urgencyFilter === 'low' ? 'default' : 'outline'}
+                onClick={() => setUrgencyFilter('low')}
+                className={urgencyFilter === 'low' ? 'bg-green-500 hover:bg-green-600' : 'border-green-300 text-green-600 hover:bg-green-50'}
+              >
+                Faible (&lt;4)
+              </Button>
+            </div>
+
+            {/* Sélecteur de tri */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-vet-brown flex items-center gap-1">
+                <ArrowUpDown className="h-4 w-4" />
+                Trier par:
+              </span>
+              <Button
+                size="sm"
+                variant={sortBy === 'urgency' ? 'default' : 'outline'}
+                onClick={() => setSortBy('urgency')}
+                className={sortBy === 'urgency' ? 'bg-vet-sage hover:bg-vet-sage/90' : ''}
+              >
+                Urgence
+              </Button>
+              <Button
+                size="sm"
+                variant={sortBy === 'date' ? 'default' : 'outline'}
+                onClick={() => setSortBy('date')}
+                className={sortBy === 'date' ? 'bg-vet-sage hover:bg-vet-sage/90' : ''}
+              >
+                Date
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
