@@ -163,15 +163,35 @@ const VetDashboard = () => {
         </div>
       </div>
 
+      {/* Sélecteur de vue */}
+      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
+        <CardContent className="p-4">
+          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'day' | 'month')} className="w-full">
+            <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsTrigger value="day" className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Vue journalière
+              </TabsTrigger>
+              <TabsTrigger value="month" className="flex items-center gap-2">
+                <CalendarDays className="h-4 w-4" />
+                Vue mensuelle ({format(now, 'MMMM yyyy', { locale: fr })})
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </CardContent>
+      </Card>
+
       {/* Statistiques principales */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-vet-brown">RDV Aujourd'hui</CardTitle>
+            <CardTitle className="text-sm font-medium text-vet-brown">
+              {viewMode === 'day' ? 'RDV Aujourd\'hui' : 'RDV du mois'}
+            </CardTitle>
             <Calendar className="h-4 w-4 text-vet-sage" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vet-navy">{stats.todayBookings}</div>
+            <div className="text-2xl font-bold text-vet-navy">{displayStats.todayBookings}</div>
             <p className="text-xs text-vet-brown">Rendez-vous programmés</p>
           </CardContent>
         </Card>
@@ -182,7 +202,7 @@ const VetDashboard = () => {
             <Clock className="h-4 w-4 text-amber-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vet-navy">{stats.pending}</div>
+            <div className="text-2xl font-bold text-vet-navy">{displayStats.pending}</div>
             <p className="text-xs text-vet-brown">À confirmer</p>
           </CardContent>
         </Card>
@@ -193,7 +213,7 @@ const VetDashboard = () => {
             <UserX className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vet-navy">{noShowBookings}</div>
+            <div className="text-2xl font-bold text-vet-navy">{displayStats.noShow}</div>
             <p className="text-xs text-vet-brown">Non présentés</p>
           </CardContent>
         </Card>
@@ -204,7 +224,7 @@ const VetDashboard = () => {
             <AlertTriangle className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vet-navy">{stats.highUrgency}</div>
+            <div className="text-2xl font-bold text-vet-navy">{displayStats.highUrgency}</div>
             <p className="text-xs text-vet-brown">Score ≥ 7/10</p>
           </CardContent>
         </Card>
@@ -215,7 +235,7 @@ const VetDashboard = () => {
             <TrendingUp className="h-4 w-4 text-vet-sage" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-vet-navy">{stats.total}</div>
+            <div className="text-2xl font-bold text-vet-navy">{displayStats.total}</div>
             <p className="text-xs text-vet-brown">Toutes réservations</p>
           </CardContent>
         </Card>
