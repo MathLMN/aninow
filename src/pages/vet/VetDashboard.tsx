@@ -18,11 +18,16 @@ const VetDashboard = () => {
   // Filtrer uniquement les vrais rendez-vous (exclure les blocs récurrents)
   const realBookings = bookings.filter(b => !b.is_blocked);
 
-  // Filtrer les rendez-vous d'aujourd'hui
-  const todayBookings = realBookings.filter(booking => {
-    const today = new Date().toISOString().split('T')[0];
+  // Filtrer les rendez-vous d'aujourd'hui pour l'affichage
+  const today = new Date().toISOString().split('T')[0];
+  const todayBookingsDisplay = realBookings.filter(booking => {
     return booking.appointment_date === today || booking.created_at.split('T')[0] === today;
   }).slice(0, 5);
+
+  // Filtrer TOUS les rendez-vous d'aujourd'hui pour les statistiques (sans limite)
+  const todayBookingsForStats = realBookings.filter(booking => {
+    return booking.appointment_date === today || booking.created_at.split('T')[0] === today;
+  });
 
   // Calculer les statistiques du mois en cours
   const now = new Date();
@@ -53,34 +58,49 @@ const VetDashboard = () => {
     emergencyBookings: monthBookings.filter(b => b.consultation_reason === 'urgence').length,
   };
 
-  // Calculer des statistiques avancées pour la vue du jour
-  const confirmedBookings = realBookings.filter(b => b.status === 'confirmed').length;
-  const cancelledBookings = realBookings.filter(b => b.status === 'cancelled').length;
-  const completedBookings = realBookings.filter(b => b.status === 'completed').length;
-  const noShowBookings = realBookings.filter(b => b.status === 'no-show').length;
+  // Statistiques journalières (basées sur les bookings du jour uniquement)
+  const dayStats = {
+    total: todayBookingsForStats.length,
+    confirmed: todayBookingsForStats.filter(b => b.status === 'confirmed').length,
+    pending: todayBookingsForStats.filter(b => b.status === 'pending').length,
+    cancelled: todayBookingsForStats.filter(b => b.status === 'cancelled').length,
+    completed: todayBookingsForStats.filter(b => b.status === 'completed').length,
+    noShow: todayBookingsForStats.filter(b => b.status === 'no-show').length,
+    highUrgency: todayBookingsForStats.filter(b => (b.urgency_score || 0) >= 7).length,
+    convenienceBookings: todayBookingsForStats.filter(b => b.consultation_reason === 'consultation-convenance').length,
+    symptomsBookings: todayBookingsForStats.filter(b => b.consultation_reason === 'symptomes-anomalie').length,
+    emergencyBookings: todayBookingsForStats.filter(b => b.consultation_reason === 'urgence').length,
+  };
+
+
+  // Calculer des statistiques avancées pour la vue du jour (basées sur les bookings du jour)
+  const confirmedBookings = dayStats.confirmed;
+  const cancelledBookings = dayStats.cancelled;
+  const completedBookings = dayStats.completed;
+  const noShowBookings = dayStats.noShow;
   
-  // Répartition par type de consultation pour la vue du jour
-  const convenienceBookings = realBookings.filter(b => b.consultation_reason === 'consultation-convenance').length;
-  const symptomsBookings = realBookings.filter(b => b.consultation_reason === 'symptomes-anomalie').length;
-  const emergencyBookings = realBookings.filter(b => b.consultation_reason === 'urgence').length;
+  // Répartition par type de consultation pour la vue du jour (basée sur les bookings du jour)
+  const convenienceBookings = dayStats.convenienceBookings;
+  const symptomsBookings = dayStats.symptomsBookings;
+  const emergencyBookings = dayStats.emergencyBookings;
   
-  // Taux de confirmation (bookings confirmés / total non-cancelled)
-  const confirmationRate = stats.total > 0 
-    ? Math.round((confirmedBookings / (stats.total - cancelledBookings)) * 100) 
+  // Taux de confirmation pour la vue du jour
+  const confirmationRate = dayStats.total > 0 
+    ? Math.round((dayStats.confirmed / (dayStats.total - dayStats.cancelled)) * 100) 
     : 0;
   
-  // Score d'urgence moyen
-  const avgUrgencyScore = realBookings.length > 0
-    ? Math.round(realBookings.reduce((sum, b) => sum + (b.urgency_score || 0), 0) / realBookings.length)
+  // Score d'urgence moyen pour le jour
+  const avgUrgencyScore = todayBookingsForStats.length > 0
+    ? Math.round(todayBookingsForStats.reduce((sum, b) => sum + (b.urgency_score || 0), 0) / todayBookingsForStats.length)
     : 0;
 
-  // Taux de présence et d'absentéisme
-  const totalAttendable = confirmedBookings + noShowBookings + completedBookings;
+  // Taux de présence et d'absentéisme pour le jour
+  const totalAttendable = dayStats.confirmed + dayStats.noShow + dayStats.completed;
   const presenceRate = totalAttendable > 0
-    ? Math.round(((confirmedBookings + completedBookings) / totalAttendable) * 100)
+    ? Math.round(((dayStats.confirmed + dayStats.completed) / totalAttendable) * 100)
     : 0;
   const absenteeismRate = totalAttendable > 0
-    ? Math.round((noShowBookings / totalAttendable) * 100)
+    ? Math.round((dayStats.noShow / totalAttendable) * 100)
     : 0;
 
   // Statistiques mensuelles calculées
@@ -102,16 +122,16 @@ const VetDashboard = () => {
 
   // Sélectionner les stats à afficher selon le mode
   const displayStats = viewMode === 'day' ? {
-    todayBookings: stats.todayBookings,
-    pending: stats.pending,
-    highUrgency: stats.highUrgency,
-    total: stats.total,
-    noShow: noShowBookings,
-    confirmed: confirmedBookings,
-    cancelled: cancelledBookings,
-    convenience: convenienceBookings,
-    symptoms: symptomsBookings,
-    emergency: emergencyBookings,
+    todayBookings: dayStats.total,
+    pending: dayStats.pending,
+    highUrgency: dayStats.highUrgency,
+    total: dayStats.total,
+    noShow: dayStats.noShow,
+    confirmed: dayStats.confirmed,
+    cancelled: dayStats.cancelled,
+    convenience: dayStats.convenienceBookings,
+    symptoms: dayStats.symptomsBookings,
+    emergency: dayStats.emergencyBookings,
     confirmationRate,
     avgUrgencyScore,
     presenceRate,
@@ -392,8 +412,8 @@ const VetDashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {todayBookings.length > 0 ? (
-              todayBookings.map((booking) => (
+            {todayBookingsDisplay.length > 0 ? (
+              todayBookingsDisplay.map((booking) => (
                 <div key={booking.id} className="flex items-center justify-between p-3 bg-vet-beige/30 rounded-lg hover:bg-vet-beige/50 transition-colors">
                   <div className="flex items-center space-x-3">
                     <div className={`rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold ${
