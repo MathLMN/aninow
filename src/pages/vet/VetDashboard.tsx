@@ -1,13 +1,19 @@
 
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Users, Clock, TrendingUp, AlertTriangle, CheckCircle, XCircle, Activity, UserX } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar, Users, Clock, TrendingUp, AlertTriangle, CheckCircle, XCircle, Activity, UserX, CalendarDays } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useVetBookings } from "@/hooks/useVetBookings";
 import { PendingBookingsNotification } from "@/components/planning/PendingBookingsNotification";
+import { startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
+import { fr } from "date-fns/locale";
+import { format } from "date-fns";
 
 const VetDashboard = () => {
   const { bookings, isLoading, stats } = useVetBookings();
+  const [viewMode, setViewMode] = useState<'day' | 'month'>('day');
 
   // Filtrer uniquement les vrais rendez-vous (exclure les blocs récurrents)
   const realBookings = bookings.filter(b => !b.is_blocked);
@@ -18,13 +24,42 @@ const VetDashboard = () => {
     return booking.appointment_date === today || booking.created_at.split('T')[0] === today;
   }).slice(0, 5);
 
-  // Calculer des statistiques avancées
+  // Calculer les statistiques du mois en cours
+  const now = new Date();
+  const monthStart = startOfMonth(now);
+  const monthEnd = endOfMonth(now);
+  
+  const monthBookings = realBookings.filter(booking => {
+    if (!booking.created_at) return false;
+    try {
+      const bookingDate = parseISO(booking.created_at);
+      return isWithinInterval(bookingDate, { start: monthStart, end: monthEnd });
+    } catch {
+      return false;
+    }
+  });
+
+  // Statistiques mensuelles
+  const monthStats = {
+    total: monthBookings.length,
+    confirmed: monthBookings.filter(b => b.status === 'confirmed').length,
+    pending: monthBookings.filter(b => b.status === 'pending').length,
+    cancelled: monthBookings.filter(b => b.status === 'cancelled').length,
+    completed: monthBookings.filter(b => b.status === 'completed').length,
+    noShow: monthBookings.filter(b => b.status === 'no-show').length,
+    highUrgency: monthBookings.filter(b => (b.urgency_score || 0) >= 7).length,
+    convenienceBookings: monthBookings.filter(b => b.consultation_reason === 'consultation-convenance').length,
+    symptomsBookings: monthBookings.filter(b => b.consultation_reason === 'symptomes-anomalie').length,
+    emergencyBookings: monthBookings.filter(b => b.consultation_reason === 'urgence').length,
+  };
+
+  // Calculer des statistiques avancées pour la vue du jour
   const confirmedBookings = realBookings.filter(b => b.status === 'confirmed').length;
   const cancelledBookings = realBookings.filter(b => b.status === 'cancelled').length;
   const completedBookings = realBookings.filter(b => b.status === 'completed').length;
   const noShowBookings = realBookings.filter(b => b.status === 'no-show').length;
   
-  // Répartition par type de consultation
+  // Répartition par type de consultation pour la vue du jour
   const convenienceBookings = realBookings.filter(b => b.consultation_reason === 'consultation-convenance').length;
   const symptomsBookings = realBookings.filter(b => b.consultation_reason === 'symptomes-anomalie').length;
   const emergencyBookings = realBookings.filter(b => b.consultation_reason === 'urgence').length;
@@ -47,6 +82,56 @@ const VetDashboard = () => {
   const absenteeismRate = totalAttendable > 0
     ? Math.round((noShowBookings / totalAttendable) * 100)
     : 0;
+
+  // Statistiques mensuelles calculées
+  const monthConfirmationRate = monthStats.total > 0 
+    ? Math.round((monthStats.confirmed / (monthStats.total - monthStats.cancelled)) * 100) 
+    : 0;
+  
+  const monthAvgUrgencyScore = monthBookings.length > 0
+    ? Math.round(monthBookings.reduce((sum, b) => sum + (b.urgency_score || 0), 0) / monthBookings.length)
+    : 0;
+
+  const monthTotalAttendable = monthStats.confirmed + monthStats.noShow + monthStats.completed;
+  const monthPresenceRate = monthTotalAttendable > 0
+    ? Math.round(((monthStats.confirmed + monthStats.completed) / monthTotalAttendable) * 100)
+    : 0;
+  const monthAbsenteeismRate = monthTotalAttendable > 0
+    ? Math.round((monthStats.noShow / monthTotalAttendable) * 100)
+    : 0;
+
+  // Sélectionner les stats à afficher selon le mode
+  const displayStats = viewMode === 'day' ? {
+    todayBookings: stats.todayBookings,
+    pending: stats.pending,
+    highUrgency: stats.highUrgency,
+    total: stats.total,
+    noShow: noShowBookings,
+    confirmed: confirmedBookings,
+    cancelled: cancelledBookings,
+    convenience: convenienceBookings,
+    symptoms: symptomsBookings,
+    emergency: emergencyBookings,
+    confirmationRate,
+    avgUrgencyScore,
+    presenceRate,
+    absenteeismRate
+  } : {
+    todayBookings: monthStats.total,
+    pending: monthStats.pending,
+    highUrgency: monthStats.highUrgency,
+    total: monthStats.total,
+    noShow: monthStats.noShow,
+    confirmed: monthStats.confirmed,
+    cancelled: monthStats.cancelled,
+    convenience: monthStats.convenienceBookings,
+    symptoms: monthStats.symptomsBookings,
+    emergency: monthStats.emergencyBookings,
+    confirmationRate: monthConfirmationRate,
+    avgUrgencyScore: monthAvgUrgencyScore,
+    presenceRate: monthPresenceRate,
+    absenteeismRate: monthAbsenteeismRate
+  };
 
   if (isLoading) {
     return (
@@ -158,28 +243,28 @@ const VetDashboard = () => {
                     <CheckCircle className="h-4 w-4 text-green-600" />
                     <span className="text-sm text-vet-brown">Confirmés</span>
                   </div>
-                  <span className="font-semibold text-vet-navy">{confirmedBookings}</span>
+                  <span className="font-semibold text-vet-navy">{displayStats.confirmed}</span>
                 </div>
                 <div className="flex items-center justify-between p-2 bg-vet-beige/30 rounded">
                   <div className="flex items-center space-x-2">
                     <Clock className="h-4 w-4 text-amber-600" />
                     <span className="text-sm text-vet-brown">En attente</span>
                   </div>
-                  <span className="font-semibold text-vet-navy">{stats.pending}</span>
+                  <span className="font-semibold text-vet-navy">{displayStats.pending}</span>
                 </div>
                 <div className="flex items-center justify-between p-2 bg-vet-beige/30 rounded">
                   <div className="flex items-center space-x-2">
                     <UserX className="h-4 w-4 text-orange-600" />
                     <span className="text-sm text-vet-brown">Non présentés</span>
                   </div>
-                  <span className="font-semibold text-vet-navy">{noShowBookings}</span>
+                  <span className="font-semibold text-vet-navy">{displayStats.noShow}</span>
                 </div>
                 <div className="flex items-center justify-between p-2 bg-vet-beige/30 rounded">
                   <div className="flex items-center space-x-2">
                     <XCircle className="h-4 w-4 text-red-600" />
                     <span className="text-sm text-vet-brown">Annulés</span>
                   </div>
-                  <span className="font-semibold text-vet-navy">{cancelledBookings}</span>
+                  <span className="font-semibold text-vet-navy">{displayStats.cancelled}</span>
                 </div>
               </div>
             </div>
@@ -194,10 +279,10 @@ const VetDashboard = () => {
                     <div className="w-24 bg-gray-200 rounded-full h-2">
                       <div 
                         className="bg-vet-sage h-2 rounded-full" 
-                        style={{ width: `${stats.total > 0 ? (convenienceBookings / stats.total) * 100 : 0}%` }}
+                        style={{ width: `${displayStats.total > 0 ? (displayStats.convenience / displayStats.total) * 100 : 0}%` }}
                       ></div>
                     </div>
-                    <span className="font-semibold text-vet-navy w-8 text-right">{convenienceBookings}</span>
+                    <span className="font-semibold text-vet-navy w-8 text-right">{displayStats.convenience}</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between p-2 bg-vet-beige/30 rounded">
@@ -206,10 +291,10 @@ const VetDashboard = () => {
                     <div className="w-24 bg-gray-200 rounded-full h-2">
                       <div 
                         className="bg-amber-500 h-2 rounded-full" 
-                        style={{ width: `${stats.total > 0 ? (symptomsBookings / stats.total) * 100 : 0}%` }}
+                        style={{ width: `${displayStats.total > 0 ? (displayStats.symptoms / displayStats.total) * 100 : 0}%` }}
                       ></div>
                     </div>
-                    <span className="font-semibold text-vet-navy w-8 text-right">{symptomsBookings}</span>
+                    <span className="font-semibold text-vet-navy w-8 text-right">{displayStats.symptoms}</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between p-2 bg-vet-beige/30 rounded">
@@ -218,10 +303,10 @@ const VetDashboard = () => {
                     <div className="w-24 bg-gray-200 rounded-full h-2">
                       <div 
                         className="bg-red-500 h-2 rounded-full" 
-                        style={{ width: `${stats.total > 0 ? (emergencyBookings / stats.total) * 100 : 0}%` }}
+                        style={{ width: `${displayStats.total > 0 ? (displayStats.emergency / displayStats.total) * 100 : 0}%` }}
                       ></div>
                     </div>
-                    <span className="font-semibold text-vet-navy w-8 text-right">{emergencyBookings}</span>
+                    <span className="font-semibold text-vet-navy w-8 text-right">{displayStats.emergency}</span>
                   </div>
                 </div>
               </div>
@@ -233,39 +318,39 @@ const VetDashboard = () => {
               <div className="space-y-2">
                 <div className="p-3 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
                   <div className="text-xs text-green-700 font-medium">Taux de confirmation</div>
-                  <div className="text-2xl font-bold text-green-800 mt-1">{confirmationRate}%</div>
+                  <div className="text-2xl font-bold text-green-800 mt-1">{displayStats.confirmationRate}%</div>
                   <div className="text-xs text-green-600 mt-1">
-                    {confirmedBookings} / {stats.total - cancelledBookings} RDV
+                    {displayStats.confirmed} / {displayStats.total - displayStats.cancelled} RDV
                   </div>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
                   <div className="text-xs text-blue-700 font-medium">Urgence moyenne</div>
-                  <div className="text-2xl font-bold text-blue-800 mt-1">{avgUrgencyScore}/10</div>
+                  <div className="text-2xl font-bold text-blue-800 mt-1">{displayStats.avgUrgencyScore}/10</div>
                   <div className="text-xs text-blue-600 mt-1">
-                    Score moyen sur {bookings.length} RDV
+                    Score moyen sur {viewMode === 'day' ? bookings.length : monthBookings.length} RDV
                   </div>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
                   <div className="text-xs text-purple-700 font-medium">Urgences élevées</div>
                   <div className="text-2xl font-bold text-purple-800 mt-1">
-                    {stats.total > 0 ? Math.round((stats.highUrgency / stats.total) * 100) : 0}%
+                    {displayStats.total > 0 ? Math.round((displayStats.highUrgency / displayStats.total) * 100) : 0}%
                   </div>
                   <div className="text-xs text-purple-600 mt-1">
-                    {stats.highUrgency} RDV avec score ≥ 7
+                    {displayStats.highUrgency} RDV avec score ≥ 7
                   </div>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
                   <div className="text-xs text-emerald-700 font-medium">Taux de présence</div>
-                  <div className="text-2xl font-bold text-emerald-800 mt-1">{presenceRate}%</div>
+                  <div className="text-2xl font-bold text-emerald-800 mt-1">{displayStats.presenceRate}%</div>
                   <div className="text-xs text-emerald-600 mt-1">
-                    {confirmedBookings + completedBookings} présents / {totalAttendable} RDV
+                    {displayStats.confirmed + (viewMode === 'month' ? monthStats.completed : completedBookings)} présents / {viewMode === 'month' ? monthTotalAttendable : totalAttendable} RDV
                   </div>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200">
                   <div className="text-xs text-orange-700 font-medium">Taux d'absentéisme</div>
-                  <div className="text-2xl font-bold text-orange-800 mt-1">{absenteeismRate}%</div>
+                  <div className="text-2xl font-bold text-orange-800 mt-1">{displayStats.absenteeismRate}%</div>
                   <div className="text-xs text-orange-600 mt-1">
-                    {noShowBookings} absents / {totalAttendable} RDV
+                    {displayStats.noShow} absents / {viewMode === 'month' ? monthTotalAttendable : totalAttendable} RDV
                   </div>
                 </div>
               </div>
