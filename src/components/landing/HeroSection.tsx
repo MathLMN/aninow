@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Calendar, Smartphone, FileText, AlertTriangle, MessageSquare } from "lucide-react";
+import { ArrowRight, Calendar, Smartphone, ClipboardList, Zap, Lightbulb } from "lucide-react";
 import { Link } from "react-router-dom";
 import ClinicAppointmentButton from "./ClinicAppointmentButton";
 
@@ -25,21 +25,21 @@ const HeroSection = () => {
             <div className="mt-6 sm:mt-8 text-base sm:text-lg text-[#1b1b3a] max-w-3xl text-left space-y-3">
               <div className="flex items-start gap-4">
                 <div className="p-2 bg-[#4D9380]/10 rounded-full">
-                  <FileText className="w-5 h-5 text-[#4D9380]" />
+                  <ClipboardList className="w-5 h-5 text-[#4D9380]" />
                 </div>
                 <span>Détaillez l'état et les symptômes de votre compagnon</span>
               </div>
               
               <div className="flex items-start gap-4">
                 <div className="p-2 bg-[#4D9380]/10 rounded-full">
-                  <AlertTriangle className="w-5 h-5 text-[#4D9380]" />
+                  <Zap className="w-5 h-5 text-[#4D9380]" />
                 </div>
                 <span>L'équipe priorise selon l'urgence de chaque situation</span>
               </div>
               
               <div className="flex items-start gap-4">
                 <div className="p-2 bg-[#4D9380]/10 rounded-full">
-                  <MessageSquare className="w-5 h-5 text-[#4D9380]" />
+                  <Lightbulb className="w-5 h-5 text-[#4D9380]" />
                 </div>
                 <span>Recevez des conseils adaptés en attendant votre rendez-vous</span>
               </div>
