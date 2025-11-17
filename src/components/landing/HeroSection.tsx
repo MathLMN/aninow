@@ -22,7 +22,7 @@ const HeroSection = () => {
               Décrivez les symptômes de votre animal en ligne et bénéficiez d'une prise en charge adaptée par votre équipe vétérinaire, disponible 24h/24.
             </p>
             
-            <div className="mt-6 sm:mt-8 text-base sm:text-lg text-gray-600 max-w-3xl text-left space-y-3">
+            <div className="mt-6 sm:mt-8 text-base sm:text-lg text-[#1b1b3a] max-w-3xl text-left space-y-3">
               <div className="flex items-start gap-4">
                 <div className="p-2 bg-[#4D9380]/10 rounded-full">
                   <FileText className="w-5 h-5 text-[#4D9380]" />
