@@ -38,44 +38,50 @@ const BenefitsSection = () => {
   ];
 
   return (
-    <section className="bg-white/80 py-8 sm:py-16">
+    <section className="py-8 sm:py-16 bg-gradient-to-br from-background via-background to-vet-sage/5 relative overflow-hidden">
       <div className="container mx-auto px-3 sm:px-6">
-        <div className="text-center mb-8 sm:mb-12">
-          <h2 className="text-xl sm:text-3xl font-bold text-vet-navy mb-3 sm:mb-4">
-            Pourquoi choisir notre système ?
-          </h2>
-          <p className="text-vet-brown text-sm sm:text-lg max-w-2xl mx-auto">
-            Découvrez tous les avantages de la prise de rendez-vous en ligne
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto items-center">
-          {/* Grille des bénéfices */}
-          <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            {benefits.map((benefit, index) => (
-              <Card key={index} className="bg-white/90 hover:shadow-lg transition-shadow duration-200 border-vet-blue/20">
-                <CardContent className="p-4 sm:p-6 text-center">
-                  <div className="bg-vet-sage/10 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                    <benefit.icon className="h-6 w-6 sm:h-8 sm:w-8 text-vet-sage" />
-                  </div>
-                  <h3 className="font-semibold text-vet-navy mb-2 text-sm sm:text-base">
-                    {benefit.title}
-                  </h3>
-                  <p className="text-vet-brown text-xs sm:text-sm leading-relaxed">
-                    {benefit.description}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-xl sm:text-3xl font-bold text-foreground mb-3 sm:mb-4">
+              Pourquoi choisir notre système ?
+            </h2>
+            <p className="text-sm sm:text-lg text-muted-foreground">
+              Un accompagnement complet pour le bien-être de votre compagnon
+            </p>
           </div>
           
-          {/* Image du chat */}
-          <div className="hidden lg:flex justify-center items-center">
-            <img 
-              src={catPortrait} 
-              alt="Chat tigré heureux" 
-              className="w-full max-w-sm h-auto object-contain"
-            />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+            {/* Benefits grid */}
+            <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              {benefits.map((benefit, index) => (
+                <Card key={index} className="p-4 sm:p-6 hover:shadow-lg transition-all duration-300 border-vet-sage/20 hover:border-vet-sage/40 bg-card/80 backdrop-blur-sm">
+                  <div className="flex flex-col items-start space-y-3 sm:space-y-4">
+                    <div className="p-2 sm:p-3 rounded-xl bg-vet-sage/10">
+                      <benefit.icon className="h-5 w-5 sm:h-6 sm:w-6 text-vet-sage" />
+                    </div>
+                    <h3 className="text-base sm:text-lg font-semibold text-foreground">
+                      {benefit.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                      {benefit.description}
+                    </p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+            
+            {/* Cat image with decorative frame */}
+            <div className="hidden lg:block relative">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
+                <div className="absolute inset-0 bg-gradient-to-br from-vet-sage/10 to-transparent z-10"></div>
+                <img 
+                  src={catPortrait} 
+                  alt="Portrait de chat attentif" 
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+              <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-vet-beige/20 rounded-full blur-3xl -z-10"></div>
+            </div>
           </div>
         </div>
       </div>
