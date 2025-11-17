@@ -22,32 +22,26 @@ const HeroSection = () => {
               Décrivez les symptômes de votre animal en ligne et bénéficiez d'une prise en charge adaptée par votre équipe vétérinaire, disponible 24h/24.
             </p>
             
-            <div className="mt-6 sm:mt-8 max-w-3xl space-y-4">
-              <div className="group bg-white rounded-xl p-4 border-2 border-vet-blue/10 hover:border-vet-blue/30 hover:shadow-lg transition-all duration-300">
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-vet-blue to-vet-sage rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-                    <FileText className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="text-vet-navy font-medium pt-3">Détaillez l'état et les symptômes de votre compagnon</span>
+            <div className="mt-6 sm:mt-8 text-base sm:text-lg text-gray-600 max-w-3xl text-left space-y-3">
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-[#4D9380]/10 rounded-full">
+                  <FileText className="w-5 h-5 text-[#4D9380]" />
                 </div>
+                <span>Détaillez l'état et les symptômes de votre compagnon</span>
               </div>
               
-              <div className="group bg-white rounded-xl p-4 border-2 border-vet-blue/10 hover:border-vet-blue/30 hover:shadow-lg transition-all duration-300">
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-vet-blue to-vet-sage rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-                    <AlertTriangle className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="text-vet-navy font-medium pt-3">L'équipe priorise selon l'urgence de chaque situation</span>
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-[#4D9380]/10 rounded-full">
+                  <AlertTriangle className="w-5 h-5 text-[#4D9380]" />
                 </div>
+                <span>L'équipe priorise selon l'urgence de chaque situation</span>
               </div>
               
-              <div className="group bg-white rounded-xl p-4 border-2 border-vet-blue/10 hover:border-vet-blue/30 hover:shadow-lg transition-all duration-300">
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-vet-blue to-vet-sage rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-                    <MessageSquare className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="text-vet-navy font-medium pt-3">Recevez des conseils adaptés en attendant votre rendez-vous</span>
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-[#4D9380]/10 rounded-full">
+                  <MessageSquare className="w-5 h-5 text-[#4D9380]" />
                 </div>
+                <span>Recevez des conseils adaptés en attendant votre rendez-vous</span>
               </div>
             </div>
 
