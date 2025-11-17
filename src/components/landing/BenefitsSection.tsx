@@ -1,68 +1,73 @@
-
-import { Card, CardContent } from "@/components/ui/card";
-import { Clock, Calendar, Heart, CheckCircle, Users, Shield, AlertTriangle } from "lucide-react";
+import { Clock, Heart, AlertTriangle, Users, CheckCircle, Calendar } from "lucide-react";
 
 const BenefitsSection = () => {
   const benefits = [
     {
       icon: Heart,
-      title: "Détaillez les symptômes de votre animal", 
-      description: "Décrivez précisément l'état et les symptômes de votre compagnon directement en ligne"
+      title: "Décrivez les symptômes",
+      bgColor: "bg-vet-blue/20",
+      iconBg: "bg-vet-blue",
+      iconColor: "text-white"
     },
     {
       icon: AlertTriangle,
-      title: "Une équipe qui priorise selon l'urgence",
-      description: "L'équipe vétérinaire prend connaissance des symptômes et adapte la prise en charge"
+      title: "Priorité selon l'urgence",
+      bgColor: "bg-vet-sage/20",
+      iconBg: "bg-vet-sage",
+      iconColor: "text-white"
     },
     {
       icon: Users,
-      title: "L'expertise des auxiliaires vétérinaires",
-      description: "Bénéficiez de la même qualité de service qu'un appel téléphonique, disponible à tout moment"
+      title: "Expertise vétérinaire",
+      bgColor: "bg-vet-blue/20",
+      iconBg: "bg-vet-blue",
+      iconColor: "text-white"
     },
     {
       icon: CheckCircle,
-      title: "Des conseils en attendant votre rendez-vous",
-      description: "Recevez des recommandations adaptées à la situation de votre animal"
+      title: "Conseils personnalisés",
+      bgColor: "bg-vet-sage/20",
+      iconBg: "bg-vet-sage",
+      iconColor: "text-white"
     },
     {
       icon: Clock,
-      title: "Disponible 24h/24, 7j/7",
-      description: "Prenez rendez-vous quand vous le souhaitez, sans attendre l'ouverture de la clinique"
+      title: "Disponible 24/7",
+      bgColor: "bg-vet-blue/20",
+      iconBg: "bg-vet-blue",
+      iconColor: "text-white"
     },
     {
       icon: Calendar,
-      title: "Une meilleure organisation pour votre clinique",
-      description: "Aidez votre établissement vétérinaire à mieux gérer les rendez-vous et les urgences"
+      title: "Meilleure organisation",
+      bgColor: "bg-vet-sage/20",
+      iconBg: "bg-vet-sage",
+      iconColor: "text-white"
     }
   ];
 
   return (
-    <section className="bg-white/80 py-8 sm:py-16">
-      <div className="container mx-auto px-3 sm:px-6">
-        <div className="text-center mb-8 sm:mb-12">
-          <h2 className="text-xl sm:text-3xl font-bold text-vet-navy mb-3 sm:mb-4">
-            Pourquoi choisir notre système ?
+    <section className="bg-gradient-to-b from-white to-vet-blue/10 py-12 sm:py-20">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="text-center mb-10 sm:mb-16">
+          <h2 className="text-2xl sm:text-4xl font-bold text-vet-navy mb-3 sm:mb-4">
+            Pourquoi réserver en ligne ?
           </h2>
-          <p className="text-vet-brown text-sm sm:text-lg max-w-2xl mx-auto">
-            Découvrez tous les avantages de la prise de rendez-vous en ligne
-          </p>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 max-w-5xl mx-auto">
           {benefits.map((benefit, index) => (
-            <Card key={index} className="bg-white/90 hover:shadow-lg transition-shadow duration-200 border-vet-blue/20">
-              <CardContent className="p-4 sm:p-6 text-center">
-                <div className="bg-vet-sage/10 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                  <benefit.icon className="h-6 w-6 sm:h-8 sm:w-8 text-vet-sage" />
-                </div>
-                <h3 className="font-semibold text-vet-navy mb-2 text-sm sm:text-base">
-                  {benefit.title}
-                </h3>
-                <p className="text-vet-brown text-xs sm:text-sm leading-relaxed">
-                  {benefit.description}
-                </p>
-              </CardContent>
-            </Card>
+            <div 
+              key={index} 
+              className={`${benefit.bgColor} rounded-2xl p-4 sm:p-8 text-center hover:scale-105 transition-transform duration-300 border-2 border-transparent hover:border-vet-blue/30`}
+            >
+              <div className={`${benefit.iconBg} w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-5 shadow-lg`}>
+                <benefit.icon className={`h-8 w-8 sm:h-10 sm:w-10 ${benefit.iconColor}`} />
+              </div>
+              <h3 className="font-bold text-vet-navy text-sm sm:text-lg leading-tight">
+                {benefit.title}
+              </h3>
+            </div>
           ))}
         </div>
       </div>
