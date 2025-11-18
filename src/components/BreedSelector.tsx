@@ -101,22 +101,21 @@ const BreedSelector: React.FC<BreedSelectorProps> = ({
         )
       ) : (
         // Affichage normal pour les espèces connues (chat, chien)
-        !isNoBreed && (
-          <div className="relative">
-            <BreedSearchInput
-              searchTerm={searchTerm}
-              onSearchChange={handleSearchChange}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
-            />
+        <div className="relative">
+          <BreedSearchInput
+            searchTerm={searchTerm}
+            onSearchChange={handleSearchChange}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+            disabled={isNoBreed}
+          />
             
-            <BreedDropdown
-              breeds={breedsWithOther}
-              isVisible={isInputFocused}
-              onBreedClick={handleBreedClick}
-            />
-          </div>
-        )
+          <BreedDropdown
+            breeds={breedsWithOther}
+            isVisible={isInputFocused && !isNoBreed}
+            onBreedClick={handleBreedClick}
+          />
+        </div>
       )}
 
       {!isOtherSpecies && (
