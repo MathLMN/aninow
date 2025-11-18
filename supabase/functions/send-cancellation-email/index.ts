@@ -17,6 +17,7 @@ interface CancellationEmailRequest {
   animal_name: string;
   appointment_date: string;
   appointment_time: string;
+  clinic_id: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -33,41 +34,32 @@ const handler = async (req: Request): Promise<Response> => {
       animal_name,
       appointment_date,
       appointment_time,
+      clinic_id,
     }: CancellationEmailRequest = await req.json();
 
     console.log(`Sending cancellation email for booking ${booking_id} to ${client_email}`);
 
-    // Get additional booking details from database
+    // Get clinic settings using clinic_id
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Fetch booking with clinic and veterinarian
-    const { data: booking, error: bookingError } = await supabase
-      .from("bookings")
-      .select(`
-        *,
-        clinic:clinics (name, slug),
-        veterinarian:clinic_veterinarians (name)
-      `)
-      .eq("id", booking_id)
+    // Fetch clinic and settings
+    const { data: clinic, error: clinicError } = await supabase
+      .from("clinics")
+      .select("*")
+      .eq("id", clinic_id)
       .maybeSingle();
 
-    if (bookingError) {
-      console.error("Error fetching booking details:", bookingError);
-      throw new Error(`Database error: ${bookingError.message}`);
+    if (clinicError) {
+      console.error("Error fetching clinic:", clinicError);
     }
 
-    if (!booking) {
-      console.error("Booking not found for ID:", booking_id);
-      throw new Error("Booking not found");
-    }
-
-    // Fetch clinic settings separately using the clinic_id from booking
+    // Fetch clinic settings
     const { data: clinicSettings, error: settingsError } = await supabase
       .from("clinic_settings")
       .select("*")
-      .eq("clinic_id", booking.clinic_id)
+      .eq("clinic_id", clinic_id)
       .maybeSingle();
 
     if (settingsError) {
@@ -84,12 +76,11 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     // Get clinic information
-    const clinicName = clinicSettings?.clinic_name || booking.clinic?.name || "Clinique Vétérinaire";
+    const clinicName = clinicSettings?.clinic_name || clinic?.name || "Clinique Vétérinaire";
     const clinicAddress = clinicSettings?.clinic_address_street
       ? `${clinicSettings.clinic_address_street}, ${clinicSettings.clinic_address_postal_code} ${clinicSettings.clinic_address_city}`
       : "";
     const clinicPhone = clinicSettings?.clinic_phone || "";
-    const vetName = booking.veterinarian?.name || "votre vétérinaire";
 
     // Build email HTML
     const emailHtml = `
@@ -184,10 +175,6 @@ const handler = async (req: Request): Promise<Response> => {
               <div class="info-row">
                 <div class="info-label">Heure :</div>
                 <div class="info-value">${appointment_time}</div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">Vétérinaire :</div>
-                <div class="info-value">Dr ${vetName}</div>
               </div>
               <div class="info-row">
                 <div class="info-label">Clinique :</div>
