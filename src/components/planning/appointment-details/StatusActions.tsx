@@ -4,17 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { UserX } from "lucide-react";
+import { UserX, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface StatusActionsProps {
   appointment: any;
   onUpdateStatus: (appointmentId: string, status: string, notes?: string) => Promise<boolean>;
+  onDeleteBooking: (bookingId: string) => Promise<boolean>;
   onClose: () => void;
 }
 
-export const StatusActions = ({ appointment, onUpdateStatus, onClose }: StatusActionsProps) => {
+export const StatusActions = ({ appointment, onUpdateStatus, onDeleteBooking, onClose }: StatusActionsProps) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [notes, setNotes] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { toast } = useToast();
 
   const handleStatusUpdate = async (newStatus: string) => {
@@ -68,7 +71,35 @@ export const StatusActions = ({ appointment, onUpdateStatus, onClose }: StatusAc
            (appointment.status === 'confirmed' || appointment.status === 'pending');
   };
 
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setIsUpdating(true);
+    try {
+      const success = await onDeleteBooking(appointment.id);
+      if (success) {
+        onClose();
+      }
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la suppression",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUpdating(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
+  };
+
   return (
+    <>
     <div className="space-y-4">
       <div className="space-y-3">
         <Label htmlFor="notes">Notes (optionnel)</Label>
@@ -95,11 +126,12 @@ export const StatusActions = ({ appointment, onUpdateStatus, onClose }: StatusAc
           )}
           {appointment.status !== 'cancelled' && appointment.status !== 'completed' && (
             <Button
-              onClick={() => handleStatusUpdate('cancelled')}
+              onClick={handleDeleteClick}
               disabled={isUpdating}
               variant="destructive"
             >
-              Annuler
+              <Trash2 className="h-4 w-4 mr-2" />
+              Annuler le RDV
             </Button>
           )}
           {canMarkNoShow() && (
@@ -129,6 +161,31 @@ export const StatusActions = ({ appointment, onUpdateStatus, onClose }: StatusAc
           Fermer
         </Button>
       </div>
+
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer définitivement ce rendez-vous ? 
+              Cette action est irréversible et le rendez-vous sera supprimé du planning.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelDelete} disabled={isUpdating}>
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmDelete}
+              disabled={isUpdating}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Supprimer définitivement
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
+    </>
   );
 };
