@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,11 +10,20 @@ import { Link, useNavigate } from "react-router-dom";
 import { useVetAuth } from "@/hooks/useVetAuth";
 import { useFirstLoginStatus } from "@/hooks/useFirstLoginStatus";
 import { useEffect } from "react";
-
 const VetLogin = () => {
   const navigate = useNavigate();
-  const { signIn, isLoading, isAuthenticated, adminProfile, clinicAccess, user } = useVetAuth();
-  const { needsFirstLogin, isLoading: firstLoginLoading } = useFirstLoginStatus();
+  const {
+    signIn,
+    isLoading,
+    isAuthenticated,
+    adminProfile,
+    clinicAccess,
+    user
+  } = useVetAuth();
+  const {
+    needsFirstLogin,
+    isLoading: firstLoginLoading
+  } = useFirstLoginStatus();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -27,7 +35,6 @@ const VetLogin = () => {
   // Redirect logic
   useEffect(() => {
     const totalLoading = isLoading || firstLoginLoading;
-    
     console.log('🔄 VetLogin useEffect - checking auth status:', {
       isAuthenticated,
       adminProfile: !!adminProfile,
@@ -37,17 +44,14 @@ const VetLogin = () => {
       firstLoginLoading,
       needsFirstLogin
     });
-
     if (totalLoading) {
       console.log('⏳ Still loading, waiting...');
       return;
     }
-
     if (!isAuthenticated) {
       console.log('❌ Not authenticated, staying on login page');
       return;
     }
-
     if (needsFirstLogin) {
       console.log('🔐 User needs first login, redirecting to first-login');
       navigate('/vet/first-login');
@@ -56,7 +60,6 @@ const VetLogin = () => {
 
     // User is authenticated and doesn't need first login
     console.log('🚀 User is authenticated, determining redirection...');
-    
     if (adminProfile) {
       console.log('👨‍💼 Admin user detected, redirecting to settings');
       navigate('/vet/settings');
@@ -67,17 +70,17 @@ const VetLogin = () => {
       console.log('⚠️ Authenticated but no valid profile found - staying on login');
     }
   }, [isAuthenticated, adminProfile, clinicAccess, user, navigate, isLoading, firstLoginLoading, needsFirstLogin]);
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError(""); // Réinitialiser l'erreur
     setIsSubmitting(true); // Démarrer le chargement
-    
+
     console.log('🔄 Starting login process for:', email);
-    const { error } = await signIn(email, password);
-    
+    const {
+      error
+    } = await signIn(email, password);
     setIsSubmitting(false); // Arrêter le chargement
-    
+
     if (!error) {
       console.log('✅ Login successful, redirection will be handled by useEffect');
     } else {
@@ -87,16 +90,13 @@ const VetLogin = () => {
       setPassword(""); // Vider le champ mot de passe
     }
   };
-
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
     // This would be implemented when we add the reset functionality
     console.log('Password reset requested for:', resetEmail);
   };
-
   if (showResetForm) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20 flex items-center justify-center p-4">
+    return <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20 flex items-center justify-center p-4">
         <div className="w-full max-w-md mx-auto">
           <div className="text-center mb-8">
             <Link to="/" className="inline-flex items-center hover:opacity-80 transition-opacity">
@@ -120,43 +120,24 @@ const VetLogin = () => {
                   <Label htmlFor="resetEmail" className="text-vet-navy text-sm sm:text-base">Email *</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-vet-brown" />
-                    <Input
-                      id="resetEmail"
-                      type="email"
-                      placeholder="votre@email.com"
-                      value={resetEmail}
-                      onChange={(e) => setResetEmail(e.target.value)}
-                      className="pl-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage text-sm sm:text-base"
-                      required
-                    />
+                    <Input id="resetEmail" type="email" placeholder="votre@email.com" value={resetEmail} onChange={e => setResetEmail(e.target.value)} className="pl-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage text-sm sm:text-base" required />
                   </div>
                 </div>
 
-                <Button 
-                  type="submit" 
-                  className="w-full bg-vet-sage hover:bg-vet-sage/90 text-white text-sm sm:text-base py-2 sm:py-3"
-                >
+                <Button type="submit" className="w-full bg-vet-sage hover:bg-vet-sage/90 text-white text-sm sm:text-base py-2 sm:py-3">
                   Envoyer le lien de réinitialisation
                 </Button>
 
-                <Button 
-                  type="button"
-                  variant="ghost"
-                  className="w-full text-vet-brown hover:text-vet-navy text-sm sm:text-base"
-                  onClick={() => setShowResetForm(false)}
-                >
+                <Button type="button" variant="ghost" className="w-full text-vet-brown hover:text-vet-navy text-sm sm:text-base" onClick={() => setShowResetForm(false)}>
                   Retour à la connexion
                 </Button>
               </form>
             </CardContent>
           </Card>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
+  return <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Mobile Header - Only visible on small screens */}
       <div className="lg:hidden bg-gradient-to-r from-vet-navy to-vet-blue p-4">
         <div className="text-center">
@@ -190,30 +171,19 @@ const VetLogin = () => {
             </CardHeader>
             <CardContent className="px-4 sm:px-6">
               <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
-                {loginError && (
-                  <Alert variant="destructive" className="bg-red-50 text-red-900 border-red-200">
+                {loginError && <Alert variant="destructive" className="bg-red-50 text-red-900 border-red-200">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>{loginError}</AlertDescription>
-                  </Alert>
-                )}
+                  </Alert>}
                 
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-vet-navy text-sm sm:text-base">Email *</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-vet-brown" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="votre@email.com"
-                      value={email}
-                      onChange={(e) => {
-                        setEmail(e.target.value);
-                        setLoginError(""); // Réinitialiser l'erreur lors de la saisie
-                      }}
-                      className="pl-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage text-sm sm:text-base"
-                      required
-                      disabled={isSubmitting}
-                    />
+                    <Input id="email" type="email" placeholder="votre@email.com" value={email} onChange={e => {
+                    setEmail(e.target.value);
+                    setLoginError(""); // Réinitialiser l'erreur lors de la saisie
+                  }} className="pl-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage text-sm sm:text-base" required disabled={isSubmitting} />
                   </div>
                 </div>
 
@@ -221,65 +191,36 @@ const VetLogin = () => {
                   <Label htmlFor="password" className="text-vet-navy text-sm sm:text-base">Mot de passe *</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-vet-brown" />
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Votre mot de passe"
-                      value={password}
-                      onChange={(e) => {
-                        setPassword(e.target.value);
-                        setLoginError(""); // Réinitialiser l'erreur lors de la saisie
-                      }}
-                      className="pl-10 pr-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage text-sm sm:text-base"
-                      required
-                      disabled={isSubmitting}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-vet-brown hover:text-vet-navy transition-colors"
-                      tabIndex={-1}
-                    >
+                    <Input id="password" type={showPassword ? "text" : "password"} placeholder="Votre mot de passe" value={password} onChange={e => {
+                    setPassword(e.target.value);
+                    setLoginError(""); // Réinitialiser l'erreur lors de la saisie
+                  }} className="pl-10 pr-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage text-sm sm:text-base" required disabled={isSubmitting} />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-vet-brown hover:text-vet-navy transition-colors" tabIndex={-1}>
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
                 </div>
 
                 <div className="flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => setShowResetForm(true)}
-                    className="text-xs sm:text-sm text-vet-sage hover:text-vet-sage/80 underline"
-                  >
+                  <button type="button" onClick={() => setShowResetForm(true)} className="text-xs sm:text-sm text-vet-sage hover:text-vet-sage/80 underline">
                     Mot de passe oublié ?
                   </button>
                 </div>
 
-                <Button 
-                  type="submit" 
-                  className="w-full bg-vet-sage hover:bg-vet-sage/90 text-white disabled:opacity-50 text-sm sm:text-base py-2 sm:py-3"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
+                <Button type="submit" className="w-full bg-vet-sage hover:bg-vet-sage/90 text-white disabled:opacity-50 text-sm sm:text-base py-2 sm:py-3" disabled={isSubmitting}>
+                  {isSubmitting ? <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Connexion en cours...
-                    </>
-                  ) : (
-                    'Se connecter'
-                  )}
+                    </> : 'Se connecter'}
                 </Button>
               </form>
 
               <div className="mt-4 sm:mt-6 text-center">
                 <p className="text-xs sm:text-sm text-vet-brown">
                   Nos solutions vous intéressent ?{" "}
-                  <button 
-                    onClick={() => {
-                      window.open('https://aninowvet.fr/demandes-aninow-pro/', '_blank');
-                    }}
-                    className="text-vet-sage hover:text-vet-sage/80 font-medium underline transition-colors"
-                  >
+                  <button onClick={() => {
+                  window.open('https://aninowvet.fr/demandes-aninow-pro/', '_blank');
+                }} className="text-vet-sage hover:text-vet-sage/80 font-medium underline transition-colors">
                     Découvrez AniNow Pro
                   </button>
                 </p>
@@ -336,24 +277,19 @@ const VetLogin = () => {
             <div className="flex items-start space-x-4">
               <BarChart3 className="h-5 w-5 lg:h-6 lg:w-6 text-vet-sage mt-1 flex-shrink-0" />
               <div>
-                <p className="text-base lg:text-lg font-medium">Concentrez-vous sur l'essentiel : soigner vos patients, pas gérer l'administratif</p>
+                <p className="text-base lg:text-lg font-medium">​Garantissez la sérénité de vos auxiliaires spécialisés vétérinaires</p>
               </div>
             </div>
           </div>
 
           <div className="pt-4">
-            <Button 
-              onClick={() => window.open('https://aninow.fr/', '_blank')}
-              className="bg-vet-sage hover:bg-vet-sage/90 text-white px-6 lg:px-8 py-2 lg:py-3 text-base lg:text-lg font-medium"
-            >
+            <Button onClick={() => window.open('https://aninow.fr/', '_blank')} className="bg-vet-sage hover:bg-vet-sage/90 text-white px-6 lg:px-8 py-2 lg:py-3 text-base lg:text-lg font-medium">
               En savoir plus
             </Button>
           </div>
         </div>
 
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default VetLogin;
