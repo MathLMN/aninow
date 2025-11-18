@@ -55,7 +55,7 @@ export const usePendingBookings = () => {
   useEffect(() => {
     fetchPendingBookings();
 
-    // Écouter les nouvelles réservations en temps réel
+    // Écouter les nouvelles réservations et les mises à jour en temps réel
     const channel = supabase
       .channel('pending-bookings')
       .on(
@@ -75,6 +75,21 @@ export const usePendingBookings = () => {
               title: "Nouvelle demande de rendez-vous",
               description: `${payload.new.client_name} souhaite prendre rendez-vous pour ${payload.new.animal_name}`,
             });
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'bookings'
+        },
+        (payload) => {
+          console.log('Réservation mise à jour:', payload);
+          // Rafraîchir la liste si un booking passe de pending à un autre statut
+          if (payload.old.status === 'pending' || payload.new.status === 'pending') {
+            fetchPendingBookings();
           }
         }
       )
