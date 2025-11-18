@@ -64,27 +64,23 @@ export const TimeSlotCell = ({
       return 'bg-gray-400 text-gray-800 border-gray-500';
     }
 
-    // Pour les rendez-vous confirmés, utiliser la couleur du type de consultation depuis la base de données
-    if (booking.status === 'confirmed' && booking.consultation_type_color) {
-      return ''; // Retourner vide car on va utiliser le style inline avec la vraie couleur
-    }
-
-    // Pour les autres rendez-vous confirmés sans couleur définie, utiliser gris neutre
-    if (booking.status === 'confirmed') {
-      return 'bg-gray-100 text-gray-800 border-gray-300';
-    }
-
-    // Couleur basée sur le type de consultation pour les autres statuts (non confirmés)
+    // Pour tous les rendez-vous avec un type de consultation, utiliser sa couleur
     if (booking.consultation_type_id && consultationTypes.length > 0) {
       const consultationType = consultationTypes.find(ct => ct.id === booking.consultation_type_id);
       if (consultationType?.color) {
-        return `border-2 text-white` + ' ' + getBgColorClass(consultationType.color);
+        return ''; // Retourner vide car on va utiliser le style inline avec la vraie couleur
       }
+    }
+
+    // Si le booking a directement la couleur du type de consultation
+    if (booking.consultation_type_color) {
+      return ''; // Retourner vide car on va utiliser le style inline avec la vraie couleur
     }
     
     // Couleurs par défaut basées sur le statut
     switch (booking.status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-500 border-2 border-dashed shadow-sm';
+      case 'confirmed': return 'bg-gray-100 text-gray-800 border-gray-300';
       case 'cancelled': return 'bg-red-100 text-red-800 border-red-300';
       case 'completed': return 'bg-gray-100 text-gray-800 border-gray-300';
       default: return 'bg-gray-100 text-gray-800 border-gray-300';
@@ -120,6 +116,18 @@ export const TimeSlotCell = ({
     // Chaque tranche de 15 minutes = 20px de hauteur
     const slotsNeeded = Math.ceil(duration / 15);
     return slotsNeeded * 20;
+  };
+
+  // Récupérer la couleur du type de consultation
+  const getConsultationTypeColor = (booking: any) => {
+    if (booking.consultation_type_color) {
+      return booking.consultation_type_color;
+    }
+    if (booking.consultation_type_id && consultationTypes.length > 0) {
+      const consultationType = consultationTypes.find(ct => ct.id === booking.consultation_type_id);
+      return consultationType?.color;
+    }
+    return null;
   };
 
   const handleCellClick = () => {
@@ -267,10 +275,10 @@ export const TimeSlotCell = ({
                 height: `${getAppointmentHeight(booking)}px`,
                 zIndex: 10,
                 ...(
-                  !isNote && booking.status === 'confirmed' && booking.consultation_type_color
+                  !isNote && booking.status === 'confirmed' && getConsultationTypeColor(booking)
                     ? {
-                        backgroundColor: `${booking.consultation_type_color}20`,
-                        borderColor: booking.consultation_type_color,
+                        backgroundColor: `${getConsultationTypeColor(booking)}20`,
+                        borderColor: getConsultationTypeColor(booking),
                         borderWidth: '2px',
                         color: '#1f2937'
                       }
