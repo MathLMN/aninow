@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useClinicContext } from '@/contexts/ClinicContext'
 import { useClinicSettings } from '@/hooks/useClinicSettings'
 import type { Database } from '@/integrations/supabase/types'
+import { filterAllConditionalAnswers } from '@/utils/conditionalAnswersFilter'
 
 type BookingInsert = Database['public']['Tables']['bookings']['Insert']
 
@@ -101,7 +102,7 @@ export const useBookingSubmission = () => {
         second_animal_custom_text: null,
         second_animal_selected_symptoms: [],
         second_animal_custom_symptom: null,
-        conditional_answers: bookingData.conditionalAnswers,
+        conditional_answers: filterAllConditionalAnswers(bookingData.conditionalAnswers, bookingData),
         symptom_duration: bookingData.symptomDuration,
         additional_points: bookingData.additionalPoints || [],
         animal_age: bookingData.animalAge || bookingData.firstAnimalAge,
@@ -187,7 +188,7 @@ export const useBookingSubmission = () => {
           second_animal_custom_text: null,
           second_animal_selected_symptoms: [],
           second_animal_custom_symptom: null,
-          conditional_answers: bookingData.conditionalAnswers,
+          conditional_answers: filterAllConditionalAnswers(bookingData.conditionalAnswers, bookingData),
           symptom_duration: bookingData.symptomDuration,
           additional_points: bookingData.additionalPoints || [],
           animal_age: bookingData.secondAnimalAge,
