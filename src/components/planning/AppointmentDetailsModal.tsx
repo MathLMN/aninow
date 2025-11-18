@@ -10,13 +10,15 @@ interface AppointmentDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onUpdateStatus: (appointmentId: string, status: string, notes?: string) => Promise<boolean>;
+  onDeleteBooking: (bookingId: string) => Promise<boolean>;
 }
 
 export const AppointmentDetailsModal = ({
   appointment,
   isOpen,
   onClose,
-  onUpdateStatus
+  onUpdateStatus,
+  onDeleteBooking
 }: AppointmentDetailsModalProps) => {
   if (!appointment) return null;
 
@@ -45,6 +47,7 @@ export const AppointmentDetailsModal = ({
             <StatusActions 
               appointment={appointment}
               onUpdateStatus={onUpdateStatus}
+              onDeleteBooking={onDeleteBooking}
               onClose={onClose}
             />
           </div>

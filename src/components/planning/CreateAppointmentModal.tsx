@@ -1,9 +1,10 @@
 
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, AlertCircle, TrendingUp, UserX, CheckCircle, XCircle } from "lucide-react";
+import { AlertTriangle, AlertCircle, TrendingUp, UserX, CheckCircle, XCircle, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AppointmentSection } from "./appointment-form/AppointmentSection";
 import { ClientSection } from "./appointment-form/ClientSection";
@@ -50,8 +51,9 @@ export const CreateAppointmentModal = ({
     validateRequiredFields
   } = useAppointmentForm(onClose, appointmentToEdit?.id);
 
-  const { updateBookingStatus, moveAppointment, isLoading: isDeletingBooking } = usePlanningActions();
+  const { updateBookingStatus, moveAppointment, deleteBooking, isLoading: isDeletingBooking } = usePlanningActions();
   const { toast } = useToast();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Initialize form data when modal opens
   useEffect(() => {
@@ -172,6 +174,31 @@ export const CreateAppointmentModal = ({
         }
       }
     }
+  };
+
+  // Handle delete appointment
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (appointmentToEdit?.id) {
+      const success = await deleteBooking(appointmentToEdit.id);
+      if (success) {
+        setShowDeleteConfirm(false);
+        onClose();
+        if (onAppointmentDeleted) {
+          onAppointmentDeleted();
+        }
+        if (onRefreshPlanning) {
+          onRefreshPlanning();
+        }
+      }
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
   };
 
   // Handle save changes in edit mode
@@ -325,11 +352,11 @@ export const CreateAppointmentModal = ({
                   {appointmentToEdit.status !== 'cancelled' && appointmentToEdit.status !== 'completed' && (
                     <Button
                       type="button"
-                      onClick={() => handleStatusUpdate('cancelled')}
+                      onClick={handleDeleteClick}
                       disabled={isDeletingBooking}
                       className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 text-xs h-8"
                     >
-                      <XCircle className="h-3 w-3 mr-1" />
+                      <Trash2 className="h-3 w-3 mr-1" />
                       Annuler RDV
                     </Button>
                   )}
@@ -358,6 +385,30 @@ export const CreateAppointmentModal = ({
             )}
           </div>
         </form>
+
+        <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+              <AlertDialogDescription>
+                Êtes-vous sûr de vouloir supprimer définitivement ce rendez-vous ? 
+                Cette action est irréversible et le rendez-vous sera supprimé du planning.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={handleCancelDelete} disabled={isDeletingBooking}>
+                Annuler
+              </AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleConfirmDelete}
+                disabled={isDeletingBooking}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Supprimer définitivement
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </DialogContent>
     </Dialog>
   );
