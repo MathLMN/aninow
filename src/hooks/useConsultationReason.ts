@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBookingFormData } from './useBookingFormData';
+import { filterAllConditionalAnswers } from '@/utils/conditionalAnswersFilter';
 
 export const useConsultationReason = () => {
   const navigate = useNavigate();
@@ -85,8 +86,20 @@ export const useConsultationReason = () => {
         secondAnimalCustomSymptom: secondAnimalDifferentReason ? secondAnimalCustomSymptom.trim() : customSymptom.trim()
       };
       
-      updateBookingData(updatedData);
-      console.log('Updated booking data:', updatedData);
+      // Filtrer les réponses conditionnelles pour ne garder que celles correspondant aux symptômes actuellement sélectionnés
+      const filteredConditionalAnswers = filterAllConditionalAnswers(
+        bookingData.conditionalAnswers,
+        {
+          ...bookingData,
+          ...updatedData
+        }
+      );
+      
+      updateBookingData({
+        ...updatedData,
+        conditionalAnswers: filteredConditionalAnswers
+      });
+      console.log('Updated booking data with filtered conditional answers:', { ...updatedData, conditionalAnswers: filteredConditionalAnswers });
       
       // Si le motif principal est "symptomes-anomalie", aller vers les questions conditionnelles (route corrigée)
       // Sinon, aller directement vers les informations animal
