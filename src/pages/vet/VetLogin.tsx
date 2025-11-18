@@ -245,7 +245,7 @@ const VetLogin = () => {
         <div className="max-w-lg text-center text-white space-y-6 lg:space-y-8">
           <div>
             <h1 className="text-2xl lg:text-4xl font-bold mb-4 leading-tight">
-              Simplifiez la gestion de vos rendez-vous vétérinaires
+              Simplifiez la gestion de vos rendez-vous
             </h1>
             <p className="text-lg lg:text-xl text-white/90">
               Une solution intelligente pour optimiser votre temps et améliorer l'expérience client
