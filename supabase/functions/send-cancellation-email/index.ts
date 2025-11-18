@@ -60,6 +60,7 @@ const handler = async (req: Request): Promise<Response> => {
       .from("clinic_settings")
       .select("*")
       .eq("clinic_id", clinic_id)
+      .limit(1)
       .maybeSingle();
 
     if (settingsError) {
@@ -198,7 +199,7 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     // Determine the sender name and email
-    const fromName = clinicSettings?.clinic_name || booking.clinic?.name || "Clinique par défaut";
+    const fromName = clinicSettings?.clinic_name || clinic?.name || "Clinique par défaut";
     console.log(`Clinic name used as sender: ${fromName}`);
 
     const fromAddress = `${fromName} <notifications@aninow.fr>`;
@@ -244,26 +245,22 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-cancellation-email function:", error);
 
-    // Try to log the error to database if we have the booking_id
+    // Try to log the error to database
     try {
-      const body = await new Request(error.request?.url || "", {
-        method: "POST",
-        body: await error.request?.text(),
-      }).json();
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-      if (body.booking_id) {
-        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-        const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-        const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-        await supabase.from("email_logs").insert({
-          booking_id: body.booking_id,
-          recipient_email: body.client_email,
-          email_type: "cancellation",
-          status: "failed",
-          error_message: error.message,
-        });
-      }
+      // Parse the original request to get booking details
+      const requestData = await req.clone().json();
+      
+      await supabase.from("email_logs").insert({
+        booking_id: requestData.booking_id,
+        recipient_email: requestData.client_email,
+        email_type: "cancellation",
+        status: "failed",
+        error_message: error.message,
+      });
     } catch (logError) {
       console.error("Error logging failed email:", logError);
     }
