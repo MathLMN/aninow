@@ -19,10 +19,28 @@ export const usePlanningActions = () => {
 
       if (fetchError) throw fetchError;
 
-      // Mettre à jour le statut
+      // Si le booking n'a pas de consultation_type_id, assigner un type par défaut
+      let updateData: any = { status: 'confirmed' };
+      
+      if (!bookingData.consultation_type_id) {
+        // Récupérer un type de consultation par défaut pour cette clinique
+        const { data: consultationTypes, error: typesError } = await supabase
+          .from('consultation_types')
+          .select('id')
+          .eq('clinic_id', bookingData.clinic_id)
+          .order('created_at', { ascending: true })
+          .limit(1);
+
+        if (!typesError && consultationTypes && consultationTypes.length > 0) {
+          updateData.consultation_type_id = consultationTypes[0].id;
+          console.log('✅ Assigned default consultation type:', consultationTypes[0].id);
+        }
+      }
+
+      // Mettre à jour le statut et éventuellement le type de consultation
       const { error } = await supabase
         .from('bookings')
-        .update({ status: 'confirmed' })
+        .update(updateData)
         .eq('id', bookingId);
 
       if (error) throw error;
