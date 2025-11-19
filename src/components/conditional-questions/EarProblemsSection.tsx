@@ -10,14 +10,14 @@ interface EarProblemsSectionProps {
 const EarProblemsSection = ({ answers, onAnswerChange, keyPrefix = '' }: EarProblemsSectionProps) => {
   const questions = [
     {
-      key: 'ear_redness',
-      title: "Est-ce l'oreille est rouge ?",
-      options: ['Non', 'Légèrement', 'Rouge vif']
-    },
-    {
       key: 'head_shaking',
       title: "Est-ce qu'il se secoue la tête ?",
       options: ['Non', 'Quelques fois', 'Fréquemment']
+    },
+    {
+      key: 'ear_redness',
+      title: "L'oreille est-elle rouge ?",
+      options: ['Non', 'Légèrement', 'Rouge vif']
     }
   ];
 

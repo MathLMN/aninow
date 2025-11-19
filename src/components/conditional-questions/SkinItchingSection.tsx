@@ -12,17 +12,17 @@ const SkinItchingSection = ({ answers, onAnswerChange, keyPrefix = '' }: SkinItc
     {
       key: 'skin_itching_areas',
       title: 'Sur quelle(s) zone(s) du corps ?',
-      options: ['Généralisée', 'Plusieurs zones', 'Une zone localisée']
-    },
-    {
-      key: 'antiparasitic_treatment',
-      title: 'Quand a-t-il eu son dernier traitement antiparasitaire ?',
-      options: ['moins d\'1 mois', '1 à 3 mois', 'plus de 3 mois', 'Jamais']
+      options: ['Une zone localisée', 'Plusieurs zones', 'Généralisée']
     },
     {
       key: 'hair_loss',
-      title: 'Est-ce qu\'il y a une perte de poils localisée ?',
+      title: "Perte de poils localisée ?",
       options: ['Aucune', 'Légère', 'Importante']
+    },
+    {
+      key: 'antiparasitic_treatment',
+      title: 'Dernier traitement antiparasitaire ?',
+      options: ['Moins d\'1 mois', '1 à 3 mois', 'Plus de 3 mois', 'Jamais']
     }
   ];
 

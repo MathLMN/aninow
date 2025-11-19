@@ -10,18 +10,18 @@ interface UrinaryProblemsSectionProps {
 const UrinaryProblemsSection = ({ answers, onAnswerChange, keyPrefix = '' }: UrinaryProblemsSectionProps) => {
   const questions = [
     {
-      key: 'urine_quantity',
-      title: "Quelle est la quantité d'urine ?",
-      options: ['Normale', 'Quelques gouttes', 'Aucune']
-    },
-    {
       key: 'urination_frequency',
       title: 'Quelle est la fréquence des mictions ?',
       options: ['Normale', 'Très rapprochées', 'Rares']
     },
     {
+      key: 'urine_quantity',
+      title: "Quelle est la quantité d'urine ?",
+      options: ['Normale', 'Quelques gouttes', 'Aucune']
+    },
+    {
       key: 'blood_in_urine',
-      title: "Est-ce qu'il y a une présence de sang dans les urines ?",
+      title: "Présence de sang dans les urines ?",
       options: ['Non', 'Légère teinte rosée', 'Sang visible']
     },
     {
