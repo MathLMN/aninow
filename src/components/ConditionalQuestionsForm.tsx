@@ -89,7 +89,7 @@ const ConditionalQuestionsForm = ({
   };
 
   // Déterminer si on doit afficher les questions générales (sans perte d'appétit ni soif excessive ni abattement ni agressivité)
-  const shouldShowGeneralQuestions = needsQuestions || hasEarProblems || hasEyeDischarge || hasLameness || hasBreathingDifficulties;
+  const shouldShowGeneralQuestions = needsQuestions || hasEyeDischarge || hasLameness || hasBreathingDifficulties;
 
   return (
     <div className="space-y-8 sm:space-y-12">
