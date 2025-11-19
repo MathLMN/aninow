@@ -10,11 +10,6 @@ interface LamenessSectionProps {
 const LamenessSection = ({ answers, onAnswerChange, keyPrefix = '' }: LamenessSectionProps) => {
   const questions = [
     {
-      key: 'pain_complaints',
-      title: "Est-ce qu'il se plaint de douleurs ?",
-      options: ['Ne se plaint pas', 'Gémissements légers', 'Cris fréquents']
-    },
-    {
       key: 'paw_position',
       title: "Est-ce qu'il pose la patte ?",
       options: ['Pose normalement', 'Pose un peu', 'Ne pose pas']

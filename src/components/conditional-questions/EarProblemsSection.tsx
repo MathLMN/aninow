@@ -10,11 +10,6 @@ interface EarProblemsSectionProps {
 const EarProblemsSection = ({ answers, onAnswerChange, keyPrefix = '' }: EarProblemsSectionProps) => {
   const questions = [
     {
-      key: 'general_form',
-      title: 'Quelle est sa forme générale ?',
-      options: ['En forme', 'Pas en forme', 'Amorphe (avachi)']
-    },
-    {
       key: 'ear_redness',
       title: "Est-ce l'oreille est rouge ?",
       options: ['Non', 'Légèrement', 'Rouge vif']
@@ -23,11 +18,6 @@ const EarProblemsSection = ({ answers, onAnswerChange, keyPrefix = '' }: EarProb
       key: 'head_shaking',
       title: "Est-ce qu'il se secoue la tête ?",
       options: ['Non', 'Quelques fois', 'Fréquemment']
-    },
-    {
-      key: 'pain_complaints',
-      title: "Est-ce qu'il se plaint de douleurs ?",
-      options: ['Ne se plaint pas', 'Gémissements légers', 'Cris fréquents']
     }
   ];
 

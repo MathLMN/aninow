@@ -1,9 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useSymptomDetection } from "@/hooks/useSymptomDetection";
-import GeneralQuestionsSection from "@/components/conditional-questions/GeneralQuestionsSection";
-import LossOfAppetiteSection from "@/components/conditional-questions/LossOfAppetiteSection";
-import ExcessiveThirstSection from "@/components/conditional-questions/ExcessiveThirstSection";
+import SharedQuestionsSection from "@/components/conditional-questions/SharedQuestionsSection";
 import BloodInStoolSection from "@/components/conditional-questions/BloodInStoolSection";
 import UrinaryProblemsSection from "@/components/conditional-questions/UrinaryProblemsSection";
 import SkinItchingSection from "@/components/conditional-questions/SkinItchingSection";
@@ -13,7 +11,6 @@ import EyeDischargeSection from "@/components/conditional-questions/EyeDischarge
 import LamenessSection from "@/components/conditional-questions/LamenessSection";
 import BreathingDifficultiesSection from "@/components/conditional-questions/BreathingDifficultiesSection";
 import LumpSection from "@/components/conditional-questions/LumpSection";
-import ListlessSection from "@/components/conditional-questions/ListlessSection";
 import AggressiveSection from "@/components/conditional-questions/AggressiveSection";
 
 interface ConditionalQuestionsFormProps {
@@ -88,43 +85,30 @@ const ConditionalQuestionsForm = ({
     console.log('ConditionalQuestionsForm: File changed:', prefixedKey, '=', file?.name);
   };
 
-  // Déterminer si on doit afficher les questions générales (sans perte d'appétit ni soif excessive ni abattement ni agressivité)
-  const shouldShowGeneralQuestions = needsQuestions || hasEyeDischarge || hasLameness || hasBreathingDifficulties;
+  // Déterminer quelles questions partagées sont nécessaires
+  const needsGeneralForm = needsQuestions || hasLossOfAppetite || hasExcessiveThirst || 
+    hasEyeDischarge || hasLameness || hasBreathingDifficulties || hasLump || hasAggression || hasEarProblems;
+  
+  const needsEating = needsQuestions || hasExcessiveThirst || hasListlessness || 
+    hasEyeDischarge || hasLameness || hasBreathingDifficulties;
+  
+  const needsDrinking = needsQuestions || hasLossOfAppetite || hasListlessness || 
+    hasEyeDischarge || hasBreathingDifficulties;
+  
+  const needsPainComplaints = hasLameness || hasEarProblems || hasAggression;
 
   return (
     <div className="space-y-8 sm:space-y-12">
-      {shouldShowGeneralQuestions && (
-        <GeneralQuestionsSection 
-          answers={answers}
-          onAnswerChange={handleAnswerChange}
-          excludeDrinking={hasLameness}
-          keyPrefix={animalPrefix}
-        />
-      )}
-
-      {hasLossOfAppetite && (
-        <LossOfAppetiteSection 
-          answers={answers}
-          onAnswerChange={handleAnswerChange}
-          keyPrefix={animalPrefix}
-        />
-      )}
-
-      {hasExcessiveThirst && (
-        <ExcessiveThirstSection 
-          answers={answers}
-          onAnswerChange={handleAnswerChange}
-          keyPrefix={animalPrefix}
-        />
-      )}
-
-      {hasListlessness && (
-        <ListlessSection 
-          answers={answers}
-          onAnswerChange={handleAnswerChange}
-          keyPrefix={animalPrefix}
-        />
-      )}
+      {/* Afficher d'abord les questions partagées */}
+      <SharedQuestionsSection 
+        answers={answers}
+        onAnswerChange={handleAnswerChange}
+        keyPrefix={animalPrefix}
+        needsGeneralForm={needsGeneralForm}
+        needsEating={needsEating}
+        needsDrinking={needsDrinking}
+        needsPainComplaints={needsPainComplaints}
+      />
 
       {hasBloodInStool && (
         <BloodInStoolSection 

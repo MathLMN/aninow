@@ -10,16 +10,6 @@ interface AggressiveSectionProps {
 const AggressiveSection = ({ answers, onAnswerChange, keyPrefix = '' }: AggressiveSectionProps) => {
   const questions = [
     {
-      key: 'general_form',
-      title: 'Quelle est sa forme générale ?',
-      options: ['En forme', 'Pas en forme', 'Amorphe (avachi)']
-    },
-    {
-      key: 'pain_complaints',
-      title: 'Est-ce qu\'il se plaint de douleurs ?',
-      options: ['Ne se plaint pas', 'Gémissements légers', 'Cris fréquents']
-    },
-    {
       key: 'bite_history',
       title: 'Est-ce que l\'animal a mordu ?',
       options: ['Aucune morsure', 'Morsure sur humain(s)', 'Morsure sur animal(aux)']
