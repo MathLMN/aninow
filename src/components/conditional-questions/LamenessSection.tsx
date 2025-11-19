@@ -1,6 +1,6 @@
-
 import SelectionButton from "@/components/SelectionButton";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 
 interface LamenessSectionProps {
   answers: {[key: string]: string | File};
@@ -14,6 +14,11 @@ const LamenessSection = ({ answers, onAnswerChange, keyPrefix = '' }: LamenessSe
       key: 'paw_position',
       title: "Est-ce qu'il pose la patte ?",
       options: ['Pose normalement', 'Pose un peu', 'Ne pose pas']
+    },
+    {
+      key: 'recent_event',
+      title: "Avez-vous remarqué un événement pouvant expliquer la boiterie ?",
+      options: ['Oui, chute/choc/accident', 'Pas sûr', 'Non, sans raison apparente']
     }
   ];
 
@@ -46,6 +51,22 @@ const LamenessSection = ({ answers, onAnswerChange, keyPrefix = '' }: LamenessSe
                 </SelectionButton>
               ))}
             </div>
+
+            {question.key === 'recent_event' && answers[keyPrefix + 'recent_event'] === 'Oui, chute/choc/accident' && (
+              <div className="ml-0 sm:ml-10 mt-4">
+                <label htmlFor={`${keyPrefix}event_details`} className="block text-sm font-medium text-foreground mb-2">
+                  Précisez l'événement (optionnel)
+                </label>
+                <Input
+                  id={`${keyPrefix}event_details`}
+                  type="text"
+                  placeholder="Ex: chute des escaliers, collision avec une voiture..."
+                  value={answers[keyPrefix + 'event_details'] as string || ''}
+                  onChange={(e) => onAnswerChange('event_details', e.target.value)}
+                  className="max-w-2xl"
+                />
+              </div>
+            )}
           </div>
           
           {index < questions.length - 1 && (
