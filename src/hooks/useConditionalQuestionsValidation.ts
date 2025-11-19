@@ -45,29 +45,44 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
      bookingData?.secondAnimalCustomSymptom?.trim() !== '') && 
     bookingData?.secondAnimalConsultationReason === 'symptomes-anomalie';
 
+  // Fonction pour déterminer quelles questions partagées sont nécessaires
+  const getSharedQuestions = (detection: any, prefix: string) => {
+    const sharedQuestions: string[] = [];
+    
+    // general_form est nécessaire pour plusieurs symptômes
+    if (detection.needsQuestions || detection.hasLossOfAppetite || detection.hasExcessiveThirst || 
+        detection.hasEyeDischarge || detection.hasLameness || detection.hasBreathingDifficulties || 
+        detection.hasLump || detection.hasAggression || detection.hasEarProblems) {
+      sharedQuestions.push(`${prefix}general_form`);
+    }
+    
+    // eating est nécessaire pour plusieurs symptômes
+    if (detection.needsQuestions || detection.hasExcessiveThirst || detection.hasListlessness || 
+        detection.hasEyeDischarge || detection.hasLameness || detection.hasBreathingDifficulties) {
+      sharedQuestions.push(`${prefix}eating`);
+    }
+    
+    // drinking est nécessaire pour plusieurs symptômes
+    if (detection.needsQuestions || detection.hasLossOfAppetite || detection.hasListlessness || 
+        detection.hasEyeDischarge || detection.hasBreathingDifficulties) {
+      sharedQuestions.push(`${prefix}drinking`);
+    }
+    
+    // pain_complaints est nécessaire pour plusieurs symptômes
+    if (detection.hasLameness || detection.hasEarProblems || detection.hasAggression) {
+      sharedQuestions.push(`${prefix}pain_complaints`);
+    }
+    
+    return sharedQuestions;
+  };
+
   // Fonction pour générer les questions requises pour un animal
   const getRequiredQuestions = (detection: any, prefix: string) => {
     let requiredQuestions: string[] = [];
     
-    // Ajouter les questions générales si nécessaire
-    if (detection.needsQuestions) {
-      requiredQuestions.push(`${prefix}general_form`, `${prefix}eating`, `${prefix}drinking`);
-    }
-
-    // Ajouter les questions pour la perte d'appétit
-    if (detection.hasLossOfAppetite) {
-      requiredQuestions.push(`${prefix}general_form`, `${prefix}drinking`);
-    }
-
-    // Ajouter les questions pour la soif excessive
-    if (detection.hasExcessiveThirst) {
-      requiredQuestions.push(`${prefix}general_form`, `${prefix}eating`);
-    }
-
-    // Ajouter les questions pour "semble abattu"
-    if (detection.hasListlessness) {
-      requiredQuestions.push(`${prefix}eating`, `${prefix}drinking`);
-    }
+    // Ajouter les questions partagées
+    const sharedQuestions = getSharedQuestions(detection, prefix);
+    requiredQuestions.push(...sharedQuestions);
     
     // Ajouter la question sur la consistance des selles si nécessaire
     if (detection.hasBloodInStool) {
@@ -91,32 +106,32 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
 
     // Ajouter les questions spécifiques aux problèmes d'oreille si nécessaire
     if (detection.hasEarProblems) {
-      requiredQuestions.push(`${prefix}general_form`, `${prefix}ear_redness`, `${prefix}head_shaking`, `${prefix}pain_complaints`);
+      requiredQuestions.push(`${prefix}ear_redness`, `${prefix}head_shaking`);
     }
 
     // Ajouter les questions pour l'écoulement des yeux si nécessaire
     if (detection.hasEyeDischarge) {
-      requiredQuestions.push(`${prefix}general_form`, `${prefix}eating`, `${prefix}drinking`, `${prefix}eye_condition`);
+      requiredQuestions.push(`${prefix}eye_condition`);
     }
 
     // Ajouter les questions spécifiques à la boiterie si nécessaire
     if (detection.hasLameness) {
-      requiredQuestions.push(`${prefix}general_form`, `${prefix}eating`, `${prefix}pain_complaints`, `${prefix}paw_position`);
+      requiredQuestions.push(`${prefix}paw_position`);
     }
 
     // Ajouter les questions pour les difficultés respiratoires si nécessaire
     if (detection.hasBreathingDifficulties) {
-      requiredQuestions.push(`${prefix}general_form`, `${prefix}eating`, `${prefix}drinking`, `${prefix}panting`);
+      requiredQuestions.push(`${prefix}panting`);
     }
 
     // Ajouter les questions spécifiques aux grosseurs si nécessaire
     if (detection.hasLump) {
-      requiredQuestions.push(`${prefix}general_form`, `${prefix}lump_body_area`, `${prefix}lump_size_evolution`);
+      requiredQuestions.push(`${prefix}lump_body_area`, `${prefix}lump_size_evolution`);
     }
 
     // Ajouter les questions spécifiques à l'agressivité si nécessaire
     if (detection.hasAggression) {
-      requiredQuestions.push(`${prefix}general_form`, `${prefix}pain_complaints`, `${prefix}bite_history`);
+      requiredQuestions.push(`${prefix}bite_history`);
     }
 
     return requiredQuestions;
@@ -146,6 +161,10 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
     allQuestionsAnswered
   });
 
+  // Calculer les questions partagées pour chaque animal
+  const animal1SharedQuestions = hasFirstAnimalSymptoms ? getSharedQuestions(animal1Detection, 'animal1_') : [];
+  const animal2SharedQuestions = hasSecondAnimalSymptoms ? getSharedQuestions(animal2Detection, 'animal2_') : [];
+
   return {
     canProceed: allQuestionsAnswered,
     hasAnyConditions,
@@ -162,6 +181,9 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
     hasBreathingDifficulties: animal1Detection.hasBreathingDifficulties || animal2Detection.hasBreathingDifficulties,
     hasLump: animal1Detection.hasLump || animal2Detection.hasLump,
     hasListlessness: animal1Detection.hasListlessness || animal2Detection.hasListlessness,
-    hasAggression: animal1Detection.hasAggression || animal2Detection.hasAggression
+    hasAggression: animal1Detection.hasAggression || animal2Detection.hasAggression,
+    // Ajouter les questions partagées pour chaque animal
+    animal1SharedQuestions,
+    animal2SharedQuestions
   };
 };

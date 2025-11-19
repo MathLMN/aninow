@@ -11,11 +11,6 @@ interface LumpSectionProps {
 const LumpSection = ({ answers, onAnswerChange, onFileChange, keyPrefix = '' }: LumpSectionProps) => {
   const questions = [
     {
-      key: 'general_form',
-      title: 'Quelle est sa forme générale ?',
-      options: ['En forme', 'Pas en forme', 'Amorphe (avachi)']
-    },
-    {
       key: 'lump_body_area',
       title: 'Sur quelle(s) zone(s) du corps ?',
       options: ['Généralisée', 'Plusieurs zones', 'Une zone localisée']
