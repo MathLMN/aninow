@@ -51,7 +51,10 @@ const ConditionalQuestionsContent = ({
 
   // Compter le nombre total de symptômes sélectionnés
   const firstAnimalSymptomsCount = (bookingData.selectedSymptoms?.length || 0) + (bookingData.customSymptom?.trim() ? 1 : 0);
-  const secondAnimalSymptomsCount = (bookingData.secondAnimalSelectedSymptoms?.length || 0) + (bookingData.secondAnimalCustomSymptom?.trim() ? 1 : 0);
+  // Ne compter les symptômes du 2e animal que s'il existe vraiment et a un motif différent
+  const secondAnimalSymptomsCount = (hasTwoAnimals && hasSecondAnimalDifferentReason) 
+    ? ((bookingData.secondAnimalSelectedSymptoms?.length || 0) + (bookingData.secondAnimalCustomSymptom?.trim() ? 1 : 0))
+    : 0;
   const totalSymptoms = firstAnimalSymptomsCount + secondAnimalSymptomsCount;
   const hasMultipleSymptoms = totalSymptoms >= 2;
 
