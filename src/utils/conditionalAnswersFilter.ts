@@ -178,6 +178,15 @@ export const filterConditionalAnswers = (
     allowedKeys.add(`${prefix}bite_history`);
   }
 
+  // Questions pour le cas "Autre symptôme"
+  if (hasOther) {
+    allowedKeys.add(`${prefix}general_form`);
+    allowedKeys.add(`${prefix}eating`);
+    allowedKeys.add(`${prefix}drinking`);
+    allowedKeys.add(`${prefix}pain_complaints`);
+    allowedKeys.add(`${prefix}other_photo`);
+  }
+
   // Filtrer les réponses pour ne garder que celles autorisées
   const filteredAnswers: { [key: string]: any } = {};
   
