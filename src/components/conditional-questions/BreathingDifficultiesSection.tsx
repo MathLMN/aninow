@@ -1,5 +1,6 @@
 
 import SelectionButton from "@/components/SelectionButton";
+import { Separator } from "@/components/ui/separator";
 
 interface BreathingDifficultiesSectionProps {
   answers: {[key: string]: string | File};
@@ -15,12 +16,12 @@ const BreathingDifficultiesSection = ({ answers, onAnswerChange, keyPrefix = '' 
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 bg-accent/30 rounded-lg border-l-4 border-primary">
+    <div className="space-y-5 sm:space-y-6">
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs sm:text-sm font-bold">
+        <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm sm:text-base font-bold">
           1
         </div>
-        <h3 className="text-base sm:text-lg text-foreground font-semibold text-left flex-1">
+        <h3 className="text-base sm:text-lg text-foreground font-semibold text-left flex-1 pt-0.5">
           {question.title}
           <span className="text-destructive ml-1">*</span>
         </h3>

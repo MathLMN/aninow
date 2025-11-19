@@ -1,5 +1,6 @@
 
 import SelectionButton from "@/components/SelectionButton";
+import { Separator } from "@/components/ui/separator";
 
 interface WoundSectionProps {
   answers: {[key: string]: string | File};
