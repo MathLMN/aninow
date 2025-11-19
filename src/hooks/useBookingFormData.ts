@@ -95,11 +95,12 @@ export const useBookingFormData = () => {
       console.log('📸 useBookingFormData: Photo keys in conditionalAnswers:', photoKeys);
       photoKeys.forEach(key => {
         const value = newData.conditionalAnswers![key];
-        console.log(`📸 useBookingFormData: ${key} =`, {
-          value,
+        console.log(`📸 useBookingFormData BEFORE stringify: ${key} =`, value);
+        console.log(`📸 Type check:`, {
           type: typeof value,
+          isObject: typeof value === 'object' && value !== null,
           hasBase64: value && typeof value === 'object' && 'base64' in value,
-          base64Length: value && typeof value === 'object' && 'base64' in value ? value.base64.length : 0
+          keys: value && typeof value === 'object' ? Object.keys(value) : []
         });
       });
     }
@@ -110,6 +111,17 @@ export const useBookingFormData = () => {
     console.log('📸 useBookingFormData: About to stringify and save to localStorage');
     const stringified = JSON.stringify(updatedData);
     console.log('📸 useBookingFormData: Stringified length:', stringified.length);
+    
+    // Test de re-parsing pour voir ce qui est perdu
+    const reparsed = JSON.parse(stringified);
+    if (newData.conditionalAnswers) {
+      const photoKeys = Object.keys(newData.conditionalAnswers).filter(k => k.includes('photo'));
+      photoKeys.forEach(key => {
+        if (reparsed.conditionalAnswers && reparsed.conditionalAnswers[key]) {
+          console.log(`📸 useBookingFormData AFTER parse: ${key} =`, reparsed.conditionalAnswers[key]);
+        }
+      });
+    }
     
     localStorage.setItem('bookingFormData', stringified);
     console.log('📸 useBookingFormData: Saved to localStorage');
