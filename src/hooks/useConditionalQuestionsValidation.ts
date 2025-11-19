@@ -33,7 +33,8 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
       hasLameness: false,
       hasBreathingDifficulties: false,
       hasLump: false,
-      hasAggression: false
+      hasAggression: false,
+      hasOtherSymptom: false
     };
 
   const hasFirstAnimalSymptoms = (bookingData?.selectedSymptoms?.length > 0 || bookingData?.customSymptom?.trim() !== '') && 
@@ -52,24 +53,24 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
     // general_form est nécessaire pour plusieurs symptômes
     if (detection.needsQuestions || detection.hasLossOfAppetite || detection.hasExcessiveThirst || 
         detection.hasEyeDischarge || detection.hasLameness || detection.hasBreathingDifficulties || 
-        detection.hasLump || detection.hasAggression || detection.hasEarProblems) {
+        detection.hasLump || detection.hasAggression || detection.hasEarProblems || detection.hasOtherSymptom) {
       sharedQuestions.push(`${prefix}general_form`);
     }
     
     // eating est nécessaire pour plusieurs symptômes
     if (detection.needsQuestions || detection.hasExcessiveThirst || detection.hasListlessness || 
-        detection.hasEyeDischarge || detection.hasLameness || detection.hasBreathingDifficulties) {
+        detection.hasEyeDischarge || detection.hasLameness || detection.hasBreathingDifficulties || detection.hasOtherSymptom) {
       sharedQuestions.push(`${prefix}eating`);
     }
     
     // drinking est nécessaire pour plusieurs symptômes
     if (detection.needsQuestions || detection.hasLossOfAppetite || detection.hasListlessness || 
-        detection.hasEyeDischarge || detection.hasBreathingDifficulties) {
+        detection.hasEyeDischarge || detection.hasBreathingDifficulties || detection.hasOtherSymptom) {
       sharedQuestions.push(`${prefix}drinking`);
     }
     
     // pain_complaints est nécessaire pour plusieurs symptômes
-    if (detection.hasLameness || detection.hasEarProblems || detection.hasAggression) {
+    if (detection.hasLameness || detection.hasEarProblems || detection.hasAggression || detection.hasOtherSymptom) {
       sharedQuestions.push(`${prefix}pain_complaints`);
     }
     
@@ -182,7 +183,7 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
     hasLump: animal1Detection.hasLump || animal2Detection.hasLump,
     hasListlessness: animal1Detection.hasListlessness || animal2Detection.hasListlessness,
     hasAggression: animal1Detection.hasAggression || animal2Detection.hasAggression,
-    // Ajouter les questions partagées pour chaque animal
+    hasOtherSymptom: animal1Detection.hasOtherSymptom || animal2Detection.hasOtherSymptom,
     animal1SharedQuestions,
     animal2SharedQuestions
   };
