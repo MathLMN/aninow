@@ -72,17 +72,6 @@ const ConditionalQuestionsContent = ({
           </div>
 
           <div className="space-y-4 sm:space-y-6">
-            
-            {/* Message informatif pour plusieurs symptômes */}
-            {hasMultipleSymptoms && (
-              <Alert className="bg-blue-50/50 border-blue-200 py-2">
-                <Info className="h-3.5 w-3.5 text-blue-600" />
-                <AlertDescription className="text-xs sm:text-sm text-blue-900">
-                  <strong>{totalSymptoms} symptômes sélectionnés</strong> - Quelques questions pour mieux préparer la consultation
-                </AlertDescription>
-              </Alert>
-            )}
-            
             {/* Questions pour l'animal 1 OU questions communes si motif partagé */}
             {hasFirstAnimalSymptoms && (
               <div className="space-y-4">
