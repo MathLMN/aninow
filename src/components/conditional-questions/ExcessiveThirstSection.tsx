@@ -1,8 +1,9 @@
 
 import SelectionButton from "@/components/SelectionButton";
+import type { PhotoData } from "@/components/conditional-questions/MultiPhotoUpload";
 
 interface ExcessiveThirstSectionProps {
-  answers: {[key: string]: string | File};
+  answers: {[key: string]: string | File | PhotoData};
   onAnswerChange: (questionKey: string, value: string) => void;
   keyPrefix?: string;
 }

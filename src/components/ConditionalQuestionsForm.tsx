@@ -14,6 +14,7 @@ import BreathingDifficultiesSection from "@/components/conditional-questions/Bre
 import LumpSection from "@/components/conditional-questions/LumpSection";
 import AggressiveSection from "@/components/conditional-questions/AggressiveSection";
 import OtherSymptomSection from "@/components/conditional-questions/OtherSymptomSection";
+import type { PhotoData } from "@/components/conditional-questions/MultiPhotoUpload";
 import {
   Accordion,
   AccordionContent,
@@ -33,7 +34,7 @@ interface ConditionalQuestionsFormProps {
   customSymptom: string;
   onAnswersChange: (answers: any) => void;
   animalPrefix?: string;
-  initialAnswers?: {[key: string]: string | File};
+  initialAnswers?: {[key: string]: string | File | PhotoData};
 }
 
 // Composant pour le trigger de l'accordéon avec validation visuelle
@@ -88,7 +89,7 @@ const ConditionalQuestionsForm = ({
   animalPrefix = '',
   initialAnswers = {}
 }: ConditionalQuestionsFormProps) => {
-  const [answers, setAnswers] = useState<{[key: string]: string | File}>({});
+  const [answers, setAnswers] = useState<{[key: string]: string | File | PhotoData}>({});
 
   const {
     needsQuestions,
@@ -114,7 +115,7 @@ const ConditionalQuestionsForm = ({
       console.log('ConditionalQuestionsForm: Loading initial answers:', initialAnswers);
       
       // Filtrer les réponses qui correspondent au préfixe de cet animal
-      const relevantAnswers: {[key: string]: string | File} = {};
+      const relevantAnswers: {[key: string]: string | File | PhotoData} = {};
       Object.entries(initialAnswers).forEach(([key, value]) => {
         if (key.startsWith(animalPrefix)) {
           relevantAnswers[key] = value;
@@ -155,12 +156,12 @@ const ConditionalQuestionsForm = ({
     console.log('ConditionalQuestionsForm: Answer changed:', prefixedKey, '=', value);
   };
 
-  const handleFileChange = (questionKey: string, file: File | null) => {
+  const handleFileChange = (questionKey: string, value: PhotoData | null) => {
     const prefixedKey = animalPrefix + questionKey;
-    const newAnswers = { ...answers, [prefixedKey]: file };
+    const newAnswers = { ...answers, [prefixedKey]: value };
     setAnswers(newAnswers);
     onAnswersChange(newAnswers);
-    console.log('ConditionalQuestionsForm: File changed:', prefixedKey, '=', file?.name);
+    console.log('ConditionalQuestionsForm: Photo changed:', prefixedKey, '=', value ? 'PhotoData' : null);
   };
 
   // Déterminer quelles questions partagées sont nécessaires

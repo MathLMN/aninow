@@ -34,27 +34,65 @@ export const useBookingSubmission = () => {
     
     for (const [key, value] of Object.entries(conditionalAnswers)) {
       // Détecter les clés de photos (wound_photo_X, lump_photo_X, other_symptom_photo_X)
-      if (key.includes('photo') && value instanceof File) {
-        const file = value as File;
-        const extension = file.name.split('.').pop();
-        const filePath = `${clinicId}/${bookingId}/${key}.${extension}`;
-        
-        console.log(`Uploading photo ${key} to:`, filePath);
-        
-        const { error: uploadError } = await supabase.storage
-          .from('consultation-photos')
-          .upload(filePath, file, {
-            cacheControl: '3600',
-            upsert: false
-          });
+      if (key.includes('photo')) {
+        // Gérer les objets File (ancien format, rétrocompatibilité)
+        if (value instanceof File) {
+          const file = value as File;
+          const extension = file.name.split('.').pop();
+          const filePath = `${clinicId}/${bookingId}/${key}.${extension}`;
+          
+          console.log(`Uploading photo ${key} (File) to:`, filePath);
+          
+          const { error: uploadError } = await supabase.storage
+            .from('consultation-photos')
+            .upload(filePath, file, {
+              cacheControl: '3600',
+              upsert: false
+            });
 
-        if (uploadError) {
-          console.error(`Error uploading photo ${key}:`, uploadError);
-          throw new Error(`Erreur lors de l'upload de la photo: ${uploadError.message}`);
+          if (uploadError) {
+            console.error(`Error uploading photo ${key}:`, uploadError);
+            throw new Error(`Erreur lors de l'upload de la photo: ${uploadError.message}`);
+          }
+
+          updatedAnswers[key] = filePath;
         }
-
-        // Remplacer le File par le chemin de stockage
-        updatedAnswers[key] = filePath;
+        // Gérer les objets base64 (nouveau format)
+        else if (value && typeof value === 'object' && 'base64' in value) {
+          try {
+            const photoData = value as { base64: string; filename: string; type: string };
+            
+            // Convertir base64 en Blob
+            const response = await fetch(photoData.base64);
+            const blob = await response.blob();
+            
+            // Extraire l'extension du filename
+            const extension = photoData.filename.split('.').pop() || 'jpg';
+            const filePath = `${clinicId}/${bookingId}/${key}.${extension}`;
+            
+            console.log(`Uploading photo ${key} (base64) to:`, filePath);
+            
+            // Upload vers Storage
+            const { error: uploadError } = await supabase.storage
+              .from('consultation-photos')
+              .upload(filePath, blob, {
+                cacheControl: '3600',
+                upsert: false,
+                contentType: photoData.type
+              });
+            
+            if (uploadError) {
+              console.error(`Error uploading photo ${key}:`, uploadError);
+              throw new Error(`Erreur lors de l'upload de la photo: ${uploadError.message}`);
+            }
+            
+            // Remplacer par le chemin
+            updatedAnswers[key] = filePath;
+          } catch (error) {
+            console.error(`Error converting base64 for ${key}:`, error);
+            throw new Error(`Erreur lors de la conversion de la photo: ${error}`);
+          }
+        }
       }
     }
 

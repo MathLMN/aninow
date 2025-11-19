@@ -1,3 +1,5 @@
+import type { PhotoData } from "@/components/conditional-questions/MultiPhotoUpload";
+
 // Définir la structure des métadonnées de section
 export interface SectionMetadata {
   key: string;
@@ -105,7 +107,7 @@ export const getSharedQuestionKeys = (
 
 // Vérifier si une section est complétée
 export const isSectionComplete = (
-  answers: {[key: string]: string | File},
+  answers: {[key: string]: string | File | PhotoData},
   requiredKeys: string[],
   keyPrefix: string = ''
 ): boolean => {
