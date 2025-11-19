@@ -1,7 +1,8 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ArrowRight, ArrowLeft, Info } from "lucide-react";
 import ConditionalQuestionsForm from "@/components/ConditionalQuestionsForm";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -48,6 +49,12 @@ const ConditionalQuestionsContent = ({
     onAnswersChange(mergedAnswers);
   };
 
+  // Compter le nombre total de symptômes sélectionnés
+  const firstAnimalSymptomsCount = (bookingData.selectedSymptoms?.length || 0) + (bookingData.customSymptom?.trim() ? 1 : 0);
+  const secondAnimalSymptomsCount = (bookingData.secondAnimalSelectedSymptoms?.length || 0) + (bookingData.secondAnimalCustomSymptom?.trim() ? 1 : 0);
+  const totalSymptoms = firstAnimalSymptomsCount + secondAnimalSymptomsCount;
+  const hasMultipleSymptoms = totalSymptoms >= 2;
+
   return (
     <>
       {/* Formulaire */}
@@ -62,6 +69,16 @@ const ConditionalQuestionsContent = ({
           </div>
 
           <div className="space-y-4 sm:space-y-6">
+            
+            {/* Message informatif pour plusieurs symptômes */}
+            {hasMultipleSymptoms && (
+              <Alert className="bg-blue-50 border-blue-200">
+                <Info className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-sm text-blue-900">
+                  Vous avez sélectionné <strong>{totalSymptoms} symptômes</strong>. Pour mieux comprendre l'état de santé de votre animal et le recevoir dans les meilleures conditions, nous avons besoin de vous poser quelques questions supplémentaires. Les questions sont organisées par symptôme pour faciliter vos réponses.
+                </AlertDescription>
+              </Alert>
+            )}
             
             {/* Questions pour l'animal 1 OU questions communes si motif partagé */}
             {hasFirstAnimalSymptoms && (
