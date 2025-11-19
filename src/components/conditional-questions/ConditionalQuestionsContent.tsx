@@ -72,10 +72,10 @@ const ConditionalQuestionsContent = ({
             
             {/* Message informatif pour plusieurs symptômes */}
             {hasMultipleSymptoms && (
-              <Alert className="bg-blue-50 border-blue-200">
-                <Info className="h-4 w-4 text-blue-600" />
-                <AlertDescription className="text-sm text-blue-900">
-                  Vous avez sélectionné <strong>{totalSymptoms} symptômes</strong>. Pour mieux comprendre l'état de santé de votre animal et le recevoir dans les meilleures conditions, nous avons besoin de vous poser quelques questions supplémentaires. Les questions sont organisées par symptôme pour faciliter vos réponses.
+              <Alert className="bg-blue-50/50 border-blue-200 py-2">
+                <Info className="h-3.5 w-3.5 text-blue-600" />
+                <AlertDescription className="text-xs sm:text-sm text-blue-900">
+                  <strong>{totalSymptoms} symptômes sélectionnés</strong> - Quelques questions pour mieux préparer la consultation
                 </AlertDescription>
               </Alert>
             )}
