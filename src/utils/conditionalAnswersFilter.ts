@@ -31,6 +31,17 @@ export const filterConditionalAnswers = (
     hasAggression: false
   };
 
+  // Détecter d'abord les symptômes à partir des réponses présentes (plus fiable)
+  const hasWoundAnswers = Object.keys(conditionalAnswers).some(key => 
+    key.startsWith(prefix) && key.includes('wound_') && !key.includes('photo')
+  );
+  const hasLumpAnswers = Object.keys(conditionalAnswers).some(key => 
+    key.startsWith(prefix) && key.includes('lump_') && !key.includes('photo')
+  );
+  const hasOtherSymptomAnswers = Object.keys(conditionalAnswers).some(key => 
+    key.startsWith(prefix) && key.includes('other_symptom_') && !key.includes('photo')
+  );
+
   // Symptômes nécessitant les questions générales
   const symptomsRequiringQuestions = ['vomissements', 'diarrhée', 'diarrhee', 'toux', 'cris-gemissements', 'sang-selles'];
   detection.needsQuestions = selectedSymptoms.some(symptom => 
@@ -39,7 +50,7 @@ export const filterConditionalAnswers = (
     customSymptom.toLowerCase().includes(symptom.replace('-', '/'))
   );
 
-  // Vérifier chaque type de symptôme
+  // Vérifier chaque type de symptôme (combiner mots-clés + réponses présentes)
   detection.hasLossOfAppetite = selectedSymptoms.some(s => s.toLowerCase().includes('perte-appetit')) || 
     customSymptom.toLowerCase().includes('perte d\'appétit');
   
@@ -58,7 +69,9 @@ export const filterConditionalAnswers = (
   detection.hasSkinItching = selectedSymptoms.some(s => s.toLowerCase().includes('demangeaisons-cutanees')) || 
     customSymptom.toLowerCase().includes('démangeaisons cutanées');
   
-  detection.hasWound = selectedSymptoms.some(s => s.toLowerCase().includes('plaie')) || 
+  // Pour les plaies, grosseurs et autres : combiner mots-clés + réponses présentes
+  detection.hasWound = hasWoundAnswers || 
+    selectedSymptoms.some(s => s.toLowerCase().includes('plaie')) || 
     customSymptom.toLowerCase().includes('plaie');
   
   detection.hasEarProblems = selectedSymptoms.some(s => 
@@ -75,19 +88,30 @@ export const filterConditionalAnswers = (
   detection.hasBreathingDifficulties = selectedSymptoms.some(s => s.toLowerCase().includes('difficultes-respiratoires')) || 
     customSymptom.toLowerCase().includes('difficultés respiratoires');
   
-  detection.hasLump = selectedSymptoms.some(s => s.toLowerCase().includes('grosseur')) || 
+  detection.hasLump = hasLumpAnswers || 
+    selectedSymptoms.some(s => s.toLowerCase().includes('grosseur')) || 
     customSymptom.toLowerCase().includes('grosseur');
   
   detection.hasAggression = selectedSymptoms.some(s => s.toLowerCase().includes('agressif')) || 
     customSymptom.toLowerCase().includes('agressif');
   
-  // Vérifier si "autre" est sélectionné sans mot-clé spécifique
-  const hasOther = selectedSymptoms.includes('autre') && 
+  // Vérifier si "autre" est sélectionné ou si des réponses "other_symptom" sont présentes
+  const hasOther = hasOtherSymptomAnswers || 
+    (selectedSymptoms.includes('autre') && 
     !detection.needsQuestions && !detection.hasLossOfAppetite && !detection.hasExcessiveThirst && 
     !detection.hasBloodInStool && !detection.hasUrinaryProblems && !detection.hasSkinItching && 
     !detection.hasWound && !detection.hasEarProblems && !detection.hasEyeDischarge && 
     !detection.hasLameness && !detection.hasBreathingDifficulties && !detection.hasLump && 
-    !detection.hasListlessness && !detection.hasAggression;
+    !detection.hasListlessness && !detection.hasAggression);
+
+  console.log('📸 filterConditionalAnswers detection:', {
+    prefix,
+    hasWoundAnswers,
+    hasLumpAnswers,
+    hasOtherSymptomAnswers,
+    detection,
+    hasOther
+  });
 
   // Construire la liste des clés de questions autorisées
   const allowedKeys: Set<string> = new Set();
