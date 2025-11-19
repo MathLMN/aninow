@@ -12,6 +12,12 @@ import LamenessSection from "@/components/conditional-questions/LamenessSection"
 import BreathingDifficultiesSection from "@/components/conditional-questions/BreathingDifficultiesSection";
 import LumpSection from "@/components/conditional-questions/LumpSection";
 import AggressiveSection from "@/components/conditional-questions/AggressiveSection";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface ConditionalQuestionsFormProps {
   selectedSymptoms: string[];
@@ -97,100 +103,248 @@ const ConditionalQuestionsForm = ({
   
   const needsPainComplaints = hasLameness || hasEarProblems || hasAggression;
 
+  const symptomLabels: { [key: string]: string } = {
+    bloodInStool: "Sang dans les selles",
+    urinaryProblems: "Problèmes urinaires",
+    skinItching: "Démangeaisons / Grattage",
+    wound: "Plaie",
+    earProblems: "Otite / Problèmes d'oreilles",
+    eyeDischarge: "Écoulements oculaires",
+    lameness: "Boiterie",
+    breathingDifficulties: "Difficultés respiratoires",
+    lump: "Grosseur / Boule",
+    aggression: "Comportement agressif"
+  };
+
   return (
-    <div className="space-y-8 sm:space-y-12">
-      {/* Afficher d'abord les questions partagées */}
-      <SharedQuestionsSection 
-        answers={answers}
-        onAnswerChange={handleAnswerChange}
-        keyPrefix={animalPrefix}
-        needsGeneralForm={needsGeneralForm}
-        needsEating={needsEating}
-        needsDrinking={needsDrinking}
-        needsPainComplaints={needsPainComplaints}
-      />
+    <div className="space-y-6">
+      <Accordion type="multiple" defaultValue={["shared"]} className="w-full space-y-4">
+        {/* Questions communes - toujours ouvertes par défaut */}
+        <AccordionItem value="shared" className="border rounded-lg bg-card shadow-sm">
+          <AccordionTrigger className="px-4 sm:px-6 py-4 hover:no-underline">
+            <div className="flex items-center gap-3">
+              <div className="h-2 w-2 rounded-full bg-primary" />
+              <span className="text-base sm:text-lg font-semibold text-foreground">
+                Questions générales
+              </span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 sm:px-6 pb-6 pt-2">
+            <SharedQuestionsSection
+              answers={answers}
+              onAnswerChange={handleAnswerChange}
+              keyPrefix={animalPrefix}
+              needsGeneralForm={needsGeneralForm}
+              needsEating={needsEating}
+              needsDrinking={needsDrinking}
+              needsPainComplaints={needsPainComplaints}
+            />
+          </AccordionContent>
+        </AccordionItem>
 
-      {hasBloodInStool && (
-        <BloodInStoolSection 
-          answers={answers}
-          onAnswerChange={handleAnswerChange}
-          keyPrefix={animalPrefix}
-        />
-      )}
+        {/* Questions spécifiques par symptôme */}
+        {hasBloodInStool && (
+          <AccordionItem value="bloodInStool" className="border rounded-lg bg-card shadow-sm">
+            <AccordionTrigger className="px-4 sm:px-6 py-4 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="h-2 w-2 rounded-full bg-destructive" />
+                <span className="text-base sm:text-lg font-semibold text-foreground">
+                  {symptomLabels.bloodInStool}
+                </span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 sm:px-6 pb-6 pt-2">
+              <BloodInStoolSection
+                answers={answers}
+                onAnswerChange={handleAnswerChange}
+                keyPrefix={animalPrefix}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
-      {hasUrinaryProblems && (
-        <UrinaryProblemsSection 
-          answers={answers}
-          onAnswerChange={handleAnswerChange}
-          keyPrefix={animalPrefix}
-        />
-      )}
+        {hasUrinaryProblems && (
+          <AccordionItem value="urinaryProblems" className="border rounded-lg bg-card shadow-sm">
+            <AccordionTrigger className="px-4 sm:px-6 py-4 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="h-2 w-2 rounded-full bg-amber-500" />
+                <span className="text-base sm:text-lg font-semibold text-foreground">
+                  {symptomLabels.urinaryProblems}
+                </span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 sm:px-6 pb-6 pt-2">
+              <UrinaryProblemsSection
+                answers={answers}
+                onAnswerChange={handleAnswerChange}
+                keyPrefix={animalPrefix}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
-      {hasSkinItching && (
-        <SkinItchingSection 
-          answers={answers}
-          onAnswerChange={handleAnswerChange}
-          keyPrefix={animalPrefix}
-        />
-      )}
+        {hasSkinItching && (
+          <AccordionItem value="skinItching" className="border rounded-lg bg-card shadow-sm">
+            <AccordionTrigger className="px-4 sm:px-6 py-4 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="h-2 w-2 rounded-full bg-orange-500" />
+                <span className="text-base sm:text-lg font-semibold text-foreground">
+                  {symptomLabels.skinItching}
+                </span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 sm:px-6 pb-6 pt-2">
+              <SkinItchingSection
+                answers={answers}
+                onAnswerChange={handleAnswerChange}
+                keyPrefix={animalPrefix}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
-      {hasWound && (
-        <WoundSection 
-          answers={answers}
-          onAnswerChange={handleAnswerChange}
-          onFileChange={handleFileChange}
-          keyPrefix={animalPrefix}
-        />
-      )}
+        {hasWound && (
+          <AccordionItem value="wound" className="border rounded-lg bg-card shadow-sm">
+            <AccordionTrigger className="px-4 sm:px-6 py-4 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="h-2 w-2 rounded-full bg-red-500" />
+                <span className="text-base sm:text-lg font-semibold text-foreground">
+                  {symptomLabels.wound}
+                </span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 sm:px-6 pb-6 pt-2">
+              <WoundSection
+                answers={answers}
+                onAnswerChange={handleAnswerChange}
+                onFileChange={handleFileChange}
+                keyPrefix={animalPrefix}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
-      {hasEarProblems && (
-        <EarProblemsSection 
-          answers={answers}
-          onAnswerChange={handleAnswerChange}
-          keyPrefix={animalPrefix}
-        />
-      )}
+        {hasEarProblems && (
+          <AccordionItem value="earProblems" className="border rounded-lg bg-card shadow-sm">
+            <AccordionTrigger className="px-4 sm:px-6 py-4 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="h-2 w-2 rounded-full bg-violet-500" />
+                <span className="text-base sm:text-lg font-semibold text-foreground">
+                  {symptomLabels.earProblems}
+                </span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 sm:px-6 pb-6 pt-2">
+              <EarProblemsSection
+                answers={answers}
+                onAnswerChange={handleAnswerChange}
+                keyPrefix={animalPrefix}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
-      {hasEyeDischarge && (
-        <EyeDischargeSection 
-          answers={answers}
-          onAnswerChange={handleAnswerChange}
-          keyPrefix={animalPrefix}
-        />
-      )}
+        {hasEyeDischarge && (
+          <AccordionItem value="eyeDischarge" className="border rounded-lg bg-card shadow-sm">
+            <AccordionTrigger className="px-4 sm:px-6 py-4 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="h-2 w-2 rounded-full bg-blue-500" />
+                <span className="text-base sm:text-lg font-semibold text-foreground">
+                  {symptomLabels.eyeDischarge}
+                </span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 sm:px-6 pb-6 pt-2">
+              <EyeDischargeSection
+                answers={answers}
+                onAnswerChange={handleAnswerChange}
+                keyPrefix={animalPrefix}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
-      {hasLameness && (
-        <LamenessSection 
-          answers={answers}
-          onAnswerChange={handleAnswerChange}
-          keyPrefix={animalPrefix}
-        />
-      )}
+        {hasLameness && (
+          <AccordionItem value="lameness" className="border rounded-lg bg-card shadow-sm">
+            <AccordionTrigger className="px-4 sm:px-6 py-4 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="h-2 w-2 rounded-full bg-indigo-500" />
+                <span className="text-base sm:text-lg font-semibold text-foreground">
+                  {symptomLabels.lameness}
+                </span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 sm:px-6 pb-6 pt-2">
+              <LamenessSection
+                answers={answers}
+                onAnswerChange={handleAnswerChange}
+                keyPrefix={animalPrefix}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
-      {hasBreathingDifficulties && (
-        <BreathingDifficultiesSection 
-          answers={answers}
-          onAnswerChange={handleAnswerChange}
-          keyPrefix={animalPrefix}
-        />
-      )}
+        {hasBreathingDifficulties && (
+          <AccordionItem value="breathingDifficulties" className="border rounded-lg bg-card shadow-sm">
+            <AccordionTrigger className="px-4 sm:px-6 py-4 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="h-2 w-2 rounded-full bg-rose-500" />
+                <span className="text-base sm:text-lg font-semibold text-foreground">
+                  {symptomLabels.breathingDifficulties}
+                </span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 sm:px-6 pb-6 pt-2">
+              <BreathingDifficultiesSection
+                answers={answers}
+                onAnswerChange={handleAnswerChange}
+                keyPrefix={animalPrefix}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
-      {hasLump && (
-        <LumpSection 
-          answers={answers}
-          onAnswerChange={handleAnswerChange}
-          onFileChange={handleFileChange}
-          keyPrefix={animalPrefix}
-        />
-      )}
+        {hasLump && (
+          <AccordionItem value="lump" className="border rounded-lg bg-card shadow-sm">
+            <AccordionTrigger className="px-4 sm:px-6 py-4 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="h-2 w-2 rounded-full bg-purple-500" />
+                <span className="text-base sm:text-lg font-semibold text-foreground">
+                  {symptomLabels.lump}
+                </span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 sm:px-6 pb-6 pt-2">
+              <LumpSection
+                answers={answers}
+                onAnswerChange={handleAnswerChange}
+                onFileChange={handleFileChange}
+                keyPrefix={animalPrefix}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
-      {hasAggression && (
-        <AggressiveSection 
-          answers={answers}
-          onAnswerChange={handleAnswerChange}
-          keyPrefix={animalPrefix}
-        />
-      )}
+        {hasAggression && (
+          <AccordionItem value="aggression" className="border rounded-lg bg-card shadow-sm">
+            <AccordionTrigger className="px-4 sm:px-6 py-4 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="h-2 w-2 rounded-full bg-red-600" />
+                <span className="text-base sm:text-lg font-semibold text-foreground">
+                  {symptomLabels.aggression}
+                </span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 sm:px-6 pb-6 pt-2">
+              <AggressiveSection
+                answers={answers}
+                onAnswerChange={handleAnswerChange}
+                keyPrefix={animalPrefix}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        )}
+      </Accordion>
     </div>
   );
 };
