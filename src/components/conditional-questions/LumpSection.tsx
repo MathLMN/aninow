@@ -24,21 +24,21 @@ const LumpSection = ({ answers, onAnswerChange, onFileChange, keyPrefix = '' }: 
   ];
 
   return (
-    <div className="space-y-8 sm:space-y-10">
+    <div className="space-y-6 sm:space-y-8">
       {questions.map((question, index) => (
         <div key={question.key}>
-          <div className="space-y-5 sm:space-y-6">
+          <div className="space-y-3 sm:space-y-6">
             <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm sm:text-base font-bold">
+              <div className="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs sm:text-base font-bold">
                 {index + 1}
               </div>
-              <h3 className="text-base sm:text-lg text-foreground font-semibold text-left flex-1 pt-0.5">
+              <h3 className="text-sm sm:text-lg text-foreground font-semibold text-left flex-1 pt-0.5">
                 {question.title}
                 <span className="text-destructive ml-1">*</span>
               </h3>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 ml-0 sm:ml-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 ml-0 sm:ml-10">
               {question.options.map((option) => (
                 <SelectionButton
                   key={option}
@@ -54,18 +54,18 @@ const LumpSection = ({ answers, onAnswerChange, onFileChange, keyPrefix = '' }: 
             </div>
           </div>
           
-          <Separator className="mt-8 sm:mt-10" />
+          <Separator className="mt-6 sm:mt-8" />
         </div>
       ))}
 
       {/* Photo upload section */}
-      <div className="space-y-5 sm:space-y-6">
+      <div className="space-y-3 sm:space-y-6">
         <div className="space-y-2">
           <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm sm:text-base font-bold">
+            <div className="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs sm:text-base font-bold">
               {questions.length + 1}
             </div>
-            <h3 className="text-base sm:text-lg text-foreground font-semibold text-left flex-1 pt-0.5">
+            <h3 className="text-sm sm:text-lg text-foreground font-semibold text-left flex-1 pt-0.5">
               📸 Photo de la grosseur
               <span className="text-sm text-muted-foreground ml-2 font-normal">(optionnel mais recommandé)</span>
             </h3>

@@ -16,18 +16,18 @@ const BloodInStoolSection = ({ answers, onAnswerChange, keyPrefix = '' }: BloodI
   };
 
   return (
-    <div className="space-y-5 sm:space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm sm:text-base font-bold">
+        <div className="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs sm:text-base font-bold">
           1
         </div>
-        <h3 className="text-base sm:text-lg text-foreground font-semibold text-left flex-1 pt-0.5">
+        <h3 className="text-sm sm:text-lg text-foreground font-semibold text-left flex-1 pt-0.5">
           {question.title}
           <span className="text-destructive ml-1">*</span>
         </h3>
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 ml-0 sm:ml-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 ml-0 sm:ml-10">
         {question.options.map((option) => (
           <SelectionButton
             key={option}
