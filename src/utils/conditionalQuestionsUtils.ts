@@ -53,8 +53,9 @@ export const getSymptomSectionMetadata = (symptomType: string): SectionMetadata 
     },
     lameness: {
       key: 'lameness',
-      questionCount: 1,
-      requiredQuestionKeys: ['paw_position']
+      questionCount: 2,
+      requiredQuestionKeys: ['paw_position', 'recent_event'],
+      optionalKeys: ['event_details']
     },
     aggression: {
       key: 'aggression',
