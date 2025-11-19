@@ -44,19 +44,27 @@ interface AccordionTriggerContentProps {
   contextText?: string;
 }
 
-const AccordionTriggerContent = ({ label, questionCount, isComplete, color }: AccordionTriggerContentProps) => (
-  <div className="flex items-center justify-between w-full">
-    <div className="flex items-center gap-3">
-      <div className={`h-2 w-2 rounded-full ${color}`} />
-      <span className={`text-base sm:text-lg font-semibold ${isComplete ? 'text-muted-foreground' : 'text-foreground'}`}>
-        {label}
-      </span>
-      <span className="text-xs sm:text-sm text-muted-foreground font-normal">
-        ({questionCount} question{questionCount > 1 ? 's' : ''})
-      </span>
+const AccordionTriggerContent = ({ label, questionCount, isComplete, color, contextText }: AccordionTriggerContentProps) => (
+  <div className="flex flex-col items-start w-full gap-1.5">
+    <div className="flex items-center justify-between w-full">
+      <div className="flex items-center gap-3">
+        <div className={`h-2 w-2 rounded-full ${color}`} />
+        <span className={`text-base sm:text-lg font-semibold ${isComplete ? 'text-muted-foreground' : 'text-foreground'}`}>
+          {label}
+        </span>
+        <span className="text-xs sm:text-sm text-muted-foreground font-normal">
+          ({questionCount} question{questionCount > 1 ? 's' : ''})
+        </span>
+      </div>
+      {isComplete && (
+        <Check className="h-5 w-5 text-green-600 mr-2" />
+      )}
     </div>
-    {isComplete && (
-      <Check className="h-5 w-5 text-green-600 mr-2" />
+    {contextText && (
+      <div className="ml-5 text-xs text-muted-foreground flex items-start gap-1.5">
+        <span>💡</span>
+        <span>{contextText}</span>
+      </div>
     )}
   </div>
 );
@@ -444,12 +452,13 @@ const ConditionalQuestionsForm = ({
                 questionCount={sharedQuestionsCount}
                 isComplete={isSharedComplete}
                 color="bg-primary"
+                contextText={sharedQuestionsContext}
               />
             </AccordionTrigger>
             <AccordionContent className="px-4 sm:px-6 pb-6 pt-2">
-              <div className="mb-6 p-3 bg-blue-50 border-l-4 border-blue-400 rounded">
-                <p className="text-sm text-blue-800 flex items-start gap-2">
-                  <span className="text-base">💡</span>
+              <div className="mb-4 p-2 bg-blue-50 border-l-2 border-blue-400 rounded">
+                <p className="text-xs text-blue-800 flex items-start gap-1.5">
+                  <span className="text-sm">💡</span>
                   <span>{sharedQuestionsContext}</span>
                 </p>
               </div>
@@ -482,13 +491,14 @@ const ConditionalQuestionsForm = ({
                   questionCount={section.metadata.questionCount}
                   isComplete={section.isComplete}
                   color={color}
+                  contextText={section.contextText}
                 />
               </AccordionTrigger>
               <AccordionContent className="px-4 sm:px-6 pb-6 pt-2">
                 {section.contextText && (
-                  <div className="mb-6 p-3 bg-blue-50 border-l-4 border-blue-400 rounded">
-                    <p className="text-sm text-blue-800 flex items-start gap-2">
-                      <span className="text-base">💡</span>
+                  <div className="mb-4 p-2 bg-blue-50 border-l-2 border-blue-400 rounded">
+                    <p className="text-xs text-blue-800 flex items-start gap-1.5">
+                      <span className="text-sm">💡</span>
                       <span>{section.contextText}</span>
                     </p>
                   </div>
