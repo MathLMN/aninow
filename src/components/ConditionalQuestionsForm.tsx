@@ -142,7 +142,7 @@ const ConditionalQuestionsForm = ({
     skin_itching: "Pour identifier la cause (allergie, parasites, infection).",
     lameness: "Pour évaluer la gravité de la boiterie et son origine.",
     aggression: "Pour assurer la sécurité lors de la consultation.",
-    other_symptom: "Ces questions générales permettent au vétérinaire d'évaluer l'urgence et de mieux préparer votre consultation."
+    other_symptom: "Ces questions nous permettent d'évaluer le caractère urgent de la situation."
   };
 
   const sharedQuestionsContext = "Pour évaluer l'état général et le confort de votre animal.";
