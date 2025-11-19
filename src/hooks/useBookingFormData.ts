@@ -87,9 +87,32 @@ export const useBookingFormData = () => {
 
   // Sauvegarder les données dans le localStorage
   const updateBookingData = (newData: Partial<CompleteBookingData>) => {
-    const updatedData = { ...bookingData, ...newData }
-    setBookingData(updatedData)
-    localStorage.setItem('bookingFormData', JSON.stringify(updatedData))
+    console.log('📸 useBookingFormData.updateBookingData called with:', newData);
+    
+    // Log des photos si présentes
+    if (newData.conditionalAnswers) {
+      const photoKeys = Object.keys(newData.conditionalAnswers).filter(k => k.includes('photo'));
+      console.log('📸 useBookingFormData: Photo keys in conditionalAnswers:', photoKeys);
+      photoKeys.forEach(key => {
+        const value = newData.conditionalAnswers![key];
+        console.log(`📸 useBookingFormData: ${key} =`, {
+          value,
+          type: typeof value,
+          hasBase64: value && typeof value === 'object' && 'base64' in value,
+          base64Length: value && typeof value === 'object' && 'base64' in value ? value.base64.length : 0
+        });
+      });
+    }
+    
+    const updatedData = { ...bookingData, ...newData };
+    setBookingData(updatedData);
+    
+    console.log('📸 useBookingFormData: About to stringify and save to localStorage');
+    const stringified = JSON.stringify(updatedData);
+    console.log('📸 useBookingFormData: Stringified length:', stringified.length);
+    
+    localStorage.setItem('bookingFormData', stringified);
+    console.log('📸 useBookingFormData: Saved to localStorage');
   }
 
   // Réinitialiser les données
