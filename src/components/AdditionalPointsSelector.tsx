@@ -2,6 +2,7 @@
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { X } from "lucide-react";
 
 interface AdditionalPointsSelectorProps {
   selectedPoints: string[];
@@ -69,28 +70,70 @@ const AdditionalPointsSelector: React.FC<AdditionalPointsSelectorProps> = ({
   };
 
   const showCustomInput = selectedPoints.includes('autre');
+  const selectedPointsData = ADDITIONAL_POINTS.filter(point => selectedPoints.includes(point.id));
+  const availablePointsData = ADDITIONAL_POINTS.filter(point => !selectedPoints.includes(point.id));
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Tags des points supplémentaires */}
-      <div className="flex flex-wrap gap-2">
-        {ADDITIONAL_POINTS.map((point) => {
-          const isSelected = selectedPoints.includes(point.id);
-          return (
-            <button
-              key={point.id}
-              type="button"
-              onClick={() => handlePointToggle(point.id, !isSelected)}
-              className={`
-                inline-flex items-center px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium border transition-all duration-200 cursor-pointer hover:shadow-sm active:scale-95
-                ${getTagColorClasses(point.color, isSelected)}
-              `}
-            >
-              {point.label}
-            </button>
-          );
-        })}
+      {/* Indication de multi-sélection */}
+      <div className="flex items-start gap-2 p-3 bg-blue-50 border-l-4 border-blue-400 rounded">
+        <span className="text-lg">💡</span>
+        <p className="text-xs sm:text-sm text-blue-800">
+          Vous pouvez sélectionner plusieurs points. Cliquez sur un point sélectionné pour le retirer.
+        </p>
       </div>
+
+      {/* Points sélectionnés */}
+      {selectedPointsData.length > 0 && (
+        <div className="space-y-2">
+          <Label className="text-sm sm:text-base font-medium text-vet-navy flex items-center gap-2">
+            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-vet-sage text-white text-xs font-bold">
+              {selectedPointsData.length}
+            </span>
+            Point{selectedPointsData.length > 1 ? 's' : ''} sélectionné{selectedPointsData.length > 1 ? 's' : ''}
+          </Label>
+          <div className="flex flex-wrap gap-2 p-3 bg-vet-sage/10 rounded-lg border-2 border-vet-sage/30">
+            {selectedPointsData.map((point) => (
+              <button
+                key={point.id}
+                type="button"
+                onClick={() => handlePointToggle(point.id, false)}
+                className={`
+                  inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium border transition-all duration-200 cursor-pointer hover:shadow-md active:scale-95
+                  ${getTagColorClasses(point.color, true)}
+                `}
+              >
+                {point.label}
+                <X className="h-3 w-3 sm:h-4 sm:w-4" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Points disponibles */}
+      {availablePointsData.length > 0 && (
+        <div className="space-y-2">
+          <Label className="text-sm sm:text-base font-medium text-gray-600">
+            Autres points disponibles
+          </Label>
+          <div className="flex flex-wrap gap-2">
+            {availablePointsData.map((point) => (
+              <button
+                key={point.id}
+                type="button"
+                onClick={() => handlePointToggle(point.id, true)}
+                className={`
+                  inline-flex items-center px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium border transition-all duration-200 cursor-pointer hover:shadow-sm active:scale-95
+                  ${getTagColorClasses(point.color, false)}
+                `}
+              >
+                {point.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Zone de texte personnalisée si "Autre" est sélectionné */}
       {showCustomInput && (
