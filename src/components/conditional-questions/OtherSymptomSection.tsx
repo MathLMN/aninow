@@ -1,5 +1,6 @@
 import SharedQuestionsSection from "@/components/conditional-questions/SharedQuestionsSection";
 import { Separator } from "@/components/ui/separator";
+import MultiPhotoUpload from "./MultiPhotoUpload";
 
 interface OtherSymptomSectionProps {
   answers: {[key: string]: string | File};
@@ -37,31 +38,25 @@ const OtherSymptomSection = ({
               5
             </div>
             <h3 className="text-sm sm:text-lg text-foreground font-semibold text-left flex-1 pt-0.5">
-              📸 Photo du symptôme
+              📸 Photos du symptôme
               <span className="text-sm text-muted-foreground ml-2 font-normal">(optionnel mais recommandé)</span>
             </h3>
           </div>
           <div className="w-full p-2 bg-blue-50 border-l-4 border-blue-400 rounded ml-0 sm:ml-10">
             <p className="text-xs text-blue-800 text-left flex items-start gap-2">
               <span className="text-sm">💡</span>
-              <span>Une photo permet au vétérinaire de mieux comprendre la situation et de préparer votre consultation.</span>
+              <span>Les photos permettent au vétérinaire de mieux comprendre la situation et de préparer votre consultation.</span>
             </p>
           </div>
         </div>
         
-        <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary/50 transition-colors ml-0 sm:ml-10">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => onFileChange('other_photo', e.target.files?.[0] || null)}
-            className="w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
-          />
-          {answers[keyPrefix + 'other_photo'] && (
-            <p className="text-sm text-green-600 mt-2">
-              ✓ Photo ajoutée : {(answers[keyPrefix + 'other_photo'] as File).name}
-            </p>
-          )}
-        </div>
+        <MultiPhotoUpload
+          photoKey="other_photo"
+          keyPrefix={keyPrefix}
+          answers={answers}
+          onFileChange={onFileChange}
+          maxPhotos={3}
+        />
       </div>
     </div>
   );
