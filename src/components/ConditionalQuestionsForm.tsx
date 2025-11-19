@@ -456,12 +456,6 @@ const ConditionalQuestionsForm = ({
               />
             </AccordionTrigger>
             <AccordionContent className="px-4 sm:px-6 pb-6 pt-2">
-              <div className="mb-4 p-2 bg-blue-50 border-l-2 border-blue-400 rounded">
-                <p className="text-xs text-blue-800 flex items-start gap-1.5">
-                  <span className="text-sm">💡</span>
-                  <span>{sharedQuestionsContext}</span>
-                </p>
-              </div>
               <SharedQuestionsSection
                 answers={answers}
                 onAnswerChange={handleAnswerChange}
@@ -495,14 +489,6 @@ const ConditionalQuestionsForm = ({
                 />
               </AccordionTrigger>
               <AccordionContent className="px-4 sm:px-6 pb-6 pt-2">
-                {section.contextText && (
-                  <div className="mb-4 p-2 bg-blue-50 border-l-2 border-blue-400 rounded">
-                    <p className="text-xs text-blue-800 flex items-start gap-1.5">
-                      <span className="text-sm">💡</span>
-                      <span>{section.contextText}</span>
-                    </p>
-                  </div>
-                )}
                 {section.component}
               </AccordionContent>
             </AccordionItem>
