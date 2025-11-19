@@ -13,6 +13,7 @@ import LamenessSection from "@/components/conditional-questions/LamenessSection"
 import BreathingDifficultiesSection from "@/components/conditional-questions/BreathingDifficultiesSection";
 import LumpSection from "@/components/conditional-questions/LumpSection";
 import AggressiveSection from "@/components/conditional-questions/AggressiveSection";
+import OtherSymptomSection from "@/components/conditional-questions/OtherSymptomSection";
 import {
   Accordion,
   AccordionContent,
@@ -103,7 +104,8 @@ const ConditionalQuestionsForm = ({
     hasBreathingDifficulties,
     hasLump,
     hasListlessness,
-    hasAggression
+    hasAggression,
+    hasOtherSymptom
   } = useSymptomDetection(selectedSymptoms, customSymptom);
 
   // Initialiser les réponses avec les données sauvegardées
@@ -139,7 +141,8 @@ const ConditionalQuestionsForm = ({
     breathing_difficulties: "Pour évaluer une détresse respiratoire potentielle.",
     skin_itching: "Pour identifier la cause (allergie, parasites, infection).",
     lameness: "Pour évaluer la gravité de la boiterie et son origine.",
-    aggression: "Pour assurer la sécurité lors de la consultation."
+    aggression: "Pour assurer la sécurité lors de la consultation.",
+    other_symptom: "Ces questions générales permettent au vétérinaire d'évaluer l'urgence et de mieux préparer votre consultation."
   };
 
   const sharedQuestionsContext = "Pour évaluer l'état général et le confort de votre animal.";
@@ -377,6 +380,25 @@ const ConditionalQuestionsForm = ({
       });
     }
     
+    if (hasOtherSymptom) {
+      const metadata = getSymptomSectionMetadata('other_symptom');
+      sections.push({
+        value: 'otherSymptom',
+        label: 'Informations générales sur le symptôme',
+        metadata,
+        isComplete: isSectionComplete(answers, metadata.requiredQuestionKeys, animalPrefix),
+        component: (
+          <OtherSymptomSection
+            answers={answers}
+            onAnswerChange={handleAnswerChange}
+            onFileChange={handleFileChange}
+            keyPrefix={animalPrefix}
+          />
+        ),
+        contextText: symptomContextTexts.other_symptom
+      });
+    }
+    
     return sections;
   }, [
     answers, 
@@ -390,7 +412,8 @@ const ConditionalQuestionsForm = ({
     hasLameness,
     hasBreathingDifficulties,
     hasLump,
-    hasAggression
+    hasAggression,
+    hasOtherSymptom
   ]);
 
   // Calculer quelles sections doivent être ouvertes par défaut (Optimisation 1)

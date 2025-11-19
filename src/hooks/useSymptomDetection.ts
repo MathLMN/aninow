@@ -84,6 +84,14 @@ export const useSymptomDetection = (selectedSymptoms: string[], customSymptom: s
     symptom.toLowerCase().includes('agressif')
   ) || customSymptom.toLowerCase().includes('agressif');
 
+  // Vérifier si "autre" est sélectionné ET qu'aucun mot-clé spécifique n'est détecté
+  const hasOtherSymptom = selectedSymptoms.includes('autre') && 
+    !needsQuestions && !hasLossOfAppetite && !hasExcessiveThirst && 
+    !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && 
+    !hasWound && !hasEarProblems && !hasEyeDischarge && 
+    !hasLameness && !hasBreathingDifficulties && !hasLump && 
+    !hasListlessness && !hasAggression;
+
   return {
     needsQuestions,
     hasLossOfAppetite,
@@ -98,7 +106,8 @@ export const useSymptomDetection = (selectedSymptoms: string[], customSymptom: s
     hasBreathingDifficulties,
     hasLump,
     hasListlessness,
-    hasAggression
+    hasAggression,
+    hasOtherSymptom
   };
 };
 

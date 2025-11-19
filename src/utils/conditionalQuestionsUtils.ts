@@ -60,6 +60,12 @@ export const getSymptomSectionMetadata = (symptomType: string): SectionMetadata 
       key: 'aggression',
       questionCount: 1,
       requiredQuestionKeys: ['bite_history']
+    },
+    other_symptom: {
+      key: 'other_symptom',
+      questionCount: 4,
+      requiredQuestionKeys: ['general_form', 'eating', 'drinking', 'pain_complaints'],
+      optionalKeys: ['other_photo']
     }
   };
   

@@ -80,6 +80,14 @@ export const filterConditionalAnswers = (
   
   detection.hasAggression = selectedSymptoms.some(s => s.toLowerCase().includes('agressif')) || 
     customSymptom.toLowerCase().includes('agressif');
+  
+  // Vérifier si "autre" est sélectionné sans mot-clé spécifique
+  const hasOther = selectedSymptoms.includes('autre') && 
+    !detection.needsQuestions && !detection.hasLossOfAppetite && !detection.hasExcessiveThirst && 
+    !detection.hasBloodInStool && !detection.hasUrinaryProblems && !detection.hasSkinItching && 
+    !detection.hasWound && !detection.hasEarProblems && !detection.hasEyeDischarge && 
+    !detection.hasLameness && !detection.hasBreathingDifficulties && !detection.hasLump && 
+    !detection.hasListlessness && !detection.hasAggression;
 
   // Construire la liste des clés de questions autorisées
   const allowedKeys: Set<string> = new Set();
