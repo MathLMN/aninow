@@ -126,7 +126,7 @@ const ConditionalQuestionsForm = ({
     }
   }, [initialAnswers, animalPrefix]);
 
-  if (!needsQuestions && !hasLossOfAppetite && !hasExcessiveThirst && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems && !hasEyeDischarge && !hasLameness && !hasBreathingDifficulties && !hasLump && !hasListlessness && !hasAggression) {
+  if (!needsQuestions && !hasLossOfAppetite && !hasExcessiveThirst && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems && !hasEyeDischarge && !hasLameness && !hasBreathingDifficulties && !hasLump && !hasListlessness && !hasAggression && !hasOtherSymptom) {
     return null;
   }
 
@@ -415,12 +415,6 @@ const ConditionalQuestionsForm = ({
     hasAggression,
     hasOtherSymptom
   ]);
-
-  console.log('ConditionalQuestionsForm - activeSymptomSections:', {
-    hasOtherSymptom,
-    sectionsCount: activeSymptomSections.length,
-    sections: activeSymptomSections.map(s => ({ value: s.value, label: s.label, isComplete: s.isComplete }))
-  });
 
   // Calculer quelles sections doivent être ouvertes par défaut (Optimisation 1)
   const defaultOpenSections = useMemo(() => {
