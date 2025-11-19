@@ -53,10 +53,19 @@ const MultiPhotoUpload = ({
         size: file.size
       };
       
+      console.log('📸 PhotoData created:', {
+        key: photoKey,
+        filename: photoData.filename,
+        type: photoData.type,
+        size: photoData.size,
+        base64Length: photoData.base64.length
+      });
+      
       // Find the next available slot
       for (let i = 1; i <= maxPhotos; i++) {
         const key = `${photoKey}_${i}`;
         if (!answers[keyPrefix + key]) {
+          console.log('📸 Calling onFileChange with key:', keyPrefix + key);
           onFileChange(key, photoData);
           break;
         }

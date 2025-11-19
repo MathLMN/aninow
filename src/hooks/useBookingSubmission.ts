@@ -30,11 +30,23 @@ export const useBookingSubmission = () => {
   ): Promise<any> => {
     if (!conditionalAnswers) return conditionalAnswers;
 
+    console.log('📤 uploadPhotosToStorage called with:', { 
+      clinicId, 
+      bookingId,
+      keys: Object.keys(conditionalAnswers).filter(k => k.includes('photo'))
+    });
+
     const updatedAnswers = { ...conditionalAnswers };
     
     for (const [key, value] of Object.entries(conditionalAnswers)) {
       // Détecter les clés de photos (wound_photo_X, lump_photo_X, other_symptom_photo_X)
       if (key.includes('photo')) {
+        console.log(`📤 Processing photo key: ${key}`, {
+          valueType: typeof value,
+          isFile: value instanceof File,
+          hasBase64: value && typeof value === 'object' && 'base64' in value,
+          value: value instanceof File ? 'File object' : value
+        });
         // Gérer les objets File (ancien format, rétrocompatibilité)
         if (value instanceof File) {
           const file = value as File;
