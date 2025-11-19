@@ -384,7 +384,7 @@ const ConditionalQuestionsForm = ({
       const metadata = getSymptomSectionMetadata('other_symptom');
       sections.push({
         value: 'otherSymptom',
-        label: 'Informations générales sur le symptôme',
+        label: 'Questions pour ce symptôme',
         metadata,
         isComplete: isSectionComplete(answers, metadata.requiredQuestionKeys, animalPrefix),
         component: (
