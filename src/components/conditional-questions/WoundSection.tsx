@@ -33,15 +33,20 @@ const WoundSection = ({ answers, onAnswerChange, onFileChange, keyPrefix = '' }:
   ];
 
   return (
-    <>
-      {questions.map((question) => (
-        <div key={question.key} className="space-y-4 sm:space-y-6">
-          <h3 className="text-base sm:text-lg text-vet-navy text-left mb-4 sm:mb-6">
-            {question.title}
-            <span className="text-red-500 ml-1">*</span>
-          </h3>
+    <div className="space-y-6 sm:space-y-8">
+      {questions.map((question, index) => (
+        <div key={question.key} className="space-y-4 sm:space-y-6 p-4 sm:p-6 bg-accent/30 rounded-lg border-l-4 border-primary">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs sm:text-sm font-bold">
+              {index + 1}
+            </div>
+            <h3 className="text-base sm:text-lg text-foreground font-semibold text-left flex-1">
+              {question.title}
+              <span className="text-destructive ml-1">*</span>
+            </h3>
+          </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 ml-0 sm:ml-10">
             {question.options.map((option) => (
               <SelectionButton
                 key={option}
@@ -59,18 +64,23 @@ const WoundSection = ({ answers, onAnswerChange, onFileChange, keyPrefix = '' }:
       ))}
 
       {/* Photo upload section */}
-      <div className="space-y-4 sm:space-y-6">
+      <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 bg-accent/30 rounded-lg border-l-4 border-primary">
         <div className="space-y-2">
-          <h3 className="text-base sm:text-lg text-vet-navy text-left">
-            📸 Photo de la plaie
-            <span className="text-sm text-gray-500 ml-2 font-normal">(optionnel mais recommandé)</span>
-          </h3>
-          <p className="text-sm text-gray-600 text-left">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs sm:text-sm font-bold">
+              {questions.length + 1}
+            </div>
+            <h3 className="text-base sm:text-lg text-foreground font-semibold text-left flex-1">
+              📸 Photo de la plaie
+              <span className="text-sm text-muted-foreground ml-2 font-normal">(optionnel mais recommandé)</span>
+            </h3>
+          </div>
+          <p className="text-sm text-muted-foreground text-left ml-0 sm:ml-10">
             Une photo permet au vétérinaire d'évaluer la gravité à l'avance et de préparer le matériel nécessaire pour soigner votre animal.
           </p>
         </div>
         
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-vet-sage/50 transition-colors">
+        <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary/50 transition-colors ml-0 sm:ml-10">
           <input
             type="file"
             accept="image/*"
@@ -82,13 +92,13 @@ const WoundSection = ({ answers, onAnswerChange, onFileChange, keyPrefix = '' }:
             htmlFor={`${keyPrefix}wound-photo-upload`}
             className="cursor-pointer flex flex-col items-center space-y-2"
           >
-            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-foreground">
               Cliquez pour choisir une photo ou faites-la glisser ici
             </span>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted-foreground">
               Format accepté : JPG, PNG, WEBP
             </span>
           </label>
@@ -102,7 +112,7 @@ const WoundSection = ({ answers, onAnswerChange, onFileChange, keyPrefix = '' }:
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
