@@ -92,16 +92,6 @@ export const useSymptomDetection = (selectedSymptoms: string[], customSymptom: s
     !hasLameness && !hasBreathingDifficulties && !hasLump && 
     !hasListlessness && !hasAggression;
 
-  console.log('useSymptomDetection - hasOtherSymptom:', {
-    selectedSymptoms,
-    customSymptom,
-    hasOtherSymptom,
-    includesAutre: selectedSymptoms.includes('autre'),
-    needsQuestions,
-    hasLossOfAppetite,
-    hasExcessiveThirst
-  });
-
   return {
     needsQuestions,
     hasLossOfAppetite,
