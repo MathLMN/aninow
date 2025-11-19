@@ -47,6 +47,16 @@ const ConditionalQuestions = () => {
   };
 
   const handleNext = () => {
+    console.log('📸 ConditionalQuestions: handleNext called with answers:', answers);
+    console.log('📸 ConditionalQuestions: Checking photo keys:', 
+      Object.keys(answers).filter(k => k.includes('photo')).map(k => ({
+        key: k,
+        value: answers[k],
+        type: typeof answers[k],
+        hasBase64: answers[k] && typeof answers[k] === 'object' && 'base64' in answers[k]
+      }))
+    );
+    
     updateBookingData({
       conditionalAnswers: answers
     });

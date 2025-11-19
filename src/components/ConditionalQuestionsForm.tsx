@@ -158,10 +158,19 @@ const ConditionalQuestionsForm = ({
 
   const handleFileChange = (questionKey: string, value: PhotoData | null) => {
     const prefixedKey = animalPrefix + questionKey;
+    console.log('📸 ConditionalQuestionsForm.handleFileChange called:', {
+      questionKey,
+      prefixedKey,
+      value,
+      valueType: value ? typeof value : null,
+      hasBase64: value && typeof value === 'object' && 'base64' in value
+    });
+    
     const newAnswers = { ...answers, [prefixedKey]: value };
     setAnswers(newAnswers);
     onAnswersChange(newAnswers);
-    console.log('ConditionalQuestionsForm: Photo changed:', prefixedKey, '=', value ? 'PhotoData' : null);
+    
+    console.log('📸 ConditionalQuestionsForm: newAnswers after photo:', newAnswers);
   };
 
   // Déterminer quelles questions partagées sont nécessaires
