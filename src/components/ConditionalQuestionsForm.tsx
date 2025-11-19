@@ -47,17 +47,17 @@ interface AccordionTriggerContentProps {
 const AccordionTriggerContent = ({ label, questionCount, isComplete, color, contextText }: AccordionTriggerContentProps) => (
   <div className="flex flex-col items-start w-full gap-3">
     <div className="flex items-center justify-between w-full">
-      <div className="flex items-center gap-3">
-        <div className={`h-2 w-2 rounded-full ${color}`} />
-        <span className={`text-base sm:text-lg font-semibold text-left ${isComplete ? 'text-muted-foreground' : 'text-foreground'}`}>
+      <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
+        <div className={`h-2 w-2 rounded-full ${color} flex-shrink-0`} />
+        <span className={`text-sm sm:text-base md:text-lg font-semibold text-left ${isComplete ? 'text-muted-foreground' : 'text-foreground'}`}>
           {label}
         </span>
-        <span className="text-xs sm:text-sm text-muted-foreground font-normal">
+        <span className="text-[10px] sm:text-xs md:text-sm text-muted-foreground font-normal whitespace-nowrap">
           ({questionCount} question{questionCount > 1 ? 's' : ''})
         </span>
       </div>
       {isComplete && (
-        <Check className="h-5 w-5 text-green-600 mr-2" />
+        <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 mr-2 flex-shrink-0" />
       )}
     </div>
     {contextText && (
@@ -130,19 +130,19 @@ const ConditionalQuestionsForm = ({
 
   // Textes contextuels pour expliquer l'utilité des questions
   const symptomContextTexts: Record<string, string> = {
-    blood_in_stool: "Ces informations aident le vétérinaire à évaluer la gravité du problème digestif.",
-    urinary_problems: "Ces détails permettent d'identifier rapidement un problème urinaire urgent.",
-    wound: "Ces précisions aident à déterminer si la plaie nécessite des soins immédiats.",
-    lump: "Ces informations permettent d'évaluer la nature et l'urgence de la grosseur.",
-    ear_problems: "Ces détails aident à diagnostiquer une infection ou inflammation de l'oreille.",
-    eye_discharge: "Ces informations permettent d'évaluer la gravité de l'atteinte oculaire.",
-    breathing_difficulties: "Ces détails sont essentiels pour évaluer une détresse respiratoire potentielle.",
-    skin_itching: "Ces précisions aident à identifier la cause des démangeaisons (allergie, parasites, infection).",
-    lameness: "Ces informations permettent d'évaluer la gravité de la boiterie et son origine.",
-    aggression: "Ces détails sont importants pour la sécurité lors de la consultation."
+    blood_in_stool: "Pour évaluer la gravité du problème digestif.",
+    urinary_problems: "Pour identifier rapidement un problème urgent.",
+    wound: "Pour déterminer si des soins immédiats sont nécessaires.",
+    lump: "Pour évaluer la nature et l'urgence de la grosseur.",
+    ear_problems: "Pour diagnostiquer une infection ou inflammation.",
+    eye_discharge: "Pour évaluer la gravité de l'atteinte oculaire.",
+    breathing_difficulties: "Pour évaluer une détresse respiratoire potentielle.",
+    skin_itching: "Pour identifier la cause (allergie, parasites, infection).",
+    lameness: "Pour évaluer la gravité de la boiterie et son origine.",
+    aggression: "Pour assurer la sécurité lors de la consultation."
   };
 
-  const sharedQuestionsContext = "Ces informations aident le vétérinaire à évaluer l'état général et le niveau de confort de votre animal.";
+  const sharedQuestionsContext = "Pour évaluer l'état général et le confort de votre animal.";
 
   const handleAnswerChange = (questionKey: string, value: string) => {
     const prefixedKey = animalPrefix + questionKey;
