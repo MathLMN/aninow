@@ -41,6 +41,7 @@ interface AccordionTriggerContentProps {
   questionCount: number;
   isComplete: boolean;
   color: string;
+  contextText?: string;
 }
 
 const AccordionTriggerContent = ({ label, questionCount, isComplete, color }: AccordionTriggerContentProps) => (
@@ -66,6 +67,7 @@ interface ActiveSymptomSection {
   metadata: SectionMetadata;
   isComplete: boolean;
   component: JSX.Element;
+  contextText?: string;
 }
 
 const ConditionalQuestionsForm = ({ 
@@ -115,6 +117,22 @@ const ConditionalQuestionsForm = ({
   if (!needsQuestions && !hasLossOfAppetite && !hasExcessiveThirst && !hasBloodInStool && !hasUrinaryProblems && !hasSkinItching && !hasWound && !hasEarProblems && !hasEyeDischarge && !hasLameness && !hasBreathingDifficulties && !hasLump && !hasListlessness && !hasAggression) {
     return null;
   }
+
+  // Textes contextuels pour expliquer l'utilité des questions
+  const symptomContextTexts: Record<string, string> = {
+    blood_in_stool: "Ces informations aident le vétérinaire à évaluer la gravité du problème digestif.",
+    urinary_problems: "Ces détails permettent d'identifier rapidement un problème urinaire urgent.",
+    wound: "Ces précisions aident à déterminer si la plaie nécessite des soins immédiats.",
+    lump: "Ces informations permettent d'évaluer la nature et l'urgence de la grosseur.",
+    ear_problems: "Ces détails aident à diagnostiquer une infection ou inflammation de l'oreille.",
+    eye_discharge: "Ces informations permettent d'évaluer la gravité de l'atteinte oculaire.",
+    breathing_difficulties: "Ces détails sont essentiels pour évaluer une détresse respiratoire potentielle.",
+    skin_itching: "Ces précisions aident à identifier la cause des démangeaisons (allergie, parasites, infection).",
+    lameness: "Ces informations permettent d'évaluer la gravité de la boiterie et son origine.",
+    aggression: "Ces détails sont importants pour la sécurité lors de la consultation."
+  };
+
+  const sharedQuestionsContext = "Ces informations aident le vétérinaire à évaluer l'état général et le niveau de confort de votre animal.";
 
   const handleAnswerChange = (questionKey: string, value: string) => {
     const prefixedKey = animalPrefix + questionKey;
@@ -180,7 +198,8 @@ const ConditionalQuestionsForm = ({
             onAnswerChange={handleAnswerChange}
             keyPrefix={animalPrefix}
           />
-        )
+        ),
+        contextText: symptomContextTexts.blood_in_stool
       });
     }
     
@@ -197,7 +216,8 @@ const ConditionalQuestionsForm = ({
             onAnswerChange={handleAnswerChange}
             keyPrefix={animalPrefix}
           />
-        )
+        ),
+        contextText: symptomContextTexts.urinary_problems
       });
     }
     
@@ -214,7 +234,8 @@ const ConditionalQuestionsForm = ({
             onAnswerChange={handleAnswerChange}
             keyPrefix={animalPrefix}
           />
-        )
+        ),
+        contextText: symptomContextTexts.skin_itching
       });
     }
     
@@ -232,7 +253,8 @@ const ConditionalQuestionsForm = ({
             onFileChange={handleFileChange}
             keyPrefix={animalPrefix}
           />
-        )
+        ),
+        contextText: symptomContextTexts.wound
       });
     }
     
@@ -249,7 +271,8 @@ const ConditionalQuestionsForm = ({
             onAnswerChange={handleAnswerChange}
             keyPrefix={animalPrefix}
           />
-        )
+        ),
+        contextText: symptomContextTexts.ear_problems
       });
     }
     
@@ -266,7 +289,8 @@ const ConditionalQuestionsForm = ({
             onAnswerChange={handleAnswerChange}
             keyPrefix={animalPrefix}
           />
-        )
+        ),
+        contextText: symptomContextTexts.eye_discharge
       });
     }
     
@@ -283,7 +307,8 @@ const ConditionalQuestionsForm = ({
             onAnswerChange={handleAnswerChange}
             keyPrefix={animalPrefix}
           />
-        )
+        ),
+        contextText: symptomContextTexts.lameness
       });
     }
     
@@ -300,7 +325,8 @@ const ConditionalQuestionsForm = ({
             onAnswerChange={handleAnswerChange}
             keyPrefix={animalPrefix}
           />
-        )
+        ),
+        contextText: symptomContextTexts.breathing_difficulties
       });
     }
     
@@ -318,7 +344,8 @@ const ConditionalQuestionsForm = ({
             onFileChange={handleFileChange}
             keyPrefix={animalPrefix}
           />
-        )
+        ),
+        contextText: symptomContextTexts.lump
       });
     }
     
@@ -335,7 +362,8 @@ const ConditionalQuestionsForm = ({
             onAnswerChange={handleAnswerChange}
             keyPrefix={animalPrefix}
           />
-        )
+        ),
+        contextText: symptomContextTexts.aggression
       });
     }
     
@@ -419,6 +447,12 @@ const ConditionalQuestionsForm = ({
               />
             </AccordionTrigger>
             <AccordionContent className="px-4 sm:px-6 pb-6 pt-2">
+              <div className="mb-6 p-3 bg-blue-50 border-l-4 border-blue-400 rounded">
+                <p className="text-sm text-blue-800 flex items-start gap-2">
+                  <span className="text-base">💡</span>
+                  <span>{sharedQuestionsContext}</span>
+                </p>
+              </div>
               <SharedQuestionsSection
                 answers={answers}
                 onAnswerChange={handleAnswerChange}
@@ -451,6 +485,14 @@ const ConditionalQuestionsForm = ({
                 />
               </AccordionTrigger>
               <AccordionContent className="px-4 sm:px-6 pb-6 pt-2">
+                {section.contextText && (
+                  <div className="mb-6 p-3 bg-blue-50 border-l-4 border-blue-400 rounded">
+                    <p className="text-sm text-blue-800 flex items-start gap-2">
+                      <span className="text-base">💡</span>
+                      <span>{section.contextText}</span>
+                    </p>
+                  </div>
+                )}
                 {section.component}
               </AccordionContent>
             </AccordionItem>
