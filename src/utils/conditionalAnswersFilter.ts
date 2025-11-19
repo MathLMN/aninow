@@ -136,6 +136,9 @@ export const filterConditionalAnswers = (
     allowedKeys.add(`${prefix}wound_oozing`);
     allowedKeys.add(`${prefix}wound_depth`);
     allowedKeys.add(`${prefix}wound_bleeding`);
+    allowedKeys.add(`${prefix}wound_photo_1`);
+    allowedKeys.add(`${prefix}wound_photo_2`);
+    allowedKeys.add(`${prefix}wound_photo_3`);
   }
 
   if (detection.hasEarProblems) {
@@ -170,6 +173,9 @@ export const filterConditionalAnswers = (
     allowedKeys.add(`${prefix}general_form`);
     allowedKeys.add(`${prefix}lump_body_area`);
     allowedKeys.add(`${prefix}lump_size_evolution`);
+    allowedKeys.add(`${prefix}lump_photo_1`);
+    allowedKeys.add(`${prefix}lump_photo_2`);
+    allowedKeys.add(`${prefix}lump_photo_3`);
   }
 
   if (detection.hasAggression) {
@@ -184,7 +190,9 @@ export const filterConditionalAnswers = (
     allowedKeys.add(`${prefix}eating`);
     allowedKeys.add(`${prefix}drinking`);
     allowedKeys.add(`${prefix}pain_complaints`);
-    allowedKeys.add(`${prefix}other_photo`);
+    allowedKeys.add(`${prefix}other_symptom_photo_1`);
+    allowedKeys.add(`${prefix}other_symptom_photo_2`);
+    allowedKeys.add(`${prefix}other_symptom_photo_3`);
   }
 
   // Filtrer les réponses pour ne garder que celles autorisées

@@ -1,7 +1,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Clock, User, PawPrint, AlertTriangle, TrendingUp, AlertCircle } from "lucide-react";
+import { Clock, User, PawPrint, AlertTriangle, TrendingUp, AlertCircle, Camera } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AppointmentCardProps {
@@ -56,6 +56,12 @@ export const AppointmentCard = ({ appointment, onClick, className }: Appointment
 
   const UrgencyIcon = appointment.urgency_score ? getUrgencyIcon(appointment.urgency_score) : TrendingUp;
   const isOnlineBooking = appointment.booking_source === 'online';
+  
+  // Vérifier si le rendez-vous contient des photos
+  const hasPhotos = appointment.conditional_answers && 
+    Object.keys(appointment.conditional_answers).some(key => 
+      key.includes('photo') && appointment.conditional_answers[key]
+    );
 
   return (
     <Card 
@@ -95,6 +101,12 @@ export const AppointmentCard = ({ appointment, onClick, className }: Appointment
             <div className="flex items-center space-x-2">
               <Clock className="h-4 w-4 text-vet-sage" />
               <span className="font-medium text-sm">{appointment.appointment_time}</span>
+              {hasPhotos && (
+                <Badge variant="outline" className="text-xs gap-1 bg-vet-sage/10 text-vet-sage border-vet-sage/30">
+                  <Camera className="h-3 w-3" />
+                  Photos
+                </Badge>
+              )}
             </div>
             {!isOnlineBooking && appointment.urgency_score && (
               <div className={cn(

@@ -22,6 +22,45 @@ export const useBookingSubmission = () => {
   const { currentClinic } = useClinicContext()
   const { settings } = useClinicSettings()
 
+  // Fonction pour uploader les photos vers Supabase Storage
+  const uploadPhotosToStorage = async (
+    conditionalAnswers: any,
+    clinicId: string,
+    bookingId: string
+  ): Promise<any> => {
+    if (!conditionalAnswers) return conditionalAnswers;
+
+    const updatedAnswers = { ...conditionalAnswers };
+    
+    for (const [key, value] of Object.entries(conditionalAnswers)) {
+      // Détecter les clés de photos (wound_photo_X, lump_photo_X, other_symptom_photo_X)
+      if (key.includes('photo') && value instanceof File) {
+        const file = value as File;
+        const extension = file.name.split('.').pop();
+        const filePath = `${clinicId}/${bookingId}/${key}.${extension}`;
+        
+        console.log(`Uploading photo ${key} to:`, filePath);
+        
+        const { error: uploadError } = await supabase.storage
+          .from('consultation-photos')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (uploadError) {
+          console.error(`Error uploading photo ${key}:`, uploadError);
+          throw new Error(`Erreur lors de l'upload de la photo: ${uploadError.message}`);
+        }
+
+        // Remplacer le File par le chemin de stockage
+        updatedAnswers[key] = filePath;
+      }
+    }
+
+    return updatedAnswers;
+  };
+
   const submitBooking = async (bookingData: any): Promise<BookingSubmissionResult> => {
     setIsSubmitting(true)
     
@@ -80,6 +119,22 @@ export const useBookingSubmission = () => {
         return endDate.toTimeString().slice(0, 5)
       }
 
+      // Filtrer les conditional_answers
+      const filteredConditionalAnswers = filterAllConditionalAnswers(
+        bookingData.conditionalAnswers,
+        bookingData
+      );
+      
+      // Générer un ID temporaire pour l'upload des photos
+      const tempBookingId = crypto.randomUUID();
+      
+      // Uploader les photos et remplacer les Files par les chemins
+      const conditionalAnswersWithPhotoPaths = await uploadPhotosToStorage(
+        filteredConditionalAnswers,
+        currentClinic.id,
+        tempBookingId
+      );
+
       // Préparer les données pour le premier animal
       const firstBookingInsert: BookingInsert = {
         clinic_id: currentClinic.id,
@@ -102,7 +157,7 @@ export const useBookingSubmission = () => {
         second_animal_custom_text: null,
         second_animal_selected_symptoms: [],
         second_animal_custom_symptom: null,
-        conditional_answers: filterAllConditionalAnswers(bookingData.conditionalAnswers, bookingData),
+        conditional_answers: conditionalAnswersWithPhotoPaths,
         symptom_duration: bookingData.symptomDuration,
         additional_points: bookingData.additionalPoints || [],
         animal_age: bookingData.animalAge || bookingData.firstAnimalAge,

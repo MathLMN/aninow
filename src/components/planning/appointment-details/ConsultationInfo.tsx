@@ -1,6 +1,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { FileText, AlertCircle } from "lucide-react";
+import { PhotoGallery } from "./PhotoGallery";
 
 interface ConsultationInfoProps {
   appointment: any;
@@ -146,6 +147,11 @@ export const ConsultationInfo = ({ appointment }: ConsultationInfoProps) => {
             {appointment.client_comment}
           </p>
         </div>
+      )}
+
+      {/* Galerie de photos */}
+      {appointment.conditional_answers && (
+        <PhotoGallery conditionalAnswers={appointment.conditional_answers} />
       )}
     </div>
   );
