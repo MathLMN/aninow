@@ -1,11 +1,11 @@
 import SharedQuestionsSection from "@/components/conditional-questions/SharedQuestionsSection";
 import { Separator } from "@/components/ui/separator";
-import MultiPhotoUpload from "./MultiPhotoUpload";
+import MultiPhotoUpload, { PhotoData } from "./MultiPhotoUpload";
 
 interface OtherSymptomSectionProps {
-  answers: {[key: string]: string | File};
+  answers: {[key: string]: string | File | PhotoData};
   onAnswerChange: (questionKey: string, value: string) => void;
-  onFileChange: (questionKey: string, file: File | null) => void;
+  onFileChange: (questionKey: string, value: PhotoData | null) => void;
   keyPrefix?: string;
 }
 

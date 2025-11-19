@@ -1,9 +1,10 @@
 
 import SelectionButton from "@/components/SelectionButton";
 import { Separator } from "@/components/ui/separator";
+import type { PhotoData } from "@/components/conditional-questions/MultiPhotoUpload";
 
 interface EyeDischargeSectionProps {
-  answers: {[key: string]: string | File};
+  answers: {[key: string]: string | File | PhotoData};
   onAnswerChange: (questionKey: string, value: string) => void;
   keyPrefix?: string;
 }

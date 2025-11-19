@@ -1,11 +1,18 @@
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+export interface PhotoData {
+  base64: string;
+  filename: string;
+  type: string;
+  size: number;
+}
+
 interface MultiPhotoUploadProps {
   photoKey: string;
   keyPrefix?: string;
-  answers: {[key: string]: string | File};
-  onFileChange: (questionKey: string, file: File | null) => void;
+  answers: {[key: string]: string | File | PhotoData};
+  onFileChange: (questionKey: string, value: PhotoData | null) => void;
   maxPhotos?: number;
 }
 
@@ -16,13 +23,14 @@ const MultiPhotoUpload = ({
   onFileChange,
   maxPhotos = 3 
 }: MultiPhotoUploadProps) => {
-  // Get all uploaded photos
-  const uploadedPhotos: Array<{ key: string; file: File; index: number }> = [];
+  // Get all uploaded photos (supporting both File and PhotoData formats)
+  const uploadedPhotos: Array<{ key: string; data: File | PhotoData; index: number }> = [];
   for (let i = 1; i <= maxPhotos; i++) {
     const key = `${photoKey}_${i}`;
-    const file = answers[keyPrefix + key];
-    if (file instanceof File) {
-      uploadedPhotos.push({ key, file, index: i });
+    const data = answers[keyPrefix + key];
+    // Accept both File objects (backward compatibility) and PhotoData objects
+    if (data instanceof File || (typeof data === 'object' && data !== null && 'base64' in data)) {
+      uploadedPhotos.push({ key, data, index: i });
     }
   }
 
@@ -32,15 +40,31 @@ const MultiPhotoUpload = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Find the next available slot
-    for (let i = 1; i <= maxPhotos; i++) {
-      const key = `${photoKey}_${i}`;
-      if (!answers[keyPrefix + key]) {
-        onFileChange(key, file);
-        break;
+    // Convert to base64
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      
+      // Store object with base64 and metadata
+      const photoData: PhotoData = {
+        base64: base64String,
+        filename: file.name,
+        type: file.type,
+        size: file.size
+      };
+      
+      // Find the next available slot
+      for (let i = 1; i <= maxPhotos; i++) {
+        const key = `${photoKey}_${i}`;
+        if (!answers[keyPrefix + key]) {
+          onFileChange(key, photoData);
+          break;
+        }
       }
-    }
-
+    };
+    
+    reader.readAsDataURL(file);
+    
     // Reset input
     e.target.value = '';
   };
@@ -85,13 +109,17 @@ const MultiPhotoUpload = ({
       {/* Uploaded photos grid - compact thumbnails */}
       {uploadedPhotos.length > 0 && (
         <div className="flex flex-wrap gap-3 ml-0 sm:ml-10">
-          {uploadedPhotos.map(({ key, file, index }) => (
+          {uploadedPhotos.map(({ key, data, index }) => (
             <div 
               key={key}
               className="relative group w-24 h-24 border-2 border-border rounded-lg overflow-hidden bg-muted"
             >
               <img
-                src={URL.createObjectURL(file)}
+                src={
+                  data instanceof File 
+                    ? URL.createObjectURL(data)
+                    : (data as PhotoData).base64
+                }
                 alt={`Photo ${index}`}
                 className="w-full h-full object-cover"
               />

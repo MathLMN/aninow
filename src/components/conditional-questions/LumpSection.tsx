@@ -1,12 +1,12 @@
 
 import SelectionButton from "@/components/SelectionButton";
 import { Separator } from "@/components/ui/separator";
-import MultiPhotoUpload from "./MultiPhotoUpload";
+import MultiPhotoUpload, { PhotoData } from "./MultiPhotoUpload";
 
 interface LumpSectionProps {
-  answers: {[key: string]: string | File};
+  answers: {[key: string]: string | File | PhotoData};
   onAnswerChange: (questionKey: string, value: string) => void;
-  onFileChange: (questionKey: string, file: File | null) => void;
+  onFileChange: (questionKey: string, value: PhotoData | null) => void;
   keyPrefix?: string;
 }
 

@@ -1,9 +1,10 @@
 import SelectionButton from "@/components/SelectionButton";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
+import type { PhotoData } from "@/components/conditional-questions/MultiPhotoUpload";
 
 interface LamenessSectionProps {
-  answers: {[key: string]: string | File};
+  answers: {[key: string]: string | File | PhotoData};
   onAnswerChange: (questionKey: string, value: string) => void;
   keyPrefix?: string;
 }
