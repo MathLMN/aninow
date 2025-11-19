@@ -82,37 +82,29 @@ const MultiPhotoUpload = ({
         </div>
       )}
 
-      {/* Uploaded photos grid */}
+      {/* Uploaded photos grid - compact thumbnails */}
       {uploadedPhotos.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="flex flex-wrap gap-3 ml-0 sm:ml-10">
           {uploadedPhotos.map(({ key, file, index }) => (
             <div 
               key={key}
-              className="relative group border-2 border-border rounded-lg overflow-hidden bg-muted"
+              className="relative group w-24 h-24 border-2 border-border rounded-lg overflow-hidden bg-muted"
             >
-              <div className="aspect-square relative">
-                <img
-                  src={URL.createObjectURL(file)}
-                  alt={`Photo ${index}`}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleRemovePhoto(key)}
-                    className="gap-2"
-                  >
-                    <X className="h-4 w-4" />
-                    Retirer
-                  </Button>
-                </div>
-              </div>
-              <div className="p-2 bg-background">
-                <p className="text-xs text-muted-foreground truncate">
-                  {file.name}
-                </p>
+              <img
+                src={URL.createObjectURL(file)}
+                alt={`Photo ${index}`}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => handleRemovePhoto(key)}
+                  className="h-8 w-8"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           ))}
