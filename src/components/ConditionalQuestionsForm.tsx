@@ -45,11 +45,11 @@ interface AccordionTriggerContentProps {
 }
 
 const AccordionTriggerContent = ({ label, questionCount, isComplete, color, contextText }: AccordionTriggerContentProps) => (
-  <div className="flex flex-col items-start w-full gap-1.5">
+  <div className="flex flex-col items-start w-full gap-3">
     <div className="flex items-center justify-between w-full">
       <div className="flex items-center gap-3">
         <div className={`h-2 w-2 rounded-full ${color}`} />
-        <span className={`text-base sm:text-lg font-semibold ${isComplete ? 'text-muted-foreground' : 'text-foreground'}`}>
+        <span className={`text-base sm:text-lg font-semibold text-left ${isComplete ? 'text-muted-foreground' : 'text-foreground'}`}>
           {label}
         </span>
         <span className="text-xs sm:text-sm text-muted-foreground font-normal">
@@ -61,9 +61,11 @@ const AccordionTriggerContent = ({ label, questionCount, isComplete, color, cont
       )}
     </div>
     {contextText && (
-      <div className="ml-5 text-xs text-muted-foreground flex items-start gap-1.5">
-        <span>💡</span>
-        <span>{contextText}</span>
+      <div className="w-full p-2 bg-blue-50 border-l-4 border-blue-400 rounded">
+        <p className="text-xs text-blue-800 text-left flex items-start gap-2">
+          <span className="text-sm">💡</span>
+          <span>{contextText}</span>
+        </p>
       </div>
     )}
   </div>
