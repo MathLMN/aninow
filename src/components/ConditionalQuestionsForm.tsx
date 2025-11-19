@@ -416,6 +416,12 @@ const ConditionalQuestionsForm = ({
     hasOtherSymptom
   ]);
 
+  console.log('ConditionalQuestionsForm - activeSymptomSections:', {
+    hasOtherSymptom,
+    sectionsCount: activeSymptomSections.length,
+    sections: activeSymptomSections.map(s => ({ value: s.value, label: s.label, isComplete: s.isComplete }))
+  });
+
   // Calculer quelles sections doivent être ouvertes par défaut (Optimisation 1)
   const defaultOpenSections = useMemo(() => {
     const totalSymptoms = activeSymptomSections.length + (shouldShowSharedQuestions ? 1 : 0);
