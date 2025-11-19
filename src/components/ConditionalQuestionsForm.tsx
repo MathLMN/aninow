@@ -116,31 +116,36 @@ const ConditionalQuestionsForm = ({
     aggression: "Comportement agressif"
   };
 
+  // Déterminer si on doit afficher les questions générales
+  const shouldShowSharedQuestions = needsGeneralForm || needsEating || needsDrinking || needsPainComplaints;
+
   return (
     <div className="space-y-6">
-      <Accordion type="multiple" defaultValue={["shared"]} className="w-full space-y-4">
-        {/* Questions communes - toujours ouvertes par défaut */}
-        <AccordionItem value="shared" className="border rounded-lg bg-card shadow-sm">
-          <AccordionTrigger className="px-4 sm:px-6 py-4 hover:no-underline">
-            <div className="flex items-center gap-3">
-              <div className="h-2 w-2 rounded-full bg-primary" />
-              <span className="text-base sm:text-lg font-semibold text-foreground">
-                Questions générales
-              </span>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="px-4 sm:px-6 pb-6 pt-2">
-            <SharedQuestionsSection
-              answers={answers}
-              onAnswerChange={handleAnswerChange}
-              keyPrefix={animalPrefix}
-              needsGeneralForm={needsGeneralForm}
-              needsEating={needsEating}
-              needsDrinking={needsDrinking}
-              needsPainComplaints={needsPainComplaints}
-            />
-          </AccordionContent>
-        </AccordionItem>
+      <Accordion type="multiple" defaultValue={shouldShowSharedQuestions ? ["shared"] : []} className="w-full space-y-4">
+        {/* Questions communes - seulement si nécessaires */}
+        {shouldShowSharedQuestions && (
+          <AccordionItem value="shared" className="border rounded-lg bg-card shadow-sm">
+            <AccordionTrigger className="px-4 sm:px-6 py-4 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="h-2 w-2 rounded-full bg-primary" />
+                <span className="text-base sm:text-lg font-semibold text-foreground">
+                  Questions générales
+                </span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 sm:px-6 pb-6 pt-2">
+              <SharedQuestionsSection
+                answers={answers}
+                onAnswerChange={handleAnswerChange}
+                keyPrefix={animalPrefix}
+                needsGeneralForm={needsGeneralForm}
+                needsEating={needsEating}
+                needsDrinking={needsDrinking}
+                needsPainComplaints={needsPainComplaints}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
         {/* Questions spécifiques par symptôme */}
         {hasBloodInStool && (
