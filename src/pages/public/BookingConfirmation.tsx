@@ -209,10 +209,10 @@ const BookingConfirmation = () => {
   return <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
       <Header />
 
-      <main className="container mx-auto px-4 sm:px-6 py-2 sm:py-3">
+      <main className="container mx-auto px-4 sm:px-6 py-2 sm:py-3 pb-4">
         <div className="max-w-3xl mx-auto">
           {/* Hero - En attente de validation */}
-          <div className="text-center mb-3 mt-6 sm:mt-8 animate-fade-in">
+          <div className="text-center mb-3 mt-12 sm:mt-16 animate-fade-in">
             <Hourglass className="h-16 sm:h-20 w-16 sm:w-20 text-amber-500 mx-auto mb-3 animate-pulse" strokeWidth={1.5} />
             <h1 className="text-xl sm:text-2xl font-bold text-vet-navy">Demande en cours de validation</h1>
           </div>
@@ -290,7 +290,7 @@ const BookingConfirmation = () => {
           )}
 
           {/* Actions CTA */}
-          <div className="text-center space-y-2 pb-2">
+          <div className="text-center space-y-2 pb-6">
             <div className="flex flex-col sm:flex-row gap-2 justify-center">
               <Link to="/" className="w-full sm:w-auto">
                 <Button size="sm" className="w-full sm:w-auto bg-vet-sage hover:bg-vet-sage/90 text-white text-xs">
