@@ -220,20 +220,6 @@ const BookingConfirmation = () => {
             </p>
           </div>
 
-          {/* Récapitulatif complet */}
-          {bookingData.appointmentDate && bookingData.appointmentTime && (
-            <BookingSummaryCard 
-              appointmentDate={bookingData.appointmentDate}
-              appointmentTime={bookingData.appointmentTime}
-              clinicName={displaySettings.clinic_name}
-              clinicAddress={clinicAddress}
-              clinicPhone={displaySettings.clinic_phone}
-              veterinarianName={veterinarianName || undefined}
-              animalName={bookingData.animalName || ''}
-              animalSpecies={bookingData.animalSpecies || ''}
-            />
-          )}
-
           {/* Prochaines étapes - Timeline */}
           <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-lg mb-4">
             <CardHeader className="pb-2">
@@ -247,6 +233,20 @@ const BookingConfirmation = () => {
               </p>
             </CardContent>
           </Card>
+
+          {/* Récapitulatif complet */}
+          {bookingData.appointmentDate && bookingData.appointmentTime && (
+            <BookingSummaryCard 
+              appointmentDate={bookingData.appointmentDate}
+              appointmentTime={bookingData.appointmentTime}
+              clinicName={displaySettings.clinic_name}
+              clinicAddress={clinicAddress}
+              clinicPhone={displaySettings.clinic_phone}
+              veterinarianName={veterinarianName || undefined}
+              animalName={bookingData.animalName || ''}
+              animalSpecies={bookingData.animalSpecies || ''}
+            />
+          )}
 
           {/* Bouton pour afficher les conseils */}
           <div className="text-center mb-4">
