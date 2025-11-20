@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Hourglass, AlertTriangle, Loader2 } from "lucide-react";
+import { CheckCircle, AlertTriangle, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { useBookingSubmission } from "@/hooks/useBookingSubmission";
@@ -15,9 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useClinicContext } from "@/contexts/ClinicContext";
 const BookingConfirmation = () => {
   const navigate = useNavigate();
-  const {
-    currentClinic
-  } = useClinicContext();
+  const { currentClinic } = useClinicContext();
   const {
     submitBooking,
     isSubmitting
@@ -32,7 +30,9 @@ const BookingConfirmation = () => {
   } = usePublicClinicSettings();
   const [submissionResult, setSubmissionResult] = useState<any>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const [veterinarianName, setVeterinarianName] = useState<string | null>(bookingData.veterinarianName || null);
+  const [veterinarianName, setVeterinarianName] = useState<string | null>(
+    bookingData.veterinarianName || null
+  );
   const [showAdvice, setShowAdvice] = useState(false);
   console.log('BookingConfirmation - bookingData:', bookingData);
 
@@ -112,13 +112,16 @@ const BookingConfirmation = () => {
         setVeterinarianName(bookingData.veterinarianName);
         return;
       }
-
+      
       // Sinon, récupérer depuis la base de données si un vétérinaire est assigné
       const booking = submissionResult?.booking;
       if (booking?.veterinarian_id) {
-        const {
-          data
-        } = await supabase.from('clinic_veterinarians').select('name').eq('id', booking.veterinarian_id).maybeSingle();
+        const { data } = await supabase
+          .from('clinic_veterinarians')
+          .select('name')
+          .eq('id', booking.veterinarian_id)
+          .maybeSingle();
+        
         if (data) {
           setVeterinarianName(data.name);
         }
@@ -198,64 +201,67 @@ const BookingConfirmation = () => {
   const displaySettings = settings || demoSettings;
 
   // Construire l'adresse complète de la clinique
-  const clinicAddress = [displaySettings.clinic_address_street, displaySettings.clinic_address_postal_code, displaySettings.clinic_address_city].filter(Boolean).join(', ');
+  const clinicAddress = [
+    displaySettings.clinic_address_street, 
+    displaySettings.clinic_address_postal_code, 
+    displaySettings.clinic_address_city
+  ].filter(Boolean).join(', ');
   return <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
       <Header />
 
       <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
         <div className="max-w-3xl mx-auto">
-          {/* Hero - En attente de validation */}
-          <div className="text-center mb-1.5 mt-2 sm:mt-20 animate-fade-in">
-            <Hourglass className="h-10 sm:h-16 w-10 sm:w-16 text-amber-500 mx-auto mb-1 animate-pulse" />
-            <h1 className="text-base sm:text-3xl font-bold text-vet-navy mb-0">Demande en cours de validation</h1>
-            
+          {/* Hero - Confirmation visuelle */}
+          <div className="text-center mb-4 mt-16 sm:mt-20 animate-fade-in">
+            <CheckCircle className="h-12 sm:h-16 w-12 sm:w-16 text-vet-sage mx-auto mb-3" />
+            <h1 className="text-2xl sm:text-3xl font-bold text-vet-navy mb-1">Demande envoyée !</h1>
+            <p className="text-vet-brown text-sm">
+              Vous recevrez un email de confirmation dans quelques minutes.
+            </p>
           </div>
 
-          {/* Bandeau explicatif - Validation humaine */}
-          <Card className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 shadow-md mb-1.5">
-            <CardContent className="pt-1.5 pb-1.5">
-              <div className="flex items-start gap-1">
-                <div className="flex-shrink-0 mt-0.5">
-                  <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-amber-500 rounded-full animate-pulse"></div>
-                </div>
-                <div>
-                  <h3 className="text-[10px] sm:text-sm font-semibold text-vet-navy mb-0.5">
-                    Pourquoi une validation est nécessaire ?
-                  </h3>
-                  <p className="text-[9px] sm:text-xs text-vet-brown leading-tight">
-                    L'équipe de la clinique analyse chaque demande. Ce regard humain garantit une prise en charge optimale et permet de mieux recevoir vos animaux <strong>en cas d'urgence plus ou moins élevée</strong>.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Récapitulatif complet */}
+          {bookingData.appointmentDate && bookingData.appointmentTime && (
+            <BookingSummaryCard 
+              appointmentDate={bookingData.appointmentDate}
+              appointmentTime={bookingData.appointmentTime}
+              clinicName={displaySettings.clinic_name}
+              clinicAddress={clinicAddress}
+              clinicPhone={displaySettings.clinic_phone}
+              veterinarianName={veterinarianName || undefined}
+              animalName={bookingData.animalName || ''}
+              animalSpecies={bookingData.animalSpecies || ''}
+            />
+          )}
 
           {/* Prochaines étapes - Timeline */}
-          <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-lg mb-1.5">
-            <CardHeader className="pb-1 pt-1.5">
-              <CardTitle className="text-[11px] sm:text-base text-vet-navy">Attendez notre confirmation</CardTitle>
+          <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-lg mb-4">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base text-vet-navy">Attendez notre confirmation</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-1 pb-1.5">
+            <CardContent className="space-y-3">
               <ValidationProcessTimeline />
               
-              <p className="text-[9px] sm:text-xs text-vet-brown leading-tight">
+              <p className="text-xs text-vet-brown leading-relaxed">
                 Notre équipe valide votre demande et vous recevrez une confirmation définitive par email.
               </p>
             </CardContent>
           </Card>
 
-          {/* Récapitulatif complet */}
-          {bookingData.appointmentDate && bookingData.appointmentTime && <BookingSummaryCard appointmentDate={bookingData.appointmentDate} appointmentTime={bookingData.appointmentTime} clinicName={displaySettings.clinic_name} clinicAddress={clinicAddress} clinicPhone={displaySettings.clinic_phone} veterinarianName={veterinarianName || undefined} animalName={bookingData.animalName || ''} animalSpecies={bookingData.animalSpecies || ''} />}
-
           {/* Bouton pour afficher les conseils */}
-          <div className="text-center mb-1.5">
-            <Button onClick={() => setShowAdvice(!showAdvice)} variant="outline" className="text-[10px] sm:text-sm border-vet-sage text-vet-sage hover:bg-vet-sage hover:text-white transition-all py-0.5 px-3 h-auto">
+          <div className="text-center mb-4">
+            <Button
+              onClick={() => setShowAdvice(!showAdvice)}
+              variant="outline"
+              className="border-vet-sage text-vet-sage hover:bg-vet-sage hover:text-white transition-all"
+            >
               {showAdvice ? "Masquer les conseils" : "Voir nos conseils"}
             </Button>
           </div>
 
           {/* Contenu additionnel (masqué par défaut) */}
-          {showAdvice && <div className="space-y-4 animate-fade-in">
+          {showAdvice && (
+            <div className="space-y-4 animate-fade-in">
               {/* Analyse IA - Résumé de la situation */}
               {aiAnalysis && <div className="mb-4">
                   <AnalysisDisplay aiAnalysis={aiAnalysis} bookingData={bookingData} />
@@ -263,26 +269,27 @@ const BookingConfirmation = () => {
 
               {/* Alerte d'urgence (si applicable) */}
               {aiAnalysis && <UrgencyAlert urgencyScore={aiAnalysis.urgency_score} priorityLevel={aiAnalysis.priority_level} clinicPhone={displaySettings.clinic_phone} />}
-            </div>}
+            </div>
+          )}
 
           {/* Actions CTA */}
-          <div className="text-center space-y-1 pb-1.5">
-            <div className="flex flex-col sm:flex-row gap-1 justify-center">
+          <div className="text-center space-y-3 pb-4">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link to="/" className="w-full sm:w-auto">
-                <Button className="w-full sm:w-auto bg-vet-sage hover:bg-vet-sage/90 text-white text-[10px] sm:text-sm py-1 h-auto">
+                <Button className="w-full sm:w-auto bg-vet-sage hover:bg-vet-sage/90 text-white">
                   Retour à l'accueil
                 </Button>
               </Link>
               <Link to="/booking" className="w-full sm:w-auto">
-                <Button variant="outline" className="w-full sm:w-auto border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white text-[10px] sm:text-sm py-1 h-auto" onClick={() => {
-                localStorage.removeItem('lastBookingConfirmation');
-                resetBookingData();
-              }}>
+                <Button variant="outline" className="w-full sm:w-auto border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white" onClick={() => {
+                  localStorage.removeItem('lastBookingConfirmation');
+                  resetBookingData();
+                }}>
                   Prendre un autre RDV
                 </Button>
               </Link>
             </div>
-            {displaySettings.clinic_phone && <p className="text-[9px] sm:text-xs text-vet-brown/70">
+            {displaySettings.clinic_phone && <p className="text-xs sm:text-sm text-vet-brown/70">
                 Besoin d'aide ? Appelez-nous au {displaySettings.clinic_phone}
               </p>}
           </div>
