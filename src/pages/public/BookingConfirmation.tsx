@@ -222,7 +222,8 @@ const BookingConfirmation = () => {
                   <h3 className="text-sm font-semibold text-vet-navy mb-1.5">
                     Pourquoi une validation est nécessaire ?
                   </h3>
-                  <p className="text-xs text-vet-brown leading-relaxed">L'équipe de la clinique analyse chaque demande pour garantir une prise en charge optimale et rapide en cas de situation urgente.<strong>évaluer le degré d'urgence</strong> et vous proposer le créneau le plus adapté à l'état de santé de votre animal. Cette validation humaine garantit une prise en charge optimale et rapide en cas de situation urgente.
+                  <p className="text-xs text-vet-brown leading-relaxed">
+                    L'équipe de la clinique analyse chaque demande. Ce regard humain garantit une prise en charge optimale et permet de mieux recevoir vos animaux <strong>en cas d'urgence plus ou moins élevée</strong>.
                   </p>
                 </div>
               </div>
