@@ -214,10 +214,7 @@ const BookingConfirmation = () => {
           {/* Hero - En attente de validation */}
           <div className="text-center mb-3 mt-4 sm:mt-6 animate-fade-in">
             <Hourglass className="h-10 sm:h-12 w-10 sm:w-12 text-amber-500 mx-auto mb-2 animate-pulse" />
-            <h1 className="text-xl sm:text-2xl font-bold text-vet-navy mb-0.5">Demande en cours de validation</h1>
-            <p className="text-vet-brown text-xs">
-              Notre équipe examine votre demande pour vous répondre rapidement.
-            </p>
+            <h1 className="text-xl sm:text-2xl font-bold text-vet-navy">Demande en cours de validation</h1>
           </div>
 
           {/* Bandeau explicatif - Validation humaine */}
