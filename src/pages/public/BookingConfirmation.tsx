@@ -15,7 +15,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useClinicContext } from "@/contexts/ClinicContext";
 const BookingConfirmation = () => {
   const navigate = useNavigate();
-  const { currentClinic } = useClinicContext();
+  const {
+    currentClinic
+  } = useClinicContext();
   const {
     submitBooking,
     isSubmitting
@@ -30,9 +32,7 @@ const BookingConfirmation = () => {
   } = usePublicClinicSettings();
   const [submissionResult, setSubmissionResult] = useState<any>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const [veterinarianName, setVeterinarianName] = useState<string | null>(
-    bookingData.veterinarianName || null
-  );
+  const [veterinarianName, setVeterinarianName] = useState<string | null>(bookingData.veterinarianName || null);
   const [showAdvice, setShowAdvice] = useState(false);
   console.log('BookingConfirmation - bookingData:', bookingData);
 
@@ -112,16 +112,13 @@ const BookingConfirmation = () => {
         setVeterinarianName(bookingData.veterinarianName);
         return;
       }
-      
+
       // Sinon, récupérer depuis la base de données si un vétérinaire est assigné
       const booking = submissionResult?.booking;
       if (booking?.veterinarian_id) {
-        const { data } = await supabase
-          .from('clinic_veterinarians')
-          .select('name')
-          .eq('id', booking.veterinarian_id)
-          .maybeSingle();
-        
+        const {
+          data
+        } = await supabase.from('clinic_veterinarians').select('name').eq('id', booking.veterinarian_id).maybeSingle();
         if (data) {
           setVeterinarianName(data.name);
         }
@@ -201,11 +198,7 @@ const BookingConfirmation = () => {
   const displaySettings = settings || demoSettings;
 
   // Construire l'adresse complète de la clinique
-  const clinicAddress = [
-    displaySettings.clinic_address_street, 
-    displaySettings.clinic_address_postal_code, 
-    displaySettings.clinic_address_city
-  ].filter(Boolean).join(', ');
+  const clinicAddress = [displaySettings.clinic_address_street, displaySettings.clinic_address_postal_code, displaySettings.clinic_address_city].filter(Boolean).join(', ');
   return <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
       <Header />
 
@@ -215,9 +208,7 @@ const BookingConfirmation = () => {
           <div className="text-center mb-4 mt-16 sm:mt-20 animate-fade-in">
             <Hourglass className="h-12 sm:h-16 w-12 sm:w-16 text-amber-500 mx-auto mb-3 animate-pulse" />
             <h1 className="text-2xl sm:text-3xl font-bold text-vet-navy mb-1">Demande en cours de validation</h1>
-            <p className="text-vet-brown text-sm">
-              Notre équipe examine votre demande pour vous répondre rapidement.
-            </p>
+            
           </div>
 
           {/* Bandeau explicatif - Validation humaine */}
@@ -231,8 +222,7 @@ const BookingConfirmation = () => {
                   <h3 className="text-sm font-semibold text-vet-navy mb-1.5">
                     Pourquoi une validation est nécessaire ?
                   </h3>
-                  <p className="text-xs text-vet-brown leading-relaxed">
-                    Notre équipe vétérinaire analyse chaque demande pour <strong>évaluer le degré d'urgence</strong> et vous proposer le créneau le plus adapté à l'état de santé de votre animal. Cette validation humaine garantit une prise en charge optimale et rapide en cas de situation urgente.
+                  <p className="text-xs text-vet-brown leading-relaxed">L'équipe de la clinique analyse chaque demande pour garantir une prise en charge optimale et rapide en cas de situation urgente.<strong>évaluer le degré d'urgence</strong> et vous proposer le créneau le plus adapté à l'état de santé de votre animal. Cette validation humaine garantit une prise en charge optimale et rapide en cas de situation urgente.
                   </p>
                 </div>
               </div>
@@ -254,33 +244,17 @@ const BookingConfirmation = () => {
           </Card>
 
           {/* Récapitulatif complet */}
-          {bookingData.appointmentDate && bookingData.appointmentTime && (
-            <BookingSummaryCard 
-              appointmentDate={bookingData.appointmentDate}
-              appointmentTime={bookingData.appointmentTime}
-              clinicName={displaySettings.clinic_name}
-              clinicAddress={clinicAddress}
-              clinicPhone={displaySettings.clinic_phone}
-              veterinarianName={veterinarianName || undefined}
-              animalName={bookingData.animalName || ''}
-              animalSpecies={bookingData.animalSpecies || ''}
-            />
-          )}
+          {bookingData.appointmentDate && bookingData.appointmentTime && <BookingSummaryCard appointmentDate={bookingData.appointmentDate} appointmentTime={bookingData.appointmentTime} clinicName={displaySettings.clinic_name} clinicAddress={clinicAddress} clinicPhone={displaySettings.clinic_phone} veterinarianName={veterinarianName || undefined} animalName={bookingData.animalName || ''} animalSpecies={bookingData.animalSpecies || ''} />}
 
           {/* Bouton pour afficher les conseils */}
           <div className="text-center mb-4">
-            <Button
-              onClick={() => setShowAdvice(!showAdvice)}
-              variant="outline"
-              className="border-vet-sage text-vet-sage hover:bg-vet-sage hover:text-white transition-all"
-            >
+            <Button onClick={() => setShowAdvice(!showAdvice)} variant="outline" className="border-vet-sage text-vet-sage hover:bg-vet-sage hover:text-white transition-all">
               {showAdvice ? "Masquer les conseils" : "Voir nos conseils"}
             </Button>
           </div>
 
           {/* Contenu additionnel (masqué par défaut) */}
-          {showAdvice && (
-            <div className="space-y-4 animate-fade-in">
+          {showAdvice && <div className="space-y-4 animate-fade-in">
               {/* Analyse IA - Résumé de la situation */}
               {aiAnalysis && <div className="mb-4">
                   <AnalysisDisplay aiAnalysis={aiAnalysis} bookingData={bookingData} />
@@ -288,8 +262,7 @@ const BookingConfirmation = () => {
 
               {/* Alerte d'urgence (si applicable) */}
               {aiAnalysis && <UrgencyAlert urgencyScore={aiAnalysis.urgency_score} priorityLevel={aiAnalysis.priority_level} clinicPhone={displaySettings.clinic_phone} />}
-            </div>
-          )}
+            </div>}
 
           {/* Actions CTA */}
           <div className="text-center space-y-3 pb-4">
@@ -301,9 +274,9 @@ const BookingConfirmation = () => {
               </Link>
               <Link to="/booking" className="w-full sm:w-auto">
                 <Button variant="outline" className="w-full sm:w-auto border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white" onClick={() => {
-                  localStorage.removeItem('lastBookingConfirmation');
-                  resetBookingData();
-                }}>
+                localStorage.removeItem('lastBookingConfirmation');
+                resetBookingData();
+              }}>
                   Prendre un autre RDV
                 </Button>
               </Link>
