@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, AlertTriangle, Loader2 } from "lucide-react";
+import { Hourglass, AlertTriangle, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { useBookingSubmission } from "@/hooks/useBookingSubmission";
@@ -211,28 +211,33 @@ const BookingConfirmation = () => {
 
       <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
         <div className="max-w-3xl mx-auto">
-          {/* Hero - Confirmation visuelle */}
+          {/* Hero - En attente de validation */}
           <div className="text-center mb-4 mt-16 sm:mt-20 animate-fade-in">
-            <CheckCircle className="h-12 sm:h-16 w-12 sm:w-16 text-vet-sage mx-auto mb-3" />
-            <h1 className="text-2xl sm:text-3xl font-bold text-vet-navy mb-1">Demande envoyée !</h1>
+            <Hourglass className="h-12 sm:h-16 w-12 sm:w-16 text-amber-500 mx-auto mb-3 animate-pulse" />
+            <h1 className="text-2xl sm:text-3xl font-bold text-vet-navy mb-1">Demande en cours de validation</h1>
             <p className="text-vet-brown text-sm">
-              Vous recevrez un email de confirmation dans quelques minutes.
+              Notre équipe examine votre demande pour vous répondre rapidement.
             </p>
           </div>
 
-          {/* Récapitulatif complet */}
-          {bookingData.appointmentDate && bookingData.appointmentTime && (
-            <BookingSummaryCard 
-              appointmentDate={bookingData.appointmentDate}
-              appointmentTime={bookingData.appointmentTime}
-              clinicName={displaySettings.clinic_name}
-              clinicAddress={clinicAddress}
-              clinicPhone={displaySettings.clinic_phone}
-              veterinarianName={veterinarianName || undefined}
-              animalName={bookingData.animalName || ''}
-              animalSpecies={bookingData.animalSpecies || ''}
-            />
-          )}
+          {/* Bandeau explicatif - Validation humaine */}
+          <Card className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 shadow-md mb-4">
+            <CardContent className="pt-4 pb-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-vet-navy mb-1.5">
+                    Pourquoi une validation est nécessaire ?
+                  </h3>
+                  <p className="text-xs text-vet-brown leading-relaxed">
+                    Notre équipe vétérinaire analyse chaque demande pour <strong>évaluer le degré d'urgence</strong> et vous proposer le créneau le plus adapté à l'état de santé de votre animal. Cette validation humaine garantit une prise en charge optimale et rapide en cas de situation urgente.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Prochaines étapes - Timeline */}
           <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-lg mb-4">
@@ -247,6 +252,20 @@ const BookingConfirmation = () => {
               </p>
             </CardContent>
           </Card>
+
+          {/* Récapitulatif complet */}
+          {bookingData.appointmentDate && bookingData.appointmentTime && (
+            <BookingSummaryCard 
+              appointmentDate={bookingData.appointmentDate}
+              appointmentTime={bookingData.appointmentTime}
+              clinicName={displaySettings.clinic_name}
+              clinicAddress={clinicAddress}
+              clinicPhone={displaySettings.clinic_phone}
+              veterinarianName={veterinarianName || undefined}
+              animalName={bookingData.animalName || ''}
+              animalSpecies={bookingData.animalSpecies || ''}
+            />
+          )}
 
           {/* Bouton pour afficher les conseils */}
           <div className="text-center mb-4">
