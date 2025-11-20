@@ -232,14 +232,17 @@ const BookingConfirmation = () => {
           </Card>
 
           {/* Encadré informatif - Pourquoi la validation */}
-          <Card className="bg-blue-50/50 backdrop-blur-sm border-blue-200/50 shadow-sm mb-4">
-            <CardContent className="py-3 px-4">
-              <div className="flex gap-3 items-start">
-                <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-vet-brown leading-relaxed">
-                  L'équipe de la clinique va analyser votre demande. Ce regard humain et expert permet de garantir une meilleure prise en charge des animaux en cas d'urgence plus ou moins élevée.
-                </p>
-              </div>
+          <Card className="bg-orange-50/70 backdrop-blur-sm border-orange-300/60 shadow-sm mb-4">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-vet-navy flex items-center gap-2">
+                <Info className="h-5 w-5 text-orange-600 flex-shrink-0" />
+                Pourquoi valider votre demande ?
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <p className="text-xs text-vet-brown leading-relaxed">
+                L'équipe de la clinique va analyser votre demande. Ce regard humain et expert permet de garantir une meilleure prise en charge des animaux en cas d'urgence plus ou moins élevée.
+              </p>
             </CardContent>
           </Card>
 
