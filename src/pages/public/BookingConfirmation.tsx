@@ -212,8 +212,8 @@ const BookingConfirmation = () => {
       <main className="container mx-auto px-4 sm:px-6 py-2 sm:py-3">
         <div className="max-w-3xl mx-auto">
           {/* Hero - En attente de validation */}
-          <div className="text-center mb-3 mt-4 sm:mt-6 animate-fade-in">
-            <Hourglass className="h-10 sm:h-12 w-10 sm:w-12 text-amber-500 mx-auto mb-2 animate-pulse" />
+          <div className="text-center mb-3 mt-6 sm:mt-8 animate-fade-in">
+            <Hourglass className="h-16 sm:h-20 w-16 sm:w-20 text-amber-500 mx-auto mb-3 animate-pulse" strokeWidth={1.5} />
             <h1 className="text-xl sm:text-2xl font-bold text-vet-navy">Demande en cours de validation</h1>
           </div>
 
