@@ -23,16 +23,16 @@ export const BookingSummaryCard = ({
   animalSpecies
 }: BookingSummaryCardProps) => {
   return (
-    <Card className="bg-white/90 backdrop-blur-sm border-vet-sage/30 shadow-lg mb-2">
-      <CardHeader className="pb-1 pt-2">
-        <CardTitle className="text-xs font-bold text-vet-navy">Récapitulatif</CardTitle>
+    <Card className="bg-white/90 backdrop-blur-sm border-vet-sage/30 shadow-lg mb-4">
+      <CardHeader className="pb-2 pt-3">
+        <CardTitle className="text-sm font-bold text-vet-navy">Récapitulatif</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-1.5 pb-2">
+      <CardContent className="space-y-2 pb-3">
         {/* Date et heure */}
-        <div className="flex flex-wrap items-center gap-2 pb-1.5 border-b border-vet-beige/30">
-          <div className="flex items-center gap-1">
-            <Calendar className="h-3.5 w-3.5 text-vet-sage" />
-            <span className="text-xs font-semibold text-vet-navy">
+        <div className="flex flex-wrap items-center gap-3 pb-2 border-b border-vet-beige/30">
+          <div className="flex items-center gap-1.5">
+            <Calendar className="h-4 w-4 text-vet-sage" />
+            <span className="text-sm font-semibold text-vet-navy">
               {new Date(appointmentDate).toLocaleDateString('fr-FR', {
                 day: 'numeric',
                 month: 'short',
@@ -40,47 +40,47 @@ export const BookingSummaryCard = ({
               })}
             </span>
           </div>
-          <div className="flex items-center gap-1">
-            <Clock className="h-3.5 w-3.5 text-vet-sage" />
-            <span className="text-xs font-semibold text-vet-navy">{appointmentTime}</span>
+          <div className="flex items-center gap-1.5">
+            <Clock className="h-4 w-4 text-vet-sage" />
+            <span className="text-sm font-semibold text-vet-navy">{appointmentTime}</span>
           </div>
         </div>
 
         {/* Détails compacts */}
-        <div className="space-y-1 text-[11px]">
+        <div className="space-y-1.5 text-xs">
           {/* Clinique */}
           <div>
-            <p className="font-semibold text-vet-navy text-xs">{clinicName}</p>
+            <p className="font-semibold text-vet-navy text-sm">{clinicName}</p>
             {clinicAddress && (
-              <div className="flex items-start gap-1 text-vet-brown/80 mt-0.5">
-                <MapPin className="h-3 w-3 mt-0.5 text-vet-sage flex-shrink-0" />
+              <div className="flex items-start gap-1.5 text-vet-brown/80 mt-0.5">
+                <MapPin className="h-3.5 w-3.5 mt-0.5 text-vet-sage flex-shrink-0" />
                 <span>{clinicAddress}</span>
               </div>
             )}
             {clinicPhone && (
-              <div className="flex items-center gap-1 text-vet-brown/80 mt-0.5">
-                <Phone className="h-3 w-3 text-vet-sage" />
+              <div className="flex items-center gap-1.5 text-vet-brown/80 mt-0.5">
+                <Phone className="h-3.5 w-3.5 text-vet-sage" />
                 <span>{clinicPhone}</span>
               </div>
             )}
           </div>
 
           {/* Vétérinaire et Animal sur même ligne */}
-          <div className="flex items-center gap-2 pt-0.5">
-            <div className="flex items-center gap-1 text-vet-brown/80">
-              <User className="h-3 w-3 text-vet-sage" />
+          <div className="flex items-center gap-3 pt-1">
+            <div className="flex items-center gap-1.5 text-vet-brown/80">
+              <User className="h-3.5 w-3.5 text-vet-sage" />
               <span>
                 {veterinarianName ? (
-                  <span className="font-medium text-vet-navy text-[11px]">{veterinarianName}</span>
+                  <span className="font-medium text-vet-navy text-xs">{veterinarianName}</span>
                 ) : (
                   <span className="italic">Vét. à définir</span>
                 )}
               </span>
             </div>
-            <div className="flex items-center gap-1 text-vet-brown/80">
-              <Heart className="h-3 w-3 text-vet-sage" />
+            <div className="flex items-center gap-1.5 text-vet-brown/80">
+              <Heart className="h-3.5 w-3.5 text-vet-sage" />
               <span>
-                <span className="font-medium text-vet-navy text-[11px]">{animalName}</span>
+                <span className="font-medium text-vet-navy text-xs">{animalName}</span>
                 <span className="text-vet-brown/60"> • {animalSpecies}</span>
               </span>
             </div>
