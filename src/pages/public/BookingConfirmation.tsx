@@ -218,18 +218,18 @@ const BookingConfirmation = () => {
           </div>
 
           {/* Prochaines étapes - Timeline */}
-          <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-lg mb-4">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base text-vet-navy">Attendez notre confirmation</CardTitle>
+          <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-lg mb-3">
+            <CardHeader className="pb-1 pt-3">
+              <CardTitle className="text-sm text-vet-navy">Attendez notre confirmation</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-2 pb-3">
               <ValidationProcessTimeline />
               
-              <div className="bg-vet-sage/10 rounded-lg p-3 border border-vet-sage/20">
-                <p className="text-xs text-vet-navy font-medium mb-2">
+              <div className="bg-vet-sage/10 rounded-lg p-2 border border-vet-sage/20">
+                <p className="text-[10px] text-vet-navy font-medium mb-1">
                   📧 Vous recevrez un <span className="font-bold">email et SMS de confirmation</span> une fois votre demande validée
                 </p>
-                <p className="text-xs text-vet-brown/80 leading-relaxed">
+                <p className="text-[10px] text-vet-brown/80 leading-relaxed">
                   Pensez à vérifier vos <span className="font-medium">spams</span> et restez proche de votre téléphone : la clinique pourrait vous appeler pour une urgence.
                 </p>
               </div>
@@ -237,15 +237,15 @@ const BookingConfirmation = () => {
           </Card>
 
           {/* Encadré informatif - Pourquoi la validation */}
-          <Card className="bg-orange-50/70 backdrop-blur-sm border-orange-300/60 shadow-sm mb-4">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-vet-navy flex items-center gap-2">
-                <Info className="h-5 w-5 text-orange-600 flex-shrink-0" />
+          <Card className="bg-orange-50/70 backdrop-blur-sm border-orange-300/60 shadow-sm mb-3">
+            <CardHeader className="pb-1 pt-2">
+              <CardTitle className="text-xs text-vet-navy flex items-center gap-2">
+                <Info className="h-4 w-4 text-orange-600 flex-shrink-0" />
                 Pourquoi valider votre demande ?
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-0">
-              <p className="text-xs text-vet-brown leading-relaxed">
+            <CardContent className="pt-0 pb-2">
+              <p className="text-[10px] text-vet-brown leading-snug">
                 L'équipe de la clinique va analyser votre demande. Ce regard humain et expert permet de garantir une meilleure prise en charge des animaux en cas d'urgence plus ou moins élevée.
               </p>
             </CardContent>
@@ -266,11 +266,12 @@ const BookingConfirmation = () => {
           )}
 
           {/* Bouton pour afficher les conseils */}
-          <div className="text-center mb-4">
+          <div className="text-center mb-3">
             <Button
               onClick={() => setShowAdvice(!showAdvice)}
               variant="outline"
-              className="border-vet-sage text-vet-sage hover:bg-vet-sage hover:text-white transition-all"
+              size="sm"
+              className="border-vet-sage text-vet-sage hover:bg-vet-sage hover:text-white transition-all text-xs"
             >
               {showAdvice ? "Masquer les conseils" : "Voir nos conseils"}
             </Button>
@@ -290,15 +291,15 @@ const BookingConfirmation = () => {
           )}
 
           {/* Actions CTA */}
-          <div className="text-center space-y-3 pb-4">
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="text-center space-y-2 pb-3">
+            <div className="flex flex-col sm:flex-row gap-2 justify-center">
               <Link to="/" className="w-full sm:w-auto">
-                <Button className="w-full sm:w-auto bg-vet-sage hover:bg-vet-sage/90 text-white">
+                <Button size="sm" className="w-full sm:w-auto bg-vet-sage hover:bg-vet-sage/90 text-white text-xs">
                   Retour à l'accueil
                 </Button>
               </Link>
               <Link to="/booking" className="w-full sm:w-auto">
-                <Button variant="outline" className="w-full sm:w-auto border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white" onClick={() => {
+                <Button size="sm" variant="outline" className="w-full sm:w-auto border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white text-xs" onClick={() => {
                   localStorage.removeItem('lastBookingConfirmation');
                   resetBookingData();
                 }}>
@@ -306,7 +307,7 @@ const BookingConfirmation = () => {
                 </Button>
               </Link>
             </div>
-            {displaySettings.clinic_phone && <p className="text-xs sm:text-sm text-vet-brown/70">
+            {displaySettings.clinic_phone && <p className="text-[10px] text-vet-brown/70">
                 Besoin d'aide ? Appelez-nous au {displaySettings.clinic_phone}
               </p>}
           </div>
