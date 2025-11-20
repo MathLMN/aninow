@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, AlertTriangle, Loader2 } from "lucide-react";
+import { CheckCircle, AlertTriangle, Loader2, Hourglass } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { useBookingSubmission } from "@/hooks/useBookingSubmission";
@@ -213,7 +213,7 @@ const BookingConfirmation = () => {
         <div className="max-w-3xl mx-auto">
           {/* Hero - Confirmation visuelle */}
           <div className="text-center mb-4 mt-16 sm:mt-20 animate-fade-in">
-            <CheckCircle className="h-12 sm:h-16 w-12 sm:w-16 text-vet-sage mx-auto mb-3" />
+            <Hourglass className="h-12 sm:h-16 w-12 sm:w-16 text-orange-500 mx-auto mb-3" />
             <h1 className="text-2xl sm:text-3xl font-bold text-vet-navy mb-1">Demande envoyée !</h1>
             <p className="text-vet-brown text-sm">
               Vous recevrez un email de confirmation dans quelques minutes.
