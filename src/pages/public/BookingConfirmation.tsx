@@ -222,7 +222,7 @@ const BookingConfirmation = () => {
             <CardHeader className="pb-1 pt-2">
               <CardTitle className="text-xs text-vet-navy flex items-center gap-2">
                 <Info className="h-4 w-4 text-orange-600 flex-shrink-0" />
-                Pourquoi valider votre demande ?
+                Pourquoi cette validation est importante ?
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0 pb-2">
