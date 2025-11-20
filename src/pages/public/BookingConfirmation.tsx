@@ -241,11 +241,8 @@ const BookingConfirmation = () => {
               <ValidationProcessTimeline />
               
               <div className="bg-vet-sage/10 rounded-lg p-2 border border-vet-sage/20">
-                <p className="text-[10px] text-vet-navy font-medium mb-1">
-                  📧 Vous recevrez un <span className="font-bold">email et SMS de confirmation</span> une fois votre demande validée
-                </p>
-                <p className="text-[10px] text-vet-brown/80 leading-relaxed">
-                  Pensez à vérifier vos <span className="font-medium">spams</span> et restez proche de votre téléphone : la clinique pourrait vous appeler pour une urgence.
+                <p className="text-[10px] text-vet-navy leading-relaxed">
+                  Vérifiez vos spams et restez proche de votre téléphone : la clinique peut vous appeler si elle peut recevoir votre animal plus tôt.
                 </p>
               </div>
             </CardContent>
