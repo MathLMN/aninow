@@ -205,24 +205,24 @@ const BookingConfirmation = () => {
       <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
         <div className="max-w-3xl mx-auto">
           {/* Hero - En attente de validation */}
-          <div className="text-center mb-3 mt-4 sm:mt-20 animate-fade-in">
-            <Hourglass className="h-10 sm:h-16 w-10 sm:w-16 text-amber-500 mx-auto mb-2 animate-pulse" />
-            <h1 className="text-xl sm:text-3xl font-bold text-vet-navy mb-0.5">Demande en cours de validation</h1>
+          <div className="text-center mb-2 mt-6 sm:mt-20 animate-fade-in">
+            <Hourglass className="h-12 sm:h-16 w-12 sm:w-16 text-amber-500 mx-auto mb-1.5 animate-pulse" />
+            <h1 className="text-lg sm:text-3xl font-bold text-vet-navy mb-0.5">Demande en cours de validation</h1>
             
           </div>
 
           {/* Bandeau explicatif - Validation humaine */}
-          <Card className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 shadow-md mb-3">
-            <CardContent className="pt-3 pb-3">
-              <div className="flex items-start gap-2">
+          <Card className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 shadow-md mb-2">
+            <CardContent className="pt-2 pb-2">
+              <div className="flex items-start gap-1.5">
                 <div className="flex-shrink-0 mt-0.5">
-                  <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                  <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></div>
                 </div>
                 <div>
-                  <h3 className="text-xs sm:text-sm font-semibold text-vet-navy mb-1">
+                  <h3 className="text-[11px] sm:text-sm font-semibold text-vet-navy mb-0.5">
                     Pourquoi une validation est nécessaire ?
                   </h3>
-                  <p className="text-xs text-vet-brown leading-snug">
+                  <p className="text-[10px] sm:text-xs text-vet-brown leading-tight">
                     L'équipe de la clinique analyse chaque demande. Ce regard humain garantit une prise en charge optimale et permet de mieux recevoir vos animaux <strong>en cas d'urgence plus ou moins élevée</strong>.
                   </p>
                 </div>
@@ -231,14 +231,14 @@ const BookingConfirmation = () => {
           </Card>
 
           {/* Prochaines étapes - Timeline */}
-          <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-lg mb-3">
-            <CardHeader className="pb-2 pt-3">
-              <CardTitle className="text-sm sm:text-base text-vet-navy">Attendez notre confirmation</CardTitle>
+          <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-lg mb-2">
+            <CardHeader className="pb-1.5 pt-2">
+              <CardTitle className="text-xs sm:text-base text-vet-navy">Attendez notre confirmation</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 pb-3">
+            <CardContent className="space-y-1.5 pb-2">
               <ValidationProcessTimeline />
               
-              <p className="text-xs text-vet-brown leading-snug">
+              <p className="text-[10px] sm:text-xs text-vet-brown leading-tight">
                 Notre équipe valide votre demande et vous recevrez une confirmation définitive par email.
               </p>
             </CardContent>
@@ -248,8 +248,8 @@ const BookingConfirmation = () => {
           {bookingData.appointmentDate && bookingData.appointmentTime && <BookingSummaryCard appointmentDate={bookingData.appointmentDate} appointmentTime={bookingData.appointmentTime} clinicName={displaySettings.clinic_name} clinicAddress={clinicAddress} clinicPhone={displaySettings.clinic_phone} veterinarianName={veterinarianName || undefined} animalName={bookingData.animalName || ''} animalSpecies={bookingData.animalSpecies || ''} />}
 
           {/* Bouton pour afficher les conseils */}
-          <div className="text-center mb-3">
-            <Button onClick={() => setShowAdvice(!showAdvice)} variant="outline" className="text-xs sm:text-sm border-vet-sage text-vet-sage hover:bg-vet-sage hover:text-white transition-all py-1.5">
+          <div className="text-center mb-2">
+            <Button onClick={() => setShowAdvice(!showAdvice)} variant="outline" className="text-[11px] sm:text-sm border-vet-sage text-vet-sage hover:bg-vet-sage hover:text-white transition-all py-1">
               {showAdvice ? "Masquer les conseils" : "Voir nos conseils"}
             </Button>
           </div>
@@ -266,15 +266,15 @@ const BookingConfirmation = () => {
             </div>}
 
           {/* Actions CTA */}
-          <div className="text-center space-y-2 pb-3">
-            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+          <div className="text-center space-y-1.5 pb-2">
+            <div className="flex flex-col sm:flex-row gap-1.5 justify-center">
               <Link to="/" className="w-full sm:w-auto">
-                <Button className="w-full sm:w-auto bg-vet-sage hover:bg-vet-sage/90 text-white text-xs sm:text-sm py-2">
+                <Button className="w-full sm:w-auto bg-vet-sage hover:bg-vet-sage/90 text-white text-[11px] sm:text-sm py-1.5">
                   Retour à l'accueil
                 </Button>
               </Link>
               <Link to="/booking" className="w-full sm:w-auto">
-                <Button variant="outline" className="w-full sm:w-auto border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white text-xs sm:text-sm py-2" onClick={() => {
+                <Button variant="outline" className="w-full sm:w-auto border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white text-[11px] sm:text-sm py-1.5" onClick={() => {
                 localStorage.removeItem('lastBookingConfirmation');
                 resetBookingData();
               }}>
@@ -282,7 +282,7 @@ const BookingConfirmation = () => {
                 </Button>
               </Link>
             </div>
-            {displaySettings.clinic_phone && <p className="text-xs text-vet-brown/70">
+            {displaySettings.clinic_phone && <p className="text-[10px] sm:text-xs text-vet-brown/70">
                 Besoin d'aide ? Appelez-nous au {displaySettings.clinic_phone}
               </p>}
           </div>
