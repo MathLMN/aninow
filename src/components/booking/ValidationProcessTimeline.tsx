@@ -4,17 +4,17 @@ export const ValidationProcessTimeline = () => {
   const steps = [
     {
       number: "1",
-      label: "Demande reçue",
+      label: "Demande reçue ✓",
       status: "completed"
     },
     {
       number: "2",
-      label: "Validation ou rappel si urgence",
+      label: "Analyse par la clinique",
       status: "current"
     },
     {
       number: "3",
-      label: "SMS & Email de confirmation",
+      label: "Email + SMS de confirmation",
       status: "pending"
     }
   ];
