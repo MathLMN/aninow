@@ -217,6 +217,21 @@ const BookingConfirmation = () => {
             <h1 className="text-2xl sm:text-3xl font-bold text-vet-navy mb-1">En attente de validation</h1>
           </div>
 
+          {/* Encadré informatif - Pourquoi la validation */}
+          <Card className="bg-orange-50/70 backdrop-blur-sm border-orange-300/60 shadow-sm mb-3">
+            <CardHeader className="pb-1 pt-2">
+              <CardTitle className="text-xs text-vet-navy flex items-center gap-2">
+                <Info className="h-4 w-4 text-orange-600 flex-shrink-0" />
+                Pourquoi valider votre demande ?
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0 pb-2">
+              <p className="text-[10px] text-vet-brown leading-snug">
+                L'équipe de la clinique va analyser votre demande. Ce regard humain et expert permet de garantir une meilleure prise en charge des animaux en cas d'urgence plus ou moins élevée.
+              </p>
+            </CardContent>
+          </Card>
+
           {/* Prochaines étapes - Timeline */}
           <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-lg mb-3">
             <CardHeader className="pb-1 pt-3">
@@ -233,21 +248,6 @@ const BookingConfirmation = () => {
                   Pensez à vérifier vos <span className="font-medium">spams</span> et restez proche de votre téléphone : la clinique pourrait vous appeler pour une urgence.
                 </p>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Encadré informatif - Pourquoi la validation */}
-          <Card className="bg-orange-50/70 backdrop-blur-sm border-orange-300/60 shadow-sm mb-3">
-            <CardHeader className="pb-1 pt-2">
-              <CardTitle className="text-xs text-vet-navy flex items-center gap-2">
-                <Info className="h-4 w-4 text-orange-600 flex-shrink-0" />
-                Pourquoi valider votre demande ?
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0 pb-2">
-              <p className="text-[10px] text-vet-brown leading-snug">
-                L'équipe de la clinique va analyser votre demande. Ce regard humain et expert permet de garantir une meilleure prise en charge des animaux en cas d'urgence plus ou moins élevée.
-              </p>
             </CardContent>
           </Card>
 
