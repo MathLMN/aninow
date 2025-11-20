@@ -14,7 +14,7 @@ export const ValidationProcessTimeline = () => {
     },
     {
       number: "3",
-      label: "Email + SMS de confirmation",
+      label: "Email de confirmation",
       status: "pending"
     }
   ];
