@@ -226,7 +226,7 @@ const BookingConfirmation = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0 pb-2">
-              <p className="text-[10px] text-vet-brown leading-snug">
+              <p className="text-[10px] text-vet-navy leading-snug">
                 L'équipe de la clinique va analyser votre demande. Ce regard humain et expert permet de garantir une <span className="font-semibold">meilleure prise en charge</span> des animaux en cas <span className="font-semibold">d'urgence plus ou moins élevée</span>.
               </p>
             </CardContent>
