@@ -209,30 +209,30 @@ const BookingConfirmation = () => {
   return <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
       <Header />
 
-      <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
+      <main className="container mx-auto px-4 sm:px-6 py-2 sm:py-3">
         <div className="max-w-3xl mx-auto">
           {/* Hero - En attente de validation */}
-          <div className="text-center mb-4 mt-16 sm:mt-20 animate-fade-in">
-            <Hourglass className="h-12 sm:h-16 w-12 sm:w-16 text-amber-500 mx-auto mb-3 animate-pulse" />
-            <h1 className="text-2xl sm:text-3xl font-bold text-vet-navy mb-1">Demande en cours de validation</h1>
-            <p className="text-vet-brown text-sm">
+          <div className="text-center mb-3 mt-4 sm:mt-6 animate-fade-in">
+            <Hourglass className="h-10 sm:h-12 w-10 sm:w-12 text-amber-500 mx-auto mb-2 animate-pulse" />
+            <h1 className="text-xl sm:text-2xl font-bold text-vet-navy mb-0.5">Demande en cours de validation</h1>
+            <p className="text-vet-brown text-xs">
               Notre équipe examine votre demande pour vous répondre rapidement.
             </p>
           </div>
 
           {/* Bandeau explicatif - Validation humaine */}
-          <Card className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 shadow-md mb-4">
-            <CardContent className="pt-4 pb-4">
-              <div className="flex items-start gap-3">
+          <Card className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 shadow-md mb-2">
+            <CardContent className="pt-2 pb-2">
+              <div className="flex items-start gap-2">
                 <div className="flex-shrink-0 mt-0.5">
-                  <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                  <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></div>
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-vet-navy mb-1.5">
+                  <h3 className="text-xs font-semibold text-vet-navy mb-1">
                     Pourquoi une validation est nécessaire ?
                   </h3>
-                  <p className="text-xs text-vet-brown leading-relaxed">
-                    Notre équipe vétérinaire analyse chaque demande pour <strong>évaluer le degré d'urgence</strong> et vous proposer le créneau le plus adapté à l'état de santé de votre animal. Cette validation humaine garantit une prise en charge optimale et rapide en cas de situation urgente.
+                  <p className="text-[11px] text-vet-brown leading-tight">
+                    Notre équipe vétérinaire analyse chaque demande pour <strong>évaluer le degré d'urgence</strong> et vous proposer le créneau le plus adapté à l'état de santé de votre animal.
                   </p>
                 </div>
               </div>
@@ -240,15 +240,15 @@ const BookingConfirmation = () => {
           </Card>
 
           {/* Prochaines étapes - Timeline */}
-          <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-lg mb-4">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base text-vet-navy">Attendez notre confirmation</CardTitle>
+          <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 shadow-lg mb-2">
+            <CardHeader className="pb-1 pt-2">
+              <CardTitle className="text-sm text-vet-navy">Attendez notre confirmation</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-2 pb-2">
               <ValidationProcessTimeline />
               
-              <p className="text-xs text-vet-brown leading-relaxed">
-                Notre équipe valide votre demande et vous recevrez une confirmation définitive par email.
+              <p className="text-[11px] text-vet-brown leading-tight">
+                Vous recevrez une confirmation définitive par email.
               </p>
             </CardContent>
           </Card>
@@ -268,11 +268,12 @@ const BookingConfirmation = () => {
           )}
 
           {/* Bouton pour afficher les conseils */}
-          <div className="text-center mb-4">
+          <div className="text-center mb-2 mt-2">
             <Button
               onClick={() => setShowAdvice(!showAdvice)}
               variant="outline"
-              className="border-vet-sage text-vet-sage hover:bg-vet-sage hover:text-white transition-all"
+              size="sm"
+              className="border-vet-sage text-vet-sage hover:bg-vet-sage hover:text-white transition-all text-xs"
             >
               {showAdvice ? "Masquer les conseils" : "Voir nos conseils"}
             </Button>
@@ -292,15 +293,15 @@ const BookingConfirmation = () => {
           )}
 
           {/* Actions CTA */}
-          <div className="text-center space-y-3 pb-4">
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="text-center space-y-2 pb-2">
+            <div className="flex flex-col sm:flex-row gap-2 justify-center">
               <Link to="/" className="w-full sm:w-auto">
-                <Button className="w-full sm:w-auto bg-vet-sage hover:bg-vet-sage/90 text-white">
+                <Button size="sm" className="w-full sm:w-auto bg-vet-sage hover:bg-vet-sage/90 text-white text-xs">
                   Retour à l'accueil
                 </Button>
               </Link>
               <Link to="/booking" className="w-full sm:w-auto">
-                <Button variant="outline" className="w-full sm:w-auto border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white" onClick={() => {
+                <Button size="sm" variant="outline" className="w-full sm:w-auto border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white text-xs" onClick={() => {
                   localStorage.removeItem('lastBookingConfirmation');
                   resetBookingData();
                 }}>
@@ -308,7 +309,7 @@ const BookingConfirmation = () => {
                 </Button>
               </Link>
             </div>
-            {displaySettings.clinic_phone && <p className="text-xs sm:text-sm text-vet-brown/70">
+            {displaySettings.clinic_phone && <p className="text-[11px] text-vet-brown/70">
                 Besoin d'aide ? Appelez-nous au {displaySettings.clinic_phone}
               </p>}
           </div>
