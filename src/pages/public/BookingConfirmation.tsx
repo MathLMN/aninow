@@ -215,9 +215,6 @@ const BookingConfirmation = () => {
           <div className="text-center mb-4 mt-16 sm:mt-20 animate-fade-in">
             <Hourglass className="h-12 sm:h-16 w-12 sm:w-16 text-orange-500 mx-auto mb-3" />
             <h1 className="text-2xl sm:text-3xl font-bold text-vet-navy mb-1">En attente de validation</h1>
-            <p className="text-vet-brown text-sm">
-              Vous recevrez un email de confirmation dans quelques minutes.
-            </p>
           </div>
 
           {/* Prochaines étapes - Timeline */}
