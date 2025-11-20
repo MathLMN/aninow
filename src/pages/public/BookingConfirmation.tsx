@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, AlertTriangle, Loader2, Hourglass } from "lucide-react";
+import { CheckCircle, AlertTriangle, Loader2, Hourglass, Info } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { useBookingSubmission } from "@/hooks/useBookingSubmission";
@@ -228,6 +228,18 @@ const BookingConfirmation = () => {
               <p className="text-xs text-vet-brown leading-relaxed">
                 Notre équipe valide votre demande et vous recevrez une confirmation définitive par email.
               </p>
+            </CardContent>
+          </Card>
+
+          {/* Encadré informatif - Pourquoi la validation */}
+          <Card className="bg-blue-50/50 backdrop-blur-sm border-blue-200/50 shadow-sm mb-4">
+            <CardContent className="py-3 px-4">
+              <div className="flex gap-3 items-start">
+                <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-vet-brown leading-relaxed">
+                  L'équipe de la clinique va analyser votre demande. Ce regard humain et expert permet de garantir une meilleure prise en charge des animaux en cas d'urgence plus ou moins élevée.
+                </p>
+              </div>
             </CardContent>
           </Card>
 
