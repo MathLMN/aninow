@@ -337,37 +337,43 @@ export const useAvailableSlots = ({
     }) => {
       console.log('🔄 Blocking time slot:', { date, startTime, endTime, veterinarianId });
       
-      const { data: clinic } = await supabase
+      const { data: clinic, error: clinicError } = await supabase
         .from('clinics')
         .select('id')
         .eq('slug', clinicSlug)
         .single();
 
+      if (clinicError) {
+        console.error('❌ Error fetching clinic:', clinicError);
+        throw new Error(`Clinique non trouvée: ${clinicError.message}`);
+      }
+
       if (!clinic) {
-        throw new Error('Clinic not found');
+        throw new Error('Clinique non trouvée');
       }
 
       // Build a minimal valid booking payload for a blocked slot.
       // bookings.Insert requires several fields even for a block.
       const blockedInsert: Database['public']['Tables']['bookings']['Insert'] = {
         clinic_id: clinic.id,
-        veterinarian_id: veterinarianId || null,
+        veterinarian_id: veterinarianId,
         appointment_date: date,
         appointment_time: startTime,
         appointment_end_time: endTime,
         is_blocked: true,
         // Required fields with placeholders for a blocked slot:
         animal_species: 'blocked',
-        animal_name: 'Blocage',
-        consultation_reason: 'Blocage de créneau',
-        client_name: 'Blocage',
-        client_email: 'blocage@placeholder.local',
+        animal_name: 'Créneau bloqué',
+        consultation_reason: 'consultation-convenance',
+        client_name: 'Système',
+        client_email: 'system@clinique.local',
         client_phone: '0000000000',
         preferred_contact_method: 'phone',
-        // Status must be one of the allowed values
-        status: 'pending',
-        booking_source: 'blocked',
+        status: 'confirmed',
+        booking_source: 'manual',
       }
+
+      console.log('📝 Inserting blocked booking:', blockedInsert);
 
       const { data, error } = await supabase
         .from('bookings')
@@ -376,14 +382,17 @@ export const useAvailableSlots = ({
         .single();
 
       if (error) {
-        console.error('❌ Error blocking slot:', error);
-        throw error;
+        console.error('❌ Error inserting blocked booking:', error);
+        throw new Error(`Erreur d'insertion: ${error.message}`);
       }
 
+      console.log('✅ Blocked booking created:', data);
       return data;
     },
     onSuccess: () => {
+      console.log('✅ Block slot mutation succeeded');
       queryClient.invalidateQueries({ queryKey: ['available-slots'] });
+      queryClient.invalidateQueries({ queryKey: ['vet-bookings'] });
       toast({
         title: "Créneau bloqué",
         description: "Le créneau a été bloqué avec succès",
@@ -391,9 +400,10 @@ export const useAvailableSlots = ({
     },
     onError: (error: any) => {
       console.error('❌ Failed to block slot:', error);
+      const errorMessage = error?.message || 'Erreur inconnue';
       toast({
         title: "Erreur",
-        description: "Impossible de bloquer le créneau",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -406,14 +416,17 @@ export const useAvailableSlots = ({
     veterinarianId: string
   ): Promise<boolean> => {
     try {
+      console.log('🔄 blockTimeSlot called with:', { date, startTime, endTime, veterinarianId });
       await blockTimeSlotMutation.mutateAsync({
         date,
         startTime,
         endTime,
         veterinarianId
       });
+      console.log('✅ blockTimeSlot succeeded');
       return true;
-    } catch {
+    } catch (error) {
+      console.error('❌ blockTimeSlot failed:', error);
       return false;
     }
   };
