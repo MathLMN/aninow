@@ -2,6 +2,7 @@
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Cat, Dog, Rabbit } from "lucide-react";
 import SelectionButton from './SelectionButton';
 import AnimalNameInput from './AnimalNameInput';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -47,6 +48,7 @@ const AnimalSpeciesSelection: React.FC<AnimalSpeciesSelectionProps> = ({
           value="chat" 
           isSelected={species === 'chat'} 
           onSelect={onSpeciesChange}
+          icon={Cat}
         >
           Chat
         </SelectionButton>
@@ -56,6 +58,7 @@ const AnimalSpeciesSelection: React.FC<AnimalSpeciesSelectionProps> = ({
           value="chien" 
           isSelected={species === 'chien'} 
           onSelect={onSpeciesChange}
+          icon={Dog}
         >
           Chien
         </SelectionButton>
@@ -65,6 +68,7 @@ const AnimalSpeciesSelection: React.FC<AnimalSpeciesSelectionProps> = ({
           value="autre" 
           isSelected={species === 'autre'} 
           onSelect={onSpeciesChange}
+          icon={Rabbit}
         >
           Autre (précisez)
         </SelectionButton>
