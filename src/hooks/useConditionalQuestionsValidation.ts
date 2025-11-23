@@ -136,6 +136,10 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
     // Ajouter les questions spécifiques aux grosseurs si nécessaire
     if (detection.hasLump) {
       requiredQuestions.push(`${prefix}lump_body_area`, `${prefix}lump_size_evolution`);
+      // Si "Une zone localisée" est sélectionnée, ajouter la question de détail
+      if (answers[`${prefix}lump_body_area`] === 'Une zone localisée') {
+        requiredQuestions.push(`${prefix}lump_body_area_detail`);
+      }
     }
 
     // Ajouter les questions spécifiques à l'agressivité si nécessaire
