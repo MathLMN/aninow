@@ -3,7 +3,6 @@ import SelectionButton from "@/components/SelectionButton";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import MultiPhotoUpload, { PhotoData } from "./MultiPhotoUpload";
-import BodyZoneSelector from "./BodyZoneSelector";
 
 interface LumpSectionProps {
   answers: {[key: string]: string | File | PhotoData};
@@ -70,26 +69,6 @@ const LumpSection = ({ answers, onAnswerChange, onFileChange, keyPrefix = '' }: 
                   rows={2}
                 />
               </div>
-            )}
-
-            {/* Show body zone selector when "Plusieurs zones" is selected */}
-            {question.key === 'lump_body_area' && answers[keyPrefix + 'lump_body_area'] === 'Plusieurs zones' && (
-              <BodyZoneSelector
-                selectedZones={(() => {
-                  const value = answers[keyPrefix + 'lump_multiple_zones'];
-                  if (Array.isArray(value)) return value;
-                  if (typeof value === 'string') {
-                    try {
-                      return JSON.parse(value);
-                    } catch {
-                      return [];
-                    }
-                  }
-                  return [];
-                })()}
-                onZonesChange={(zones) => onAnswerChange('lump_multiple_zones', JSON.stringify(zones))}
-                keyPrefix={keyPrefix}
-              />
             )}
           </div>
           
