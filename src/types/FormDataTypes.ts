@@ -1,5 +1,6 @@
 
 export interface FormData {
+  bookingSituation: '1-animal' | '2-animaux' | 'une-portee' | '';
   animalSpecies: string;
   customSpecies: string;
   animalName: string;
@@ -11,9 +12,9 @@ export interface FormData {
 }
 
 export interface FormState {
+  showFirstAnimalForm: boolean;
+  showSecondAnimalForm: boolean;
+  showLitterForm: boolean;
   showNameInput: boolean;
-  showMultipleOptions: boolean;
-  showSecondAnimal: boolean;
   showSecondNameInput: boolean;
-  showLitterOptions: boolean;
 }

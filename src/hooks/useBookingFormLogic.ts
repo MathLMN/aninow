@@ -4,6 +4,7 @@ import { FormData, FormState } from '../types/FormDataTypes';
 
 export const useBookingFormLogic = () => {
   const [formData, setFormData] = useState<FormData>({
+    bookingSituation: '',
     animalSpecies: '',
     customSpecies: '',
     animalName: '',
@@ -15,19 +16,49 @@ export const useBookingFormLogic = () => {
   });
 
   const [formState, setFormState] = useState<FormState>({
+    showFirstAnimalForm: false,
+    showSecondAnimalForm: false,
+    showLitterForm: false,
     showNameInput: false,
-    showMultipleOptions: false,
-    showSecondAnimal: false,
-    showSecondNameInput: false,
-    showLitterOptions: false
+    showSecondNameInput: false
   });
 
   // Vérifier si c'est une portée
   const isLitter = formData.multipleAnimals.includes('une-portee');
 
+  // Handler pour le changement de situation
+  const handleBookingSituationChange = (situation: string) => {
+    // Réinitialiser les données selon la nouvelle situation
+    const newFormData: FormData = {
+      bookingSituation: situation as '1-animal' | '2-animaux' | 'une-portee' | '',
+      animalSpecies: formData.animalSpecies,
+      customSpecies: formData.customSpecies,
+      animalName: situation === 'une-portee' ? '' : formData.animalName,
+      multipleAnimals: situation === '2-animaux' ? ['2-animaux'] : situation === 'une-portee' ? ['une-portee'] : [],
+      secondAnimalSpecies: situation === '2-animaux' ? formData.secondAnimalSpecies : '',
+      secondAnimalName: situation === '2-animaux' ? formData.secondAnimalName : '',
+      secondCustomSpecies: situation === '2-animaux' ? formData.secondCustomSpecies : '',
+      vaccinationType: situation === 'une-portee' ? formData.vaccinationType : ''
+    };
+    
+    setFormData(newFormData);
+    
+    // Mettre à jour l'état des formulaires
+    const newFormState: FormState = {
+      showFirstAnimalForm: situation !== '',
+      showSecondAnimalForm: situation === '2-animaux',
+      showLitterForm: situation === 'une-portee',
+      showNameInput: !!formData.animalSpecies && situation !== 'une-portee',
+      showSecondNameInput: situation === '2-animaux' && !!formData.secondAnimalSpecies
+    };
+    
+    setFormState(newFormState);
+  };
+
   // Function to initialize form data from localStorage - simplified
   const initializeFormData = (data: Partial<FormData>) => {
     const newFormData: FormData = {
+      bookingSituation: data.bookingSituation || '',
       animalSpecies: data.animalSpecies || '',
       customSpecies: data.customSpecies || '',
       animalName: data.animalName || '',
@@ -41,12 +72,13 @@ export const useBookingFormLogic = () => {
     setFormData(newFormData);
     
     // Update form state based on the loaded data
+    const situation = newFormData.bookingSituation;
     const newFormState: FormState = {
-      showNameInput: !!newFormData.animalSpecies,
-      showMultipleOptions: !!newFormData.animalSpecies,
-      showSecondAnimal: newFormData.multipleAnimals.includes('2-animaux'),
-      showSecondNameInput: !!newFormData.secondAnimalSpecies,
-      showLitterOptions: newFormData.multipleAnimals.includes('une-portee')
+      showFirstAnimalForm: !!situation,
+      showSecondAnimalForm: situation === '2-animaux',
+      showLitterForm: situation === 'une-portee',
+      showNameInput: !!newFormData.animalSpecies && situation !== 'une-portee',
+      showSecondNameInput: !!newFormData.secondAnimalSpecies && situation === '2-animaux'
     };
     
     setFormState(newFormState);
@@ -61,8 +93,7 @@ export const useBookingFormLogic = () => {
       }));
       setFormState(prev => ({
         ...prev,
-        showNameInput: true,
-        showMultipleOptions: true
+        showNameInput: prev.showLitterForm ? false : true
       }));
     } else {
       setFormData(prev => ({
@@ -70,13 +101,10 @@ export const useBookingFormLogic = () => {
         animalSpecies: '',
         customSpecies: ''
       }));
-      setFormState({
-        showNameInput: false,
-        showMultipleOptions: false,
-        showSecondAnimal: false,
-        showSecondNameInput: false,
-        showLitterOptions: false
-      });
+      setFormState(prev => ({
+        ...prev,
+        showNameInput: false
+      }));
     }
   };
 
@@ -180,6 +208,7 @@ export const useBookingFormLogic = () => {
     formState,
     isLitter,
     initializeFormData,
+    handleBookingSituationChange,
     handleSpeciesChange,
     handleCustomSpeciesChange,
     handleNameChange,
