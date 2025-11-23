@@ -22,7 +22,7 @@ const MultipleAnimalsOptions: React.FC<MultipleAnimalsOptionsProps> = ({
             onCheckedChange={checked => onMultipleAnimalsChange('2-animaux', checked as boolean)} 
           />
           <Label htmlFor="deux-animaux" className="text-vet-navy cursor-pointer">
-            Ajouter un 2ème animal
+            Je prends rendez-vous pour 2 animaux
           </Label>
         </div>
         
@@ -33,7 +33,7 @@ const MultipleAnimalsOptions: React.FC<MultipleAnimalsOptionsProps> = ({
             onCheckedChange={checked => onMultipleAnimalsChange('une-portee', checked as boolean)} 
           />
           <Label htmlFor="une-portee" className="text-vet-navy cursor-pointer">
-            Venir avec une portée
+            Je prends rendez-vous pour une portée chiots/chatons
           </Label>
         </div>
       </div>
