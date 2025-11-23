@@ -7,7 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useClinicContext } from "@/contexts/ClinicContext";
-import { useAvailableSlots } from "@/hooks/useAvailableSlots";
+import { supabase } from "@/integrations/supabase/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import type { Database } from "@/integrations/supabase/types";
 
 interface BlockSlotModalProps {
   isOpen: boolean;
@@ -50,18 +53,97 @@ export const BlockSlotModal = ({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { currentClinic } = useClinicContext();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
-  const { blockTimeSlot } = useAvailableSlots({
-    clinicSlug: currentClinic?.slug || '',
-    selectedVeterinarianId: undefined,
-    noVeterinarianPreference: false,
-    hasTwoAnimals: false
+  const blockTimeSlotMutation = useMutation({
+    mutationFn: async ({
+      date,
+      startTime,
+      endTime,
+      veterinarianId,
+      clinicId
+    }: {
+      date: string;
+      startTime: string;
+      endTime: string;
+      veterinarianId: string;
+      clinicId: string;
+    }) => {
+      console.log('🔄 Blocking time slot:', { date, startTime, endTime, veterinarianId, clinicId });
+      
+      const blockedInsert: Database['public']['Tables']['bookings']['Insert'] = {
+        clinic_id: clinicId,
+        veterinarian_id: veterinarianId,
+        appointment_date: date,
+        appointment_time: startTime,
+        appointment_end_time: endTime,
+        is_blocked: true,
+        animal_species: 'blocked',
+        animal_name: 'Créneau bloqué',
+        consultation_reason: 'consultation-convenance',
+        client_name: 'Système',
+        client_email: 'system@clinique.local',
+        client_phone: '0000000000',
+        preferred_contact_method: 'phone',
+        status: 'confirmed',
+        booking_source: 'manual',
+      }
+
+      console.log('📝 Inserting blocked booking:', blockedInsert);
+
+      const { data, error } = await supabase
+        .from('bookings')
+        .insert(blockedInsert)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ Error inserting blocked booking:', error);
+        throw new Error(`Erreur d'insertion: ${error.message}`);
+      }
+
+      console.log('✅ Blocked booking created:', data);
+      return data;
+    },
+    onSuccess: () => {
+      console.log('✅ Block slot mutation succeeded');
+      queryClient.invalidateQueries({ queryKey: ['available-slots'] });
+      queryClient.invalidateQueries({ queryKey: ['vet-bookings'] });
+      toast({
+        title: "Créneau bloqué",
+        description: "Le créneau a été bloqué avec succès",
+      });
+    },
+    onError: (error: any) => {
+      console.error('❌ Failed to block slot:', error);
+      const errorMessage = error?.message || 'Erreur inconnue';
+      toast({
+        title: "Erreur",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    },
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.date || !formData.startTime || !formData.endTime || !formData.veterinarianId) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez remplir tous les champs requis",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!currentClinic?.id) {
+      toast({
+        title: "Erreur",
+        description: "Clinique non identifiée",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -70,25 +152,24 @@ export const BlockSlotModal = ({
     try {
       console.log('🔄 Submitting block slot form:', formData);
       
-      const success = await blockTimeSlot(
-        formData.date,
-        formData.startTime,
-        formData.endTime,
-        formData.veterinarianId
-      );
+      await blockTimeSlotMutation.mutateAsync({
+        date: formData.date,
+        startTime: formData.startTime,
+        endTime: formData.endTime,
+        veterinarianId: formData.veterinarianId,
+        clinicId: currentClinic.id
+      });
 
-      if (success) {
-        console.log('✅ Slot blocked successfully, closing modal');
-        onClose();
-        // Réinitialiser le formulaire
-        setFormData({
-          date: '',
-          startTime: '',
-          endTime: '',
-          veterinarianId: '',
-          reason: ''
-        });
-      }
+      console.log('✅ Slot blocked successfully, closing modal');
+      onClose();
+      // Réinitialiser le formulaire
+      setFormData({
+        date: '',
+        startTime: '',
+        endTime: '',
+        veterinarianId: '',
+        reason: ''
+      });
     } catch (error) {
       console.error('❌ Error in handleSubmit:', error);
     } finally {
