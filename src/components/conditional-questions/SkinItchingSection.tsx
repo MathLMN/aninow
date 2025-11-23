@@ -1,6 +1,7 @@
 
 import SelectionButton from "@/components/SelectionButton";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import type { PhotoData } from "@/components/conditional-questions/MultiPhotoUpload";
 
 interface SkinItchingSectionProps {
@@ -57,6 +58,22 @@ const SkinItchingSection = ({ answers, onAnswerChange, keyPrefix = '' }: SkinItc
                 </SelectionButton>
               ))}
             </div>
+
+            {/* Show text input when "Une zone localisée" is selected */}
+            {question.key === 'skin_itching_areas' && answers[keyPrefix + 'skin_itching_areas'] === 'Une zone localisée' && (
+              <div className="ml-0 sm:ml-10 mt-4">
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Précisez la zone du corps <span className="text-destructive">*</span>
+                </label>
+                <Textarea
+                  value={answers[keyPrefix + 'skin_itching_areas_detail'] as string || ''}
+                  onChange={(e) => onAnswerChange('skin_itching_areas_detail', e.target.value)}
+                  placeholder="Exemple : patte arrière droite, dos, tête..."
+                  className="w-full"
+                  rows={2}
+                />
+              </div>
+            )}
           </div>
           
           {index < questions.length - 1 && (
