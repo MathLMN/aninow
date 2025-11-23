@@ -5,6 +5,7 @@ import { WeeklyCalendarView } from "@/components/planning/WeeklyCalendarView";
 import { PlanningHeader } from "@/components/planning/PlanningHeader";
 import { CreateAppointmentModal } from "@/components/planning/CreateAppointmentModal";
 import { CreateNoteModal } from "@/components/planning/CreateNoteModal";
+import { BlockSlotModal } from "@/components/planning/BlockSlotModal";
 import { PendingBookingsNotification } from "@/components/planning/PendingBookingsNotification";
 import { WaitingList } from "@/components/planning/WaitingList";
 import { useVetBookings } from "@/hooks/useVetBookings";
@@ -18,9 +19,11 @@ export default function VetPlanning() {
   const [viewMode, setViewMode] = useState<'daily' | 'weekly'>('daily');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+  const [isBlockSlotModalOpen, setIsBlockSlotModalOpen] = useState(false);
   const [appointmentToEdit, setAppointmentToEdit] = useState<any>(null);
   const [createModalDefaultData, setCreateModalDefaultData] = useState<any>(null);
   const [noteModalDefaultData, setNoteModalDefaultData] = useState<any>(null);
+  const [blockSlotModalData, setBlockSlotModalData] = useState<any>(null);
 
   const { bookings, refreshBookings } = useVetBookings();
   const { veterinarians } = useClinicVeterinarians();
@@ -92,6 +95,25 @@ export default function VetPlanning() {
       setCreateModalDefaultData(null);
       setIsCreateModalOpen(true);
     }
+  };
+
+  const handleBlockedSlotClick = (booking: any) => {
+    console.log('🚫 Opening block slot modal for editing:', booking);
+    setBlockSlotModalData({
+      bookingId: booking.id,
+      date: booking.appointment_date,
+      time: booking.appointment_time,
+      endTime: booking.appointment_end_time,
+      veterinarianId: booking.veterinarian_id,
+      reason: booking.client_comment || ''
+    });
+    setIsBlockSlotModalOpen(true);
+  };
+
+  const handleCloseBlockSlotModal = () => {
+    setIsBlockSlotModalOpen(false);
+    setBlockSlotModalData(null);
+    refreshBookings();
   };
 
   const handleCloseModal = () => {
@@ -213,6 +235,7 @@ export default function VetPlanning() {
                   onCreateAppointment={handleCreateAppointment}
                   onCreateNote={handleCreateNote}
                   onAppointmentClick={handleAppointmentClick}
+                  onBlockedSlotClick={handleBlockedSlotClick}
                   onValidateBooking={handleValidateBooking}
                   onCancelBooking={handleCancelBooking}
                   onCopyBooking={handleCopyBooking}
@@ -246,6 +269,7 @@ export default function VetPlanning() {
                 onCreateAppointment={handleCreateAppointment}
                 onCreateNote={handleCreateNote}
                 onAppointmentClick={handleAppointmentClick}
+                onBlockedSlotClick={handleBlockedSlotClick}
                 onValidateBooking={handleValidateBooking}
                 onCancelBooking={handleCancelBooking}
                 onCopyBooking={handleCopyBooking}
@@ -294,6 +318,13 @@ export default function VetPlanning() {
         isOpen={isNoteModalOpen}
         onClose={handleCloseNoteModal}
         defaultData={noteModalDefaultData}
+        veterinarians={veterinarians}
+      />
+
+      <BlockSlotModal
+        isOpen={isBlockSlotModalOpen}
+        onClose={handleCloseBlockSlotModal}
+        defaultData={blockSlotModalData}
         veterinarians={veterinarians}
       />
     </div>
