@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, AlertCircle, TrendingUp, UserX, CheckCircle, XCircle, Trash2 } from "lucide-react";
+import { AlertTriangle, AlertCircle, TrendingUp, UserX, CheckCircle, XCircle, Trash2, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AppointmentSection } from "./appointment-form/AppointmentSection";
 import { ClientSection } from "./appointment-form/ClientSection";
@@ -308,6 +308,45 @@ export const CreateAppointmentModal = ({
                 />
               </div>
             </div>
+
+            {/* Section Vétérinaire assigné - seulement pour RDV en ligne */}
+            {isEditMode && isOnlineBooking && appointmentToEdit.veterinarian_id && (
+              <div className="bg-indigo-50/50 border border-indigo-200 rounded-md p-3">
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-indigo-900 text-sm flex items-center">
+                    <UserCircle className="h-4 w-4 mr-1.5" />
+                    Vétérinaire assigné
+                  </h3>
+                  
+                  {/* Nom du vétérinaire */}
+                  <div className="text-xs">
+                    <span className="font-medium text-vet-brown">
+                      {veterinarians.find(v => v.id === appointmentToEdit.veterinarian_id)?.name || 'Non spécifié'}
+                    </span>
+                  </div>
+                  
+                  {/* Mention de préférence */}
+                  <div className={cn(
+                    "p-2 rounded-lg border text-xs",
+                    appointmentToEdit.veterinarian_preference_selected
+                      ? "bg-green-50 border-green-200 text-green-900"
+                      : "bg-blue-50 border-blue-200 text-blue-900"
+                  )}>
+                    {appointmentToEdit.veterinarian_preference_selected ? (
+                      <span className="flex items-start gap-1.5">
+                        <span className="text-green-600 font-bold">✓</span>
+                        <span><strong>Vétérinaire choisi par le client</strong> - Le client a spécifiquement sélectionné ce vétérinaire</span>
+                      </span>
+                    ) : (
+                      <span className="flex items-start gap-1.5">
+                        <span className="text-blue-600 font-bold">ℹ️</span>
+                        <span><strong>Vétérinaire attribué automatiquement</strong> - Le client n'avait pas de préférence</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Section Consultation - pleine largeur très compacte */}
             <div className="bg-purple-50/50 border border-purple-200 rounded-md p-2">
