@@ -1,6 +1,7 @@
 
 import SelectionButton from "@/components/SelectionButton";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import MultiPhotoUpload, { PhotoData } from "./MultiPhotoUpload";
 
 interface LumpSectionProps {
@@ -15,7 +16,7 @@ const LumpSection = ({ answers, onAnswerChange, onFileChange, keyPrefix = '' }: 
     {
       key: 'lump_body_area',
       title: 'Sur quelle(s) zone(s) du corps ?',
-      options: ['Généralisée', 'Plusieurs zones', 'Une zone localisée']
+      options: ['Une zone localisée', 'Plusieurs zones']
     },
     {
       key: 'lump_size_evolution',
@@ -53,6 +54,22 @@ const LumpSection = ({ answers, onAnswerChange, onFileChange, keyPrefix = '' }: 
                 </SelectionButton>
               ))}
             </div>
+
+            {/* Show text input when "Une zone localisée" is selected */}
+            {question.key === 'lump_body_area' && answers[keyPrefix + 'lump_body_area'] === 'Une zone localisée' && (
+              <div className="ml-0 sm:ml-10 mt-4">
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Précisez la zone du corps <span className="text-destructive">*</span>
+                </label>
+                <Textarea
+                  value={answers[keyPrefix + 'lump_body_area_detail'] as string || ''}
+                  onChange={(e) => onAnswerChange('lump_body_area_detail', e.target.value)}
+                  placeholder="Exemple : patte avant gauche, abdomen, cou..."
+                  className="w-full"
+                  rows={2}
+                />
+              </div>
+            )}
           </div>
           
           <Separator className="mt-6 sm:mt-8" />
