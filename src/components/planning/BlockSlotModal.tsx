@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useClinicContext } from "@/contexts/ClinicContext";
+import { useClinicAccess } from "@/hooks/useClinicAccess";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -52,7 +52,7 @@ export const BlockSlotModal = ({
     reason: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { currentClinic } = useClinicContext();
+  const { currentClinicId } = useClinicAccess();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -138,7 +138,7 @@ export const BlockSlotModal = ({
       return;
     }
 
-    if (!currentClinic?.id) {
+    if (!currentClinicId) {
       toast({
         title: "Erreur",
         description: "Clinique non identifiée",
@@ -157,7 +157,7 @@ export const BlockSlotModal = ({
         startTime: formData.startTime,
         endTime: formData.endTime,
         veterinarianId: formData.veterinarianId,
-        clinicId: currentClinic.id
+        clinicId: currentClinicId
       });
 
       console.log('✅ Slot blocked successfully, closing modal');
