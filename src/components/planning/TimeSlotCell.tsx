@@ -131,7 +131,7 @@ export const TimeSlotCell = ({
   };
 
   const handleCellClick = () => {
-    if (bookings.length === 0 && isOpen && !isVeterinarianAbsent && !isBlocked) {
+    if (bookings.length === 0 && isOpen && !isVeterinarianAbsent) {
       onCreateAppointment({
         date: formatDateLocal(selectedDate),
         time: time,
@@ -230,7 +230,13 @@ export const TimeSlotCell = ({
         {/* Affichage spécial pour les créneaux bloqués */}
         {isBlocked && isFirstBlockedSlot && (
           <div 
-            className="absolute inset-0 flex items-center justify-center bg-gray-400/60 text-gray-800 text-[9px] font-medium z-10"
+            className="absolute inset-0 flex items-center justify-center bg-gray-400/60 text-gray-800 text-[9px] font-medium z-10 cursor-pointer hover:bg-gray-400/70"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (blockingBooking) {
+                onAppointmentClick(blockingBooking);
+              }
+            }}
             style={{ 
               height: `${blockedSlotsCount * 20}px`,
               minHeight: '20px'
@@ -243,9 +249,9 @@ export const TimeSlotCell = ({
                   {blockingBooking.recurring_block_title}
                 </div>
               )}
-              {blockingBooking?.consultation_reason && blockingBooking.consultation_reason !== 'Créneau bloqué' && (
+              {blockingBooking?.client_comment && (
                 <div className="truncate text-[8px] opacity-80">
-                  {blockingBooking.consultation_reason}
+                  {blockingBooking.client_comment}
                 </div>
               )}
             </div>

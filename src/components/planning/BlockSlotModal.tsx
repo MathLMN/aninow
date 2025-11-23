@@ -7,10 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useClinicAccess } from "@/hooks/useClinicAccess";
-import { supabase } from "@/integrations/supabase/client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useBlockSlots } from "@/hooks/useBlockSlots";
 import { useToast } from "@/hooks/use-toast";
-import type { Database } from "@/integrations/supabase/types";
 
 interface BlockSlotModalProps {
   isOpen: boolean;
@@ -54,77 +52,7 @@ export const BlockSlotModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { currentClinicId } = useClinicAccess();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  
-  const blockTimeSlotMutation = useMutation({
-    mutationFn: async ({
-      date,
-      startTime,
-      endTime,
-      veterinarianId,
-      clinicId
-    }: {
-      date: string;
-      startTime: string;
-      endTime: string;
-      veterinarianId: string;
-      clinicId: string;
-    }) => {
-      console.log('🔄 Blocking time slot:', { date, startTime, endTime, veterinarianId, clinicId });
-      
-      const blockedInsert: Database['public']['Tables']['bookings']['Insert'] = {
-        clinic_id: clinicId,
-        veterinarian_id: veterinarianId,
-        appointment_date: date,
-        appointment_time: startTime,
-        appointment_end_time: endTime,
-        is_blocked: true,
-        animal_species: 'blocked',
-        animal_name: 'Créneau bloqué',
-        consultation_reason: 'consultation-convenance',
-        client_name: 'Système',
-        client_email: 'system@clinique.local',
-        client_phone: '0000000000',
-        preferred_contact_method: 'phone',
-        status: 'confirmed',
-        booking_source: 'manual',
-      }
-
-      console.log('📝 Inserting blocked booking:', blockedInsert);
-
-      const { data, error } = await supabase
-        .from('bookings')
-        .insert(blockedInsert)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('❌ Error inserting blocked booking:', error);
-        throw new Error(`Erreur d'insertion: ${error.message}`);
-      }
-
-      console.log('✅ Blocked booking created:', data);
-      return data;
-    },
-    onSuccess: () => {
-      console.log('✅ Block slot mutation succeeded');
-      queryClient.invalidateQueries({ queryKey: ['available-slots'] });
-      queryClient.invalidateQueries({ queryKey: ['vet-bookings'] });
-      toast({
-        title: "Créneau bloqué",
-        description: "Le créneau a été bloqué avec succès",
-      });
-    },
-    onError: (error: any) => {
-      console.error('❌ Failed to block slot:', error);
-      const errorMessage = error?.message || 'Erreur inconnue';
-      toast({
-        title: "Erreur",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    },
-  });
+  const { blockSlots, isBlocking } = useBlockSlots();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,15 +80,16 @@ export const BlockSlotModal = ({
     try {
       console.log('🔄 Submitting block slot form:', formData);
       
-      await blockTimeSlotMutation.mutateAsync({
+      await blockSlots({
         date: formData.date,
         startTime: formData.startTime,
         endTime: formData.endTime,
         veterinarianId: formData.veterinarianId,
-        clinicId: currentClinicId
+        clinicId: currentClinicId,
+        reason: formData.reason
       });
 
-      console.log('✅ Slot blocked successfully, closing modal');
+      console.log('✅ Slots blocked successfully, closing modal');
       onClose();
       // Réinitialiser le formulaire
       setFormData({
@@ -275,10 +204,10 @@ export const BlockSlotModal = ({
             </Button>
             <Button 
               type="submit" 
-              disabled={isSubmitting}
+              disabled={isSubmitting || isBlocking}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
-              {isSubmitting ? 'Blocage...' : 'Bloquer le créneau'}
+              {isSubmitting || isBlocking ? 'Blocage...' : 'Bloquer le créneau'}
             </Button>
           </div>
         </form>
