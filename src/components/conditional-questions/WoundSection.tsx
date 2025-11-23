@@ -1,6 +1,7 @@
 
 import SelectionButton from "@/components/SelectionButton";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import MultiPhotoUpload, { PhotoData } from "./MultiPhotoUpload";
 
 interface WoundSectionProps {
@@ -63,6 +64,22 @@ const WoundSection = ({ answers, onAnswerChange, onFileChange, keyPrefix = '' }:
                 </SelectionButton>
               ))}
             </div>
+
+            {/* Show text input when "Une zone localisée" is selected */}
+            {question.key === 'wound_location' && answers[keyPrefix + 'wound_location'] === 'Une zone localisée' && (
+              <div className="ml-0 sm:ml-10 mt-4">
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Précisez la zone du corps <span className="text-destructive">*</span>
+                </label>
+                <Textarea
+                  value={answers[keyPrefix + 'wound_location_detail'] as string || ''}
+                  onChange={(e) => onAnswerChange('wound_location_detail', e.target.value)}
+                  placeholder="Exemple : patte avant gauche, ventre, oreille droite..."
+                  className="w-full"
+                  rows={2}
+                />
+              </div>
+            )}
           </div>
           
           <Separator className="mt-6 sm:mt-8" />

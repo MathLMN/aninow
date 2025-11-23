@@ -98,11 +98,19 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
     // Ajouter les questions spécifiques aux démangeaisons cutanées si nécessaire
     if (detection.hasSkinItching) {
       requiredQuestions.push(`${prefix}skin_itching_areas`, `${prefix}antiparasitic_treatment`, `${prefix}hair_loss`);
+      // Si "Une zone localisée" est sélectionnée, ajouter la question de détail
+      if (answers[`${prefix}skin_itching_areas`] === 'Une zone localisée') {
+        requiredQuestions.push(`${prefix}skin_itching_areas_detail`);
+      }
     }
 
     // Ajouter les questions spécifiques aux plaies si nécessaire
     if (detection.hasWound) {
       requiredQuestions.push(`${prefix}wound_location`, `${prefix}wound_oozing`, `${prefix}wound_depth`, `${prefix}wound_bleeding`);
+      // Si "Une zone localisée" est sélectionnée, ajouter la question de détail
+      if (answers[`${prefix}wound_location`] === 'Une zone localisée') {
+        requiredQuestions.push(`${prefix}wound_location_detail`);
+      }
     }
 
     // Ajouter les questions spécifiques aux problèmes d'oreille si nécessaire
