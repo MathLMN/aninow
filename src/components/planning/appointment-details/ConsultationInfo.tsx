@@ -63,35 +63,41 @@ export const ConsultationInfo = ({ appointment }: ConsultationInfoProps) => {
         <div className="text-sm space-y-3 pl-6">
           <div><strong>Type de consultation:</strong> {getConsultationTypeLabel(appointment.consultation_reason)}</div>
           
-          {/* Résumé de la consultation par l'IA */}
-          <div>
-            <strong>Résumé de la consultation:</strong>
-            {appointment.consultation_reason === 'consultation-convenance' ? (
-              // Pour les consultations de convenance, afficher les options sélectionnées
-              appointment.convenience_options && appointment.convenience_options.length > 0 ? (
-                <div className="mt-1">
-                  <div className="flex flex-wrap gap-1">
-                    {getConvenienceOptionsLabels(appointment.convenience_options).map((label: string, index: number) => (
-                      <Badge key={index} variant="outline" className="text-xs bg-vet-beige/20">
-                        {label}
-                      </Badge>
-                    ))}
-                  </div>
+          {appointment.consultation_reason === 'consultation-convenance' && (
+            <div>
+              <strong>Prestations demandées:</strong>
+              {appointment.convenience_options && appointment.convenience_options.length > 0 ? (
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {getConvenienceOptionsLabels(appointment.convenience_options).map((label: string, index: number) => (
+                    <Badge key={index} variant="outline" className="text-xs bg-vet-beige/20">
+                      {label}
+                    </Badge>
+                  ))}
                 </div>
               ) : (
-                <span className="ml-1 text-vet-brown">Consultation de convenance</span>
-              )
-            ) : (
-              // Pour les consultations avec symptômes, afficher le résumé IA
-              appointment.ai_analysis?.analysis_summary ? (
+                <span className="ml-1 text-vet-brown">Aucune prestation spécifiée</span>
+              )}
+              {appointment.custom_text && (
+                <div className="mt-2 text-vet-brown bg-vet-beige/10 p-2 rounded-md">
+                  <strong>Détails:</strong> {appointment.custom_text}
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Résumé de la consultation par l'IA */}
+          {appointment.consultation_reason === 'symptomes-anomalie' && (
+            <div>
+              <strong>Résumé de la consultation:</strong>
+              {appointment.ai_analysis?.analysis_summary ? (
                 <p className="mt-1 text-vet-brown bg-blue-50 p-2 rounded-md border border-blue-200">
                   {appointment.ai_analysis.analysis_summary}
                 </p>
               ) : (
                 <span className="ml-1 text-vet-brown">En attente d'analyse</span>
-              )
-            )}
-          </div>
+              )}
+            </div>
+          )}
 
           {appointment.selected_symptoms && appointment.selected_symptoms.length > 0 && (
             <div>
