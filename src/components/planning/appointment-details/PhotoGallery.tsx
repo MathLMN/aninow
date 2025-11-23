@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,12 @@ interface PhotoItem {
   label: string;
 }
 
-export const PhotoGallery = ({ conditionalAnswers }: PhotoGalleryProps) => {
+export interface PhotoGalleryRef {
+  openFirstPhoto: () => void;
+  getPhotoCount: () => number;
+}
+
+export const PhotoGallery = forwardRef<PhotoGalleryRef, PhotoGalleryProps>(({ conditionalAnswers }, ref) => {
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
@@ -74,6 +79,15 @@ export const PhotoGallery = ({ conditionalAnswers }: PhotoGalleryProps) => {
     setPhotos(photoItems);
     setIsLoading(false);
   };
+
+  useImperativeHandle(ref, () => ({
+    openFirstPhoto: () => {
+      if (photos.length > 0) {
+        setSelectedPhotoIndex(0);
+      }
+    },
+    getPhotoCount: () => photos.length
+  }));
 
   const openPhoto = (index: number) => {
     setSelectedPhotoIndex(index);
@@ -253,4 +267,4 @@ export const PhotoGallery = ({ conditionalAnswers }: PhotoGalleryProps) => {
       )}
     </>
   );
-};
+});

@@ -1,13 +1,15 @@
-
+import { useRef } from "react";
 import { Badge } from "@/components/ui/badge";
-import { FileText, AlertCircle } from "lucide-react";
-import { PhotoGallery } from "./PhotoGallery";
+import { Button } from "@/components/ui/button";
+import { FileText, AlertCircle, Camera } from "lucide-react";
+import { PhotoGallery, PhotoGalleryRef } from "./PhotoGallery";
 
 interface ConsultationInfoProps {
   appointment: any;
 }
 
 export const ConsultationInfo = ({ appointment }: ConsultationInfoProps) => {
+  const photoGalleryRef = useRef<PhotoGalleryRef>(null);
   const getUrgencyLevel = (score: number) => {
     if (score >= 7) {
       return {
@@ -110,10 +112,22 @@ export const ConsultationInfo = ({ appointment }: ConsultationInfoProps) => {
               return (
                 <div>
                   <strong>Photos jointes:</strong>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="outline" className="text-xs bg-vet-sage/10 text-vet-sage border-vet-sage">
-                      {photoKeys.length} photo{photoKeys.length > 1 ? 's' : ''} disponible{photoKeys.length > 1 ? 's' : ''}
-                    </Badge>
+                  <div className="mt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => photoGalleryRef.current?.openFirstPhoto()}
+                      className="relative bg-vet-sage/10 border-vet-sage text-vet-sage hover:bg-vet-sage hover:text-white transition-colors"
+                    >
+                      <Camera className="h-4 w-4 mr-2" />
+                      Voir les photos jointes
+                      <Badge 
+                        variant="secondary" 
+                        className="ml-2 bg-vet-sage text-white px-2 py-0.5 rounded-full animate-pulse"
+                      >
+                        {photoKeys.length}
+                      </Badge>
+                    </Button>
                   </div>
                 </div>
               );
@@ -179,7 +193,7 @@ export const ConsultationInfo = ({ appointment }: ConsultationInfoProps) => {
 
       {/* Galerie de photos */}
       {appointment.conditional_answers && (
-        <PhotoGallery conditionalAnswers={appointment.conditional_answers} />
+        <PhotoGallery ref={photoGalleryRef} conditionalAnswers={appointment.conditional_answers} />
       )}
     </div>
   );
