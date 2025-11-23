@@ -102,7 +102,9 @@ export const ConsultationInfo = ({ appointment }: ConsultationInfoProps) => {
           {/* Photos jointes */}
           {appointment.conditional_answers && (() => {
             const photoKeys = Object.keys(appointment.conditional_answers).filter(key => 
-              key.includes('photo') && appointment.conditional_answers[key]
+              key.includes('photo') && 
+              typeof appointment.conditional_answers[key] === 'string' && 
+              appointment.conditional_answers[key].length > 0
             );
             if (photoKeys.length > 0) {
               return (
