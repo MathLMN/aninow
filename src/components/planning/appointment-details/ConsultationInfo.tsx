@@ -1,8 +1,9 @@
 import { useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { FileText, AlertCircle, Camera } from "lucide-react";
+import { FileText, AlertCircle, Camera, UserCircle } from "lucide-react";
 import { PhotoGallery, PhotoGalleryRef } from "./PhotoGallery";
+import { cn } from "@/lib/utils";
 
 interface ConsultationInfoProps {
   appointment: any;
@@ -54,8 +55,47 @@ export const ConsultationInfo = ({ appointment }: ConsultationInfoProps) => {
     return options.map(opt => labels[opt] || opt);
   };
 
+  const isOnlineBooking = appointment.booking_source === 'online';
+
   return (
     <div className="space-y-4">
+      {/* Vétérinaire assigné */}
+      {appointment.veterinarian_id && (
+        <div className="space-y-3">
+          <h4 className="font-medium text-vet-navy flex items-center">
+            <UserCircle className="h-4 w-4 mr-2" />
+            Vétérinaire
+          </h4>
+          <div className="pl-6 space-y-3">
+            <div className="text-sm">
+              <strong>Assigné à:</strong> <span className="text-vet-brown">{appointment.veterinarian_name || 'Non spécifié'}</span>
+            </div>
+            
+            {/* Note sur la préférence de vétérinaire pour RDV en ligne */}
+            {isOnlineBooking && (
+              <div className={cn(
+                "p-3 rounded-lg border",
+                appointment.veterinarian_preference_selected
+                  ? "bg-green-50 border-green-200"
+                  : "bg-blue-50 border-blue-200"
+              )}>
+                <div className="text-sm">
+                  {appointment.veterinarian_preference_selected ? (
+                    <span className="text-green-900">
+                      ✓ <strong>Vétérinaire choisi par le client</strong> - Le client a spécifiquement sélectionné ce vétérinaire
+                    </span>
+                  ) : (
+                    <span className="text-blue-900">
+                      ℹ️ <strong>Vétérinaire attribué automatiquement</strong> - Le client n'avait pas de préférence, ce vétérinaire a été assigné par le système
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Motif de consultation */}
       <div className="space-y-3">
         <h4 className="font-medium text-vet-navy flex items-center">
