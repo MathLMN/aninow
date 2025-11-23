@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Label } from "@/components/ui/label";
-import { User, Users, Baby } from "lucide-react";
+import { Dog, PawPrint, Heart } from "lucide-react";
 
 interface BookingSituationSelectorProps {
   selectedSituation: string;
@@ -27,7 +27,7 @@ const BookingSituationSelector: React.FC<BookingSituationSelectorProps> = ({
           }`}
           onClick={() => onSituationChange('1-animal')}
         >
-          <User className={`w-8 h-8 mb-2 ${selectedSituation === '1-animal' ? 'text-primary' : 'text-muted-foreground'}`} />
+          <Dog className={`w-8 h-8 mb-2 ${selectedSituation === '1-animal' ? 'text-primary' : 'text-muted-foreground'}`} />
           <Label className="text-vet-navy font-semibold cursor-pointer text-center mb-1">
             Je prends rendez-vous pour 1 animal
           </Label>
@@ -45,7 +45,10 @@ const BookingSituationSelector: React.FC<BookingSituationSelectorProps> = ({
           }`}
           onClick={() => onSituationChange('2-animaux')}
         >
-          <Users className={`w-8 h-8 mb-2 ${selectedSituation === '2-animaux' ? 'text-primary' : 'text-muted-foreground'}`} />
+          <div className="relative w-8 h-8 mb-2">
+            <PawPrint className={`absolute w-5 h-5 top-0 left-0 ${selectedSituation === '2-animaux' ? 'text-primary' : 'text-muted-foreground'}`} />
+            <PawPrint className={`absolute w-5 h-5 bottom-0 right-0 ${selectedSituation === '2-animaux' ? 'text-primary' : 'text-muted-foreground'}`} />
+          </div>
           <Label className="text-vet-navy font-semibold cursor-pointer text-center mb-1">
             Je prends rendez-vous pour 2 animaux
           </Label>
@@ -63,7 +66,7 @@ const BookingSituationSelector: React.FC<BookingSituationSelectorProps> = ({
           }`}
           onClick={() => onSituationChange('une-portee')}
         >
-          <Baby className={`w-8 h-8 mb-2 ${selectedSituation === 'une-portee' ? 'text-primary' : 'text-muted-foreground'}`} />
+          <Heart className={`w-8 h-8 mb-2 ${selectedSituation === 'une-portee' ? 'text-primary' : 'text-muted-foreground'} fill-current`} />
           <Label className="text-vet-navy font-semibold cursor-pointer text-center mb-1">
             Je prends rendez-vous pour une portée chiots/chatons
           </Label>
