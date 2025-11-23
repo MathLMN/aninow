@@ -25,7 +25,7 @@ const SecondAnimalForm: React.FC<SecondAnimalFormProps> = ({
   showSecondNameInput
 }) => {
   return (
-    <div className="space-y-4 pl-4 border-l-2 border-vet-sage/30">
+    <div className="space-y-4">
       <AnimalSpeciesSelection
         species={formData.secondAnimalSpecies || ''}
         customSpecies={formData.secondCustomSpecies || ''}
