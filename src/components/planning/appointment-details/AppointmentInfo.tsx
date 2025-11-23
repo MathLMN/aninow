@@ -102,6 +102,28 @@ export const AppointmentInfo = ({ appointment }: AppointmentInfoProps) => {
         </div>
       </div>
 
+      {/* Note sur la préférence de vétérinaire pour RDV en ligne */}
+      {isOnlineBooking && appointment.veterinarian_id && (
+        <div className={cn(
+          "p-3 rounded-lg border",
+          appointment.veterinarian_preference_selected
+            ? "bg-green-50 border-green-200"
+            : "bg-blue-50 border-blue-200"
+        )}>
+          <div className="text-sm">
+            {appointment.veterinarian_preference_selected ? (
+              <span className="text-green-900">
+                ✓ <strong>Vétérinaire choisi par le client</strong> - Le client a spécifiquement sélectionné ce vétérinaire
+              </span>
+            ) : (
+              <span className="text-blue-900">
+                ℹ️ <strong>Vétérinaire attribué automatiquement</strong> - Le client n'avait pas de préférence, ce vétérinaire a été assigné par le système
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Informations client */}
       <div className="space-y-2">
         <h4 className="font-medium text-vet-navy flex items-center">

@@ -259,6 +259,7 @@ export type Database = {
           urgency_score: number | null
           vaccination_type: string | null
           veterinarian_id: string | null
+          veterinarian_preference_selected: boolean | null
         }
         Insert: {
           additional_points?: string[] | null
@@ -318,6 +319,7 @@ export type Database = {
           urgency_score?: number | null
           vaccination_type?: string | null
           veterinarian_id?: string | null
+          veterinarian_preference_selected?: boolean | null
         }
         Update: {
           additional_points?: string[] | null
@@ -377,6 +379,7 @@ export type Database = {
           urgency_score?: number | null
           vaccination_type?: string | null
           veterinarian_id?: string | null
+          veterinarian_preference_selected?: boolean | null
         }
         Relationships: [
           {
