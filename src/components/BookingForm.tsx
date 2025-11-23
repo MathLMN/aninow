@@ -1,6 +1,6 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 import BookingSituationSelector from './BookingSituationSelector';
 import AnimalSpeciesSelection from './AnimalSpeciesSelection';
@@ -69,54 +69,73 @@ const BookingForm = () => {
 
       {/* Formulaire du premier animal */}
       {formState.showFirstAnimalForm && (
-        <div className="animate-fade-in space-y-3 sm:space-y-4">
-          {formData.bookingSituation === '2-animaux' && (
-            <div className="flex items-center gap-3 pb-3 border-b-2 border-primary/20">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground font-bold text-lg shrink-0">
-                1
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">Premier animal</h3>
-                <p className="text-sm text-muted-foreground">Informations du premier animal</p>
-              </div>
+        <div className="animate-fade-in">
+          {formData.bookingSituation === '2-animaux' ? (
+            <Card className="border-2 border-primary/20">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <span className="flex items-center justify-center w-7 h-7 rounded-full bg-primary text-primary-foreground text-sm font-bold">
+                    1
+                  </span>
+                  Animal 1
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 sm:space-y-4">
+                <AnimalSpeciesSelection
+                  species={formData.animalSpecies}
+                  customSpecies={formData.customSpecies}
+                  onSpeciesChange={handleSpeciesChange}
+                  onCustomSpeciesChange={handleCustomSpeciesChange}
+                  title="Sélectionnez l'espèce *"
+                  animalName={formData.animalName}
+                  onAnimalNameChange={handleNameChange}
+                  showNameInput={formState.showNameInput}
+                  nameInputId="animal-name"
+                  nameInputPlaceholder="Nom de l'animal"
+                />
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3 sm:space-y-4">
+              <AnimalSpeciesSelection
+                species={formData.animalSpecies}
+                customSpecies={formData.customSpecies}
+                onSpeciesChange={handleSpeciesChange}
+                onCustomSpeciesChange={handleCustomSpeciesChange}
+                title={isLitter ? "Sélectionnez l'espèce de la portée *" : "Sélectionnez l'espèce de votre animal *"}
+                animalName={formData.animalName}
+                onAnimalNameChange={handleNameChange}
+                showNameInput={formState.showNameInput}
+                nameInputId="animal-name"
+                nameInputPlaceholder="Nom de l'animal"
+              />
             </div>
           )}
-          <AnimalSpeciesSelection
-            species={formData.animalSpecies}
-            customSpecies={formData.customSpecies}
-            onSpeciesChange={handleSpeciesChange}
-            onCustomSpeciesChange={handleCustomSpeciesChange}
-            title={isLitter ? "Sélectionnez l'espèce de la portée *" : "Sélectionnez l'espèce de votre animal *"}
-            animalName={formData.animalName}
-            onAnimalNameChange={handleNameChange}
-            showNameInput={formState.showNameInput}
-            nameInputId="animal-name"
-            nameInputPlaceholder="Nom de l'animal"
-          />
         </div>
       )}
 
       {/* Formulaire du deuxième animal */}
       {formState.showSecondAnimalForm && (
-        <div className="animate-fade-in mt-8">
-          <div className="flex items-center gap-3 pb-3 mb-4 border-b-2 border-secondary/30">
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-secondary text-secondary-foreground font-bold text-lg shrink-0">
-              2
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-foreground">Deuxième animal</h3>
-              <p className="text-sm text-muted-foreground">Informations du deuxième animal</p>
-            </div>
-          </div>
-          <div className="bg-secondary/5 p-3 sm:p-4 rounded-lg border-2 border-secondary/20">
-            <SecondAnimalForm
-            formData={formData}
-            onSecondAnimalSpeciesChange={handleSecondAnimalSpeciesChange}
-            onSecondCustomSpeciesChange={handleSecondCustomSpeciesChange}
-            onSecondAnimalNameChange={handleSecondAnimalNameChange}
-            showSecondNameInput={formState.showSecondNameInput}
-          />
-          </div>
+        <div className="animate-fade-in mt-6">
+          <Card className="border-2 border-secondary/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <span className="flex items-center justify-center w-7 h-7 rounded-full bg-secondary text-secondary-foreground text-sm font-bold">
+                  2
+                </span>
+                Animal 2
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 sm:space-y-4">
+              <SecondAnimalForm
+                formData={formData}
+                onSecondAnimalSpeciesChange={handleSecondAnimalSpeciesChange}
+                onSecondCustomSpeciesChange={handleSecondCustomSpeciesChange}
+                onSecondAnimalNameChange={handleSecondAnimalNameChange}
+                showSecondNameInput={formState.showSecondNameInput}
+              />
+            </CardContent>
+          </Card>
         </div>
       )}
 
