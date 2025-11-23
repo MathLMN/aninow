@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ArrowLeft, Mail, Lock, Loader2, Eye, EyeOff, CheckCircle, Users, Calendar, BarChart3, AlertCircle } from "lucide-react";
+import { ArrowLeft, Mail, Lock, Loader2, Eye, EyeOff, PhoneOff, Smile, Calendar, Shield, AlertCircle } from "lucide-react";
 import logoAninow from "@/assets/logo-aninow-new.png";
 import { Link, useNavigate } from "react-router-dom";
 import { useVetAuth } from "@/hooks/useVetAuth";
@@ -254,14 +254,14 @@ const VetLogin = () => {
 
           <div className="space-y-4 lg:space-y-6 text-left">
             <div className="flex items-start space-x-4">
-              <CheckCircle className="h-5 w-5 lg:h-6 lg:w-6 text-vet-sage mt-1 flex-shrink-0" />
+              <PhoneOff className="h-5 w-5 lg:h-6 lg:w-6 text-vet-sage mt-1 flex-shrink-0" />
               <div>
                 <p className="text-base lg:text-lg font-medium">Réduisez le temps passé au téléphone grâce à la prise de rendez-vous en ligne 24/7</p>
               </div>
             </div>
 
             <div className="flex items-start space-x-4">
-              <Users className="h-5 w-5 lg:h-6 lg:w-6 text-vet-sage mt-1 flex-shrink-0" />
+              <Smile className="h-5 w-5 lg:h-6 lg:w-6 text-vet-sage mt-1 flex-shrink-0" />
               <div>
                 <p className="text-base lg:text-lg font-medium">Améliorez la satisfaction client avec un système moderne et accessible</p>
               </div>
@@ -275,7 +275,7 @@ const VetLogin = () => {
             </div>
 
             <div className="flex items-start space-x-4">
-              <BarChart3 className="h-5 w-5 lg:h-6 lg:w-6 text-vet-sage mt-1 flex-shrink-0" />
+              <Shield className="h-5 w-5 lg:h-6 lg:w-6 text-vet-sage mt-1 flex-shrink-0" />
               <div>
                 <p className="text-base lg:text-lg font-medium">​Garantissez la sérénité de vos auxiliaires spécialisés vétérinaires</p>
               </div>
