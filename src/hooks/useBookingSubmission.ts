@@ -234,6 +234,7 @@ export const useBookingSubmission = () => {
           ? calculateEndTime(bookingData.appointmentTime, baseDurationMinutes)
           : calculateEndTime(bookingData.appointmentTime, baseDurationMinutes),
         veterinarian_id: selectedVeterinarianId || null,
+        veterinarian_preference_selected: bookingData.veterinarianPreferenceSelected || false,
         duration_minutes: hasTwoAnimals ? baseDurationMinutes : baseDurationMinutes, // Chaque RDV garde la durée normale
         status: 'pending',
         booking_source: 'online'
@@ -318,6 +319,7 @@ export const useBookingSubmission = () => {
           appointment_time: secondStartTime,
           appointment_end_time: calculateEndTime(secondStartTime, baseDurationMinutes),
           veterinarian_id: selectedVeterinarianId || null,
+          veterinarian_preference_selected: bookingData.veterinarianPreferenceSelected || false,
           duration_minutes: baseDurationMinutes,
           status: 'pending',
           booking_source: 'online'

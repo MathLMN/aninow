@@ -107,7 +107,8 @@ const AppointmentSlots = () => {
         appointmentDate: formattedDate,
         appointmentTime: selectedTime,
         veterinarianId: selectedVeterinarianId,
-        veterinarianName: veterinarian?.name
+        veterinarianName: veterinarian?.name,
+        veterinarianPreferenceSelected: !noVeterinarianPreference
       }
 
       // Mettre à jour les données de réservation
