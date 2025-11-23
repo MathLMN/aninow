@@ -118,71 +118,55 @@ export const DailyCalendarGrid = ({
     return newSlotBookings;
   }, [timeSlots, columns, bookings, selectedDate]);
 
-  // Fonction pour déterminer les plages de blocage continues
+  // Fonction pour déterminer les plages de blocage continues et calculer leur durée
   const getBlockedSlotInfo = useMemo(() => {
     const blockedSlotInfo: Record<string, { isFirst: boolean; count: number }> = {};
     
+    // Convertir une heure "HH:MM" en minutes depuis minuit
+    const timeToMinutes = (time: string): number => {
+      const [hours, minutes] = time.split(':').map(Number);
+      return hours * 60 + minutes;
+    };
+    
     for (const column of columns) {
-      let currentBlockStart = -1;
-      let currentBlockCount = 0;
-      let currentBlockId: string | null = null;
-      
       for (let i = 0; i < timeSlots.length; i++) {
         const time = timeSlots[i];
         const key = `${time}-${column.id}`;
         const bookingsForSlot = slotBookings[key] || [];
         
-        const isBlocked = bookingsForSlot.some(booking => 
-          booking.consultation_reason === 'Créneau bloqué' || 
-          booking.is_blocked || 
-          booking.client_name === 'CRÉNEAU BLOQUÉ' ||
-          booking.recurring_block_id ||
-          booking.booking_source === 'blocked'
-        );
-        
+        // Trouver un booking bloqué qui couvre ce créneau
         const blockingBooking = bookingsForSlot.find(booking => 
-          booking.recurring_block_id || booking.is_blocked || booking.booking_source === 'blocked'
+          booking.is_blocked || booking.booking_source === 'blocked' || booking.recurring_block_id
         );
-        const blockId = blockingBooking?.recurring_block_id || blockingBooking?.id || 'manual';
         
-        if (isBlocked && (currentBlockStart === -1 || blockId === currentBlockId)) {
-          // Début d'un nouveau bloc ou continuation du bloc actuel
-          if (currentBlockStart === -1) {
-            currentBlockStart = i;
-            currentBlockCount = 1;
-            currentBlockId = blockId;
-          } else {
-            currentBlockCount++;
-          }
-        } else {
-          // Fin du bloc actuel, enregistrer les infos
-          if (currentBlockStart !== -1) {
-            for (let j = currentBlockStart; j < currentBlockStart + currentBlockCount; j++) {
-              const blockTime = timeSlots[j];
-              const blockKey = `${blockTime}-${column.id}`;
-              blockedSlotInfo[blockKey] = {
-                isFirst: j === currentBlockStart,
-                count: currentBlockCount
+        if (blockingBooking) {
+          const startTime = blockingBooking.appointment_time;
+          const endTime = blockingBooking.appointment_end_time;
+          
+          // Vérifier si c'est le premier créneau de ce blocage
+          const isFirst = time === startTime;
+          
+          if (isFirst && endTime) {
+            // Calculer combien de créneaux de 15 minutes sont couverts
+            const startMinutes = timeToMinutes(startTime);
+            const endMinutes = timeToMinutes(endTime);
+            const durationMinutes = endMinutes - startMinutes;
+            const slotCount = Math.ceil(durationMinutes / 15);
+            
+            // Marquer tous les créneaux couverts par ce blocage
+            for (let j = 0; j < slotCount; j++) {
+              const slotMinutes = startMinutes + (j * 15);
+              const slotHour = Math.floor(slotMinutes / 60);
+              const slotMin = slotMinutes % 60;
+              const slotTime = `${slotHour.toString().padStart(2, '0')}:${slotMin.toString().padStart(2, '0')}`;
+              const slotKey = `${slotTime}-${column.id}`;
+              
+              blockedSlotInfo[slotKey] = {
+                isFirst: j === 0,
+                count: slotCount
               };
             }
           }
-          
-          // Reset pour le prochain bloc
-          currentBlockStart = isBlocked ? i : -1;
-          currentBlockCount = isBlocked ? 1 : 0;
-          currentBlockId = isBlocked ? blockId : null;
-        }
-      }
-      
-      // Traiter le dernier bloc s'il se termine à la fin
-      if (currentBlockStart !== -1) {
-        for (let j = currentBlockStart; j < currentBlockStart + currentBlockCount; j++) {
-          const blockTime = timeSlots[j];
-          const blockKey = `${blockTime}-${column.id}`;
-          blockedSlotInfo[blockKey] = {
-            isFirst: j === currentBlockStart,
-            count: currentBlockCount
-          };
         }
       }
     }
@@ -240,9 +224,12 @@ export const DailyCalendarGrid = ({
                   <div 
                     key={time} 
                     className={cn(
-                      "grid relative h-5 border-b border-gray-200/50"
+                      "grid h-5 border-b border-gray-200/50"
                     )} 
-                    style={{gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`}}
+                    style={{
+                      gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`,
+                      position: 'relative'
+                    }}
                   >
                     {/* Colonne horaire - alignement centré */}
                     <div className={cn(

@@ -232,7 +232,7 @@ export const TimeSlotCell = ({
         {/* Affichage spécial pour les créneaux bloqués */}
         {isBlocked && isFirstBlockedSlot && (
           <div 
-            className="absolute inset-0 flex items-center justify-center bg-gray-400/60 text-gray-800 text-[9px] font-medium z-10 cursor-pointer hover:bg-gray-400/70"
+            className="absolute top-0 left-0 right-0 flex items-center justify-center bg-gray-400/60 text-gray-800 text-[9px] font-medium z-10 cursor-pointer hover:bg-gray-400/70 border-l border-gray-200/30"
             onClick={(e) => {
               e.stopPropagation();
               if (blockingBooking && onBlockedSlotClick) {
@@ -244,7 +244,7 @@ export const TimeSlotCell = ({
               minHeight: '20px'
             }}
           >
-            <div className="text-center px-1">
+            <div className="text-center px-1 w-full">
               <div className="truncate font-semibold">BLOQUÉ</div>
               {blockingBooking?.recurring_block_title && (
                 <div className="truncate text-[8px] opacity-80">
