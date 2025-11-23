@@ -111,7 +111,9 @@ export const AppointmentSection = ({
                 variant="outline"
                 role="combobox"
                 className={`w-full h-auto min-h-7 justify-between text-xs ${
-                  validationErrors.consultationTypeIds ? 'border-red-500 border-2' : ''
+                  validationErrors.consultationTypeIds || (formData.booking_source === 'online' && (!formData.consultationTypeIds || formData.consultationTypeIds.length === 0))
+                    ? 'border-red-500 border-2' 
+                    : ''
                 }`}
               >
                 <div className="flex flex-wrap gap-1 flex-1 overflow-hidden max-w-[90%]">
