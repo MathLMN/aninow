@@ -16,7 +16,7 @@ const WoundSection = ({ answers, onAnswerChange, onFileChange, keyPrefix = '' }:
     {
       key: 'wound_location',
       title: 'Sur quelle(s) zone(s) du corps ?',
-      options: ['Une zone localisée', 'Plusieurs zones', 'Généralisée']
+      options: ['Une zone localisée', 'Plusieurs zones']
     },
     {
       key: 'wound_depth',
