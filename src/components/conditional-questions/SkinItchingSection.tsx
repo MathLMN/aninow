@@ -3,6 +3,7 @@ import SelectionButton from "@/components/SelectionButton";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import type { PhotoData } from "@/components/conditional-questions/MultiPhotoUpload";
+import BodyZoneSelector from "./BodyZoneSelector";
 
 interface SkinItchingSectionProps {
   answers: {[key: string]: string | File | PhotoData};
@@ -73,6 +74,26 @@ const SkinItchingSection = ({ answers, onAnswerChange, keyPrefix = '' }: SkinItc
                   rows={2}
                 />
               </div>
+            )}
+
+            {/* Show body zone selector when "Plusieurs zones" is selected */}
+            {question.key === 'skin_itching_areas' && answers[keyPrefix + 'skin_itching_areas'] === 'Plusieurs zones' && (
+              <BodyZoneSelector
+                selectedZones={(() => {
+                  const value = answers[keyPrefix + 'skin_itching_multiple_zones'];
+                  if (Array.isArray(value)) return value;
+                  if (typeof value === 'string') {
+                    try {
+                      return JSON.parse(value);
+                    } catch {
+                      return [];
+                    }
+                  }
+                  return [];
+                })()}
+                onZonesChange={(zones) => onAnswerChange('skin_itching_multiple_zones', JSON.stringify(zones))}
+                keyPrefix={keyPrefix}
+              />
             )}
           </div>
           
