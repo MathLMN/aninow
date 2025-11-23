@@ -222,7 +222,7 @@ const ContactInfo = () => {
                     </div>
 
                     {/* Notice RGPD */}
-                    <div className="text-xs text-gray-600 leading-relaxed italic p-3 bg-gray-50/50 rounded-lg">
+                    <div className="text-[10px] text-gray-500 leading-tight italic px-2 py-1.5 bg-gray-50/30 rounded">
                       Les informations recueillies sont nécessaires au traitement de votre demande et à l'envoi d'un email de confirmation. 
                       Elles sont transmises à la clinique vétérinaire et ne seront pas utilisées à d'autres fins. 
                       Conformément au RGPD, vous pouvez exercer votre droit d'accès, de rectification et de suppression en nous contactant à l'adresse aninow.team@gmail.com.
