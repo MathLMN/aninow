@@ -251,11 +251,26 @@ export const usePublicBookingSlots = () => {
                 continue;
               }
               
-              // 4. Vérifier si ce créneau est déjà réservé ou bloqué
-              const isSlotTaken = existingBookings?.some(booking => 
-                booking.appointment_time === timeSlot && 
-                booking.veterinarian_id === vet.id
-              );
+              // 4. Vérifier si ce créneau est déjà réservé ou bloqué (en tenant compte de la durée)
+              const isSlotTaken = existingBookings?.some(booking => {
+                if (booking.veterinarian_id !== vet.id) return false;
+                
+                // Calculer l'heure de début et de fin du booking existant
+                const [bookingStartH, bookingStartM] = booking.appointment_time.split(':').map(Number);
+                const bookingStartMinutes = bookingStartH * 60 + bookingStartM;
+                const bookingDuration = booking.duration_minutes || settings.default_slot_duration_minutes || 30;
+                const bookingEndMinutes = bookingStartMinutes + bookingDuration;
+                
+                // Calculer l'heure de début et de fin du créneau testé
+                const [slotH, slotM] = timeSlot.split(':').map(Number);
+                const slotStartMinutes = slotH * 60 + slotM;
+                const slotDuration = settings.default_slot_duration_minutes || 30;
+                const slotEndMinutes = slotStartMinutes + slotDuration;
+                
+                // Vérifier s'il y a un chevauchement
+                // Le créneau chevauche si : slotStart < bookingEnd ET slotEnd > bookingStart
+                return slotStartMinutes < bookingEndMinutes && slotEndMinutes > bookingStartMinutes;
+              });
               
               if (!isSlotTaken) {
                 daySlots.push({
