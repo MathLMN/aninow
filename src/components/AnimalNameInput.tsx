@@ -20,12 +20,12 @@ const AnimalNameInput: React.FC<AnimalNameInputProps> = ({
   const isEmpty = !name || name.trim() === '';
 
   return (
-    <div className="space-y-2 p-4 bg-vet-sage/5 rounded-lg border-2 border-vet-sage/20 animate-fade-in">
+    <div className="space-y-1.5 p-3 bg-vet-sage/5 rounded-lg border border-vet-sage/20 animate-fade-in">
       <div className="flex items-center gap-2">
-        <Heart className="h-4 w-4 text-vet-sage" />
+        <Heart className="h-3.5 w-3.5 text-vet-sage" />
         <Label 
           htmlFor={id} 
-          className="text-base font-semibold text-vet-navy flex-1"
+          className="text-sm font-semibold text-vet-navy flex-1"
         >
           Nom de votre animal *
         </Label>
@@ -41,7 +41,7 @@ const AnimalNameInput: React.FC<AnimalNameInputProps> = ({
         value={name} 
         onChange={e => onNameChange(e.target.value)} 
         placeholder={placeholder}
-        className="text-base h-12 transition-all duration-200 border-vet-sage border-2 bg-white shadow-sm focus:border-vet-sage focus:ring-2 focus:ring-vet-sage/20"
+        className="text-sm h-10 transition-all duration-200 border-vet-sage bg-white shadow-sm focus:border-vet-sage focus:ring-2 focus:ring-vet-sage/20"
       />
     </div>
   );
