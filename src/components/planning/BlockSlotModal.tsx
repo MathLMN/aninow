@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useClinicAccess } from "@/hooks/useClinicAccess";
 import { useBlockSlots } from "@/hooks/useBlockSlots";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BlockSlotModalProps {
   isOpen: boolean;
@@ -16,6 +17,14 @@ interface BlockSlotModalProps {
   defaultDate?: string;
   defaultTime?: string;
   defaultVeterinarian?: string;
+  defaultData?: {
+    bookingId?: string;
+    date?: string;
+    time?: string;
+    endTime?: string;
+    veterinarianId?: string;
+    reason?: string;
+  };
   veterinarians: any[];
 }
 
@@ -40,19 +49,78 @@ export const BlockSlotModal = ({
   defaultDate,
   defaultTime,
   defaultVeterinarian,
+  defaultData,
   veterinarians
 }: BlockSlotModalProps) => {
+  const isEditMode = !!defaultData?.bookingId;
+  
   const [formData, setFormData] = useState({
-    date: defaultDate || '',
-    startTime: defaultTime || '',
-    endTime: '',
-    veterinarianId: defaultVeterinarian || '',
-    reason: ''
+    date: defaultData?.date || defaultDate || '',
+    startTime: defaultData?.time || defaultTime || '',
+    endTime: defaultData?.endTime || '',
+    veterinarianId: defaultData?.veterinarianId || defaultVeterinarian || '',
+    reason: defaultData?.reason || ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { currentClinicId } = useClinicAccess();
   const { toast } = useToast();
   const { blockSlots, isBlocking } = useBlockSlots();
+
+  // Mettre à jour le formulaire quand defaultData change
+  useEffect(() => {
+    if (defaultData) {
+      setFormData({
+        date: defaultData.date || '',
+        startTime: defaultData.time || '',
+        endTime: defaultData.endTime || '',
+        veterinarianId: defaultData.veterinarianId || '',
+        reason: defaultData.reason || ''
+      });
+    } else if (defaultDate || defaultTime || defaultVeterinarian) {
+      setFormData({
+        date: defaultDate || '',
+        startTime: defaultTime || '',
+        endTime: '',
+        veterinarianId: defaultVeterinarian || '',
+        reason: ''
+      });
+    }
+  }, [defaultData, defaultDate, defaultTime, defaultVeterinarian]);
+
+  const handleUnblock = async () => {
+    if (!defaultData?.bookingId) return;
+
+    setIsSubmitting(true);
+    try {
+      // Supprimer tous les bookings bloqués qui ont les mêmes date/heure/vétérinaire
+      const { error } = await supabase
+        .from('bookings')
+        .delete()
+        .eq('is_blocked', true)
+        .eq('appointment_date', formData.date)
+        .eq('veterinarian_id', formData.veterinarianId)
+        .gte('appointment_time', formData.startTime)
+        .lt('appointment_time', formData.endTime);
+
+      if (error) throw error;
+
+      toast({
+        title: "Créneau débloqué",
+        description: "Le créneau est à nouveau disponible",
+      });
+      
+      onClose();
+    } catch (error: any) {
+      console.error('❌ Error unblocking slot:', error);
+      toast({
+        title: "Erreur",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,6 +148,19 @@ export const BlockSlotModal = ({
     try {
       console.log('🔄 Submitting block slot form:', formData);
       
+      // Si en mode édition, d'abord supprimer les anciens blocages
+      if (isEditMode && defaultData) {
+        await supabase
+          .from('bookings')
+          .delete()
+          .eq('is_blocked', true)
+          .eq('appointment_date', defaultData.date)
+          .eq('veterinarian_id', defaultData.veterinarianId)
+          .gte('appointment_time', defaultData.time)
+          .lt('appointment_time', defaultData.endTime);
+      }
+
+      // Créer les nouveaux blocages
       await blockSlots({
         date: formData.date,
         startTime: formData.startTime,
@@ -110,9 +191,14 @@ export const BlockSlotModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="text-vet-navy">Bloquer un créneau</DialogTitle>
+          <DialogTitle className="text-vet-navy">
+            {isEditMode ? 'Modifier le créneau bloqué' : 'Bloquer un créneau'}
+          </DialogTitle>
           <DialogDescription className="text-vet-brown">
-            Bloquez manuellement un créneau horaire pour empêcher les réservations
+            {isEditMode 
+              ? 'Modifiez les paramètres du créneau bloqué ou débloquez-le'
+              : 'Bloquez manuellement un créneau horaire pour empêcher les réservations'
+            }
           </DialogDescription>
         </DialogHeader>
         
@@ -198,17 +284,34 @@ export const BlockSlotModal = ({
             />
           </div>
 
-          <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Annuler
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={isSubmitting || isBlocking}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
-              {isSubmitting || isBlocking ? 'Blocage...' : 'Bloquer le créneau'}
-            </Button>
+          <div className="flex justify-between">
+            <div>
+              {isEditMode && (
+                <Button 
+                  type="button" 
+                  variant="destructive"
+                  onClick={handleUnblock}
+                  disabled={isSubmitting}
+                >
+                  Débloquer le créneau
+                </Button>
+              )}
+            </div>
+            <div className="flex space-x-2">
+              <Button type="button" variant="outline" onClick={onClose}>
+                Annuler
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting || isBlocking}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                {isSubmitting || isBlocking 
+                  ? (isEditMode ? 'Modification...' : 'Blocage...') 
+                  : (isEditMode ? 'Modifier le blocage' : 'Bloquer le créneau')
+                }
+              </Button>
+            </div>
           </div>
         </form>
       </DialogContent>

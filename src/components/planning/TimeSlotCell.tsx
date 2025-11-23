@@ -14,6 +14,7 @@ interface TimeSlotCellProps {
   onCreateAppointment: (timeSlot: { date: string; time: string; veterinarian?: string }) => void;
   onCreateNote?: (timeSlot: { date: string; time: string; veterinarian?: string }) => void;
   onAppointmentClick: (appointment: any) => void;
+  onBlockedSlotClick?: (booking: any) => void;
   onBlockSlot?: (timeSlot: { date: string; time: string; veterinarian: string }) => void;
   selectedDate: Date;
   // Nouvelles props pour les actions du menu contextuel
@@ -42,6 +43,7 @@ export const TimeSlotCell = ({
   onCreateAppointment,
   onCreateNote,
   onAppointmentClick,
+  onBlockedSlotClick,
   selectedDate,
   onValidateBooking,
   onCancelBooking,
@@ -233,8 +235,8 @@ export const TimeSlotCell = ({
             className="absolute inset-0 flex items-center justify-center bg-gray-400/60 text-gray-800 text-[9px] font-medium z-10 cursor-pointer hover:bg-gray-400/70"
             onClick={(e) => {
               e.stopPropagation();
-              if (blockingBooking) {
-                onAppointmentClick(blockingBooking);
+              if (blockingBooking && onBlockedSlotClick) {
+                onBlockedSlotClick(blockingBooking);
               }
             }}
             style={{ 
