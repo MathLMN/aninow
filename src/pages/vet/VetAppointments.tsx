@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Users, Search, Calendar, AlertTriangle, Clock, Phone, Mail, Globe, ChevronLeft, ChevronRight, ArrowUpDown, Flame } from "lucide-react";
+import { Users, Search, Calendar, AlertTriangle, Clock, Phone, Mail, Globe, ChevronLeft, ChevronRight, ArrowUpDown, Flame, Camera } from "lucide-react";
 import { useVetBookings } from "@/hooks/useVetBookings";
 import { format, addDays, subDays, isSameDay, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
+import { PhotoGallery, PhotoGalleryRef } from "@/components/planning/appointment-details/PhotoGallery";
 
 const VetAppointments = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -174,13 +175,24 @@ const VetAppointments = () => {
     );
   }
 
-  const renderBookingsList = (bookingsList: typeof bookingsForSelectedDate, emptyMessage: string) => (
-    <div className="space-y-3">
-      {bookingsList.map((booking) => (
-        <div 
-          key={booking.id} 
-          className="border border-vet-blue/20 rounded-lg bg-white hover:shadow-md transition-all overflow-hidden"
-        >
+  const renderBookingsList = (bookingsList: typeof bookingsForSelectedDate, emptyMessage: string) => {
+    // Créer un hook pour chaque booking (les hooks ne peuvent pas être conditionnels)
+    const photoGalleryRefs = useRef<{ [key: string]: PhotoGalleryRef | null }>({});
+
+    return (
+      <div className="space-y-3">
+        {bookingsList.map((booking) => {
+          // Détecter les photos dans conditional_answers pour ce booking
+          const photoKeys = booking.conditional_answers ? Object.keys(booking.conditional_answers).filter((key) => 
+            key.startsWith('photo_') && booking.conditional_answers[key] && typeof booking.conditional_answers[key] === 'string'
+          ) : [];
+          const hasPhotos = photoKeys.length > 0;
+
+          return (
+            <div 
+              key={booking.id} 
+              className="border border-vet-blue/20 rounded-lg bg-white hover:shadow-md transition-all overflow-hidden"
+            >
           {/* Header avec urgence et statut */}
           <div className="flex items-center justify-between px-4 py-2 bg-gradient-to-r from-vet-beige/30 to-transparent border-b border-vet-blue/10">
             <div className="flex items-center gap-3">
@@ -299,6 +311,26 @@ const VetAppointments = () => {
                     </div>
                   )}
 
+                  {/* Bouton pour voir les photos jointes */}
+                  {hasPhotos && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => photoGalleryRefs.current[booking.id]?.openFirstPhoto()}
+                      className="relative bg-vet-sage/10 border-vet-sage text-vet-sage hover:bg-vet-sage hover:text-white transition-colors"
+                    >
+                      <Camera className="h-4 w-4 mr-2" />
+                      Voir les photos jointes
+                      <Badge 
+                        variant="secondary" 
+                        className="ml-2 bg-vet-sage text-white px-2 py-0.5 rounded-full animate-pulse"
+                      >
+                        {photoKeys.length}
+                      </Badge>
+                    </Button>
+                  )}
+
                   {booking.client_comment && (
                     <div className="bg-slate-50/50 border border-slate-200/50 rounded-lg p-2">
                       <p className="text-xs font-bold text-slate-900 mb-1">Commentaire client</p>
@@ -349,10 +381,21 @@ const VetAppointments = () => {
               )}
             </div>
           </div>
+          
+          {/* Galerie de photos - invisible jusqu'au clic */}
+          {booking.conditional_answers && (
+            <PhotoGallery 
+              ref={(ref) => {
+                if (ref) photoGalleryRefs.current[booking.id] = ref;
+              }} 
+              conditionalAnswers={booking.conditional_answers} 
+            />
+          )}
         </div>
-      ))}
+          );
+        })}
 
-      {bookingsList.length === 0 && (
+        {bookingsList.length === 0 && (
         <div className="text-center py-12">
           <Globe className="h-16 w-16 text-vet-blue mx-auto mb-4 opacity-50" />
           <h3 className="text-xl font-semibold text-vet-navy mb-2">{emptyMessage}</h3>
@@ -360,9 +403,10 @@ const VetAppointments = () => {
             {searchTerm ? 'Essayez de modifier vos critères de recherche' : 'Aucune réservation pour cette date'}
           </p>
         </div>
-      )}
-    </div>
-  );
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="container mx-auto py-6 space-y-6">

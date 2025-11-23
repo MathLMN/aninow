@@ -314,6 +314,7 @@ export const CreateAppointmentModal = ({
               <ConsultationSection
                 formData={formData}
                 onFieldUpdate={updateField}
+                conditionalAnswers={appointmentToEdit?.conditional_answers}
               />
             </div>
           </div>
