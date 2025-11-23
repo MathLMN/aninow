@@ -4,6 +4,7 @@ import { assignAppointmentToColumn } from '@/components/planning/utils/appointme
 
 export const usePlanningLogic = () => {
   const [formData, setFormData] = useState<FormData>({
+    bookingSituation: '',
     animalSpecies: '',
     customSpecies: '',
     animalName: '',
@@ -15,11 +16,11 @@ export const usePlanningLogic = () => {
   });
 
   const [formState, setFormState] = useState<FormState>({
+    showFirstAnimalForm: false,
+    showSecondAnimalForm: false,
+    showLitterForm: false,
     showNameInput: false,
-    showMultipleOptions: false,
-    showSecondAnimal: false,
-    showSecondNameInput: false,
-    showLitterOptions: false
+    showSecondNameInput: false
   });
 
   // Vérifier si c'est une portée
@@ -28,6 +29,7 @@ export const usePlanningLogic = () => {
   // Function to initialize form data from localStorage - simplified
   const initializeFormData = (data: Partial<FormData>) => {
     const newFormData: FormData = {
+      bookingSituation: data.bookingSituation || '',
       animalSpecies: data.animalSpecies || '',
       customSpecies: data.customSpecies || '',
       animalName: data.animalName || '',
@@ -41,12 +43,13 @@ export const usePlanningLogic = () => {
     setFormData(newFormData);
     
     // Update form state based on the loaded data
+    const situation = newFormData.bookingSituation;
     const newFormState: FormState = {
-      showNameInput: !!newFormData.animalSpecies,
-      showMultipleOptions: !!newFormData.animalSpecies,
-      showSecondAnimal: newFormData.multipleAnimals.includes('2-animaux'),
-      showSecondNameInput: !!newFormData.secondAnimalSpecies,
-      showLitterOptions: newFormData.multipleAnimals.includes('une-portee')
+      showFirstAnimalForm: !!situation,
+      showSecondAnimalForm: situation === '2-animaux',
+      showLitterForm: situation === 'une-portee',
+      showNameInput: !!newFormData.animalSpecies && situation !== 'une-portee',
+      showSecondNameInput: !!newFormData.secondAnimalSpecies && situation === '2-animaux'
     };
     
     setFormState(newFormState);
@@ -61,8 +64,7 @@ export const usePlanningLogic = () => {
       }));
       setFormState(prev => ({
         ...prev,
-        showNameInput: true,
-        showMultipleOptions: true
+        showNameInput: prev.showLitterForm ? false : true
       }));
     } else {
       setFormData(prev => ({
@@ -70,13 +72,10 @@ export const usePlanningLogic = () => {
         animalSpecies: '',
         customSpecies: ''
       }));
-      setFormState({
-        showNameInput: false,
-        showMultipleOptions: false,
-        showSecondAnimal: false,
-        showSecondNameInput: false,
-        showLitterOptions: false
-      });
+      setFormState(prev => ({
+        ...prev,
+        showNameInput: false
+      }));
     }
   };
 
@@ -118,8 +117,8 @@ export const usePlanningLogic = () => {
 
     setFormState(prev => ({
       ...prev,
-      showSecondAnimal: newMultipleAnimals.includes('2-animaux'),
-      showLitterOptions: newMultipleAnimals.includes('une-portee')
+      showSecondAnimalForm: newMultipleAnimals.includes('2-animaux'),
+      showLitterForm: newMultipleAnimals.includes('une-portee')
     }));
   };
 

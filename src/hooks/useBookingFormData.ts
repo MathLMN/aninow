@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 
 export interface CompleteBookingData {
   // Données de base
+  bookingSituation?: '1-animal' | '2-animaux' | 'une-portee' | ''
   animalSpecies: string
   animalName: string
   customSpecies?: string

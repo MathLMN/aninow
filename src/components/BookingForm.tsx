@@ -2,8 +2,8 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import BookingSituationSelector from './BookingSituationSelector';
 import AnimalSpeciesSelection from './AnimalSpeciesSelection';
-import MultipleAnimalsOptions from './MultipleAnimalsOptions';
 import SecondAnimalForm from './SecondAnimalForm';
 import LitterOptions from './LitterOptions';
 import { useBookingFormLogic } from '../hooks/useBookingFormLogic';
@@ -23,6 +23,7 @@ const BookingForm = () => {
     formState,
     isLitter,
     initializeFormData,
+    handleBookingSituationChange,
     handleSpeciesChange,
     handleCustomSpeciesChange,
     handleNameChange,
@@ -60,34 +61,32 @@ const BookingForm = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Question principale : Espèce de l'animal */}
-      <div className="space-y-3 sm:space-y-4">
-        <AnimalSpeciesSelection
-          species={formData.animalSpecies}
-          customSpecies={formData.customSpecies}
-          onSpeciesChange={handleSpeciesChange}
-          onCustomSpeciesChange={handleCustomSpeciesChange}
-          title="Sélectionnez l'espèce votre animal *"
-          animalName={formData.animalName}
-          onAnimalNameChange={handleNameChange}
-          showNameInput={formState.showNameInput && !isLitter}
-          nameInputId="animal-name"
-          nameInputPlaceholder="Nom de l'animal"
-        />
-      </div>
+      {/* Sélecteur de situation - toujours visible en premier */}
+      <BookingSituationSelector
+        selectedSituation={formData.bookingSituation}
+        onSituationChange={handleBookingSituationChange}
+      />
 
-      {/* Options multiples animaux */}
-      {formState.showMultipleOptions && (
-        <div className="animate-fade-in">
-          <MultipleAnimalsOptions
-            multipleAnimals={formData.multipleAnimals}
-            onMultipleAnimalsChange={handleMultipleAnimalsChange}
+      {/* Formulaire du premier animal */}
+      {formState.showFirstAnimalForm && (
+        <div className="animate-fade-in space-y-3 sm:space-y-4">
+          <AnimalSpeciesSelection
+            species={formData.animalSpecies}
+            customSpecies={formData.customSpecies}
+            onSpeciesChange={handleSpeciesChange}
+            onCustomSpeciesChange={handleCustomSpeciesChange}
+            title={isLitter ? "Sélectionnez l'espèce de la portée *" : "Sélectionnez l'espèce de votre animal *"}
+            animalName={formData.animalName}
+            onAnimalNameChange={handleNameChange}
+            showNameInput={formState.showNameInput}
+            nameInputId="animal-name"
+            nameInputPlaceholder="Nom de l'animal"
           />
         </div>
       )}
 
-      {/* Deuxième animal */}
-      {formState.showSecondAnimal && (
+      {/* Formulaire du deuxième animal */}
+      {formState.showSecondAnimalForm && (
         <div className="animate-fade-in bg-vet-beige/20 p-3 sm:p-4 rounded-lg border border-vet-blue/20">
           <SecondAnimalForm
             formData={formData}
@@ -100,7 +99,7 @@ const BookingForm = () => {
       )}
 
       {/* Options pour une portée */}
-      {formState.showLitterOptions && (
+      {formState.showLitterForm && (
         <div className="animate-fade-in bg-vet-sage/10 p-3 sm:p-4 rounded-lg border border-vet-sage/20">
           <LitterOptions
             vaccinationType={formData.vaccinationType}
