@@ -99,6 +99,26 @@ export const ConsultationInfo = ({ appointment }: ConsultationInfoProps) => {
             </div>
           )}
 
+          {/* Photos jointes */}
+          {appointment.conditional_answers && (() => {
+            const photoKeys = Object.keys(appointment.conditional_answers).filter(key => 
+              key.includes('photo') && appointment.conditional_answers[key]
+            );
+            if (photoKeys.length > 0) {
+              return (
+                <div>
+                  <strong>Photos jointes:</strong>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Badge variant="outline" className="text-xs bg-vet-sage/10 text-vet-sage border-vet-sage">
+                      {photoKeys.length} photo{photoKeys.length > 1 ? 's' : ''} disponible{photoKeys.length > 1 ? 's' : ''}
+                    </Badge>
+                  </div>
+                </div>
+              );
+            }
+            return null;
+          })()}
+
           {appointment.selected_symptoms && appointment.selected_symptoms.length > 0 && (
             <div>
               <strong>Symptômes sélectionnés:</strong>
