@@ -156,7 +156,7 @@ const VetLogin = () => {
             <Link to="/" className="inline-flex items-center hover:opacity-80 transition-opacity">
               <img src={logoAninow} alt="AniNow" className="h-8 sm:h-10 w-auto" />
             </Link>
-            <p className="text-vet-brown mt-2 text-sm sm:text-base">Espace Vétérinaire</p>
+            <p className="text-vet-brown mt-2 text-sm sm:text-base">Espace Vétérinaires et ASV</p>
           </div>
 
           {/* Formulaire */}
