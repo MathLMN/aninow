@@ -102,6 +102,10 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
       if (answers[`${prefix}skin_itching_areas`] === 'Une zone localisée') {
         requiredQuestions.push(`${prefix}skin_itching_areas_detail`);
       }
+      // Si "Plusieurs zones" est sélectionnée, vérifier qu'au moins une zone est cochée
+      if (answers[`${prefix}skin_itching_areas`] === 'Plusieurs zones') {
+        requiredQuestions.push(`${prefix}skin_itching_multiple_zones`);
+      }
     }
 
     // Ajouter les questions spécifiques aux plaies si nécessaire
@@ -110,6 +114,10 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
       // Si "Une zone localisée" est sélectionnée, ajouter la question de détail
       if (answers[`${prefix}wound_location`] === 'Une zone localisée') {
         requiredQuestions.push(`${prefix}wound_location_detail`);
+      }
+      // Si "Plusieurs zones" est sélectionnée, vérifier qu'au moins une zone est cochée
+      if (answers[`${prefix}wound_location`] === 'Plusieurs zones') {
+        requiredQuestions.push(`${prefix}wound_multiple_zones`);
       }
     }
 
@@ -140,6 +148,10 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
       if (answers[`${prefix}lump_body_area`] === 'Une zone localisée') {
         requiredQuestions.push(`${prefix}lump_body_area_detail`);
       }
+      // Si "Plusieurs zones" est sélectionnée, vérifier qu'au moins une zone est cochée
+      if (answers[`${prefix}lump_body_area`] === 'Plusieurs zones') {
+        requiredQuestions.push(`${prefix}lump_multiple_zones`);
+      }
     }
 
     // Ajouter les questions spécifiques à l'agressivité si nécessaire
@@ -160,7 +172,29 @@ export const useConditionalQuestionsValidation = ({ bookingData, answers }: Vali
     animal1RequiredQuestions;
 
   const hasAnyConditions = hasFirstAnimalSymptoms || hasSecondAnimalSymptoms;
-  const allQuestionsAnswered = hasAnyConditions ? allRequiredQuestions.every(key => answers[key]) : true;
+  
+  // Fonction personnalisée pour vérifier si une question est répondue
+  const isQuestionAnswered = (key: string): boolean => {
+    const value = answers[key];
+    
+    // Pour les zones multiples, vérifier que le JSON parsé contient au moins une zone
+    if (key.includes('_multiple_zones')) {
+      if (!value) return false;
+      try {
+        const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+        return Array.isArray(parsed) && parsed.length > 0;
+      } catch {
+        return false;
+      }
+    }
+    
+    // Pour les autres questions, vérifier simplement qu'une valeur existe
+    return !!value;
+  };
+  
+  const allQuestionsAnswered = hasAnyConditions ? 
+    allRequiredQuestions.every(key => isQuestionAnswered(key)) : 
+    true;
 
   console.log('Validation debug:', {
     hasTwoAnimals,
