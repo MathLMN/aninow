@@ -366,12 +366,6 @@ export const useBookingSubmission = () => {
         console.error('Erreur lors de l\'analyse IA (non bloquante):', aiError)
       }
 
-      const bookingCount = hasTwoAnimals && secondBooking ? 2 : 1
-      toast({
-        title: `${bookingCount} réservation${bookingCount > 1 ? 's' : ''} créée${bookingCount > 1 ? 's' : ''} avec succès`,
-        description: `Votre demande de rendez-vous a été enregistrée.`,
-      })
-
       return {
         booking: firstBooking,
         secondBooking,
