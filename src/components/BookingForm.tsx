@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Phone, Info } from "lucide-react";
 import BookingSituationSelector from './BookingSituationSelector';
 import AnimalSpeciesSelection from './AnimalSpeciesSelection';
 import SecondAnimalForm from './SecondAnimalForm';
@@ -12,11 +12,14 @@ import { FormData } from '../types/FormDataTypes';
 import { useBookingFormData } from '../hooks/useBookingFormData';
 import { useMultiTenantBookingNavigation } from '../hooks/useMultiTenantBookingNavigation';
 import { useLocation } from 'react-router-dom';
+import { usePublicClinicSettings } from '../hooks/usePublicClinicSettings';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const BookingForm = () => {
   const location = useLocation();
   const { bookingData, updateBookingData } = useBookingFormData();
   const { navigateNext } = useMultiTenantBookingNavigation();
+  const { settings } = usePublicClinicSettings();
   
   const {
     formData,
@@ -61,6 +64,23 @@ const BookingForm = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Encadré informatif pour autres situations - disparaît après sélection */}
+      {!formData.bookingSituation && settings?.clinic_phone && (
+        <Alert className="bg-blue-50 border-blue-200 animate-fade-in">
+          <Info className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="text-sm text-gray-700 leading-relaxed">
+            Pour toute autre situation non proposée ci-dessous, merci de prendre rendez-vous par téléphone au{' '}
+            <a 
+              href={`tel:${settings.clinic_phone}`}
+              className="font-bold text-blue-700 hover:text-blue-800 underline inline-flex items-center gap-1"
+            >
+              <Phone className="h-3.5 w-3.5" />
+              {settings.clinic_phone}
+            </a>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Sélecteur de situation - toujours visible en premier */}
       <BookingSituationSelector
         selectedSituation={formData.bookingSituation}
