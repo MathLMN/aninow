@@ -13,6 +13,7 @@ import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { usePlanningActions } from "@/hooks/usePlanningActions";
 import { useSlotManagement } from "@/hooks/useSlotManagement";
 import { useAppointmentClipboard } from "@/hooks/useAppointmentClipboard";
+import { useRealtimeBookings } from "@/hooks/useRealtimeBookings";
 
 export default function VetPlanning() {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -28,6 +29,9 @@ export default function VetPlanning() {
   const { bookings, refreshBookings } = useVetBookings();
   const { veterinarians } = useClinicVeterinarians();
   const { consultationTypes } = useSlotManagement();
+  
+  // Activer la synchronisation temps réel
+  useRealtimeBookings();
 
   const {
     validateBooking,
