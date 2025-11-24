@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Users, Search, Calendar, AlertTriangle, Clock, Phone, Mail, Globe, ChevronLeft, ChevronRight, ArrowUpDown, Flame, Camera } from "lucide-react";
 import { useVetBookings } from "@/hooks/useVetBookings";
+import { useRealtimeBookings } from "@/hooks/useRealtimeBookings";
 import { format, addDays, subDays, isSameDay, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { PhotoGallery, PhotoGalleryRef } from "@/components/planning/appointment-details/PhotoGallery";
@@ -17,6 +18,9 @@ const VetAppointments = () => {
   const [sortBy, setSortBy] = useState<'urgency' | 'date'>('urgency');
   const { bookings, isLoading, updateBookingStatus } = useVetBookings();
   const photoGalleryRefs = useRef<{ [key: string]: PhotoGalleryRef | null }>({});
+  
+  // Activer la synchronisation temps réel
+  useRealtimeBookings();
 
   const goToPreviousDay = () => {
     setSelectedDate(prev => subDays(prev, 1));
