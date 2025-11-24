@@ -16,6 +16,7 @@ const VetAppointments = () => {
   const [urgencyFilter, setUrgencyFilter] = useState<'all' | 'critical' | 'high' | 'medium' | 'low'>('all');
   const [sortBy, setSortBy] = useState<'urgency' | 'date'>('urgency');
   const { bookings, isLoading, updateBookingStatus } = useVetBookings();
+  const photoGalleryRefs = useRef<{ [key: string]: PhotoGalleryRef | null }>({});
 
   const goToPreviousDay = () => {
     setSelectedDate(prev => subDays(prev, 1));
@@ -176,9 +177,6 @@ const VetAppointments = () => {
   }
 
   const renderBookingsList = (bookingsList: typeof bookingsForSelectedDate, emptyMessage: string) => {
-    // Créer un hook pour chaque booking (les hooks ne peuvent pas être conditionnels)
-    const photoGalleryRefs = useRef<{ [key: string]: PhotoGalleryRef | null }>({});
-
     return (
       <div className="space-y-3">
         {bookingsList.map((booking) => {
