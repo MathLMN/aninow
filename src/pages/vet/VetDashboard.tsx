@@ -7,6 +7,7 @@ import { Calendar, Users, Clock, TrendingUp, AlertTriangle, CheckCircle, XCircle
 import { Link } from "react-router-dom";
 import { useVetBookings } from "@/hooks/useVetBookings";
 import { PendingBookingsNotification } from "@/components/planning/PendingBookingsNotification";
+import { useRealtimeBookings } from "@/hooks/useRealtimeBookings";
 import { startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { format } from "date-fns";
@@ -15,6 +16,9 @@ const VetDashboard = () => {
   const { bookings, isLoading, stats } = useVetBookings();
   const [viewMode, setViewMode] = useState<'day' | 'month'>('day');
   const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
+  
+  // Activer la synchronisation temps réel
+  useRealtimeBookings();
 
   // Filtrer uniquement les vrais rendez-vous (exclure les blocs récurrents)
   const realBookings = bookings.filter(b => !b.is_blocked);
