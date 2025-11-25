@@ -34,7 +34,8 @@ export default function VetPlanning() {
     cancelBooking,
     moveAppointment,
     deleteBooking,
-    handleBlockSlot
+    handleBlockSlot,
+    updateBookingStatus
   } = usePlanningActions();
 
   const {
@@ -178,6 +179,13 @@ export default function VetPlanning() {
     }
   };
 
+  const handleTakeInConsultation = async (bookingId: string) => {
+    const success = await updateBookingStatus(bookingId, 'completed');
+    if (success) {
+      refreshBookings();
+    }
+  };
+
   // Filter bookings for selected date (daily view)
   const todayBookings = bookings.filter(booking => {
     if (viewMode === 'daily') {
@@ -250,7 +258,10 @@ export default function VetPlanning() {
               
               {/* Liste d'attente */}
               <div className="flex-shrink-0">
-                <WaitingList bookings={bookings} />
+                <WaitingList 
+                  bookings={bookings} 
+                  onTakeInConsultation={handleTakeInConsultation}
+                />
               </div>
             </div>
           </div>
