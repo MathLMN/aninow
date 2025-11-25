@@ -9,7 +9,7 @@ import { useVetBookings } from "@/hooks/useVetBookings";
 import { format, addDays, subDays, isSameDay, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { PhotoGallery, PhotoGalleryRef } from "@/components/planning/appointment-details/PhotoGallery";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogPortal } from "@/components/ui/alert-dialog";
 
 const VetAppointments = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -641,25 +641,27 @@ const VetAppointments = () => {
       </Card>
 
       <AlertDialog open={bookingToConfirm !== null} onOpenChange={(open) => !open && setBookingToConfirm(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmer le rendez-vous</AlertDialogTitle>
-            <AlertDialogDescription>
-              Confirmez-vous ce rendez-vous en ligne ? Un email de confirmation sera automatiquement envoyé au client.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancelConfirmation}>
-              Annuler
-            </AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleConfirmConfirmation}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              Valider la confirmation
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
+        <AlertDialogPortal>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmer le rendez-vous</AlertDialogTitle>
+              <AlertDialogDescription>
+                Confirmez-vous ce rendez-vous en ligne ? Un email de confirmation sera automatiquement envoyé au client.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={handleCancelConfirmation}>
+                Annuler
+              </AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleConfirmConfirmation}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                Valider la confirmation
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogPortal>
       </AlertDialog>
     </div>
   );
