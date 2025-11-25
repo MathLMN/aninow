@@ -166,6 +166,15 @@ export const CreateAppointmentModal = ({
     }
     
     if (appointmentToEdit?.id) {
+      // Si on confirme le RDV et qu'il y a des changements, sauvegarder d'abord les modifications
+      if (newStatus === 'confirmed' && hasChanges()) {
+        console.log('💾 Saving changes before confirming...');
+        // Créer un faux événement pour handleSubmit
+        const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
+        await handleSubmit(fakeEvent);
+      }
+      
+      // Ensuite mettre à jour le statut
       const success = await updateBookingStatus(appointmentToEdit.id, newStatus);
       if (success) {
         onClose();
