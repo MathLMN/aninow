@@ -467,7 +467,7 @@ export type Database = {
           {
             foreignKeyName: "clinic_settings_clinic_id_fkey"
             columns: ["clinic_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "clinics"
             referencedColumns: ["id"]
           },
