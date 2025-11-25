@@ -26,6 +26,14 @@ interface DailySchedules {
   sunday: DaySchedule
 }
 
+export interface ConvenienceOption {
+  value: string
+  label: string
+  color: string
+  isActive: boolean
+  isOther?: boolean
+}
+
 interface ClinicSettings {
   id?: string
   clinic_name: string
@@ -40,6 +48,7 @@ interface ClinicSettings {
   daily_schedules: DailySchedules
   default_slot_duration_minutes?: number
   minimum_booking_delay_hours?: number
+  convenience_options_config?: ConvenienceOption[]
   clinic_id?: string
   created_at?: string
   updated_at?: string
@@ -110,7 +119,17 @@ const getDefaultSettings = (): ClinicSettings => ({
     friday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
     saturday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } },
     sunday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } }
-  }
+  },
+  convenience_options_config: [
+    { value: "bilan-annuel-vaccination", label: "Bilan annuel / vaccination", color: "bg-red-100 text-red-600 border-red-200", isActive: true },
+    { value: "coupe-griffes", label: "Coupe de griffes", color: "bg-orange-100 text-orange-600 border-orange-200", isActive: true },
+    { value: "controle", label: "Contrôle", color: "bg-yellow-100 text-yellow-600 border-yellow-200", isActive: true },
+    { value: "bilan-senior", label: "Bilan sénior", color: "bg-green-100 text-green-600 border-green-200", isActive: true },
+    { value: "premiere-consultation", label: "1ère consultation chiot/chaton", color: "bg-blue-100 text-blue-600 border-blue-200", isActive: true },
+    { value: "castration-sterilisation", label: "Castration/Stérilisation (pré-opératoire)", color: "bg-purple-100 text-purple-600 border-purple-200", isActive: true },
+    { value: "detartrage-extractions", label: "Détartrage/Extractions dentaires (pré-opératoire)", color: "bg-pink-100 text-pink-600 border-pink-200", isActive: true },
+    { value: "autre", label: "Autre (Précisez)", color: "bg-gray-100 text-gray-600 border-gray-200", isActive: true, isOther: true }
+  ]
 });
 
 export const useClinicSettings = () => {
@@ -165,7 +184,8 @@ export const useClinicSettings = () => {
           clinic_address_street: data.clinic_address_street || '',
           clinic_address_city: data.clinic_address_city || '',
           clinic_address_postal_code: data.clinic_address_postal_code || '',
-          clinic_address_country: data.clinic_address_country || 'France'
+          clinic_address_country: data.clinic_address_country || 'France',
+          convenience_options_config: (data.convenience_options_config as unknown as ConvenienceOption[]) || getDefaultSettings().convenience_options_config
         };
         setSettings(settingsData);
       } else {
@@ -216,6 +236,7 @@ export const useClinicSettings = () => {
         daily_schedules: JSON.parse(JSON.stringify(updatedSettings.daily_schedules)),
         default_slot_duration_minutes: updatedSettings.default_slot_duration_minutes || 30,
         minimum_booking_delay_hours: updatedSettings.minimum_booking_delay_hours || 0,
+        convenience_options_config: updatedSettings.convenience_options_config ? JSON.parse(JSON.stringify(updatedSettings.convenience_options_config)) : undefined,
         clinic_id: currentClinicId
       };
       
@@ -272,7 +293,8 @@ export const useClinicSettings = () => {
         clinic_address_street: data.clinic_address_street || '',
         clinic_address_city: data.clinic_address_city || '',
         clinic_address_postal_code: data.clinic_address_postal_code || '',
-        clinic_address_country: data.clinic_address_country || 'France'
+        clinic_address_country: data.clinic_address_country || 'France',
+        convenience_options_config: (data.convenience_options_config as ConvenienceOption[]) || getDefaultSettings().convenience_options_config
       };
       
       console.log('🔄 Updating local state with:', settingsData);

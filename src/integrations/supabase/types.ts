@@ -416,6 +416,7 @@ export type Database = {
           clinic_id: string | null
           clinic_name: string
           clinic_phone: string | null
+          convenience_options_config: Json | null
           created_at: string
           daily_schedules: Json | null
           default_slot_duration_minutes: number
@@ -434,6 +435,7 @@ export type Database = {
           clinic_id?: string | null
           clinic_name?: string
           clinic_phone?: string | null
+          convenience_options_config?: Json | null
           created_at?: string
           daily_schedules?: Json | null
           default_slot_duration_minutes?: number
@@ -452,6 +454,7 @@ export type Database = {
           clinic_id?: string | null
           clinic_name?: string
           clinic_phone?: string | null
+          convenience_options_config?: Json | null
           created_at?: string
           daily_schedules?: Json | null
           default_slot_duration_minutes?: number

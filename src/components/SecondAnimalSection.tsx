@@ -3,6 +3,7 @@ import React from 'react';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import AnimalConsultationForm from "@/components/AnimalConsultationForm";
+import { ConvenienceOption } from "@/components/ConvenienceConsultationSelect";
 
 interface SecondAnimalSectionProps {
   hasTwoAnimals: boolean;
@@ -31,6 +32,7 @@ interface SecondAnimalSectionProps {
   onSecondAnimalCustomSymptomChange?: (symptom: string) => void;
   firstAnimalName?: string;
   secondAnimalName?: string;
+  clinicOptions?: ConvenienceOption[];
 }
 
 const SecondAnimalSection: React.FC<SecondAnimalSectionProps> = ({
@@ -59,7 +61,8 @@ const SecondAnimalSection: React.FC<SecondAnimalSectionProps> = ({
   secondAnimalCustomSymptom = '',
   onSecondAnimalCustomSymptomChange = () => {},
   firstAnimalName,
-  secondAnimalName
+  secondAnimalName,
+  clinicOptions
 }) => {
   if (!hasTwoAnimals) return null;
 
@@ -107,6 +110,7 @@ const SecondAnimalSection: React.FC<SecondAnimalSectionProps> = ({
             onSymptomsChange={onSymptomsChange}
             customSymptom={customSymptom}
             onCustomSymptomChange={onCustomSymptomChange}
+            clinicOptions={clinicOptions}
             containerClassName="p-3 bg-vet-beige/30 rounded-lg sm:p-4"
           />
 
@@ -126,6 +130,7 @@ const SecondAnimalSection: React.FC<SecondAnimalSectionProps> = ({
             customSymptom={secondAnimalCustomSymptom}
             onCustomSymptomChange={onSecondAnimalCustomSymptomChange}
             isForced={shouldForceConvenienceForAnimal2}
+            clinicOptions={clinicOptions}
             containerClassName="p-3 bg-vet-blue/10 rounded-lg sm:p-4"
           />
         </div>

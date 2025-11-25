@@ -2,7 +2,7 @@
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import ConsultationReasonSelect from "@/components/ConsultationReasonSelect";
-import ConvenienceConsultationSelect from "@/components/ConvenienceConsultationSelect";
+import ConvenienceConsultationSelect, { ConvenienceOption } from "@/components/ConvenienceConsultationSelect";
 import SymptomSelector from "@/components/SymptomSelector";
 
 interface AnimalConsultationFormProps {
@@ -21,6 +21,7 @@ interface AnimalConsultationFormProps {
   containerClassName?: string;
   animalName?: string;
   animalNumber?: number;
+  clinicOptions?: ConvenienceOption[];
 }
 
 const AnimalConsultationForm: React.FC<AnimalConsultationFormProps> = ({
@@ -38,7 +39,8 @@ const AnimalConsultationForm: React.FC<AnimalConsultationFormProps> = ({
   isForced = false,
   containerClassName = "",
   animalName,
-  animalNumber
+  animalNumber,
+  clinicOptions
 }) => {
   // Construire le titre avec le numéro et le prénom de l'animal si fournis
   const displayTitle = animalNumber && animalName 
@@ -72,6 +74,7 @@ const AnimalConsultationForm: React.FC<AnimalConsultationFormProps> = ({
             onOptionsChange={onConvenienceOptionsChange}
             customText={customText}
             onCustomTextChange={onCustomTextChange}
+            clinicOptions={clinicOptions}
           />
         </>
       )}
