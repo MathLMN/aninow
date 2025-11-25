@@ -127,17 +127,13 @@ export const ConsultationInfo = ({ appointment }: ConsultationInfoProps) => {
             </div>
           )}
           
-          {/* Résumé de la consultation par l'IA */}
-          {appointment.consultation_reason === 'symptomes-anomalie' && (
+          {/* Résumé de la consultation par l'IA - toujours affiché si disponible */}
+          {appointment.ai_analysis?.analysis_summary && (
             <div>
               <strong>Résumé de la consultation:</strong>
-              {appointment.ai_analysis?.analysis_summary ? (
-                <p className="mt-1 text-vet-brown bg-blue-50 p-2 rounded-md border border-blue-200">
-                  {appointment.ai_analysis.analysis_summary}
-                </p>
-              ) : (
-                <span className="ml-1 text-vet-brown">En attente d'analyse</span>
-              )}
+              <p className="mt-1 text-vet-brown bg-blue-50 p-2 rounded-md border border-blue-200">
+                {appointment.ai_analysis.analysis_summary}
+              </p>
             </div>
           )}
 
@@ -196,8 +192,8 @@ export const ConsultationInfo = ({ appointment }: ConsultationInfoProps) => {
         </div>
       </div>
 
-      {/* Niveau d'urgence simplifié (3 niveaux) */}
-      {appointment.urgency_score && appointment.consultation_reason !== 'consultation-convenance' && (
+      {/* Niveau d'urgence - toujours affiché si disponible */}
+      {appointment.urgency_score && (
         <div className="space-y-2">
           <h4 className="font-medium text-vet-navy flex items-center">
             <AlertCircle className="h-4 w-4 mr-2" />
