@@ -130,6 +130,14 @@ const BookingConfirmation = () => {
     fetchVeterinarian();
   }, [submissionResult, bookingData.veterinarianName]);
 
+  // Nettoyer automatiquement les données du formulaire après une soumission réussie
+  useEffect(() => {
+    if (submissionResult?.booking && !submissionResult?.error) {
+      console.log('BookingConfirmation - Cleaning form data after successful submission');
+      resetBookingData();
+    }
+  }, [submissionResult, resetBookingData]);
+
   // Affichage pendant le chargement
   if (isSubmitting) {
     return <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] from-0% to-[#EDE3DA] to-36%">
