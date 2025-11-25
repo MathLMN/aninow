@@ -12,6 +12,7 @@ interface RecurringBlockModalProps {
   isOpen: boolean;
   onClose: () => void;
   veterinarians: any[];
+  blockToEdit?: any;
 }
 
 const TIME_SLOTS = [
@@ -42,7 +43,8 @@ const DAYS_OF_WEEK = [
 export const RecurringBlockModal = ({
   isOpen,
   onClose,
-  veterinarians
+  veterinarians,
+  blockToEdit
 }: RecurringBlockModalProps) => {
   const [formData, setFormData] = useState({
     title: '',
@@ -55,7 +57,34 @@ export const RecurringBlockModal = ({
     end_date: '' // Optionnel
   });
 
-  const { createRecurringBlock, isCreating } = useRecurringSlotBlocks();
+  const { createRecurringBlock, updateRecurringBlock, isCreating, isUpdating } = useRecurringSlotBlocks();
+
+  // Pré-remplir le formulaire quand on édite
+  useState(() => {
+    if (blockToEdit) {
+      setFormData({
+        title: blockToEdit.title,
+        description: blockToEdit.description || '',
+        veterinarian_id: blockToEdit.veterinarian_id,
+        day_of_week: blockToEdit.day_of_week.toString(),
+        start_time: blockToEdit.start_time.slice(0, 5),
+        end_time: blockToEdit.end_time.slice(0, 5),
+        start_date: blockToEdit.start_date || new Date().toISOString().split('T')[0],
+        end_date: blockToEdit.end_date || ''
+      });
+    } else {
+      setFormData({
+        title: '',
+        description: '',
+        veterinarian_id: '',
+        day_of_week: '',
+        start_time: '',
+        end_time: '',
+        start_date: new Date().toISOString().split('T')[0],
+        end_date: ''
+      });
+    }
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +95,7 @@ export const RecurringBlockModal = ({
     }
 
     try {
-      await createRecurringBlock({
+      const blockData = {
         title: formData.title,
         description: formData.description,
         veterinarian_id: formData.veterinarian_id,
@@ -76,7 +105,13 @@ export const RecurringBlockModal = ({
         start_date: formData.start_date,
         end_date: formData.end_date || undefined,
         is_active: true
-      });
+      };
+
+      if (blockToEdit) {
+        await updateRecurringBlock({ id: blockToEdit.id, ...blockData });
+      } else {
+        await createRecurringBlock(blockData);
+      }
 
       // Réinitialiser le formulaire et fermer la modale
       setFormData({
@@ -91,7 +126,7 @@ export const RecurringBlockModal = ({
       });
       onClose();
     } catch (error) {
-      console.error('Error creating recurring block:', error);
+      console.error('Error saving recurring block:', error);
     }
   };
 
@@ -120,7 +155,9 @@ export const RecurringBlockModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
-          <DialogTitle className="text-vet-navy">Créer un blocage récurrent</DialogTitle>
+          <DialogTitle className="text-vet-navy">
+            {blockToEdit ? 'Modifier le blocage récurrent' : 'Créer un blocage récurrent'}
+          </DialogTitle>
           <DialogDescription className="text-vet-brown">
             Configurez un blocage automatique qui se répète chaque semaine pendant une période donnée
           </DialogDescription>
@@ -278,10 +315,13 @@ export const RecurringBlockModal = ({
             </Button>
             <Button 
               type="submit" 
-              disabled={isCreating}
+              disabled={isCreating || isUpdating}
               className="bg-vet-sage hover:bg-vet-sage/90 text-white"
             >
-              {isCreating ? 'Création...' : 'Créer le blocage récurrent'}
+              {blockToEdit 
+                ? (isUpdating ? 'Modification...' : 'Modifier le blocage')
+                : (isCreating ? 'Création...' : 'Créer le blocage récurrent')
+              }
             </Button>
           </div>
         </form>
