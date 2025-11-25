@@ -632,65 +632,6 @@ export const ClinicSettingsForm = () => {
         <CardContent className="space-y-6">
           <Form {...form}>
             <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="defaultSlotDurationMinutes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Durée d'un créneau en ligne (minutes)</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner la durée" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {[5, 10, 15, 20, 30, 45, 60].map(duration => (
-                          <SelectItem key={duration} value={duration.toString()}>
-                            {duration} minutes
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="minimumBookingDelayHours"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Délai minimum de prise de RDV en ligne</FormLabel>
-                    <Select 
-                      onValueChange={(value) => field.onChange(parseInt(value))} 
-                      defaultValue={field.value?.toString() || "0"}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un délai" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="0">Immédiat (jour même autorisé)</SelectItem>
-                        <SelectItem value="1">1 heure minimum</SelectItem>
-                        <SelectItem value="2">2 heures minimum</SelectItem>
-                        <SelectItem value="4">4 heures minimum</SelectItem>
-                        <SelectItem value="12">12 heures minimum</SelectItem>
-                        <SelectItem value="24">24 heures minimum (à partir de demain)</SelectItem>
-                        <SelectItem value="48">48 heures minimum</SelectItem>
-                        <SelectItem value="72">72 heures minimum</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-vet-brown/70 mt-1">
-                      Définit le délai minimum avant lequel un client peut prendre rendez-vous en ligne
-                    </p>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               <div className="border border-vet-blue/30 rounded-lg bg-gradient-to-r from-vet-beige/5 to-vet-sage/5 p-4">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -1106,6 +1047,65 @@ export const ClinicSettingsForm = () => {
                         className="data-[state=checked]:bg-vet-sage"
                       />
                     </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="defaultSlotDurationMinutes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Durée d'un créneau en ligne (minutes)</FormLabel>
+                    <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value.toString()}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner la durée" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {[5, 10, 15, 20, 30, 45, 60].map(duration => (
+                          <SelectItem key={duration} value={duration.toString()}>
+                            {duration} minutes
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="minimumBookingDelayHours"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Délai minimum de prise de RDV en ligne</FormLabel>
+                    <Select 
+                      onValueChange={(value) => field.onChange(parseInt(value))} 
+                      defaultValue={field.value?.toString() || "0"}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner un délai" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="0">Immédiat (jour même autorisé)</SelectItem>
+                        <SelectItem value="1">1 heure minimum</SelectItem>
+                        <SelectItem value="2">2 heures minimum</SelectItem>
+                        <SelectItem value="4">4 heures minimum</SelectItem>
+                        <SelectItem value="12">12 heures minimum</SelectItem>
+                        <SelectItem value="24">24 heures minimum (à partir de demain)</SelectItem>
+                        <SelectItem value="48">48 heures minimum</SelectItem>
+                        <SelectItem value="72">72 heures minimum</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-vet-brown/70 mt-1">
+                      Définit le délai minimum avant lequel un client peut prendre rendez-vous en ligne
+                    </p>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
