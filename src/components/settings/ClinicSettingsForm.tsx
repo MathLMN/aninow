@@ -36,6 +36,7 @@ interface ClinicSettings {
   clinic_address_postal_code: string;
   clinic_address_country: string;
   asv_enabled: boolean;
+  online_booking_enabled: boolean;
   default_slot_duration_minutes: number;
 }
 
@@ -48,6 +49,7 @@ const defaultSettings: ClinicSettings = {
   clinic_address_postal_code: "",
   clinic_address_country: "France",
   asv_enabled: true,
+  online_booking_enabled: true,
   default_slot_duration_minutes: 15
 };
 
@@ -64,6 +66,7 @@ const formSchema = z.object({
   clinicAddressPostalCode: z.string().optional(),
   clinicAddressCountry: z.string().optional(),
   asvEnabled: z.boolean().default(true),
+  onlineBookingEnabled: z.boolean().default(true),
   defaultSlotDurationMinutes: z.number().min(5).max(60).default(15),
   minimumBookingDelayHours: z.number().min(0).default(0)
 });
@@ -168,6 +171,7 @@ export const ClinicSettingsForm = () => {
       clinicAddressPostalCode: settings?.clinic_address_postal_code || defaultSettings.clinic_address_postal_code,
       clinicAddressCountry: settings?.clinic_address_country || defaultSettings.clinic_address_country,
       asvEnabled: settings?.asv_enabled || defaultSettings.asv_enabled,
+      onlineBookingEnabled: settings?.online_booking_enabled ?? defaultSettings.online_booking_enabled,
       defaultSlotDurationMinutes: settings?.default_slot_duration_minutes || defaultSettings.default_slot_duration_minutes,
       minimumBookingDelayHours: 0
     }
@@ -184,6 +188,7 @@ export const ClinicSettingsForm = () => {
         clinicAddressPostalCode: settings.clinic_address_postal_code,
         clinicAddressCountry: settings.clinic_address_country,
         asvEnabled: settings.asv_enabled,
+        onlineBookingEnabled: settings.online_booking_enabled ?? true,
         defaultSlotDurationMinutes: settings.default_slot_duration_minutes,
         minimumBookingDelayHours: settings.minimum_booking_delay_hours || 0
       });
@@ -239,6 +244,7 @@ export const ClinicSettingsForm = () => {
       clinic_address_postal_code: values.clinicAddressPostalCode || '',
       clinic_address_country: values.clinicAddressCountry || 'France',
       asv_enabled: values.asvEnabled,
+      online_booking_enabled: values.onlineBookingEnabled,
       default_slot_duration_minutes: values.defaultSlotDurationMinutes,
       minimum_booking_delay_hours: values.minimumBookingDelayHours || 0
     });
@@ -1023,6 +1029,60 @@ export const ClinicSettingsForm = () => {
             </p>
           </div>
         </div>
+      </Card>
+
+      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
+        <CardHeader>
+          <CardTitle className="text-vet-navy flex items-center">
+            <Calendar className="h-5 w-5 mr-2" />
+            Prise de rendez-vous en ligne
+          </CardTitle>
+          <CardDescription>
+            Contrôlez l'accès des clients à la prise de rendez-vous en ligne
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="onlineBookingEnabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border border-vet-blue/20 p-4 bg-gradient-to-r from-vet-blue/5 to-transparent">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base font-semibold text-vet-navy">
+                        Activer la prise de rendez-vous en ligne
+                      </FormLabel>
+                      <FormDescription className="text-sm text-vet-brown/70">
+                        Lorsque désactivé, les clients verront un message les invitant à contacter la clinique par téléphone.
+                        <br />
+                        <span className="font-medium text-vet-navy mt-2 inline-block">
+                          ⚠️ Utilisez cette option pour préparer votre clinique avant le lancement officiel.
+                        </span>
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className="data-[state=checked]:bg-vet-sage"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex justify-end">
+                <Button 
+                  type="submit"
+                  className="bg-vet-sage hover:bg-vet-sage/90 text-white"
+                >
+                  Enregistrer les paramètres
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
       </Card>
 
       <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">

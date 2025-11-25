@@ -36,6 +36,7 @@ interface ClinicSettings {
   clinic_address_postal_code?: string
   clinic_address_country?: string
   asv_enabled: boolean
+  online_booking_enabled?: boolean
   daily_schedules: DailySchedules
   default_slot_duration_minutes?: number
   minimum_booking_delay_hours?: number
@@ -98,6 +99,7 @@ const getDefaultSettings = (): ClinicSettings => ({
   clinic_address_postal_code: '',
   clinic_address_country: 'France',
   asv_enabled: true,
+  online_booking_enabled: true,
   default_slot_duration_minutes: 30,
   minimum_booking_delay_hours: 0,
   daily_schedules: {
@@ -157,6 +159,7 @@ export const useClinicSettings = () => {
           daily_schedules: convertToDailySchedules(data.daily_schedules),
           default_slot_duration_minutes: data.default_slot_duration_minutes || 30,
           minimum_booking_delay_hours: data.minimum_booking_delay_hours || 0,
+          online_booking_enabled: data.online_booking_enabled ?? true,
           clinic_phone: data.clinic_phone || '',
           clinic_email: data.clinic_email || '',
           clinic_address_street: data.clinic_address_street || '',
@@ -209,6 +212,7 @@ export const useClinicSettings = () => {
         clinic_address_postal_code: updatedSettings.clinic_address_postal_code || null,
         clinic_address_country: updatedSettings.clinic_address_country || 'France',
         asv_enabled: updatedSettings.asv_enabled,
+        online_booking_enabled: updatedSettings.online_booking_enabled ?? true,
         daily_schedules: JSON.parse(JSON.stringify(updatedSettings.daily_schedules)),
         default_slot_duration_minutes: updatedSettings.default_slot_duration_minutes || 30,
         minimum_booking_delay_hours: updatedSettings.minimum_booking_delay_hours || 0,
@@ -262,6 +266,7 @@ export const useClinicSettings = () => {
         daily_schedules: convertToDailySchedules(data.daily_schedules),
         default_slot_duration_minutes: data.default_slot_duration_minutes || 30,
         minimum_booking_delay_hours: data.minimum_booking_delay_hours || 0,
+        online_booking_enabled: data.online_booking_enabled ?? true,
         clinic_phone: data.clinic_phone || '',
         clinic_email: data.clinic_email || '',
         clinic_address_street: data.clinic_address_street || '',
