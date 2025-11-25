@@ -30,6 +30,7 @@ export interface ConvenienceOption {
   color: string;
   isActive: boolean;
   isOther?: boolean;
+  helpMessage?: string;
 }
 
 interface ClinicSettings {
