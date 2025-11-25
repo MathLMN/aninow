@@ -90,6 +90,9 @@ const handler = async (req: Request): Promise<Response> => {
       : "";
     const clinicPhone = clinicSettings?.clinic_phone || "";
     const vetName = booking.veterinarian?.name || "votre vétérinaire";
+    
+    // Utiliser toujours le résumé de l'IA comme motif
+    const consultationReason = booking.ai_analysis?.analysis_summary || booking.consultation_reason || "Consultation";
 
     // Build email HTML
     const emailHtml = `
@@ -175,9 +178,9 @@ const handler = async (req: Request): Promise<Response> => {
               <div class="info-row">
                 <span class="label">👨‍⚕️ Vétérinaire :</span> ${vetName}
               </div>
-              ${booking.consultation_reason ? `
+              ${consultationReason ? `
               <div class="info-row">
-                <span class="label">📋 Motif :</span> ${booking.consultation_reason}
+                <span class="label">📋 Motif :</span> ${consultationReason}
               </div>
               ` : ''}
             </div>
