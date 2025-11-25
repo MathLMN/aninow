@@ -4,13 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Users, Search, Calendar, AlertTriangle, Clock, Phone, Mail, Globe, ChevronLeft, ChevronRight, ArrowUpDown, Flame, Camera } from "lucide-react";
+import { Users, Search, Calendar, AlertTriangle, Clock, Phone, Mail, Globe, ChevronLeft, ChevronRight, ArrowUpDown, Flame, Camera, ChevronDown, X } from "lucide-react";
 import { useVetBookings } from "@/hooks/useVetBookings";
 import { format, addDays, subDays, isSameDay, parseISO, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { PhotoGallery, PhotoGalleryRef } from "@/components/planning/appointment-details/PhotoGallery";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogPortal } from "@/components/ui/alert-dialog";
 import { useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useClinicAccess } from "@/hooks/useClinicAccess";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const VetAppointments = () => {
   const [searchParams] = useSearchParams();
@@ -19,9 +24,29 @@ const VetAppointments = () => {
   const [urgencyFilter, setUrgencyFilter] = useState<'all' | 'critical' | 'high' | 'medium' | 'low'>('all');
   const [sortBy, setSortBy] = useState<'urgency' | 'date'>('urgency');
   const [bookingToConfirm, setBookingToConfirm] = useState<string | null>(null);
+  const [selectedConsultationTypeIds, setSelectedConsultationTypeIds] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState("pending");
   const { bookings, isLoading, updateBookingStatus } = useVetBookings();
   const photoGalleryRefs = useRef<{ [key: string]: PhotoGalleryRef | null }>({});
+  const { currentClinicId } = useClinicAccess();
+
+  // Charger les types de consultation
+  const { data: consultationTypes = [] } = useQuery({
+    queryKey: ['consultation-types', currentClinicId],
+    queryFn: async () => {
+      if (!currentClinicId) return [];
+      
+      const { data, error } = await supabase
+        .from('consultation_types')
+        .select('id, name, color, duration_minutes')
+        .eq('clinic_id', currentClinicId)
+        .order('name');
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!currentClinicId,
+  });
 
   // Gérer l'ouverture de l'onglet via l'URL
   useEffect(() => {
@@ -197,22 +222,59 @@ const VetAppointments = () => {
 
   const handleStatusChange = (bookingId: string, newStatus: 'pending' | 'confirmed' | 'cancelled' | 'completed') => {
     if (newStatus === 'confirmed') {
+      // Récupérer les types de consultation existants du booking
+      const booking = bookings.find(b => b.id === bookingId);
+      const existingTypeId = booking?.consultation_type_id;
+      
       setBookingToConfirm(bookingId);
+      setSelectedConsultationTypeIds(existingTypeId ? [existingTypeId] : []);
     } else {
       updateBookingStatus({ id: bookingId, status: newStatus });
     }
   };
 
-  const handleConfirmConfirmation = () => {
-    if (bookingToConfirm) {
-      updateBookingStatus({ id: bookingToConfirm, status: 'confirmed' });
-      setBookingToConfirm(null);
+  const handleConfirmConfirmation = async () => {
+    if (bookingToConfirm && selectedConsultationTypeIds.length > 0) {
+      try {
+        // D'abord, mettre à jour le type de consultation
+        const { error: updateError } = await supabase
+          .from('bookings')
+          .update({ 
+            consultation_type_id: selectedConsultationTypeIds[0] // Prendre le premier type sélectionné
+          })
+          .eq('id', bookingToConfirm);
+
+        if (updateError) throw updateError;
+
+        // Ensuite, confirmer le rendez-vous
+        await updateBookingStatus({ id: bookingToConfirm, status: 'confirmed' });
+        
+        setBookingToConfirm(null);
+        setSelectedConsultationTypeIds([]);
+      } catch (error) {
+        console.error('Error updating booking:', error);
+      }
     }
   };
 
   const handleCancelConfirmation = () => {
     setBookingToConfirm(null);
+    setSelectedConsultationTypeIds([]);
   };
+
+  const handleConsultationTypeToggle = (typeId: string) => {
+    setSelectedConsultationTypeIds(prev => 
+      prev.includes(typeId) ? prev.filter(id => id !== typeId) : [...prev, typeId]
+    );
+  };
+
+  const handleRemoveConsultationType = (typeId: string) => {
+    setSelectedConsultationTypeIds(prev => prev.filter(id => id !== typeId));
+  };
+
+  const selectedTypes = consultationTypes.filter(type => 
+    selectedConsultationTypeIds.includes(type.id)
+  );
 
   // Type guard to check if ai_analysis has the expected structure
   const isValidAiAnalysis = (analysis: any): analysis is { analysis_summary: string } => {
@@ -750,13 +812,125 @@ const VetAppointments = () => {
         </CardContent>
       </Card>
 
-      <AlertDialog open={bookingToConfirm !== null} onOpenChange={(open) => !open && setBookingToConfirm(null)}>
+      <AlertDialog open={bookingToConfirm !== null} onOpenChange={(open) => !open && handleCancelConfirmation()}>
         <AlertDialogPortal>
-          <AlertDialogContent>
+          <AlertDialogContent className="max-w-md">
             <AlertDialogHeader>
               <AlertDialogTitle>Confirmer le rendez-vous</AlertDialogTitle>
-              <AlertDialogDescription>
-                Confirmez-vous ce rendez-vous en ligne ? Un email de confirmation sera automatiquement envoyé au client.
+              <AlertDialogDescription asChild>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-900 mb-2 block">
+                      Type(s) de consultation <span className="text-red-500">*</span>
+                    </label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className={`w-full h-auto min-h-9 justify-between text-sm ${
+                            selectedConsultationTypeIds.length === 0 ? 'border-red-500 border-2' : ''
+                          }`}
+                        >
+                          <div className="flex flex-wrap gap-1 flex-1 overflow-hidden max-w-[90%]">
+                            {selectedTypes.length === 0 ? (
+                              <span className="text-muted-foreground">Sélectionnez le(s) type(s)...</span>
+                            ) : selectedTypes.length === 1 ? (
+                              <Badge
+                                variant="secondary"
+                                className="text-xs px-2 py-0.5 gap-1 hover:bg-secondary/80 cursor-pointer flex items-center max-w-full"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveConsultationType(selectedTypes[0].id);
+                                }}
+                              >
+                                <span className="truncate">
+                                  {selectedTypes[0].name} ({selectedTypes[0].duration_minutes} min)
+                                </span>
+                                <X className="h-3 w-3 shrink-0" />
+                              </Badge>
+                            ) : (
+                              <>
+                                <Badge
+                                  variant="secondary"
+                                  className="text-xs px-2 py-0.5 gap-1 hover:bg-secondary/80 cursor-pointer flex items-center"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveConsultationType(selectedTypes[0].id);
+                                  }}
+                                >
+                                  <span className="truncate max-w-[120px]">
+                                    {selectedTypes[0].name}
+                                  </span>
+                                  <X className="h-3 w-3 shrink-0" />
+                                </Badge>
+                                <Badge
+                                  variant="secondary"
+                                  className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 border-blue-200"
+                                >
+                                  +{selectedTypes.length - 1} autre{selectedTypes.length > 2 ? 's' : ''}
+                                </Badge>
+                              </>
+                            )}
+                          </div>
+                          <ChevronDown className="h-4 w-4 shrink-0 opacity-50 ml-1" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[320px] p-2 bg-white z-50" align="start">
+                        <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                          {selectedTypes.length > 0 && (
+                            <div className="pb-2 border-b mb-2">
+                              <div className="text-xs font-medium text-gray-500 mb-2">
+                                Sélectionné{selectedTypes.length > 1 ? 's' : ''} ({selectedTypes.reduce((sum, t) => sum + t.duration_minutes, 0)} min total)
+                              </div>
+                              <div className="flex flex-wrap gap-1">
+                                {selectedTypes.map((type) => (
+                                  <Badge
+                                    key={type.id}
+                                    variant="secondary"
+                                    className="text-xs px-2 py-0.5 gap-1 hover:bg-secondary/80 cursor-pointer"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRemoveConsultationType(type.id);
+                                    }}
+                                  >
+                                    {type.name} ({type.duration_minutes}m)
+                                    <X className="h-3 w-3" />
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {consultationTypes.map((type) => (
+                            <div key={type.id} className="flex items-center space-x-2 hover:bg-gray-50 p-1.5 rounded">
+                              <Checkbox
+                                id={`confirm-type-${type.id}`}
+                                checked={selectedConsultationTypeIds.includes(type.id)}
+                                onCheckedChange={() => handleConsultationTypeToggle(type.id)}
+                                className="h-4 w-4"
+                              />
+                              <label
+                                htmlFor={`confirm-type-${type.id}`}
+                                className="text-sm font-normal leading-none cursor-pointer flex-1"
+                              >
+                                {type.name} <span className="text-gray-500">({type.duration_minutes} min)</span>
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                    {selectedConsultationTypeIds.length === 0 && (
+                      <p className="text-xs text-orange-600 mt-2 flex items-center gap-1">
+                        <AlertTriangle className="h-3 w-3" />
+                        Champ obligatoire pour afficher la couleur dans le planning
+                      </p>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Un email de confirmation sera automatiquement envoyé au client.
+                  </p>
+                </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -765,9 +939,10 @@ const VetAppointments = () => {
               </AlertDialogCancel>
               <AlertDialogAction 
                 onClick={handleConfirmConfirmation}
-                className="bg-green-600 hover:bg-green-700 text-white"
+                disabled={selectedConsultationTypeIds.length === 0}
+                className="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Valider la confirmation
+                Valider ✓
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
