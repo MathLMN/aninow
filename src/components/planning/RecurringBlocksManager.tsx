@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Calendar, User, Trash2, Plus, RefreshCw } from "lucide-react";
+import { Clock, Calendar, User, Trash2, Plus, RefreshCw, Edit } from "lucide-react";
 import { useRecurringSlotBlocks } from "@/hooks/useRecurringSlotBlocks";
 import { RecurringBlockModal } from "./RecurringBlockModal";
 
@@ -15,12 +15,23 @@ const DAYS_OF_WEEK = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendre
 
 export const RecurringBlocksManager = ({ veterinarians }: RecurringBlocksManagerProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [blockToEdit, setBlockToEdit] = useState<any>(null);
   const { 
     recurringBlocks, 
     isLoading, 
     deleteRecurringBlock, 
     isDeleting 
   } = useRecurringSlotBlocks();
+
+  const handleOpenModal = (block?: any) => {
+    setBlockToEdit(block || null);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setBlockToEdit(null);
+  };
 
   const getVeterinarianName = (vetId: string) => {
     const vet = veterinarians.find(v => v.id === vetId);
@@ -79,7 +90,7 @@ export const RecurringBlocksManager = ({ veterinarians }: RecurringBlocksManager
               Blocages récurrents
             </CardTitle>
             <Button
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => handleOpenModal()}
               className="bg-vet-sage hover:bg-vet-sage/90 text-white"
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -96,7 +107,7 @@ export const RecurringBlocksManager = ({ veterinarians }: RecurringBlocksManager
                 Créez des blocages automatiques pour les activités récurrentes
               </p>
               <Button
-                onClick={() => setIsModalOpen(true)}
+                onClick={() => handleOpenModal()}
                 className="mt-3 bg-vet-sage hover:bg-vet-sage/90 text-white"
                 size="sm"
               >
@@ -149,15 +160,25 @@ export const RecurringBlocksManager = ({ veterinarians }: RecurringBlocksManager
                       )}
                     </div>
 
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeleteBlock(block.id, block.title)}
-                      disabled={isDeleting}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleOpenModal(block)}
+                        className="text-vet-blue hover:text-vet-blue/90 hover:bg-vet-beige/20 border-vet-blue/30"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteBlock(block.id, block.title)}
+                        disabled={isDeleting}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -168,8 +189,9 @@ export const RecurringBlocksManager = ({ veterinarians }: RecurringBlocksManager
 
       <RecurringBlockModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         veterinarians={veterinarians}
+        blockToEdit={blockToEdit}
       />
     </>
   );
