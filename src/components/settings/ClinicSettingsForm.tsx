@@ -410,6 +410,43 @@ export const ClinicSettingsForm = () => {
 
   const handleDeleteConsultationType = async (typeId: string) => {
     try {
+      // Vérifier si le type est utilisé dans des rendez-vous
+      const { data: bookingsData, error: bookingsError } = await supabase
+        .from('bookings')
+        .select('id')
+        .eq('consultation_type_id', typeId)
+        .limit(1);
+
+      if (bookingsError) throw bookingsError;
+
+      if (bookingsData && bookingsData.length > 0) {
+        toast({
+          title: "Impossible de supprimer",
+          description: "Ce type de consultation est utilisé par des rendez-vous existants. Vous ne pouvez pas le supprimer.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Vérifier si le type est utilisé dans des créneaux disponibles
+      const { data: slotsData, error: slotsError } = await supabase
+        .from('available_slots')
+        .select('id')
+        .eq('consultation_type_id', typeId)
+        .limit(1);
+
+      if (slotsError) throw slotsError;
+
+      if (slotsData && slotsData.length > 0) {
+        toast({
+          title: "Impossible de supprimer",
+          description: "Ce type de consultation est utilisé par des créneaux existants. Vous ne pouvez pas le supprimer.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Si non utilisé, procéder à la suppression
       const { error } = await supabase
         .from('consultation_types')
         .delete()
