@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { UserX, Trash2 } from "lucide-react";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogPortal } from "@/components/ui/alert-dialog";
 
 interface StatusActionsProps {
   appointment: any;
@@ -177,50 +177,54 @@ export const StatusActions = ({ appointment, onUpdateStatus, onDeleteBooking, on
       </div>
 
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-            <AlertDialogDescription>
-              Êtes-vous sûr de vouloir supprimer définitivement ce rendez-vous ? 
-              Cette action est irréversible et le rendez-vous sera supprimé du planning.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancelDelete} disabled={isUpdating}>
-              Annuler
-            </AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleConfirmDelete}
-              disabled={isUpdating}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Supprimer définitivement
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
+        <AlertDialogPortal>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+              <AlertDialogDescription>
+                Êtes-vous sûr de vouloir supprimer définitivement ce rendez-vous ? 
+                Cette action est irréversible et le rendez-vous sera supprimé du planning.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={handleCancelDelete} disabled={isUpdating}>
+                Annuler
+              </AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleConfirmDelete}
+                disabled={isUpdating}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Supprimer définitivement
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogPortal>
       </AlertDialog>
 
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmer le rendez-vous</AlertDialogTitle>
-            <AlertDialogDescription>
-              Confirmez-vous ce rendez-vous en ligne ? Un email de confirmation sera automatiquement envoyé au client.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancelConfirmation} disabled={isUpdating}>
-              Annuler
-            </AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleConfirmConfirmation}
-              disabled={isUpdating}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              Valider la confirmation
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
+        <AlertDialogPortal>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmer le rendez-vous</AlertDialogTitle>
+              <AlertDialogDescription>
+                Confirmez-vous ce rendez-vous en ligne ? Un email de confirmation sera automatiquement envoyé au client.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={handleCancelConfirmation} disabled={isUpdating}>
+                Annuler
+              </AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleConfirmConfirmation}
+                disabled={isUpdating}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                Valider la confirmation
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogPortal>
       </AlertDialog>
     </div>
     </>
