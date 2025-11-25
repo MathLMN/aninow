@@ -85,11 +85,11 @@ export const usePublicClinicSettings = () => {
         setIsLoading(true);
         console.log('🔍 Fetching public clinic settings for clinic:', currentClinic.id);
 
+        // With unique constraint, we expect exactly one record per clinic
         const { data, error } = await supabase
           .from('clinic_settings')
           .select('*')
           .eq('clinic_id', currentClinic.id)
-          .limit(1)
           .maybeSingle();
 
         if (error) {

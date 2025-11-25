@@ -152,11 +152,11 @@ export const useClinicSettings = () => {
       setHasAttemptedFetch(true);
       console.log('🔍 Fetching clinic settings for clinic:', currentClinicId);
       
+      // With unique constraint, we expect exactly one record per clinic
       const { data, error } = await supabase
         .from('clinic_settings')
         .select('*')
         .eq('clinic_id', currentClinicId)
-        .limit(1)
         .maybeSingle();
 
       if (error) {
@@ -243,11 +243,11 @@ export const useClinicSettings = () => {
       
       console.log('📤 Data to save to database:', dataToUpdate);
       
+      // Check if settings already exist for this clinic
       const { data: existingData, error: fetchError } = await supabase
         .from('clinic_settings')
         .select('id')
         .eq('clinic_id', currentClinicId)
-        .limit(1)
         .maybeSingle();
 
       if (fetchError) {
