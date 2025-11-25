@@ -568,6 +568,159 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
     }
   };
 
+  // Nouvelle fonction pour créer avec email de confirmation
+  const handleSubmitWithConfirmation = async (): Promise<boolean> => {
+    // Validation des champs obligatoires
+    const errors: Record<string, boolean> = {};
+    
+    if (!formData.veterinarianId) {
+      errors.veterinarianId = true;
+    }
+    
+    if (!formData.consultationTypeIds || formData.consultationTypeIds.length === 0) {
+      errors.consultationTypeIds = true;
+    }
+    
+    if (!formData.duration || formData.duration < 5) {
+      errors.duration = true;
+    }
+    
+    // Si des erreurs, afficher les bordures rouges et ne pas soumettre
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      toast({
+        title: "Champs obligatoires manquants",
+        description: "Veuillez remplir tous les champs obligatoires",
+        variant: "destructive",
+        duration: 10000
+      });
+      return false;
+    }
+    
+    // Réinitialiser les erreurs si tout est valide
+    setValidationErrors({});
+    
+    if (!currentClinicId) {
+      toast({
+        title: "Erreur",
+        description: "Aucune clinique sélectionnée",
+        variant: "destructive"
+      });
+      return false;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      const appointmentData = {
+        clinic_id: currentClinicId,
+        animal_name: formData.animalName,
+        animal_species: formData.animalSpecies,
+        animal_breed: formData.isNoBreed ? 'no-breed' : (formData.animalBreed || null),
+        animal_age: formData.animalAge || null,
+        animal_weight: formData.animalWeight || null,
+        animal_sex: formData.animalSex || null,
+        animal_sterilized: formData.animalSterilized || null,
+        animal_vaccines_up_to_date: formData.animalVaccinesUpToDate || null,
+        client_name: formData.clientName,
+        client_email: formData.clientEmail,
+        client_phone: formData.clientPhoneCountryCode + formData.clientPhone,
+        preferred_contact_method: 'phone',
+        client_status: formData.clientStatus,
+        consultation_reason: formData.consultationReason,
+        client_comment: formData.clientComment || null,
+        appointment_date: formData.appointmentDate,
+        appointment_time: formData.appointmentTime,
+        appointment_end_time: formData.appointmentEndTime,
+        veterinarian_id: formData.veterinarianId || null,
+        consultation_type_id: formData.consultationTypeIds?.[0] || null,
+        duration_minutes: formData.duration,
+        arrival_time: formData.arrival_time || null,
+        booking_source: formData.booking_source,
+        status: 'pending', // Créer d'abord avec status pending
+        selected_symptoms: [],
+        convenience_options: [],
+        multiple_animals: [],
+        custom_species: null,
+        second_animal_species: null,
+        second_animal_name: null,
+        second_custom_species: null,
+        vaccination_type: null,
+        custom_text: null,
+        custom_symptom: null,
+        second_animal_different_reason: false,
+        second_animal_consultation_reason: null,
+        second_animal_convenience_options: [],
+        second_animal_custom_text: null,
+        second_animal_selected_symptoms: [],
+        second_animal_custom_symptom: null,
+        conditional_answers: null,
+        symptom_duration: null,
+        additional_points: [],
+        second_animal_age: null,
+        second_animal_breed: null,
+        second_animal_weight: null,
+        second_animal_sex: null,
+        second_animal_sterilized: null,
+        second_animal_vaccines_up_to_date: null,
+        ai_analysis: null,
+        urgency_score: null,
+        recommended_actions: [],
+        is_blocked: false
+      };
+
+      console.log('📤 Creating appointment with pending status:', appointmentData);
+
+      // Étape 1: Créer le rendez-vous avec status pending
+      const { data: createdData, error: createError } = await supabase
+        .from('bookings')
+        .insert([appointmentData])
+        .select()
+        .single();
+
+      if (createError) {
+        console.error('❌ Error creating appointment:', createError);
+        throw createError;
+      }
+
+      console.log('✅ Appointment created with pending status:', createdData);
+
+      // Étape 2: Mettre à jour immédiatement le statut en confirmed (ce qui déclenchera le trigger d'email)
+      const { error: updateError } = await supabase
+        .from('bookings')
+        .update({ status: 'confirmed' })
+        .eq('id', createdData.id);
+
+      if (updateError) {
+        console.error('❌ Error confirming appointment:', updateError);
+        throw updateError;
+      }
+
+      console.log('✅ Appointment confirmed (email trigger activated):', createdData.id);
+
+      toast({
+        title: "Rendez-vous créé",
+        description: formData.clientEmail 
+          ? `Le rendez-vous pour ${formData.animalName} a été créé avec succès. Un email de confirmation a été envoyé au client.`
+          : `Le rendez-vous pour ${formData.animalName} a été créé avec succès.`,
+      });
+
+      onClose();
+      return true;
+      
+    } catch (error: any) {
+      console.error('❌ Error in handleSubmitWithConfirmation:', error);
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible de créer le rendez-vous",
+        variant: "destructive"
+      });
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return {
     formData,
     isSubmitting,
@@ -575,6 +728,7 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
     updateField,
     handleConsultationTypesChange,
     handleSubmit,
+    handleSubmitWithConfirmation,
     calculateEndTime,
     initializeFormData,
     handleTimeChange,
