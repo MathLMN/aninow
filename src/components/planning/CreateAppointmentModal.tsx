@@ -54,6 +54,7 @@ export const CreateAppointmentModal = ({
   const { updateBookingStatus, moveAppointment, deleteBooking, isLoading: isDeletingBooking } = usePlanningActions();
   const { toast } = useToast();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   // Initialize form data when modal opens
   useEffect(() => {
@@ -152,10 +153,10 @@ export const CreateAppointmentModal = ({
            (appointmentToEdit.status === 'confirmed' || appointmentToEdit.status === 'pending');
   };
 
-  // Handle status update
-  const handleStatusUpdate = async (newStatus: string) => {
-    // Vérifier les champs obligatoires avant de confirmer
-    if (newStatus === 'confirmed' && !validateRequiredFields()) {
+  // Handle confirm click - opens dialog for online bookings
+  const handleConfirmClick = () => {
+    // Vérifier les champs obligatoires avant d'ouvrir le popup
+    if (!validateRequiredFields()) {
       toast({
         title: "Champs obligatoires manquants",
         description: "Veuillez remplir tous les champs obligatoires (marqués avec *) avant de confirmer le rendez-vous.",
@@ -165,9 +166,15 @@ export const CreateAppointmentModal = ({
       return;
     }
     
+    // Ouvrir le popup de confirmation
+    setShowConfirmDialog(true);
+  };
+
+  // Handle confirm confirmation - actually confirms the appointment
+  const handleConfirmConfirmation = async () => {
     if (appointmentToEdit?.id) {
       // Si on confirme le RDV et qu'il y a des changements, sauvegarder d'abord les modifications
-      if (newStatus === 'confirmed' && hasChanges()) {
+      if (hasChanges()) {
         console.log('💾 Saving changes before confirming...');
         // Créer un faux événement pour handleSubmit
         const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
@@ -175,6 +182,24 @@ export const CreateAppointmentModal = ({
       }
       
       // Ensuite mettre à jour le statut
+      const success = await updateBookingStatus(appointmentToEdit.id, 'confirmed');
+      if (success) {
+        setShowConfirmDialog(false);
+        onClose();
+        if (onRefreshPlanning) {
+          onRefreshPlanning();
+        }
+      }
+    }
+  };
+
+  const handleCancelConfirmation = () => {
+    setShowConfirmDialog(false);
+  };
+
+  // Handle status update for other statuses (not confirmed)
+  const handleStatusUpdate = async (newStatus: string) => {
+    if (appointmentToEdit?.id) {
       const success = await updateBookingStatus(appointmentToEdit.id, newStatus);
       if (success) {
         onClose();
@@ -362,7 +387,7 @@ export const CreateAppointmentModal = ({
                   {appointmentToEdit.status !== 'confirmed' && (
                     <Button
                       type="button"
-                      onClick={() => handleStatusUpdate('confirmed')}
+                      onClick={handleConfirmClick}
                       disabled={isDeletingBooking || !validateRequiredFields()}
                       className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs h-8 disabled:opacity-50"
                     >
@@ -437,6 +462,29 @@ export const CreateAppointmentModal = ({
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
                 Supprimer définitivement
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmer le rendez-vous</AlertDialogTitle>
+              <AlertDialogDescription>
+                Confirmez-vous ce rendez-vous en ligne ? Un email de confirmation sera automatiquement envoyé au client.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={handleCancelConfirmation} disabled={isDeletingBooking}>
+                Annuler
+              </AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleConfirmConfirmation}
+                disabled={isDeletingBooking}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                Valider la confirmation
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
