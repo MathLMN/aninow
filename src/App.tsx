@@ -10,6 +10,9 @@ import LandingPage from '@/pages/LandingPage';
 import PricingPage from '@/pages/PricingPage';
 import ContactPage from '@/pages/ContactPage';
 import FeaturesPage from '@/pages/FeaturesPage';
+import MentionsLegales from '@/pages/MentionsLegales';
+import CGU from '@/pages/CGU';
+import PolitiqueConfidentialite from '@/pages/PolitiqueConfidentialite';
 
 // Booking Pages
 import BookingStart from '@/pages/public/BookingStart';
@@ -48,6 +51,9 @@ function App() {
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/features" element={<FeaturesPage />} />
+            <Route path="/mentions-legales" element={<MentionsLegales />} />
+            <Route path="/cgu" element={<CGU />} />
+            <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
             
             {/* Legacy Booking Routes (redirect or fallback) */}
             <Route path="/booking" element={<BookingStart />} />

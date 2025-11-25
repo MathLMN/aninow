@@ -3,8 +3,8 @@ import Header from "@/components/Header";
 import HeroSection from "@/components/landing/HeroSection";
 import BenefitsSection from "@/components/landing/BenefitsSection";
 import HowItWorksSection from "@/components/landing/HowItWorksSection";
-import ArticlesSection from "@/components/landing/ArticlesSection";
 import CTASection from "@/components/landing/CTASection";
+import Footer from "@/components/Footer";
 
 const LandingPage = () => {
   return (
@@ -14,9 +14,9 @@ const LandingPage = () => {
         <HeroSection />
         <BenefitsSection />
         <HowItWorksSection />
-        <ArticlesSection />
         <CTASection />
       </main>
+      <Footer />
     </div>
   );
 };
