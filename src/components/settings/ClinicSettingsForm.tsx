@@ -104,7 +104,8 @@ const SPECIALTY_OPTIONS = [
   "Ophtalmologie", 
   "Dermatologie",
   "Chirurgie",
-  "Imagerie médicale"
+  "Imagerie médicale",
+  "Autre"
 ];
 
 const DAYS_OF_WEEK = [
@@ -156,6 +157,7 @@ export const ClinicSettingsForm = () => {
     is_active: true
   });
   const [editingVeterinarian, setEditingVeterinarian] = useState<Veterinarian | null>(null);
+  const [customSpecialty, setCustomSpecialty] = useState('');
   const [openVeterinarianSchedules, setOpenVeterinarianSchedules] = useState<Set<string>>(new Set());
   const [isClinicScheduleOpen, setIsClinicScheduleOpen] = useState(false);
   const [tempDailySchedules, setTempDailySchedules] = useState(getDefaultDailySchedules());
@@ -291,7 +293,11 @@ export const ClinicSettingsForm = () => {
 
   const handleVeterinarianSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newVeterinarian.name.trim() || newVeterinarian.name.trim() === 'Dr.' || !newVeterinarian.specialty.trim()) {
+    
+    // Déterminer la spécialité finale
+    const finalSpecialty = newVeterinarian.specialty === 'Autre' ? customSpecialty : newVeterinarian.specialty;
+    
+    if (!newVeterinarian.name.trim() || newVeterinarian.name.trim() === 'Dr.' || !finalSpecialty.trim()) {
       toast({
         title: "Erreur",
         description: "Veuillez remplir tous les champs obligatoires",
@@ -302,11 +308,11 @@ export const ClinicSettingsForm = () => {
 
     const success = await (editingVeterinarian ? updateVeterinarian(editingVeterinarian.id, {
       name: newVeterinarian.name,
-      specialty: newVeterinarian.specialty,
+      specialty: finalSpecialty,
       is_active: newVeterinarian.is_active
     }) : addVeterinarian({
       name: newVeterinarian.name,
-      specialty: newVeterinarian.specialty,
+      specialty: finalSpecialty,
       is_active: newVeterinarian.is_active
     }));
 
@@ -317,6 +323,7 @@ export const ClinicSettingsForm = () => {
         specialty: '',
         is_active: true
       });
+      setCustomSpecialty('');
       setEditingVeterinarian(null);
     }
   };
@@ -1146,6 +1153,7 @@ export const ClinicSettingsForm = () => {
                       specialty: '',
                       is_active: true
                     });
+                    setCustomSpecialty('');
                   }}
                   className="bg-vet-blue hover:bg-vet-blue/90 text-white"
                 >
@@ -1181,10 +1189,15 @@ export const ClinicSettingsForm = () => {
                       <Label htmlFor="vet-specialty">Spécialité *</Label>
                       <Select
                         value={newVeterinarian.specialty}
-                        onValueChange={(value) => setNewVeterinarian(prev => ({
-                          ...prev,
-                          specialty: value
-                        }))}
+                        onValueChange={(value) => {
+                          setNewVeterinarian(prev => ({
+                            ...prev,
+                            specialty: value
+                          }));
+                          if (value !== 'Autre') {
+                            setCustomSpecialty('');
+                          }
+                        }}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionnez une spécialité" />
@@ -1197,6 +1210,17 @@ export const ClinicSettingsForm = () => {
                           ))}
                         </SelectContent>
                       </Select>
+                      {newVeterinarian.specialty === 'Autre' && (
+                        <div className="mt-2">
+                          <Input
+                            id="custom-specialty"
+                            value={customSpecialty}
+                            onChange={(e) => setCustomSpecialty(e.target.value)}
+                            placeholder="Précisez la spécialité"
+                            required
+                          />
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center space-x-2">
                       <Switch
@@ -1263,11 +1287,13 @@ export const ClinicSettingsForm = () => {
                         variant="outline"
                         onClick={() => {
                           setEditingVeterinarian(vet);
+                          const isCustomSpecialty = vet.specialty && !SPECIALTY_OPTIONS.slice(0, -1).includes(vet.specialty);
                           setNewVeterinarian({
                             name: vet.name,
-                            specialty: vet.specialty || '',
+                            specialty: isCustomSpecialty ? 'Autre' : (vet.specialty || ''),
                             is_active: vet.is_active
                           });
+                          setCustomSpecialty(isCustomSpecialty ? vet.specialty : '');
                           setIsVetDialogOpen(true);
                         }}
                       >
