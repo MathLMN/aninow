@@ -167,33 +167,33 @@ export const useClinicVeterinarians = () => {
 
   const deleteVeterinarianMutation = useMutation({
     mutationFn: async (id: string) => {
-      console.log('🔄 Deleting veterinarian:', id);
+      console.log('🔄 Deactivating veterinarian:', id);
       
       const { error } = await supabase
         .from('clinic_veterinarians')
-        .delete()
+        .update({ is_active: false })
         .eq('id', id);
 
       if (error) {
-        console.error('❌ Error deleting veterinarian:', error);
+        console.error('❌ Error deactivating veterinarian:', error);
         throw error;
       }
 
-      console.log('✅ Veterinarian deleted');
+      console.log('✅ Veterinarian deactivated');
       return id;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clinic-veterinarians'] });
       toast({
-        title: "Vétérinaire supprimé",
-        description: "Le vétérinaire a été supprimé avec succès",
+        title: "Vétérinaire désactivé",
+        description: "Le vétérinaire a été désactivé avec succès",
       });
     },
     onError: (error: any) => {
-      console.error('❌ Failed to delete veterinarian:', error);
+      console.error('❌ Failed to deactivate veterinarian:', error);
       toast({
         title: "Erreur",
-        description: "Impossible de supprimer le vétérinaire",
+        description: "Impossible de désactiver le vétérinaire",
         variant: "destructive",
       });
     },
