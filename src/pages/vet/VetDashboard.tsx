@@ -107,9 +107,10 @@ const VetDashboard = () => {
     ? Math.round((dayStats.confirmed / (dayStats.total - dayStats.cancelled)) * 100) 
     : 0;
   
-  // Score d'urgence moyen pour le jour
-  const avgUrgencyScore = todayBookingsForStats.length > 0
-    ? Math.round(todayBookingsForStats.reduce((sum, b) => sum + (b.urgency_score || 0), 0) / todayBookingsForStats.length)
+  // Score d'urgence moyen pour le jour (uniquement sur les RDV avec score)
+  const bookingsWithScore = todayBookingsForStats.filter(b => b.urgency_score != null);
+  const avgUrgencyScore = bookingsWithScore.length > 0
+    ? Math.round(bookingsWithScore.reduce((sum, b) => sum + (b.urgency_score || 0), 0) / bookingsWithScore.length)
     : 0;
 
   // Taux de présence et d'absentéisme pour le jour
@@ -126,8 +127,9 @@ const VetDashboard = () => {
     ? Math.round((monthStats.confirmed / (monthStats.total - monthStats.cancelled)) * 100) 
     : 0;
   
-  const monthAvgUrgencyScore = monthBookings.length > 0
-    ? Math.round(monthBookings.reduce((sum, b) => sum + (b.urgency_score || 0), 0) / monthBookings.length)
+  const monthBookingsWithScore = monthBookings.filter(b => b.urgency_score != null);
+  const monthAvgUrgencyScore = monthBookingsWithScore.length > 0
+    ? Math.round(monthBookingsWithScore.reduce((sum, b) => sum + (b.urgency_score || 0), 0) / monthBookingsWithScore.length)
     : 0;
 
   const monthTotalAttendable = monthStats.confirmed + monthStats.noShow + monthStats.completed;
@@ -152,6 +154,7 @@ const VetDashboard = () => {
     emergency: dayStats.emergencyBookings,
     confirmationRate,
     avgUrgencyScore,
+    bookingsWithScoreCount: bookingsWithScore.length,
     presenceRate,
     absenteeismRate
   } : {
@@ -167,6 +170,7 @@ const VetDashboard = () => {
     emergency: monthStats.emergencyBookings,
     confirmationRate: monthConfirmationRate,
     avgUrgencyScore: monthAvgUrgencyScore,
+    bookingsWithScoreCount: monthBookingsWithScore.length,
     presenceRate: monthPresenceRate,
     absenteeismRate: monthAbsenteeismRate
   };
@@ -407,15 +411,21 @@ const VetDashboard = () => {
                 </div>
                 <div className="p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
                   <div className="text-xs text-blue-700 font-medium">Urgence moyenne</div>
-                  <div className="text-2xl font-bold text-blue-800 mt-1">{displayStats.avgUrgencyScore}/10</div>
+                  <div className="text-2xl font-bold text-blue-800 mt-1">
+                    {displayStats.bookingsWithScoreCount > 0 ? `${displayStats.avgUrgencyScore}/10` : 'N/A'}
+                  </div>
                   <div className="text-xs text-blue-600 mt-1">
-                    Score moyen sur {viewMode === 'day' ? bookings.length : monthBookings.length} RDV
+                    {displayStats.bookingsWithScoreCount > 0 
+                      ? `Score moyen sur ${displayStats.bookingsWithScoreCount} RDV` 
+                      : 'Aucun RDV avec score d\'urgence'}
                   </div>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
                   <div className="text-xs text-purple-700 font-medium">Urgences élevées</div>
                   <div className="text-2xl font-bold text-purple-800 mt-1">
-                    {displayStats.total > 0 ? Math.round((displayStats.highUrgency / displayStats.total) * 100) : 0}%
+                    {displayStats.bookingsWithScoreCount > 0 
+                      ? Math.round((displayStats.highUrgency / displayStats.bookingsWithScoreCount) * 100) 
+                      : 0}%
                   </div>
                   <div className="text-xs text-purple-600 mt-1">
                     {displayStats.highUrgency} RDV avec score ≥ 7
