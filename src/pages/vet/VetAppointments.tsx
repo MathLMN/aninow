@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,19 +6,30 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Users, Search, Calendar, AlertTriangle, Clock, Phone, Mail, Globe, ChevronLeft, ChevronRight, ArrowUpDown, Flame, Camera } from "lucide-react";
 import { useVetBookings } from "@/hooks/useVetBookings";
-import { format, addDays, subDays, isSameDay, parseISO } from "date-fns";
+import { format, addDays, subDays, isSameDay, parseISO, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { PhotoGallery, PhotoGalleryRef } from "@/components/planning/appointment-details/PhotoGallery";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogPortal } from "@/components/ui/alert-dialog";
+import { useSearchParams } from "react-router-dom";
 
 const VetAppointments = () => {
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [urgencyFilter, setUrgencyFilter] = useState<'all' | 'critical' | 'high' | 'medium' | 'low'>('all');
   const [sortBy, setSortBy] = useState<'urgency' | 'date'>('urgency');
   const [bookingToConfirm, setBookingToConfirm] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("pending");
   const { bookings, isLoading, updateBookingStatus } = useVetBookings();
   const photoGalleryRefs = useRef<{ [key: string]: PhotoGalleryRef | null }>({});
+
+  // Gérer l'ouverture de l'onglet via l'URL
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'all-pending') {
+      setActiveTab('all-pending');
+    }
+  }, [searchParams]);
 
   const goToPreviousDay = () => {
     setSelectedDate(prev => subDays(prev, 1));
@@ -158,6 +169,32 @@ const VetAppointments = () => {
     bookingsForSelectedDate.filter((booking) => booking.status === 'confirmed')
   );
 
+  // Tous les bookings pending (peu importe la date de création)
+  const allPendingBookings = sortBookings(
+    onlineBookings.filter((booking) => {
+      const matchesSearch = 
+        booking.animal_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        booking.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        booking.client_phone.includes(searchTerm);
+      
+      // Filtrer par niveau d'urgence
+      let matchesUrgency = true;
+      const urgencyScore = booking.urgency_score || 0;
+      
+      if (urgencyFilter === 'critical') {
+        matchesUrgency = urgencyScore >= 8;
+      } else if (urgencyFilter === 'high') {
+        matchesUrgency = urgencyScore >= 6 && urgencyScore < 8;
+      } else if (urgencyFilter === 'medium') {
+        matchesUrgency = urgencyScore >= 4 && urgencyScore < 6;
+      } else if (urgencyFilter === 'low') {
+        matchesUrgency = urgencyScore < 4;
+      }
+      
+      return booking.status === 'pending' && matchesSearch && matchesUrgency;
+    })
+  );
+
   const handleStatusChange = (bookingId: string, newStatus: 'pending' | 'confirmed' | 'cancelled' | 'completed') => {
     if (newStatus === 'confirmed') {
       setBookingToConfirm(bookingId);
@@ -182,6 +219,35 @@ const VetAppointments = () => {
     return analysis && typeof analysis === 'object' && typeof analysis.analysis_summary === 'string';
   };
 
+  // Fonction pour obtenir le badge de date relative
+  const getDateBadge = (createdAt: string) => {
+    const today = new Date();
+    const createdDate = new Date(createdAt);
+    const daysDiff = differenceInDays(today, createdDate);
+
+    if (daysDiff === 0) {
+      return {
+        text: "Aujourd'hui",
+        className: "bg-green-100 text-green-800 border-green-300"
+      };
+    } else if (daysDiff === 1) {
+      return {
+        text: "Hier",
+        className: "bg-yellow-100 text-yellow-800 border-yellow-300"
+      };
+    } else if (daysDiff === 2) {
+      return {
+        text: "Il y a 2 jours",
+        className: "bg-orange-100 text-orange-800 border-orange-300"
+      };
+    } else {
+      return {
+        text: `Il y a ${daysDiff} jours`,
+        className: "bg-red-100 text-red-800 border-red-300"
+      };
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto py-6 space-y-6">
@@ -193,7 +259,7 @@ const VetAppointments = () => {
     );
   }
 
-  const renderBookingsList = (bookingsList: typeof bookingsForSelectedDate, emptyMessage: string) => {
+  const renderBookingsList = (bookingsList: typeof bookingsForSelectedDate, emptyMessage: string, showDateBadge: boolean = false) => {
     return (
       <div className="space-y-3">
         {bookingsList.map((booking) => {
@@ -225,8 +291,8 @@ const VetAppointments = () => {
                 <span className="text-[9px] opacity-90">URGENCE</span>
               </div>
               
-              {/* Date de réservation */}
-              <div className="text-xs text-vet-brown/70 flex items-center gap-1">
+              {/* Date de réservation avec badge si demandé */}
+              <div className="text-xs text-vet-brown/70 flex items-center gap-2">
                 <Clock className="h-3 w-3" />
                 Réservé le {new Date(booking.created_at).toLocaleDateString('fr-FR', { 
                   day: '2-digit', 
@@ -234,6 +300,14 @@ const VetAppointments = () => {
                   hour: '2-digit',
                   minute: '2-digit'
                 })}
+                {showDateBadge && (() => {
+                  const badge = getDateBadge(booking.created_at);
+                  return (
+                    <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full border ${badge.className}`}>
+                      {badge.text}
+                    </span>
+                  );
+                })()}
               </div>
               
               {booking.urgency_score && booking.urgency_score >= 8 && (
@@ -595,16 +669,30 @@ const VetAppointments = () => {
       {/* Onglets des réservations */}
       <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
         <CardContent className="p-0">
-          <Tabs defaultValue="pending" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="border-b border-vet-blue/20 px-6">
               <TabsList className="bg-transparent h-auto p-0">
+                <TabsTrigger 
+                  value="all-pending" 
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-vet-sage rounded-none px-6 py-3"
+                >
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span>Tous à confirmer</span>
+                    {allPendingBookings.length > 0 && (
+                      <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse">
+                        {allPendingBookings.length}
+                      </span>
+                    )}
+                  </div>
+                </TabsTrigger>
                 <TabsTrigger 
                   value="pending" 
                   className="data-[state=active]:border-b-2 data-[state=active]:border-vet-sage rounded-none px-6 py-3"
                 >
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4" />
-                    <span>À confirmer</span>
+                    <span>À confirmer (jour sélectionné)</span>
                     {pendingBookings.length > 0 && (
                       <span className="ml-2 bg-yellow-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                         {pendingBookings.length}
@@ -628,6 +716,10 @@ const VetAppointments = () => {
                 </TabsTrigger>
               </TabsList>
             </div>
+
+            <TabsContent value="all-pending" className="p-6 m-0">
+              {renderBookingsList(allPendingBookings, "Aucune réservation à confirmer", true)}
+            </TabsContent>
 
             <TabsContent value="pending" className="p-6 m-0">
               {renderBookingsList(pendingBookings, "Aucune réservation à confirmer pour cette date")}

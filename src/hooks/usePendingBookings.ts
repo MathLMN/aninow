@@ -26,15 +26,8 @@ export const usePendingBookings = () => {
 
       setPendingBookings(data || []);
       
-      // Compter les rendez-vous non lus (créés dans les dernières 24h)
-      const oneDayAgo = new Date();
-      oneDayAgo.setDate(oneDayAgo.getDate() - 1);
-      
-      const unreadBookings = data?.filter(booking => 
-        new Date(booking.created_at) > oneDayAgo
-      ) || [];
-      
-      setUnreadCount(unreadBookings.length);
+      // Compter tous les rendez-vous en attente
+      setUnreadCount(data?.length || 0);
       
     } catch (err) {
       console.error('Erreur lors du chargement des réservations en attente:', err);
