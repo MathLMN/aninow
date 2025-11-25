@@ -10,7 +10,7 @@ export const PendingBookingsNotification = () => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate('/vet/appointments');
+    navigate('/vet/appointments?tab=all-pending');
   };
 
   if (isLoading) return null;
