@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,6 +17,7 @@ export interface ConvenienceOption {
   color: string;
   isActive: boolean;
   isOther?: boolean;
+  helpMessage?: string;
 }
 
 interface ConvenienceOptionsManagerProps {
@@ -48,7 +50,8 @@ export const ConvenienceOptionsManager: React.FC<ConvenienceOptionsManagerProps>
     label: '',
     color: COLOR_PALETTE[0].classes,
     isActive: true,
-    isOther: false
+    isOther: false,
+    helpMessage: ''
   });
 
   const handleToggleActive = (value: string) => {
@@ -73,7 +76,8 @@ export const ConvenienceOptionsManager: React.FC<ConvenienceOptionsManagerProps>
       label: option.label,
       color: option.color,
       isActive: option.isActive,
-      isOther: false
+      isOther: false,
+      helpMessage: option.helpMessage || ''
     });
     setIsDialogOpen(true);
   };
@@ -85,7 +89,8 @@ export const ConvenienceOptionsManager: React.FC<ConvenienceOptionsManagerProps>
       label: '',
       color: COLOR_PALETTE[0].classes,
       isActive: true,
-      isOther: false
+      isOther: false,
+      helpMessage: ''
     });
     setIsDialogOpen(true);
   };
@@ -112,7 +117,7 @@ export const ConvenienceOptionsManager: React.FC<ConvenienceOptionsManagerProps>
       // Modification
       const updatedOptions = options.map(opt =>
         opt.value === editingOption.value
-          ? { ...opt, label: newOption.label!, color: newOption.color! }
+          ? { ...opt, label: newOption.label!, color: newOption.color!, helpMessage: newOption.helpMessage || undefined }
           : opt
       );
       onOptionsChange(updatedOptions);
@@ -137,7 +142,8 @@ export const ConvenienceOptionsManager: React.FC<ConvenienceOptionsManagerProps>
         label: newOption.label!,
         color: newOption.color!,
         isActive: true,
-        isOther: false
+        isOther: false,
+        helpMessage: newOption.helpMessage || undefined
       };
 
       // Insérer avant l'option "Autre"
@@ -333,6 +339,21 @@ export const ConvenienceOptionsManager: React.FC<ConvenienceOptionsManagerProps>
                   value={newOption.label || ''}
                   onChange={(e) => setNewOption({ ...newOption, label: e.target.value })}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="helpMessage">Message explicatif (optionnel)</Label>
+                <Textarea
+                  id="helpMessage"
+                  placeholder="Ex: Il s'agit du rendez-vous de préparation. La chirurgie sera programmée lors de ce rendez-vous avec le vétérinaire."
+                  value={newOption.helpMessage || ''}
+                  onChange={(e) => setNewOption({ ...newOption, helpMessage: e.target.value })}
+                  rows={3}
+                  className="resize-none"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Ce message s'affichera automatiquement au client lorsqu'il sélectionne cette option
+                </p>
               </div>
 
               <div className="space-y-2">
