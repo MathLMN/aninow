@@ -43,6 +43,7 @@ export const CreateAppointmentModal = ({
     updateField,
     handleConsultationTypesChange,
     handleSubmit,
+    handleSubmitWithConfirmation,
     calculateEndTime,
     initializeFormData,
     handleTimeChange,
@@ -55,6 +56,7 @@ export const CreateAppointmentModal = ({
   const { toast } = useToast();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showCreateConfirmDialog, setShowCreateConfirmDialog] = useState(false);
 
   // Initialize form data when modal opens
   useEffect(() => {
@@ -233,6 +235,38 @@ export const CreateAppointmentModal = ({
 
   const handleCancelDelete = () => {
     setShowDeleteConfirm(false);
+  };
+
+  // Handle create click - opens dialog for manual bookings
+  const handleCreateClick = () => {
+    // Vérifier les champs obligatoires avant d'ouvrir le popup
+    if (!validateRequiredFields()) {
+      toast({
+        title: "Champs obligatoires manquants",
+        description: "Veuillez remplir tous les champs obligatoires (marqués avec *) avant de créer le rendez-vous.",
+        variant: "destructive",
+        duration: 5000
+      });
+      return;
+    }
+    
+    // Ouvrir le popup de confirmation
+    setShowCreateConfirmDialog(true);
+  };
+
+  // Handle create confirmation - actually creates the appointment
+  const handleConfirmCreate = async () => {
+    const success = await handleSubmitWithConfirmation();
+    if (success) {
+      setShowCreateConfirmDialog(false);
+      if (onRefreshPlanning) {
+        onRefreshPlanning();
+      }
+    }
+  };
+
+  const handleCancelCreate = () => {
+    setShowCreateConfirmDialog(false);
   };
 
   // Handle save changes in edit mode
@@ -433,7 +467,8 @@ export const CreateAppointmentModal = ({
               </Button>
             ) : (
               <Button 
-                type="submit" 
+                type="button"
+                onClick={handleCreateClick}
                 disabled={isSubmitting || !validateRequiredFields()}
                 className="bg-vet-sage hover:bg-vet-sage/90 text-white px-3 py-1 text-xs h-8 disabled:opacity-50"
               >
@@ -485,6 +520,39 @@ export const CreateAppointmentModal = ({
                 className="bg-green-600 hover:bg-green-700 text-white"
               >
                 Valider la confirmation
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog open={showCreateConfirmDialog} onOpenChange={setShowCreateConfirmDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Créer le rendez-vous</AlertDialogTitle>
+              <AlertDialogDescription>
+                Créer ce rendez-vous ? 
+                {formData.clientEmail && (
+                  <span className="block mt-2 font-semibold">
+                    Un email de confirmation sera automatiquement envoyé au client à l'adresse : {formData.clientEmail}
+                  </span>
+                )}
+                {!formData.clientEmail && (
+                  <span className="block mt-2 text-muted-foreground">
+                    Aucun email ne sera envoyé (adresse email non renseignée)
+                  </span>
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={handleCancelCreate} disabled={isSubmitting}>
+                Annuler
+              </AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleConfirmCreate}
+                disabled={isSubmitting}
+                className="bg-vet-sage hover:bg-vet-sage/90 text-white"
+              >
+                Valider la création
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
