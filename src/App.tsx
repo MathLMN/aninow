@@ -63,52 +63,52 @@ function App() {
             
             {/* Multi-Tenant Booking Routes */}
             <Route path="/:clinicSlug/booking" element={
-              <ClinicWrapper>
+              <ClinicWrapper requiresOnlineBooking={true}>
                 <BookingStart />
               </ClinicWrapper>
             } />
             <Route path="/:clinicSlug/booking/consultation-reason" element={
-              <ClinicWrapper>
+              <ClinicWrapper requiresOnlineBooking={true}>
                 <ConsultationReason />
               </ClinicWrapper>
             } />
             <Route path="/:clinicSlug/booking/conditional-questions" element={
-              <ClinicWrapper>
+              <ClinicWrapper requiresOnlineBooking={true}>
                 <ConditionalQuestions />
               </ClinicWrapper>
             } />
             <Route path="/:clinicSlug/booking/symptom-duration" element={
-              <ClinicWrapper>
+              <ClinicWrapper requiresOnlineBooking={true}>
                 <SymptomDuration />
               </ClinicWrapper>
             } />
             <Route path="/:clinicSlug/booking/additional-points" element={
-              <ClinicWrapper>
+              <ClinicWrapper requiresOnlineBooking={true}>
                 <AdditionalConsultationPoints />
               </ClinicWrapper>
             } />
             <Route path="/:clinicSlug/booking/animal-info" element={
-              <ClinicWrapper>
+              <ClinicWrapper requiresOnlineBooking={true}>
                 <AnimalInfo />
               </ClinicWrapper>
             } />
             <Route path="/:clinicSlug/booking/client-comment" element={
-              <ClinicWrapper>
+              <ClinicWrapper requiresOnlineBooking={true}>
                 <ClientComment />
               </ClinicWrapper>
             } />
             <Route path="/:clinicSlug/booking/contact-info" element={
-              <ClinicWrapper>
+              <ClinicWrapper requiresOnlineBooking={true}>
                 <ContactInfo />
               </ClinicWrapper>
             } />
             <Route path="/:clinicSlug/booking/appointment-slots" element={
-              <ClinicWrapper>
+              <ClinicWrapper requiresOnlineBooking={true}>
                 <AppointmentSlots />
               </ClinicWrapper>
             } />
             <Route path="/:clinicSlug/booking/confirmation" element={
-              <ClinicWrapper>
+              <ClinicWrapper requiresOnlineBooking={true}>
                 <BookingConfirmation />
               </ClinicWrapper>
             } />

@@ -34,6 +34,7 @@ interface ClinicSettings {
   clinic_address_postal_code?: string;
   clinic_address_country?: string;
   asv_enabled: boolean;
+  online_booking_enabled?: boolean;
   daily_schedules: DailySchedules;
   default_slot_duration_minutes?: number;
   clinic_id?: string;
@@ -92,6 +93,7 @@ export const usePublicClinicSettings = () => {
             ...data,
             daily_schedules: convertToDailySchedules(data.daily_schedules),
             default_slot_duration_minutes: data.default_slot_duration_minutes || 30,
+            online_booking_enabled: data.online_booking_enabled ?? true,
             clinic_phone: data.clinic_phone || '',
             clinic_email: data.clinic_email || '',
             clinic_address_street: data.clinic_address_street || '',

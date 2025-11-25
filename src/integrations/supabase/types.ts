@@ -421,6 +421,7 @@ export type Database = {
           default_slot_duration_minutes: number
           id: string
           minimum_booking_delay_hours: number | null
+          online_booking_enabled: boolean
           updated_at: string
         }
         Insert: {
@@ -438,6 +439,7 @@ export type Database = {
           default_slot_duration_minutes?: number
           id?: string
           minimum_booking_delay_hours?: number | null
+          online_booking_enabled?: boolean
           updated_at?: string
         }
         Update: {
@@ -455,6 +457,7 @@ export type Database = {
           default_slot_duration_minutes?: number
           id?: string
           minimum_booking_delay_hours?: number | null
+          online_booking_enabled?: boolean
           updated_at?: string
         }
         Relationships: [
