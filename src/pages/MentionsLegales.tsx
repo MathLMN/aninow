@@ -9,23 +9,31 @@ const MentionsLegales = () => {
         <h1 className="text-4xl font-bold text-vet-navy mb-8">Mentions légales</h1>
         
         <div className="prose max-w-none space-y-6">
-          <section>
-            <h2 className="text-2xl font-semibold text-vet-navy mb-4">Éditeur du site</h2>
-            <p className="text-vet-brown">
-              <strong>Raison sociale :</strong> [À compléter]<br />
-              <strong>Forme juridique :</strong> [À compléter]<br />
-              <strong>Adresse :</strong> [À compléter]<br />
-              <strong>Téléphone :</strong> [À compléter]<br />
-              <strong>Email :</strong> [À compléter]<br />
-              <strong>SIRET :</strong> [À compléter]<br />
-              <strong>Numéro TVA intracommunautaire :</strong> [À compléter]
-            </p>
-          </section>
+          <p className="text-vet-brown mb-8">
+            Le site AniNow est édité par Mathilde Lammin, micro-entreprise (entrepreneur individuel) 
+            dont le siège social est situé 10 rue Martin Luther King 59250 Halluin, 
+            adresse de courrier électronique : <a href="mailto:contact@aninow.fr" className="text-vet-blue hover:underline">contact@aninow.fr</a>.
+          </p>
 
           <section>
             <h2 className="text-2xl font-semibold text-vet-navy mb-4">Directeur de la publication</h2>
             <p className="text-vet-brown">
-              [Nom du directeur de publication]
+              Le Directeur de la publication des pages gérées par AniNow est : Mathilde Lammin.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold text-vet-navy mb-4">Responsabilité</h2>
+            <p className="text-vet-brown">
+              Chaque utilisateur des services du site AniNow est qualifié d'éditeur concernant ses pages dédiées et informations communiquées.
+            </p>
+            <p className="text-vet-brown mt-4">
+              Chaque professionnel utilisant le service de prise de rendez-vous en ligne de AniNow peut être joint 
+              aux coordonnées renseignées dans son espace personnel.
+            </p>
+            <p className="text-vet-brown mt-4">
+              Chaque professionnel est responsable des données personnelles qu'il collecte lors de la prise de 
+              rendez-vous en ligne et doit se conformer à la loi Informatique et Libertés du 6 janvier 1978 modifiée.
             </p>
           </section>
 
@@ -51,10 +59,10 @@ const MentionsLegales = () => {
             <p className="text-vet-brown">
               Conformément au Règlement Général sur la Protection des Données (RGPD) et à la loi Informatique et Libertés, 
               vous disposez d'un droit d'accès, de rectification, de suppression et d'opposition aux données personnelles vous concernant. 
-              Pour exercer ces droits, veuillez nous contacter à l'adresse : [email de contact].
+              Pour exercer ces droits, veuillez nous contacter à l'adresse : <a href="mailto:contact@aninow.fr" className="text-vet-blue hover:underline">contact@aninow.fr</a>.
             </p>
             <p className="text-vet-brown mt-4">
-              Pour plus d'informations, consultez notre <a href="/politique-confidentialite" className="text-vet-blue hover:underline">Politique de confidentialité</a>.
+              Les présentes CGU sont complétées de la <a href="/politique-confidentialite" className="text-vet-blue hover:underline">Politique relative à la protection des données personnelles</a>.
             </p>
           </section>
 
