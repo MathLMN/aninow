@@ -9,12 +9,14 @@ import { useVetBookings } from "@/hooks/useVetBookings";
 import { format, addDays, subDays, isSameDay, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { PhotoGallery, PhotoGalleryRef } from "@/components/planning/appointment-details/PhotoGallery";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const VetAppointments = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [urgencyFilter, setUrgencyFilter] = useState<'all' | 'critical' | 'high' | 'medium' | 'low'>('all');
   const [sortBy, setSortBy] = useState<'urgency' | 'date'>('urgency');
+  const [bookingToConfirm, setBookingToConfirm] = useState<string | null>(null);
   const { bookings, isLoading, updateBookingStatus } = useVetBookings();
   const photoGalleryRefs = useRef<{ [key: string]: PhotoGalleryRef | null }>({});
 
@@ -157,7 +159,22 @@ const VetAppointments = () => {
   );
 
   const handleStatusChange = (bookingId: string, newStatus: 'pending' | 'confirmed' | 'cancelled' | 'completed') => {
-    updateBookingStatus({ id: bookingId, status: newStatus });
+    if (newStatus === 'confirmed') {
+      setBookingToConfirm(bookingId);
+    } else {
+      updateBookingStatus({ id: bookingId, status: newStatus });
+    }
+  };
+
+  const handleConfirmConfirmation = () => {
+    if (bookingToConfirm) {
+      updateBookingStatus({ id: bookingToConfirm, status: 'confirmed' });
+      setBookingToConfirm(null);
+    }
+  };
+
+  const handleCancelConfirmation = () => {
+    setBookingToConfirm(null);
   };
 
   // Type guard to check if ai_analysis has the expected structure
@@ -622,6 +639,28 @@ const VetAppointments = () => {
           </Tabs>
         </CardContent>
       </Card>
+
+      <AlertDialog open={bookingToConfirm !== null} onOpenChange={(open) => !open && setBookingToConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer le rendez-vous</AlertDialogTitle>
+            <AlertDialogDescription>
+              Confirmez-vous ce rendez-vous en ligne ? Un email de confirmation sera automatiquement envoyé au client.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelConfirmation}>
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmConfirmation}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              Valider la confirmation
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

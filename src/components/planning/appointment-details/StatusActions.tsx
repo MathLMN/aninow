@@ -18,6 +18,7 @@ export const StatusActions = ({ appointment, onUpdateStatus, onDeleteBooking, on
   const [isUpdating, setIsUpdating] = useState(false);
   const [notes, setNotes] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const { toast } = useToast();
 
   const handleStatusUpdate = async (newStatus: string) => {
@@ -98,6 +99,19 @@ export const StatusActions = ({ appointment, onUpdateStatus, onDeleteBooking, on
     setShowDeleteConfirm(false);
   };
 
+  const handleConfirmClick = () => {
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmConfirmation = async () => {
+    setShowConfirmDialog(false);
+    await handleStatusUpdate('confirmed');
+  };
+
+  const handleCancelConfirmation = () => {
+    setShowConfirmDialog(false);
+  };
+
   return (
     <>
     <div className="space-y-4">
@@ -117,7 +131,7 @@ export const StatusActions = ({ appointment, onUpdateStatus, onDeleteBooking, on
         <div className="flex flex-wrap gap-2">
           {appointment.status !== 'confirmed' && (
             <Button
-              onClick={() => handleStatusUpdate('confirmed')}
+              onClick={handleConfirmClick}
               disabled={isUpdating}
               className="bg-green-600 hover:bg-green-700 text-white"
             >
@@ -181,6 +195,29 @@ export const StatusActions = ({ appointment, onUpdateStatus, onDeleteBooking, on
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Supprimer définitivement
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer le rendez-vous</AlertDialogTitle>
+            <AlertDialogDescription>
+              Confirmez-vous ce rendez-vous en ligne ? Un email de confirmation sera automatiquement envoyé au client.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelConfirmation} disabled={isUpdating}>
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmConfirmation}
+              disabled={isUpdating}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              Valider la confirmation
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
