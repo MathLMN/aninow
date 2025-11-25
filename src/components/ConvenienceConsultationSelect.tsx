@@ -2,7 +2,8 @@
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { X } from "lucide-react";
+import { X, Info } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export interface ConvenienceOption {
   value: string;
@@ -10,6 +11,7 @@ export interface ConvenienceOption {
   color: string;
   isActive?: boolean;
   isOther?: boolean;
+  helpMessage?: string;
 }
 
 interface ConvenienceConsultationSelectProps {
@@ -111,6 +113,21 @@ const ConvenienceConsultationSelect: React.FC<ConvenienceConsultationSelectProps
           })}
         </div>
       )}
+
+      {/* Help messages for selected options */}
+      {selectedOptions.map((selectedValue) => {
+        const option = convenienceOptions.find(opt => opt.value === selectedValue);
+        if (!option?.helpMessage) return null;
+        
+        return (
+          <Alert key={`help-${selectedValue}`} className="border-blue-200 bg-blue-50">
+            <Info className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-sm text-blue-900">
+              {option.helpMessage}
+            </AlertDescription>
+          </Alert>
+        );
+      })}
 
       {/* Custom text input for "autre" option */}
       {selectedOptions.includes('autre') && (
