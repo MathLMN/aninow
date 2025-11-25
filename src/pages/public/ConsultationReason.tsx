@@ -13,10 +13,12 @@ import ProgressBar from "@/components/ProgressBar";
 import { useConsultationReason } from "@/hooks/useConsultationReason";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useBookingNavigation } from "@/hooks/useBookingNavigation";
+import { usePublicClinicSettings } from "@/hooks/usePublicClinicSettings";
 
 const ConsultationReason = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { settings: clinicSettings } = usePublicClinicSettings();
   const { navigateBack, navigateNext } = useBookingNavigation();
   
   const {
@@ -106,6 +108,7 @@ const ConsultationReason = () => {
                         onOptionsChange={setConvenienceOptions}
                         customText={customText}
                         onCustomTextChange={setCustomText}
+                        clinicOptions={clinicSettings?.convenience_options_config}
                       />
                     )}
 
@@ -155,6 +158,7 @@ const ConsultationReason = () => {
                   onSecondAnimalCustomSymptomChange={setSecondAnimalCustomSymptom}
                   firstAnimalName={firstAnimalName}
                   secondAnimalName={secondAnimalName}
+                  clinicOptions={clinicSettings?.convenience_options_config}
                 />
               </div>
 

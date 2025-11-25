@@ -17,6 +17,7 @@ import { useVeterinarianSchedules } from "@/hooks/useVeterinarianSchedules";
 import { useClinicAccess } from "@/hooks/useClinicAccess";
 import { VeterinarianAbsenceManager } from "./VeterinarianAbsenceManager";
 import { VeterinarianWeeklySchedule } from "./VeterinarianWeeklySchedule";
+import { ConvenienceOptionsManager } from "./ConvenienceOptionsManager";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -1289,6 +1290,13 @@ export const ClinicSettingsForm = () => {
       </Card>
 
       <VeterinarianAbsenceManager veterinarians={veterinarians.filter(vet => vet.is_active)} />
+      
+      <ConvenienceOptionsManager
+        options={settings?.convenience_options_config || []}
+        onOptionsChange={(newOptions) => {
+          updateSettings({ convenience_options_config: newOptions });
+        }}
+      />
       
       <EmailPreviewModal 
         open={isEmailPreviewOpen}

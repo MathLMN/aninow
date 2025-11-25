@@ -24,6 +24,14 @@ interface DailySchedules {
   sunday: DaySchedule;
 }
 
+export interface ConvenienceOption {
+  value: string;
+  label: string;
+  color: string;
+  isActive: boolean;
+  isOther?: boolean;
+}
+
 interface ClinicSettings {
   id?: string;
   clinic_name: string;
@@ -37,6 +45,7 @@ interface ClinicSettings {
   online_booking_enabled?: boolean;
   daily_schedules: DailySchedules;
   default_slot_duration_minutes?: number;
+  convenience_options_config?: ConvenienceOption[];
   clinic_id?: string;
 }
 
@@ -99,7 +108,8 @@ export const usePublicClinicSettings = () => {
             clinic_address_street: data.clinic_address_street || '',
             clinic_address_city: data.clinic_address_city || '',
             clinic_address_postal_code: data.clinic_address_postal_code || '',
-            clinic_address_country: data.clinic_address_country || 'France'
+            clinic_address_country: data.clinic_address_country || 'France',
+            convenience_options_config: data.convenience_options_config as unknown as ConvenienceOption[] | undefined
           };
           setSettings(settingsData);
         } else {
