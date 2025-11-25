@@ -17,7 +17,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const BookingForm = () => {
   const location = useLocation();
-  const { bookingData, updateBookingData } = useBookingFormData();
+  const { bookingData, updateBookingData, resetBookingData } = useBookingFormData();
   const { navigateNext } = useMultiTenantBookingNavigation();
   const { settings } = usePublicClinicSettings();
   
@@ -36,6 +36,16 @@ const BookingForm = () => {
     handleSecondAnimalNameChange,
     handleVaccinationTypeChange
   } = useBookingFormLogic();
+
+  // Nettoyer automatiquement les données si un rendez-vous a été pris récemment
+  React.useEffect(() => {
+    const lastConfirmation = localStorage.getItem('lastBookingConfirmation');
+    if (lastConfirmation) {
+      console.log('BookingForm - Cleaning previous booking data after successful submission');
+      resetBookingData();
+      localStorage.removeItem('lastBookingConfirmation');
+    }
+  }, [resetBookingData]);
 
   // Initialisation simple une seule fois au montage
   React.useEffect(() => {
