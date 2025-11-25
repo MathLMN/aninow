@@ -202,15 +202,6 @@ export const CreateAppointmentModal = ({
   // Handle status update for other statuses (not confirmed)
   const handleStatusUpdate = async (newStatus: string) => {
     if (appointmentToEdit?.id) {
-      // Si le formulaire a des changements, sauvegarder d'abord les modifications
-      if (hasChanges()) {
-        console.log('💾 Saving changes before updating status...');
-        // Créer un faux événement pour handleSubmit
-        const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
-        await handleSubmit(fakeEvent);
-      }
-      
-      // Ensuite mettre à jour le statut
       const success = await updateBookingStatus(appointmentToEdit.id, newStatus);
       if (success) {
         onClose();
