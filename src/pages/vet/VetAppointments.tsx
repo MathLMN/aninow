@@ -277,19 +277,23 @@ const VetAppointments = () => {
           {/* Header avec urgence et statut */}
           <div className="flex items-center justify-between px-4 py-2 bg-gradient-to-r from-vet-beige/30 to-transparent border-b border-vet-blue/10">
             <div className="flex items-center gap-3">
-              {/* Badge d'urgence */}
-              <div className={`rounded-md px-3 py-1.5 text-xs font-bold min-w-[55px] text-center flex flex-col items-center shadow-sm ${
-                booking.urgency_score && booking.urgency_score >= 8 
-                  ? 'bg-red-500 text-white' 
-                  : booking.urgency_score && booking.urgency_score >= 6
-                  ? 'bg-orange-500 text-white'
-                  : booking.urgency_score && booking.urgency_score >= 4
-                  ? 'bg-yellow-500 text-white'
-                  : 'bg-green-500 text-white'
-              }`}>
-                <span className="text-lg font-bold">{booking.urgency_score || 'N/A'}</span>
-                <span className="text-[9px] opacity-90">URGENCE</span>
-              </div>
+              {/* Badge d'urgence - Toujours affiché */}
+              {booking.booking_source === 'online' && (
+                <div className={`rounded-md px-3 py-1.5 text-xs font-bold min-w-[55px] text-center flex flex-col items-center shadow-sm ${
+                  booking.urgency_score && booking.urgency_score >= 8 
+                    ? 'bg-red-500 text-white' 
+                    : booking.urgency_score && booking.urgency_score >= 6
+                    ? 'bg-orange-500 text-white'
+                    : booking.urgency_score && booking.urgency_score >= 4
+                    ? 'bg-yellow-500 text-white'
+                    : booking.urgency_score
+                    ? 'bg-green-500 text-white'
+                    : 'bg-gray-300 text-gray-600'
+                }`}>
+                  <span className="text-lg font-bold">{booking.urgency_score || 'N/A'}</span>
+                  <span className="text-[9px] opacity-90">URGENCE</span>
+                </div>
+              )}
               
               {/* Date de réservation avec badge si demandé */}
               <div className="text-xs text-vet-brown/70 flex items-center gap-2">
@@ -360,8 +364,8 @@ const VetAppointments = () => {
 
               {/* Colonne 2: Analyse & Symptômes */}
               <div className="lg:col-span-2 space-y-3">
-                {/* Résumé de l'analyse IA */}
-                {booking.ai_analysis && isValidAiAnalysis(booking.ai_analysis) ? (
+                {/* Résumé de l'analyse IA - Toujours affiché si disponible */}
+                {booking.ai_analysis && isValidAiAnalysis(booking.ai_analysis) && (
                   <div className="bg-blue-50/50 border border-blue-200/50 rounded-lg p-3">
                     <div className="flex items-start gap-2">
                       <div className="text-lg">🤖</div>
@@ -373,17 +377,31 @@ const VetAppointments = () => {
                       </div>
                     </div>
                   </div>
-                ) : (
-                  <div className="bg-vet-beige/30 rounded-lg p-3">
-                    <p className="text-sm text-vet-brown">
-                      <span className="font-medium">Motif:</span> {
-                        booking.consultation_reason === 'consultation-convenance' ? 'Consultation de convenance' :
-                        booking.consultation_reason === 'symptomes-anomalie' ? 'Symptômes ou anomalie' :
-                        booking.consultation_reason === 'urgence' ? 'Urgence' : 'Consultation'
-                      }
-                    </p>
-                  </div>
                 )}
+                
+                {/* Motif de consultation - Toujours affiché */}
+                <div className="bg-vet-beige/30 rounded-lg p-3">
+                  <p className="text-sm text-vet-brown">
+                    <span className="font-medium">Motif:</span> {
+                      booking.consultation_reason === 'consultation-convenance' ? 'Consultation de convenance' :
+                      booking.consultation_reason === 'symptomes-anomalie' ? 'Symptômes ou anomalie' :
+                      booking.consultation_reason === 'urgence' ? 'Urgence' : 'Consultation'
+                    }
+                  </p>
+                  {/* Afficher les options de convenance si disponibles */}
+                  {booking.consultation_reason === 'consultation-convenance' && booking.convenience_options && booking.convenience_options.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {booking.convenience_options.map((opt, idx) => (
+                        <span key={idx} className="text-[10px] bg-vet-sage/20 text-vet-sage px-2 py-1 rounded-full border border-vet-sage/30">
+                          {opt}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {booking.custom_text && (
+                    <p className="text-xs text-vet-brown/80 mt-2 italic">{booking.custom_text}</p>
+                  )}
+                </div>
 
                 {/* Symptômes et commentaire */}
                 <div className="flex flex-col gap-2">
