@@ -463,7 +463,8 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
     setIsSubmitting(true);
     
     try {
-      const appointmentData = {
+      // Données de base toujours mises à jour (champs éditables par l'équipe)
+      const baseAppointmentData = {
         clinic_id: currentClinicId,
         animal_name: formData.animalName,
         animal_species: formData.animalSpecies,
@@ -479,7 +480,6 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
         preferred_contact_method: 'phone',
         client_status: formData.clientStatus,
         consultation_reason: formData.consultationReason,
-        client_comment: formData.clientComment || null,
         appointment_date: formData.appointmentDate,
         appointment_time: formData.appointmentTime,
         appointment_end_time: formData.appointmentEndTime,
@@ -489,54 +489,58 @@ export const useAppointmentForm = (onClose: () => void, appointmentId?: string) 
         arrival_time: formData.arrival_time || null,
         booking_source: formData.booking_source,
         status: 'confirmed',
-        selected_symptoms: [],
-        convenience_options: [],
-        multiple_animals: [],
-        custom_species: null,
-        second_animal_species: null,
-        second_animal_name: null,
-        second_custom_species: null,
-        vaccination_type: null,
-        custom_text: null,
-        custom_symptom: null,
-        second_animal_different_reason: false,
-        second_animal_consultation_reason: null,
-        second_animal_convenience_options: [],
-        second_animal_custom_text: null,
-        second_animal_selected_symptoms: [],
-        second_animal_custom_symptom: null,
-        conditional_answers: null,
-        symptom_duration: null,
-        additional_points: [],
-        second_animal_age: null,
-        second_animal_breed: null,
-        second_animal_weight: null,
-        second_animal_sex: null,
-        second_animal_sterilized: null,
-        second_animal_vaccines_up_to_date: null,
-        ai_analysis: null,
-        urgency_score: null,
-        recommended_actions: [],
         is_blocked: false
       };
 
-      console.log('📤 Sending appointment data:', appointmentData);
+      console.log('📤 Sending appointment data:', baseAppointmentData);
 
       let result;
       if (appointmentId) {
-        // Mode édition
+        // Mode édition - NE PAS écraser les données provenant des réservations en ligne
         console.log('✏️ Updating appointment:', appointmentId);
         result = await supabase
           .from('bookings')
-          .update(appointmentData)
+          .update(baseAppointmentData)
           .eq('id', appointmentId)
           .select();
       } else {
-        // Mode création
+        // Mode création - Inclure tous les champs avec valeurs par défaut
         console.log('➕ Creating new appointment');
+        const fullAppointmentData = {
+          ...baseAppointmentData,
+          client_comment: formData.clientComment || null,
+          selected_symptoms: [],
+          convenience_options: [],
+          multiple_animals: [],
+          custom_species: null,
+          second_animal_species: null,
+          second_animal_name: null,
+          second_custom_species: null,
+          vaccination_type: null,
+          custom_text: null,
+          custom_symptom: null,
+          second_animal_different_reason: false,
+          second_animal_consultation_reason: null,
+          second_animal_convenience_options: [],
+          second_animal_custom_text: null,
+          second_animal_selected_symptoms: [],
+          second_animal_custom_symptom: null,
+          conditional_answers: null,
+          symptom_duration: null,
+          additional_points: [],
+          second_animal_age: null,
+          second_animal_breed: null,
+          second_animal_weight: null,
+          second_animal_sex: null,
+          second_animal_sterilized: null,
+          second_animal_vaccines_up_to_date: null,
+          ai_analysis: null,
+          urgency_score: null,
+          recommended_actions: []
+        };
         result = await supabase
           .from('bookings')
-          .insert([appointmentData])
+          .insert([fullAppointmentData])
           .select();
       }
 
