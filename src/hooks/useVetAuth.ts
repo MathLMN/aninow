@@ -173,17 +173,19 @@ export const useVetAuth = () => {
       console.log('🔄 Signing out...');
       const { error } = await supabase.auth.signOut();
       
-      if (error) {
+      // Ignore "session not found" errors - session might already be invalid
+      if (error && !error.message?.includes('session_not_found') && error.status !== 403) {
         console.error('❌ Sign out error:', error);
         toast({
           title: "Erreur",
           description: "Erreur lors de la déconnexion",
           variant: "destructive"
         });
-        return;
+        // Still clear local state even if server logout fails
       }
 
-      console.log('✅ Sign out successful');
+      console.log('✅ Sign out successful (or session already invalid)');
+      // Always clear local state regardless of server response
       setUser(null);
       setSession(null);
       setAdminProfile(null);
@@ -195,6 +197,11 @@ export const useVetAuth = () => {
       });
     } catch (error) {
       console.error('❌ Sign out exception:', error);
+      // Clear local state even on exception
+      setUser(null);
+      setSession(null);
+      setAdminProfile(null);
+      setClinicAccess(null);
     }
   };
 
