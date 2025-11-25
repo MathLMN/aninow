@@ -257,16 +257,16 @@ const BookingConfirmation = () => {
           </Card>
 
           {/* Récapitulatif complet */}
-          {bookingData.appointmentDate && bookingData.appointmentTime && (
+          {booking && (
             <BookingSummaryCard 
-              appointmentDate={bookingData.appointmentDate}
-              appointmentTime={bookingData.appointmentTime}
+              appointmentDate={booking.appointment_date}
+              appointmentTime={booking.appointment_time}
               clinicName={displaySettings.clinic_name}
               clinicAddress={clinicAddress}
               clinicPhone={displaySettings.clinic_phone}
               veterinarianName={veterinarianName || undefined}
-              animalName={bookingData.animalName || ''}
-              animalSpecies={bookingData.animalSpecies || ''}
+              animalName={booking.animal_name || ''}
+              animalSpecies={booking.animal_species || ''}
             />
           )}
 
