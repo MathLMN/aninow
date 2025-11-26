@@ -13,6 +13,8 @@ import { ValidationProcessTimeline } from "@/components/booking/ValidationProces
 import { usePublicClinicSettings } from "@/hooks/usePublicClinicSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { useClinicContext } from "@/contexts/ClinicContext";
+import { PersonalizedAdviceCard } from "@/components/booking/PersonalizedAdviceCard";
+import { usePersonalizedAdvice } from "@/hooks/usePersonalizedAdvice";
 const BookingConfirmation = () => {
   const navigate = useNavigate();
   const { currentClinic } = useClinicContext();
@@ -34,6 +36,7 @@ const BookingConfirmation = () => {
     bookingData.veterinarianName || null
   );
   const [showAdvice, setShowAdvice] = useState(false);
+  const { advice, isLoading: isLoadingAdvice, error: adviceError, generateAdvice } = usePersonalizedAdvice();
   console.log('BookingConfirmation - bookingData:', bookingData);
 
   // Récupérer depuis localStorage si pas de submissionResult
@@ -273,7 +276,13 @@ const BookingConfirmation = () => {
           {/* Bouton pour afficher les conseils */}
           <div className="text-center mb-3">
             <Button
-              onClick={() => setShowAdvice(!showAdvice)}
+              onClick={() => {
+                setShowAdvice(!showAdvice);
+                // Générer les conseils au premier clic seulement
+                if (!showAdvice && !advice && !isLoadingAdvice && !adviceError) {
+                  generateAdvice(booking || bookingData);
+                }
+              }}
               variant="outline"
               size="sm"
               className="border-vet-sage text-vet-sage hover:bg-vet-sage hover:text-white transition-all text-xs"
@@ -285,10 +294,12 @@ const BookingConfirmation = () => {
           {/* Contenu additionnel (masqué par défaut) */}
           {showAdvice && (
             <div className="space-y-4 animate-fade-in">
-              {/* Analyse IA - Résumé de la situation */}
-              {aiAnalysis && <div className="mb-4">
-                  <AnalysisDisplay aiAnalysis={aiAnalysis} bookingData={bookingData} />
-                </div>}
+              {/* Conseils personnalisés */}
+              <PersonalizedAdviceCard 
+                advice={advice}
+                isLoading={isLoadingAdvice}
+                error={adviceError}
+              />
 
               {/* Alerte d'urgence (si applicable) */}
               {aiAnalysis && <UrgencyAlert urgencyScore={aiAnalysis.urgency_score} priorityLevel={aiAnalysis.priority_level} clinicPhone={displaySettings.clinic_phone} />}
