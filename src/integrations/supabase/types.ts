@@ -256,6 +256,7 @@ export type Database = {
           status: string | null
           symptom_duration: string | null
           updated_at: string
+          urgency_feedback: Json | null
           urgency_score: number | null
           vaccination_type: string | null
           veterinarian_id: string | null
@@ -316,6 +317,7 @@ export type Database = {
           status?: string | null
           symptom_duration?: string | null
           updated_at?: string
+          urgency_feedback?: Json | null
           urgency_score?: number | null
           vaccination_type?: string | null
           veterinarian_id?: string | null
@@ -376,6 +378,7 @@ export type Database = {
           status?: string | null
           symptom_duration?: string | null
           updated_at?: string
+          urgency_feedback?: Json | null
           urgency_score?: number | null
           vaccination_type?: string | null
           veterinarian_id?: string | null
@@ -888,6 +891,60 @@ export type Database = {
             columns: ["veterinarian_id"]
             isOneToOne: false
             referencedRelation: "clinic_veterinarians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      urgency_feedbacks: {
+        Row: {
+          booking_id: string
+          clinic_id: string
+          created_at: string | null
+          feedback_reason: string | null
+          id: string
+          is_correct: boolean
+          original_level: string
+          original_score: number
+          submitted_by: string | null
+          suggested_level: string | null
+        }
+        Insert: {
+          booking_id: string
+          clinic_id: string
+          created_at?: string | null
+          feedback_reason?: string | null
+          id?: string
+          is_correct: boolean
+          original_level: string
+          original_score: number
+          submitted_by?: string | null
+          suggested_level?: string | null
+        }
+        Update: {
+          booking_id?: string
+          clinic_id?: string
+          created_at?: string | null
+          feedback_reason?: string | null
+          id?: string
+          is_correct?: boolean
+          original_level?: string
+          original_score?: number
+          submitted_by?: string | null
+          suggested_level?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "urgency_feedbacks_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "urgency_feedbacks_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
             referencedColumns: ["id"]
           },
         ]

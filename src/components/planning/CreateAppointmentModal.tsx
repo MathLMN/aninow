@@ -16,6 +16,7 @@ import { ConsultationSection } from "./appointment-form/ConsultationSection";
 import { useAppointmentForm } from "./appointment-form/useAppointmentForm";
 import { usePlanningActions } from "@/hooks/usePlanningActions";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CreateAppointmentModalProps {
   isOpen: boolean;
@@ -64,6 +65,7 @@ export const CreateAppointmentModal = ({
   const [urgencyFeedbackCorrect, setUrgencyFeedbackCorrect] = useState<boolean | null>(null);
   const [suggestedUrgency, setSuggestedUrgency] = useState<'critical' | 'moderate' | 'low' | ''>('');
   const [feedbackReason, setFeedbackReason] = useState('');
+  const [existingFeedback, setExistingFeedback] = useState<any>(null);
 
   // Initialize form data when modal opens
   useEffect(() => {
@@ -105,10 +107,18 @@ export const CreateAppointmentModal = ({
           ai_analysis: appointmentToEdit.ai_analysis,
           clientComment: appointmentToEdit.client_comment,
         });
+        
+        // Charger le feedback existant si disponible
+        if (appointmentToEdit.urgency_feedback) {
+          setExistingFeedback(appointmentToEdit.urgency_feedback);
+        } else {
+          setExistingFeedback(null);
+        }
       } else if (defaultData) {
         console.log('🔄 Modal opened for creating with default data:', defaultData);
         // Mode création: pré-remplir avec les données du créneau sélectionné
         initializeFormData(defaultData);
+        setExistingFeedback(null);
       }
     }
   }, [isOpen, defaultData, appointmentToEdit]);
@@ -293,26 +303,78 @@ export const CreateAppointmentModal = ({
       return;
     }
 
-    // TODO: Enregistrer le feedback dans Supabase (nouvelle table ou champ JSON)
-    console.log("Feedback d'urgence:", {
-      bookingId: appointmentToEdit?.id,
-      originalScore: urgencyScore,
-      isCorrect: urgencyFeedbackCorrect,
-      suggestedLevel: suggestedUrgency,
-      reason: feedbackReason
-    });
+    if (!appointmentToEdit?.id || !appointmentToEdit?.clinic_id) {
+      toast({
+        title: "Erreur",
+        description: "Informations du rendez-vous manquantes",
+        variant: "destructive",
+        duration: 3000
+      });
+      return;
+    }
 
-    toast({
-      title: "Feedback enregistré",
-      description: "Merci pour votre retour, cela nous aide à améliorer l'évaluation automatique.",
-      duration: 3000
-    });
+    try {
+      const urgencyScoreValue = appointmentToEdit.urgency_score || 0;
+      let originalLevel = 'low';
+      if (urgencyScoreValue >= 8) originalLevel = 'critical';
+      else if (urgencyScoreValue >= 5) originalLevel = 'moderate';
 
-    // Reset et fermer
-    setShowUrgencyFeedback(false);
-    setUrgencyFeedbackCorrect(null);
-    setSuggestedUrgency('');
-    setFeedbackReason('');
+      const feedbackData = {
+        is_correct: urgencyFeedbackCorrect,
+        suggested_level: urgencyFeedbackCorrect ? null : suggestedUrgency,
+        feedback_reason: urgencyFeedbackCorrect ? null : feedbackReason,
+        submitted_at: new Date().toISOString()
+      };
+
+      // 1. Insérer dans urgency_feedbacks
+      const { error: insertError } = await supabase
+        .from('urgency_feedbacks')
+        .insert({
+          booking_id: appointmentToEdit.id,
+          clinic_id: appointmentToEdit.clinic_id,
+          original_score: urgencyScoreValue,
+          original_level: originalLevel,
+          is_correct: urgencyFeedbackCorrect,
+          suggested_level: urgencyFeedbackCorrect ? null : suggestedUrgency,
+          feedback_reason: urgencyFeedbackCorrect ? null : feedbackReason,
+        });
+
+      if (insertError) throw insertError;
+
+      // 2. Mettre à jour le champ urgency_feedback sur bookings
+      const { error: updateError } = await supabase
+        .from('bookings')
+        .update({ urgency_feedback: feedbackData })
+        .eq('id', appointmentToEdit.id);
+
+      if (updateError) throw updateError;
+
+      setExistingFeedback(feedbackData);
+      toast({
+        title: "Feedback enregistré",
+        description: "Merci pour votre retour, cela nous aide à améliorer l'évaluation automatique.",
+        duration: 3000
+      });
+
+      // Reset et fermer
+      setShowUrgencyFeedback(false);
+      setUrgencyFeedbackCorrect(null);
+      setSuggestedUrgency('');
+      setFeedbackReason('');
+      
+      // Refresh planning
+      if (onRefreshPlanning) {
+        onRefreshPlanning();
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'enregistrement du feedback:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'enregistrer le feedback. Veuillez réessayer.",
+        variant: "destructive",
+        duration: 3000
+      });
+    }
   };
 
   // Handle save changes in edit mode
@@ -375,27 +437,34 @@ export const CreateAppointmentModal = ({
             </div>
             {/* Indicateur d'urgence pour les RDV en ligne - Cliquable */}
             {isEditMode && isOnlineBooking && urgencyConfig && UrgencyIcon && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowUrgencyFeedback(true)}
-                className={cn(
-                  "px-4 py-2.5 text-xs font-bold border-2 flex items-center gap-2 flex-shrink-0 transition-all hover:scale-105 hover:shadow-lg",
-                  urgencyConfig.color,
-                  "hover:bg-opacity-90",
-                  urgencyScore >= 8 && "animate-pulse shadow-lg"
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowUrgencyFeedback(true)}
+                  className={cn(
+                    "px-4 py-2.5 text-xs font-bold border-2 flex items-center gap-2 flex-shrink-0 transition-all hover:scale-105 hover:shadow-lg",
+                    urgencyConfig.color,
+                    "hover:bg-opacity-90",
+                    urgencyScore >= 8 && "animate-pulse shadow-lg"
+                  )}
+                >
+                  <UrgencyIcon className="h-4 w-4" />
+                  <div className="flex flex-col items-start">
+                    <span className="text-[10px] font-semibold uppercase tracking-wide opacity-90">
+                      {urgencyConfig.label}
+                    </span>
+                    <span className="text-base font-extrabold">
+                      {urgencyScore}/10
+                    </span>
+                  </div>
+                </Button>
+                {existingFeedback && (
+                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                    Feedback donné ✓
+                  </Badge>
                 )}
-              >
-                <UrgencyIcon className="h-4 w-4" />
-                <div className="flex flex-col items-start">
-                  <span className="text-[10px] font-semibold uppercase tracking-wide opacity-90">
-                    {urgencyConfig.label}
-                  </span>
-                  <span className="text-base font-extrabold">
-                    {urgencyScore}/10
-                  </span>
-                </div>
-              </Button>
+              </div>
             )}
           </div>
         </DialogHeader>
