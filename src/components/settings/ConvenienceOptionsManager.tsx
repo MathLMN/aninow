@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Trash2, GripVertical, CheckCircle2, XCircle } from "lucide-react";
+import { Plus, Edit, Trash2, GripVertical, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export interface ConvenienceOption {
@@ -188,20 +189,32 @@ export const ConvenienceOptionsManager: React.FC<ConvenienceOptionsManagerProps>
     });
   };
 
-  const handleMoveUp = (index: number) => {
-    if (index === 0) return;
-    const updatedOptions = [...options];
-    [updatedOptions[index - 1], updatedOptions[index]] = [updatedOptions[index], updatedOptions[index - 1]];
-    onOptionsChange(updatedOptions);
-  };
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
 
-  const handleMoveDown = (index: number) => {
+    const sourceIndex = result.source.index;
+    const destinationIndex = result.destination.index;
+
     // Ne pas permettre de déplacer l'option "Autre"
+    if (options[sourceIndex]?.isOther) {
+      toast({
+        title: "Action non autorisée",
+        description: "L'option 'Autre' ne peut pas être déplacée",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Ne pas permettre de déplacer après l'option "Autre"
     const otherIndex = options.findIndex(opt => opt.isOther);
-    if (index >= options.length - 1 || index === otherIndex - 1) return;
+    if (otherIndex !== -1 && destinationIndex >= otherIndex) {
+      return;
+    }
+
+    const updatedOptions = Array.from(options);
+    const [removed] = updatedOptions.splice(sourceIndex, 1);
+    updatedOptions.splice(destinationIndex, 0, removed);
     
-    const updatedOptions = [...options];
-    [updatedOptions[index], updatedOptions[index + 1]] = [updatedOptions[index + 1], updatedOptions[index]];
     onOptionsChange(updatedOptions);
   };
 
@@ -215,100 +228,111 @@ export const ConvenienceOptionsManager: React.FC<ConvenienceOptionsManagerProps>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Liste des options */}
-        <div className="space-y-2">
-          {options.map((option, index) => (
-            <div
-              key={option.value}
-              className="flex items-center gap-2 p-3 bg-background rounded-lg border border-border hover:border-border/80 transition-colors"
-            >
-              {/* Poignée de déplacement */}
-              <div className="flex flex-col gap-0.5 cursor-move text-muted-foreground">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-5 w-5 p-0 hover:bg-accent"
-                  onClick={() => handleMoveUp(index)}
-                  disabled={index === 0 || option.isOther}
-                >
-                  <GripVertical className="h-3 w-3" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-5 w-5 p-0 hover:bg-accent"
-                  onClick={() => handleMoveDown(index)}
-                  disabled={index >= options.length - 1 || option.isOther}
-                >
-                  <GripVertical className="h-3 w-3" />
-                </Button>
-              </div>
-
-              {/* Badge de l'option */}
-              <div className={`flex-1 px-3 py-2 rounded-full border text-sm font-medium ${option.color}`}>
-                {option.label}
-                {option.isOther && ' 🔒'}
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-2">
-                {/* Toggle actif/inactif */}
-                <div className="flex items-center gap-2">
-                  {option.isActive ? (
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  ) : (
-                    <XCircle className="h-4 w-4 text-gray-400" />
-                  )}
-                  <Switch
-                    checked={option.isActive}
-                    onCheckedChange={() => handleToggleActive(option.value)}
-                  />
-                </div>
-
-                {/* Bouton éditer */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleEditClick(option)}
-                  disabled={option.isOther}
-                  className="h-8 w-8 p-0"
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-
-                {/* Bouton supprimer */}
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={option.isOther}
-                      className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Êtes-vous sûr de vouloir supprimer l'option "{option.label}" ? Cette action est irréversible.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Annuler</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleDeleteOption(option.value)}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="convenience-options">
+            {(provided, snapshot) => (
+              <div
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                className="space-y-2"
+              >
+                {options.map((option, index) => (
+                  <Draggable
+                    key={option.value}
+                    draggableId={option.value}
+                    index={index}
+                    isDragDisabled={option.isOther}
+                  >
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        className={`group flex items-center gap-3 p-3 bg-card rounded-lg border transition-all ${
+                          snapshot.isDragging
+                            ? 'border-primary shadow-lg'
+                            : option.isActive
+                            ? 'border-border'
+                            : 'border-border/50 opacity-60'
+                        }`}
                       >
-                        Supprimer
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                        {/* Poignée de déplacement */}
+                        <div
+                          {...provided.dragHandleProps}
+                          className={`${
+                            option.isOther
+                              ? 'cursor-not-allowed opacity-30'
+                              : 'cursor-grab active:cursor-grabbing'
+                          } text-muted-foreground hover:text-foreground transition-colors`}
+                        >
+                          <GripVertical className="h-5 w-5" />
+                        </div>
+
+                        {/* Badge de l'option */}
+                        <div className={`flex-1 px-4 py-2 rounded-full border text-sm font-medium ${option.color} flex items-center gap-2`}>
+                          {option.label}
+                          {option.isOther && <Lock className="h-3 w-3" />}
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-1">
+                          {/* Toggle actif/inactif */}
+                          <Switch
+                            checked={option.isActive}
+                            onCheckedChange={() => handleToggleActive(option.value)}
+                            className="data-[state=checked]:bg-primary"
+                          />
+
+                          {/* Bouton éditer */}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEditClick(option)}
+                            disabled={option.isOther}
+                            className="h-9 w-9 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+
+                          {/* Bouton supprimer */}
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                disabled={option.isOther}
+                                className="h-9 w-9 opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Êtes-vous sûr de vouloir supprimer l'option "{option.label}" ? Cette action est irréversible.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteOption(option.value)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Supprimer
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
               </div>
-            </div>
-          ))}
-        </div>
+            )}
+          </Droppable>
+        </DragDropContext>
 
         {/* Bouton ajouter */}
         <Button onClick={handleAddNew} variant="outline" className="w-full">
