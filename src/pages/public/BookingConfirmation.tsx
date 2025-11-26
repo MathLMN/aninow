@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, AlertTriangle, Loader2, Hourglass, Info } from "lucide-react";
+import { CheckCircle, AlertTriangle, Loader2, Hourglass, Info, Sparkles } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { useBookingSubmission } from "@/hooks/useBookingSubmission";
@@ -283,11 +283,17 @@ const BookingConfirmation = () => {
                   generateAdvice(booking || bookingData);
                 }
               }}
-              variant="outline"
               size="sm"
-              className="border-vet-sage text-vet-sage hover:bg-vet-sage hover:text-white transition-all text-xs"
+              className="bg-gradient-to-r from-vet-sage to-vet-blue hover:from-vet-sage/90 hover:to-vet-blue/90 text-white shadow-md hover:shadow-lg transition-all text-xs font-semibold"
             >
-              {showAdvice ? "Masquer les conseils" : "Voir nos conseils"}
+              {showAdvice ? (
+                "Masquer les conseils"
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-1.5" />
+                  Voir nos conseils
+                </>
+              )}
             </Button>
           </div>
 
