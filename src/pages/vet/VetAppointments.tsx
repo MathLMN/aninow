@@ -298,10 +298,34 @@ const VetAppointments = () => {
           <div className="flex items-center justify-between px-4 py-2 bg-gradient-to-r from-vet-beige/30 to-transparent border-b border-vet-blue/10">
             <div className="flex items-center gap-3">
               {/* Badge d'urgence - Toujours affiché */}
-              {booking.booking_source === 'online' && <div className={`rounded-md px-3 py-1.5 text-xs font-bold min-w-[55px] text-center flex flex-col items-center shadow-sm ${booking.urgency_score && booking.urgency_score >= 8 ? 'bg-red-500 text-white' : booking.urgency_score && booking.urgency_score >= 6 ? 'bg-orange-500 text-white' : booking.urgency_score && booking.urgency_score >= 4 ? 'bg-yellow-500 text-white' : booking.urgency_score ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'}`}>
-                  <span className="text-lg font-bold">{booking.urgency_score || 'N/A'}</span>
-                  <span className="text-[9px] opacity-90">URGENCE</span>
-                </div>}
+              {booking.booking_source === 'online' && (() => {
+                const score = booking.urgency_score || 0;
+                const getUrgencyLabel = () => {
+                  if (score >= 8) return { text: 'Urgence critique', icon: '🔥' };
+                  if (score >= 6) return { text: 'Urgence élevée', icon: '⚠️' };
+                  if (score >= 4) return { text: 'Urgence moyenne', icon: '📋' };
+                  if (score > 0) return { text: 'Urgence faible', icon: '✓' };
+                  return { text: 'Non évalué', icon: '?' };
+                };
+                const urgency = getUrgencyLabel();
+                return (
+                  <div className={`rounded-lg px-4 py-2 text-xs font-bold min-w-[140px] flex flex-col items-center gap-1 shadow-md border-2 ${
+                    score >= 8 ? 'bg-red-500 text-white border-red-700' : 
+                    score >= 6 ? 'bg-orange-500 text-white border-orange-700' : 
+                    score >= 4 ? 'bg-yellow-500 text-white border-yellow-700' : 
+                    score > 0 ? 'bg-green-500 text-white border-green-700' : 
+                    'bg-gray-300 text-gray-700 border-gray-400'
+                  }`}>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-base">{urgency.icon}</span>
+                      <span className="text-xl font-extrabold">{score || 'N/A'}</span>
+                    </div>
+                    <span className="text-[10px] font-semibold uppercase tracking-wide">
+                      {urgency.text}
+                    </span>
+                  </div>
+                );
+              })()}
               
               {/* Date de réservation avec badge si demandé */}
               <div className="text-xs text-vet-brown/70 flex items-center gap-2">
