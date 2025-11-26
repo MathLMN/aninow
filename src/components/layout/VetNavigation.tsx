@@ -25,7 +25,7 @@ export const VetNavigation = () => {
   const navigationItems = [
     {
       path: "/vet/dashboard",
-      label: "Dashboard",
+      label: "Statistiques",
       icon: BarChart3
     },
     {
