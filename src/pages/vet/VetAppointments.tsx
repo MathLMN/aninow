@@ -302,8 +302,7 @@ const VetAppointments = () => {
                 const score = booking.urgency_score || 0;
                 const getUrgencyLabel = () => {
                   if (score >= 8) return { text: 'Urgence critique', icon: '🔥' };
-                  if (score >= 6) return { text: 'Urgence élevée', icon: '⚠️' };
-                  if (score >= 4) return { text: 'Urgence moyenne', icon: '📋' };
+                  if (score >= 5) return { text: 'Urgence modérée', icon: '⚠️' };
                   if (score > 0) return { text: 'Urgence faible', icon: '✓' };
                   return { text: 'Non évalué', icon: '?' };
                 };
@@ -311,8 +310,7 @@ const VetAppointments = () => {
                 return (
                   <div className={`rounded-lg px-4 py-2 text-xs font-bold min-w-[140px] flex flex-col items-center gap-1 shadow-md border-2 ${
                     score >= 8 ? 'bg-red-500 text-white border-red-700' : 
-                    score >= 6 ? 'bg-orange-500 text-white border-orange-700' : 
-                    score >= 4 ? 'bg-yellow-500 text-white border-yellow-700' : 
+                    score >= 5 ? 'bg-orange-500 text-white border-orange-700' : 
                     score > 0 ? 'bg-green-500 text-white border-green-700' : 
                     'bg-gray-300 text-gray-700 border-gray-400'
                   }`}>

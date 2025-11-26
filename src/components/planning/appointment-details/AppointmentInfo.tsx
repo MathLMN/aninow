@@ -32,22 +32,17 @@ export const AppointmentInfo = ({ appointment }: AppointmentInfoProps) => {
     if (score >= 8) return {
       color: 'bg-red-100 text-red-800 border-red-300',
       icon: AlertTriangle,
-      label: 'URGENCE ÉLEVÉE'
+      label: 'Urgence critique'
     };
-    if (score >= 6) return {
+    if (score >= 5) return {
       color: 'bg-orange-100 text-orange-800 border-orange-300',
       icon: AlertCircle,
       label: 'Urgence modérée'
     };
-    if (score >= 4) return {
-      color: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-      icon: TrendingUp,
-      label: 'Priorité moyenne'
-    };
     return {
       color: 'bg-green-100 text-green-800 border-green-300',
       icon: TrendingUp,
-      label: 'Priorité faible'
+      label: 'Urgence faible'
     };
   };
 
