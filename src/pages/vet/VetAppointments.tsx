@@ -21,7 +21,7 @@ const VetAppointments = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [urgencyFilter, setUrgencyFilter] = useState<'all' | 'critical' | 'high' | 'medium' | 'low'>('all');
+  const [urgencyFilter, setUrgencyFilter] = useState<'all' | 'critical' | 'moderate' | 'low'>('all');
   const [sortBy, setSortBy] = useState<'urgency' | 'date'>('urgency');
   const [bookingToConfirm, setBookingToConfirm] = useState<string | null>(null);
   const [selectedConsultationTypeIds, setSelectedConsultationTypeIds] = useState<string[]>([]);
@@ -119,15 +119,11 @@ const VetAppointments = () => {
   // Calculer les compteurs par niveau d'urgence (uniquement les demandes à confirmer)
   const pendingBookingsForCount = bookingsForSelectedDateNoUrgencyFilter.filter(b => b.status === 'pending');
   const criticalCount = pendingBookingsForCount.filter(b => (b.urgency_score || 0) >= 8).length;
-  const highCount = pendingBookingsForCount.filter(b => {
+  const moderateCount = pendingBookingsForCount.filter(b => {
     const score = b.urgency_score || 0;
-    return score >= 6 && score < 8;
+    return score >= 5 && score < 8;
   }).length;
-  const mediumCount = pendingBookingsForCount.filter(b => {
-    const score = b.urgency_score || 0;
-    return score >= 4 && score < 6;
-  }).length;
-  const lowCount = pendingBookingsForCount.filter(b => (b.urgency_score || 0) < 4).length;
+  const lowCount = pendingBookingsForCount.filter(b => (b.urgency_score || 0) < 5).length;
 
   // Filtrer par date de création (created_at), recherche et urgence
   const bookingsForSelectedDate = onlineBookings.filter(booking => {
@@ -142,12 +138,10 @@ const VetAppointments = () => {
       const urgencyScore = booking.urgency_score || 0;
       if (urgencyFilter === 'critical') {
         matchesUrgency = urgencyScore >= 8;
-      } else if (urgencyFilter === 'high') {
-        matchesUrgency = urgencyScore >= 6 && urgencyScore < 8;
-      } else if (urgencyFilter === 'medium') {
-        matchesUrgency = urgencyScore >= 4 && urgencyScore < 6;
+      } else if (urgencyFilter === 'moderate') {
+        matchesUrgency = urgencyScore >= 5 && urgencyScore < 8;
       } else if (urgencyFilter === 'low') {
-        matchesUrgency = urgencyScore < 4;
+        matchesUrgency = urgencyScore < 5;
       }
       return matchesDate && matchesSearch && matchesUrgency;
     } catch (error) {
@@ -187,12 +181,10 @@ const VetAppointments = () => {
     const urgencyScore = booking.urgency_score || 0;
     if (urgencyFilter === 'critical') {
       matchesUrgency = urgencyScore >= 8;
-    } else if (urgencyFilter === 'high') {
-      matchesUrgency = urgencyScore >= 6 && urgencyScore < 8;
-    } else if (urgencyFilter === 'medium') {
-      matchesUrgency = urgencyScore >= 4 && urgencyScore < 6;
+    } else if (urgencyFilter === 'moderate') {
+      matchesUrgency = urgencyScore >= 5 && urgencyScore < 8;
     } else if (urgencyFilter === 'low') {
-      matchesUrgency = urgencyScore < 4;
+      matchesUrgency = urgencyScore < 5;
     }
     return booking.status === 'pending' && matchesSearch && matchesUrgency;
   }));
@@ -536,20 +528,14 @@ const VetAppointments = () => {
                     {criticalCount}
                   </Badge>}
               </Button>
-              <Button size="sm" variant={urgencyFilter === 'high' ? 'default' : 'outline'} onClick={() => setUrgencyFilter('high')} className={urgencyFilter === 'high' ? 'bg-orange-500 hover:bg-orange-600' : 'border-orange-300 text-orange-600 hover:bg-orange-50'}>
-                Élevée (6-7)
-                {highCount > 0 && <Badge className="ml-2 bg-orange-700 hover:bg-orange-700 text-white px-1.5 py-0 text-xs min-w-[20px] h-5 flex items-center justify-center">
-                    {highCount}
-                  </Badge>}
-              </Button>
-              <Button size="sm" variant={urgencyFilter === 'medium' ? 'default' : 'outline'} onClick={() => setUrgencyFilter('medium')} className={urgencyFilter === 'medium' ? 'bg-yellow-500 hover:bg-yellow-600' : 'border-yellow-300 text-yellow-600 hover:bg-yellow-50'}>
-                Moyenne (4-5)
-                {mediumCount > 0 && <Badge className="ml-2 bg-yellow-700 hover:bg-yellow-700 text-white px-1.5 py-0 text-xs min-w-[20px] h-5 flex items-center justify-center">
-                    {mediumCount}
+              <Button size="sm" variant={urgencyFilter === 'moderate' ? 'default' : 'outline'} onClick={() => setUrgencyFilter('moderate')} className={urgencyFilter === 'moderate' ? 'bg-orange-500 hover:bg-orange-600' : 'border-orange-300 text-orange-600 hover:bg-orange-50'}>
+                Modérée (5-7)
+                {moderateCount > 0 && <Badge className="ml-2 bg-orange-700 hover:bg-orange-700 text-white px-1.5 py-0 text-xs min-w-[20px] h-5 flex items-center justify-center">
+                    {moderateCount}
                   </Badge>}
               </Button>
               <Button size="sm" variant={urgencyFilter === 'low' ? 'default' : 'outline'} onClick={() => setUrgencyFilter('low')} className={urgencyFilter === 'low' ? 'bg-green-500 hover:bg-green-600' : 'border-green-300 text-green-600 hover:bg-green-50'}>
-                Faible (&lt;4)
+                Faible (&lt;5)
                 {lowCount > 0 && <Badge className="ml-2 bg-green-700 hover:bg-green-700 text-white px-1.5 py-0 text-xs min-w-[20px] h-5 flex items-center justify-center">
                     {lowCount}
                   </Badge>}
