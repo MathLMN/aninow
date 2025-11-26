@@ -314,17 +314,25 @@ const BookingConfirmation = () => {
 
           {/* Actions CTA */}
           <div className="text-center space-y-2 pb-3">
-            <div className="flex flex-col sm:flex-row gap-2 justify-center">
-              <Link to="/" className="w-full sm:w-auto">
-                <Button size="sm" className="w-full sm:w-auto bg-vet-sage hover:bg-vet-sage/90 text-white text-xs">
+            <div className="flex flex-row gap-2 justify-center">
+              <Link to="/" className="flex-1 max-w-[180px]">
+                <Button 
+                  size="sm" 
+                  className="w-full bg-gradient-to-r from-vet-sage to-vet-blue hover:from-vet-sage/90 hover:to-vet-blue/90 text-white text-xs font-semibold shadow-md hover:shadow-lg transition-all"
+                >
                   Retour à l'accueil
                 </Button>
               </Link>
-              <Link to="/booking" className="w-full sm:w-auto">
-                <Button size="sm" variant="outline" className="w-full sm:w-auto border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white text-xs" onClick={() => {
-                  localStorage.removeItem('lastBookingConfirmation');
-                  resetBookingData();
-                }}>
+              <Link to="/booking" className="flex-1 max-w-[180px]">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="w-full border-2 border-vet-navy text-vet-navy hover:bg-vet-navy hover:text-white text-xs font-semibold shadow-sm hover:shadow-md transition-all" 
+                  onClick={() => {
+                    localStorage.removeItem('lastBookingConfirmation');
+                    resetBookingData();
+                  }}
+                >
                   Prendre un autre RDV
                 </Button>
               </Link>
