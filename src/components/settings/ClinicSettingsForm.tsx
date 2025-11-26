@@ -1029,6 +1029,28 @@ export const ClinicSettingsForm = () => {
               </div>
             </form>
           </Form>
+
+          <Separator className="my-6" />
+
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-base font-semibold text-vet-navy mb-1">
+                Options de consultation de convenance
+              </h3>
+              <p className="text-sm text-vet-brown/70">
+                Personnalisez les options proposées aux clients lors de la prise de rendez-vous en ligne
+              </p>
+            </div>
+            
+            <ConvenienceOptionsManager 
+              options={settings?.convenience_options_config || []} 
+              onOptionsChange={newOptions => {
+                updateSettings({
+                  convenience_options_config: newOptions
+                });
+              }} 
+            />
+          </div>
         </CardContent>
       </Card>
 
@@ -1206,12 +1228,6 @@ export const ClinicSettingsForm = () => {
       </Card>
 
       <VeterinarianAbsenceManager veterinarians={veterinarians.filter(vet => vet.is_active)} />
-      
-      <ConvenienceOptionsManager options={settings?.convenience_options_config || []} onOptionsChange={newOptions => {
-      updateSettings({
-        convenience_options_config: newOptions
-      });
-    }} />
       
       <EmailPreviewModal open={isEmailPreviewOpen} onOpenChange={setIsEmailPreviewOpen} clinicName={form.watch("clinicName")} clinicPhone={form.watch("clinicPhone")} clinicAddress={form.watch("clinicAddressStreet") && form.watch("clinicAddressCity") && form.watch("clinicAddressPostalCode") ? `${form.watch("clinicAddressStreet")}, ${form.watch("clinicAddressPostalCode")} ${form.watch("clinicAddressCity")}` : undefined} />
     </div>;
