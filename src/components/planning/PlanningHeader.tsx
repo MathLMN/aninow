@@ -49,22 +49,22 @@ export const PlanningHeader = ({
             <div className="flex items-center gap-1.5">
               {/* Sélecteur de zoom */}
               {onZoomLevelChange && (
-                <div className="flex items-center gap-0.5 border rounded px-0.5 bg-white">
+                <div className="flex items-center gap-0.5 border rounded-md px-1 py-0.5 bg-white shadow-sm">
                   <Button
                     variant={zoomLevel === 'compact' ? 'default' : 'ghost'}
                     size="sm"
                     onClick={() => onZoomLevelChange('compact')}
-                    className="h-6 px-1.5"
-                    title="Vue compacte"
+                    className="h-7 px-2 text-[10px] font-medium"
+                    title="Vue compacte (70%)"
                   >
-                    <ZoomOut className="h-3 w-3" />
+                    70%
                   </Button>
                   <Button
                     variant={zoomLevel === 'normal' ? 'default' : 'ghost'}
                     size="sm"
                     onClick={() => onZoomLevelChange('normal')}
-                    className="h-6 px-2 text-[10px]"
-                    title="Vue normale"
+                    className="h-7 px-2 text-[10px] font-medium"
+                    title="Vue normale (100%)"
                   >
                     100%
                   </Button>
@@ -72,10 +72,10 @@ export const PlanningHeader = ({
                     variant={zoomLevel === 'large' ? 'default' : 'ghost'}
                     size="sm"
                     onClick={() => onZoomLevelChange('large')}
-                    className="h-6 px-1.5"
-                    title="Vue large"
+                    className="h-7 px-2 text-[10px] font-medium"
+                    title="Vue large (140%)"
                   >
-                    <ZoomIn className="h-3 w-3" />
+                    140%
                   </Button>
                 </div>
               )}
