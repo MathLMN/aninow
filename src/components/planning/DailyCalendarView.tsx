@@ -9,6 +9,7 @@ import { DailyCalendarGrid } from "./DailyCalendarGrid";
 import { BlockSlotModal } from "./BlockSlotModal";
 import { EnhancedDateNavigation } from "./EnhancedDateNavigation";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
+import type { ZoomLevel } from "@/pages/vet/VetPlanning";
 
 interface DailyCalendarViewProps {
   selectedDate: Date;
@@ -41,6 +42,7 @@ interface DailyCalendarViewProps {
   hasClipboard?: boolean;
   sidebarMode?: boolean;
   mainViewMode?: boolean;
+  zoomLevel?: ZoomLevel;
 }
 
 export const DailyCalendarView = ({
@@ -61,7 +63,8 @@ export const DailyCalendarView = ({
   onBlockSlot,
   hasClipboard = false,
   sidebarMode = false,
-  mainViewMode = false
+  mainViewMode = false,
+  zoomLevel = 'normal'
 }: DailyCalendarViewProps) => {
   const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
   const [blockSlotData, setBlockSlotData] = useState<{
@@ -151,6 +154,7 @@ export const DailyCalendarView = ({
           onBlockSlot={handleBlockSlot}
           hasClipboard={hasClipboard}
           fixedHeaders={true}
+          zoomLevel={zoomLevel}
         />
 
         {/* Modale de blocage de créneau */}
@@ -210,6 +214,7 @@ export const DailyCalendarView = ({
         onDeleteBooking={onDeleteBooking} 
         onBlockSlot={handleBlockSlot}
         hasClipboard={hasClipboard}
+        zoomLevel={zoomLevel}
       />
 
       {/* Modale de blocage de créneau */}

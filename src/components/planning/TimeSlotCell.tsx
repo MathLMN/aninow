@@ -32,6 +32,7 @@ interface TimeSlotCellProps {
   // Nouvelles props pour les types de consultation
   consultationTypes?: any[];
   hasClipboard?: boolean;
+  slotHeightPx?: number;
 }
 
 export const TimeSlotCell = ({
@@ -56,7 +57,8 @@ export const TimeSlotCell = ({
   isFirstBlockedSlot = false,
   blockedSlotsCount = 1,
   consultationTypes = [],
-  hasClipboard = false
+  hasClipboard = false,
+  slotHeightPx = 28
 }: TimeSlotCellProps) => {
   const [showActions, setShowActions] = useState(false);
 
@@ -115,9 +117,8 @@ export const TimeSlotCell = ({
   // Calculer la hauteur du rendez-vous en fonction de sa durée
   const getAppointmentHeight = (booking: any) => {
     const duration = booking.duration_minutes || 15;
-    // Chaque tranche de 15 minutes = 20px de hauteur
     const slotsNeeded = Math.ceil(duration / 15);
-    return slotsNeeded * 20;
+    return slotsNeeded * slotHeightPx;
   };
 
   // Récupérer la couleur du type de consultation
@@ -220,11 +221,11 @@ export const TimeSlotCell = ({
       <div
         className={cn(
           "border-l border-gray-200/30 relative transition-colors",
-          "h-5", // Hauteur harmonisée avec la grille
           getCellBackground(),
           canInteract && "cursor-pointer group hover:bg-blue-50/30",
           !canInteract && canCreateTask && "group hover:bg-yellow-50/30"
         )}
+        style={{ height: `${slotHeightPx}px` }}
         onClick={handleCellClick}
         onMouseEnter={() => (canInteract || canCreateTask) && setShowActions(true)}
         onMouseLeave={() => setShowActions(false)}
@@ -240,8 +241,8 @@ export const TimeSlotCell = ({
               }
             }}
             style={{ 
-              height: `${blockedSlotsCount * 20}px`,
-              minHeight: '20px'
+              height: `${blockedSlotsCount * slotHeightPx}px`,
+              minHeight: `${slotHeightPx}px`
             }}
           >
             <div className="text-center px-1 w-full">

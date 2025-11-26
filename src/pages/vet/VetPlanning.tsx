@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DailyCalendarView } from "@/components/planning/DailyCalendarView";
 import { WeeklyCalendarView } from "@/components/planning/WeeklyCalendarView";
 import { PlanningHeader } from "@/components/planning/PlanningHeader";
@@ -14,9 +14,15 @@ import { usePlanningActions } from "@/hooks/usePlanningActions";
 import { useSlotManagement } from "@/hooks/useSlotManagement";
 import { useAppointmentClipboard } from "@/hooks/useAppointmentClipboard";
 
+export type ZoomLevel = 'compact' | 'normal' | 'large';
+
 export default function VetPlanning() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'daily' | 'weekly'>('daily');
+  const [zoomLevel, setZoomLevel] = useState<ZoomLevel>(() => {
+    const saved = localStorage.getItem('planning_zoom_level');
+    return (saved as ZoomLevel) || 'normal';
+  });
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [isBlockSlotModalOpen, setIsBlockSlotModalOpen] = useState(false);
@@ -24,6 +30,11 @@ export default function VetPlanning() {
   const [createModalDefaultData, setCreateModalDefaultData] = useState<any>(null);
   const [noteModalDefaultData, setNoteModalDefaultData] = useState<any>(null);
   const [blockSlotModalData, setBlockSlotModalData] = useState<any>(null);
+
+  // Persister le niveau de zoom dans localStorage
+  useEffect(() => {
+    localStorage.setItem('planning_zoom_level', zoomLevel);
+  }, [zoomLevel]);
 
   const { bookings, refreshBookings } = useVetBookings();
   const { veterinarians } = useClinicVeterinarians();
@@ -253,6 +264,7 @@ export default function VetPlanning() {
                   onBlockSlot={handleBlockSlot}
                   hasClipboard={hasClipboard()}
                   sidebarMode={true}
+                  zoomLevel={zoomLevel}
                 />
               </div>
               
@@ -290,6 +302,7 @@ export default function VetPlanning() {
                 onBlockSlot={handleBlockSlot}
                 hasClipboard={hasClipboard()}
                 mainViewMode={true}
+                zoomLevel={zoomLevel}
               />
             ) : (
               <WeeklyCalendarView
@@ -311,6 +324,8 @@ export default function VetPlanning() {
               viewMode={viewMode}
               onViewModeChange={setViewMode}
               selectedDate={selectedDate}
+              zoomLevel={zoomLevel}
+              onZoomLevelChange={setZoomLevel}
             />
           </div>
         </div>

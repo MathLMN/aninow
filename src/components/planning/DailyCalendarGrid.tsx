@@ -10,6 +10,7 @@ import { useSlotManagement } from "@/hooks/useSlotManagement";
 import { useState, useEffect, useMemo } from "react";
 import { formatDateLocal } from "@/utils/date";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import type { ZoomLevel } from "@/pages/vet/VetPlanning";
 
 interface DailyCalendarGridProps {
   selectedDate: Date;
@@ -30,6 +31,7 @@ interface DailyCalendarGridProps {
   onBlockSlot?: (timeSlot: { date: string; time: string; veterinarian: string }) => void;
   hasClipboard?: boolean;
   fixedHeaders?: boolean;
+  zoomLevel?: ZoomLevel;
 }
 
 export const DailyCalendarGrid = ({
@@ -50,13 +52,18 @@ export const DailyCalendarGrid = ({
   onDeleteBooking,
   onBlockSlot,
   hasClipboard = false,
-  fixedHeaders = false
+  fixedHeaders = false,
+  zoomLevel = 'normal'
 }: DailyCalendarGridProps) => {
   const { settings } = useClinicSettings();
   const { currentClinicId } = useClinicAccess();
   const { absences } = useVeterinarianAbsences();
   const { consultationTypes } = useSlotManagement();
   const timeSlots = generateAllTimeSlots();
+  
+  // Calculer la hauteur en pixels selon le niveau de zoom
+  const slotHeightPx = zoomLevel === 'compact' ? 20 : zoomLevel === 'normal' ? 28 : 40;
+  const slotHeightClass = zoomLevel === 'compact' ? 'h-5' : zoomLevel === 'normal' ? 'h-7' : 'h-10';
 
   // Optimiser le calcul des bookings par slot avec useMemo pour éviter les recalculs
   const slotBookings = useMemo(() => {
@@ -224,7 +231,8 @@ export const DailyCalendarGrid = ({
                   <div 
                     key={time} 
                     className={cn(
-                      "grid h-5 border-b border-gray-200/50"
+                      "grid border-b border-gray-200/50",
+                      slotHeightClass
                     )} 
                     style={{
                       gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`,
@@ -276,6 +284,7 @@ export const DailyCalendarGrid = ({
                           blockedSlotsCount={blockInfo?.count || 1}
                           consultationTypes={consultationTypes}
                           hasClipboard={hasClipboard}
+                          slotHeightPx={slotHeightPx}
                         />
                       );
                     })}

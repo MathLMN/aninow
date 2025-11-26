@@ -1,24 +1,29 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar, Settings, RefreshCw } from "lucide-react";
+import { Calendar, ZoomIn, ZoomOut } from "lucide-react";
 import { ViewModeSelector } from "./ViewModeSelector";
 import { SlotAssignmentSheet } from "./SlotAssignmentSheet";
 import { RecurringBlocksModal } from "./RecurringBlocksModal";
 import { useSlotAssignments } from "@/hooks/useSlotAssignments";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { useVetAuth } from "@/hooks/useVetAuth";
+import type { ZoomLevel } from "@/pages/vet/VetPlanning";
 
 interface PlanningHeaderProps {
   viewMode: 'daily' | 'weekly';
   onViewModeChange: (mode: 'daily' | 'weekly') => void;
   selectedDate?: Date;
+  zoomLevel?: ZoomLevel;
+  onZoomLevelChange?: (level: ZoomLevel) => void;
 }
 
 export const PlanningHeader = ({ 
   viewMode, 
   onViewModeChange,
-  selectedDate = new Date()
+  selectedDate = new Date(),
+  zoomLevel = 'normal',
+  onZoomLevelChange
 }: PlanningHeaderProps) => {
   const [isRecurringBlocksModalOpen, setIsRecurringBlocksModalOpen] = useState(false);
   const { veterinarians } = useClinicVeterinarians();
@@ -42,6 +47,39 @@ export const PlanningHeader = ({
 
             {/* Boutons d'action à droite - plus compacts */}
             <div className="flex items-center gap-1.5">
+              {/* Sélecteur de zoom */}
+              {onZoomLevelChange && (
+                <div className="flex items-center gap-0.5 border rounded px-0.5 bg-white">
+                  <Button
+                    variant={zoomLevel === 'compact' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => onZoomLevelChange('compact')}
+                    className="h-6 px-1.5"
+                    title="Vue compacte"
+                  >
+                    <ZoomOut className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant={zoomLevel === 'normal' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => onZoomLevelChange('normal')}
+                    className="h-6 px-2 text-[10px]"
+                    title="Vue normale"
+                  >
+                    100%
+                  </Button>
+                  <Button
+                    variant={zoomLevel === 'large' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => onZoomLevelChange('large')}
+                    className="h-6 px-1.5"
+                    title="Vue large"
+                  >
+                    <ZoomIn className="h-3 w-3" />
+                  </Button>
+                </div>
+              )}
+              
               {/* Bouton Gérer les attributions */}
               <SlotAssignmentSheet
                 assignments={assignments}
