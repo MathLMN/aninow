@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, Loader2, AlertCircle } from "lucide-react";
+import { Lightbulb, Loader2, AlertCircle } from "lucide-react";
 
 interface PersonalizedAdviceCardProps {
   advice: string | null;
@@ -13,7 +13,7 @@ export const PersonalizedAdviceCard = ({ advice, isLoading, error }: Personalize
       <Card className="bg-vet-sage/10 border-vet-sage/30 shadow-md animate-fade-in">
         <CardHeader className="pb-3">
           <CardTitle className="text-base text-vet-navy flex items-center gap-2">
-            <Heart className="h-5 w-5 text-vet-sage" />
+            <Lightbulb className="h-5 w-5 text-vet-sage" />
             Conseils personnalisés
           </CardTitle>
         </CardHeader>
@@ -52,19 +52,28 @@ export const PersonalizedAdviceCard = ({ advice, isLoading, error }: Personalize
     return null;
   }
 
+  // Parse advice to split by <br> tags and create proper spacing
+  const adviceItems = advice
+    .split(/<br\s*\/?>/gi)
+    .map(item => item.trim())
+    .filter(item => item.length > 0);
+
   return (
     <Card className="bg-vet-sage/10 border-vet-sage/30 shadow-md animate-fade-in">
       <CardHeader className="pb-3">
         <CardTitle className="text-base text-vet-navy flex items-center gap-2">
-          <Heart className="h-5 w-5 text-vet-sage" />
+          <Lightbulb className="h-5 w-5 text-vet-sage" />
           Conseils personnalisés en attendant votre rendez-vous
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div 
-          className="text-xs text-vet-brown leading-relaxed prose prose-sm max-w-none"
-          dangerouslySetInnerHTML={{ __html: advice }}
-        />
+        <div className="space-y-4">
+          {adviceItems.map((item, index) => (
+            <p key={index} className="text-xs text-vet-navy leading-relaxed">
+              {item}
+            </p>
+          ))}
+        </div>
         <div className="bg-white/60 rounded-lg p-3 border border-vet-sage/20 mt-4">
           <p className="text-[10px] text-vet-brown/70 leading-relaxed">
             <strong>Important :</strong> Ces conseils sont donnés à titre informatif. En cas de doute ou d'aggravation des symptômes, 
