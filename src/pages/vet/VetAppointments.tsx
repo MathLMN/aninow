@@ -16,7 +16,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useClinicAccess } from "@/hooks/useClinicAccess";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-
 const VetAppointments = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -27,26 +26,33 @@ const VetAppointments = () => {
   const [bookingToConfirm, setBookingToConfirm] = useState<string | null>(null);
   const [selectedConsultationTypeIds, setSelectedConsultationTypeIds] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState("pending");
-  const { bookings, isLoading, updateBookingStatus } = useVetBookings();
-  const photoGalleryRefs = useRef<{ [key: string]: PhotoGalleryRef | null }>({});
-  const { currentClinicId } = useClinicAccess();
+  const {
+    bookings,
+    isLoading,
+    updateBookingStatus
+  } = useVetBookings();
+  const photoGalleryRefs = useRef<{
+    [key: string]: PhotoGalleryRef | null;
+  }>({});
+  const {
+    currentClinicId
+  } = useClinicAccess();
 
   // Charger les types de consultation
-  const { data: consultationTypes = [] } = useQuery({
+  const {
+    data: consultationTypes = []
+  } = useQuery({
     queryKey: ['consultation-types', currentClinicId],
     queryFn: async () => {
       if (!currentClinicId) return [];
-      
-      const { data, error } = await supabase
-        .from('consultation_types')
-        .select('id, name, color, duration_minutes')
-        .eq('clinic_id', currentClinicId)
-        .order('name');
-
+      const {
+        data,
+        error
+      } = await supabase.from('consultation_types').select('id, name, color, duration_minutes').eq('clinic_id', currentClinicId).order('name');
       if (error) throw error;
       return data || [];
     },
-    enabled: !!currentClinicId,
+    enabled: !!currentClinicId
   });
 
   // Gérer l'ouverture de l'onglet via l'URL
@@ -56,19 +62,15 @@ const VetAppointments = () => {
       setActiveTab('all-pending');
     }
   }, [searchParams]);
-
   const goToPreviousDay = () => {
     setSelectedDate(prev => subDays(prev, 1));
   };
-
   const goToNextDay = () => {
     setSelectedDate(prev => addDays(prev, 1));
   };
-
   const goToToday = () => {
     setSelectedDate(new Date());
   };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case "confirmed":
@@ -83,7 +85,6 @@ const VetAppointments = () => {
         return "bg-gray-100 text-gray-800 border-gray-300";
     }
   };
-
   const getStatusText = (status: string) => {
     switch (status) {
       case "confirmed":
@@ -100,22 +101,15 @@ const VetAppointments = () => {
   };
 
   // Filtrer pour n'afficher que les réservations en ligne (exclure manuels et blocages)
-  const onlineBookings = bookings.filter(
-    (booking) => booking.booking_source === "online" && booking?.is_blocked !== true
-  );
+  const onlineBookings = bookings.filter(booking => booking.booking_source === "online" && booking?.is_blocked !== true);
 
   // Filtrer par date de création sans filtre d'urgence pour calculer les compteurs
-  const bookingsForSelectedDateNoUrgencyFilter = onlineBookings.filter((booking) => {
+  const bookingsForSelectedDateNoUrgencyFilter = onlineBookings.filter(booking => {
     if (!booking.created_at) return false;
-    
     try {
       const createdDate = new Date(booking.created_at);
       const matchesDate = isSameDay(createdDate, selectedDate);
-      const matchesSearch = 
-        booking.animal_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        booking.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        booking.client_phone.includes(searchTerm);
-      
+      const matchesSearch = booking.animal_name.toLowerCase().includes(searchTerm.toLowerCase()) || booking.client_name.toLowerCase().includes(searchTerm.toLowerCase()) || booking.client_phone.includes(searchTerm);
       return matchesDate && matchesSearch;
     } catch (error) {
       return false;
@@ -136,21 +130,16 @@ const VetAppointments = () => {
   const lowCount = pendingBookingsForCount.filter(b => (b.urgency_score || 0) < 4).length;
 
   // Filtrer par date de création (created_at), recherche et urgence
-  const bookingsForSelectedDate = onlineBookings.filter((booking) => {
+  const bookingsForSelectedDate = onlineBookings.filter(booking => {
     if (!booking.created_at) return false;
-    
     try {
       const createdDate = new Date(booking.created_at);
       const matchesDate = isSameDay(createdDate, selectedDate);
-      const matchesSearch = 
-        booking.animal_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        booking.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        booking.client_phone.includes(searchTerm);
-      
+      const matchesSearch = booking.animal_name.toLowerCase().includes(searchTerm.toLowerCase()) || booking.client_name.toLowerCase().includes(searchTerm.toLowerCase()) || booking.client_phone.includes(searchTerm);
+
       // Filtrer par niveau d'urgence
       let matchesUrgency = true;
       const urgencyScore = booking.urgency_score || 0;
-      
       if (urgencyFilter === 'critical') {
         matchesUrgency = urgencyScore >= 8;
       } else if (urgencyFilter === 'high') {
@@ -160,7 +149,6 @@ const VetAppointments = () => {
       } else if (urgencyFilter === 'low') {
         matchesUrgency = urgencyScore < 4;
       }
-      
       return matchesDate && matchesSearch && matchesUrgency;
     } catch (error) {
       return false;
@@ -187,69 +175,57 @@ const VetAppointments = () => {
   };
 
   // Séparer les réservations à confirmer et confirmées avec tri
-  const pendingBookings = sortBookings(
-    bookingsForSelectedDate.filter((booking) => booking.status === 'pending')
-  );
-
-  const confirmedBookings = sortBookings(
-    bookingsForSelectedDate.filter((booking) => booking.status === 'confirmed')
-  );
+  const pendingBookings = sortBookings(bookingsForSelectedDate.filter(booking => booking.status === 'pending'));
+  const confirmedBookings = sortBookings(bookingsForSelectedDate.filter(booking => booking.status === 'confirmed'));
 
   // Tous les bookings pending (peu importe la date de création)
-  const allPendingBookings = sortBookings(
-    onlineBookings.filter((booking) => {
-      const matchesSearch = 
-        booking.animal_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        booking.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        booking.client_phone.includes(searchTerm);
-      
-      // Filtrer par niveau d'urgence
-      let matchesUrgency = true;
-      const urgencyScore = booking.urgency_score || 0;
-      
-      if (urgencyFilter === 'critical') {
-        matchesUrgency = urgencyScore >= 8;
-      } else if (urgencyFilter === 'high') {
-        matchesUrgency = urgencyScore >= 6 && urgencyScore < 8;
-      } else if (urgencyFilter === 'medium') {
-        matchesUrgency = urgencyScore >= 4 && urgencyScore < 6;
-      } else if (urgencyFilter === 'low') {
-        matchesUrgency = urgencyScore < 4;
-      }
-      
-      return booking.status === 'pending' && matchesSearch && matchesUrgency;
-    })
-  );
+  const allPendingBookings = sortBookings(onlineBookings.filter(booking => {
+    const matchesSearch = booking.animal_name.toLowerCase().includes(searchTerm.toLowerCase()) || booking.client_name.toLowerCase().includes(searchTerm.toLowerCase()) || booking.client_phone.includes(searchTerm);
 
+    // Filtrer par niveau d'urgence
+    let matchesUrgency = true;
+    const urgencyScore = booking.urgency_score || 0;
+    if (urgencyFilter === 'critical') {
+      matchesUrgency = urgencyScore >= 8;
+    } else if (urgencyFilter === 'high') {
+      matchesUrgency = urgencyScore >= 6 && urgencyScore < 8;
+    } else if (urgencyFilter === 'medium') {
+      matchesUrgency = urgencyScore >= 4 && urgencyScore < 6;
+    } else if (urgencyFilter === 'low') {
+      matchesUrgency = urgencyScore < 4;
+    }
+    return booking.status === 'pending' && matchesSearch && matchesUrgency;
+  }));
   const handleStatusChange = (bookingId: string, newStatus: 'pending' | 'confirmed' | 'cancelled' | 'completed') => {
     if (newStatus === 'confirmed') {
       // Récupérer les types de consultation existants du booking
       const booking = bookings.find(b => b.id === bookingId);
       const existingTypeId = booking?.consultation_type_id;
-      
       setBookingToConfirm(bookingId);
       setSelectedConsultationTypeIds(existingTypeId ? [existingTypeId] : []);
     } else {
-      updateBookingStatus({ id: bookingId, status: newStatus });
+      updateBookingStatus({
+        id: bookingId,
+        status: newStatus
+      });
     }
   };
-
   const handleConfirmConfirmation = async () => {
     if (bookingToConfirm && selectedConsultationTypeIds.length > 0) {
       try {
         // D'abord, mettre à jour le type de consultation
-        const { error: updateError } = await supabase
-          .from('bookings')
-          .update({ 
-            consultation_type_id: selectedConsultationTypeIds[0] // Prendre le premier type sélectionné
-          })
-          .eq('id', bookingToConfirm);
-
+        const {
+          error: updateError
+        } = await supabase.from('bookings').update({
+          consultation_type_id: selectedConsultationTypeIds[0] // Prendre le premier type sélectionné
+        }).eq('id', bookingToConfirm);
         if (updateError) throw updateError;
 
         // Ensuite, confirmer le rendez-vous
-        await updateBookingStatus({ id: bookingToConfirm, status: 'confirmed' });
-        
+        await updateBookingStatus({
+          id: bookingToConfirm,
+          status: 'confirmed'
+        });
         setBookingToConfirm(null);
         setSelectedConsultationTypeIds([]);
       } catch (error) {
@@ -257,28 +233,22 @@ const VetAppointments = () => {
       }
     }
   };
-
   const handleCancelConfirmation = () => {
     setBookingToConfirm(null);
     setSelectedConsultationTypeIds([]);
   };
-
   const handleConsultationTypeToggle = (typeId: string) => {
-    setSelectedConsultationTypeIds(prev => 
-      prev.includes(typeId) ? prev.filter(id => id !== typeId) : [...prev, typeId]
-    );
+    setSelectedConsultationTypeIds(prev => prev.includes(typeId) ? prev.filter(id => id !== typeId) : [...prev, typeId]);
   };
-
   const handleRemoveConsultationType = (typeId: string) => {
     setSelectedConsultationTypeIds(prev => prev.filter(id => id !== typeId));
   };
-
-  const selectedTypes = consultationTypes.filter(type => 
-    selectedConsultationTypeIds.includes(type.id)
-  );
+  const selectedTypes = consultationTypes.filter(type => selectedConsultationTypeIds.includes(type.id));
 
   // Type guard to check if ai_analysis has the expected structure
-  const isValidAiAnalysis = (analysis: any): analysis is { analysis_summary: string } => {
+  const isValidAiAnalysis = (analysis: any): analysis is {
+    analysis_summary: string;
+  } => {
     return analysis && typeof analysis === 'object' && typeof analysis.analysis_summary === 'string';
   };
 
@@ -287,7 +257,6 @@ const VetAppointments = () => {
     const today = new Date();
     const createdDate = new Date(createdAt);
     const daysDiff = differenceInDays(today, createdDate);
-
     if (daysDiff === 0) {
       return {
         text: "Aujourd'hui",
@@ -310,76 +279,48 @@ const VetAppointments = () => {
       };
     }
   };
-
   if (isLoading) {
-    return (
-      <div className="container mx-auto py-6 space-y-6">
+    return <div className="container mx-auto py-6 space-y-6">
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-vet-sage mx-auto"></div>
           <p className="text-vet-brown mt-4">Chargement des rendez-vous...</p>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   const renderBookingsList = (bookingsList: typeof bookingsForSelectedDate, emptyMessage: string, showDateBadge: boolean = false) => {
-    return (
-      <div className="space-y-3">
-        {bookingsList.map((booking) => {
-          // Détecter les photos dans conditional_answers pour ce booking
-          const photoKeys = booking.conditional_answers ? Object.keys(booking.conditional_answers).filter((key) => 
-            key.startsWith('photo_') && booking.conditional_answers[key] && typeof booking.conditional_answers[key] === 'string'
-          ) : [];
-          const hasPhotos = photoKeys.length > 0;
-
-          return (
-            <div 
-              key={booking.id} 
-              className="border border-vet-blue/20 rounded-lg bg-white hover:shadow-md transition-all overflow-hidden"
-            >
+    return <div className="space-y-3">
+        {bookingsList.map(booking => {
+        // Détecter les photos dans conditional_answers pour ce booking
+        const photoKeys = booking.conditional_answers ? Object.keys(booking.conditional_answers).filter(key => key.startsWith('photo_') && booking.conditional_answers[key] && typeof booking.conditional_answers[key] === 'string') : [];
+        const hasPhotos = photoKeys.length > 0;
+        return <div key={booking.id} className="border border-vet-blue/20 rounded-lg bg-white hover:shadow-md transition-all overflow-hidden">
           {/* Header avec urgence et statut */}
           <div className="flex items-center justify-between px-4 py-2 bg-gradient-to-r from-vet-beige/30 to-transparent border-b border-vet-blue/10">
             <div className="flex items-center gap-3">
               {/* Badge d'urgence - Toujours affiché */}
-              {booking.booking_source === 'online' && (
-                <div className={`rounded-md px-3 py-1.5 text-xs font-bold min-w-[55px] text-center flex flex-col items-center shadow-sm ${
-                  booking.urgency_score && booking.urgency_score >= 8 
-                    ? 'bg-red-500 text-white' 
-                    : booking.urgency_score && booking.urgency_score >= 6
-                    ? 'bg-orange-500 text-white'
-                    : booking.urgency_score && booking.urgency_score >= 4
-                    ? 'bg-yellow-500 text-white'
-                    : booking.urgency_score
-                    ? 'bg-green-500 text-white'
-                    : 'bg-gray-300 text-gray-600'
-                }`}>
+              {booking.booking_source === 'online' && <div className={`rounded-md px-3 py-1.5 text-xs font-bold min-w-[55px] text-center flex flex-col items-center shadow-sm ${booking.urgency_score && booking.urgency_score >= 8 ? 'bg-red-500 text-white' : booking.urgency_score && booking.urgency_score >= 6 ? 'bg-orange-500 text-white' : booking.urgency_score && booking.urgency_score >= 4 ? 'bg-yellow-500 text-white' : booking.urgency_score ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'}`}>
                   <span className="text-lg font-bold">{booking.urgency_score || 'N/A'}</span>
                   <span className="text-[9px] opacity-90">URGENCE</span>
-                </div>
-              )}
+                </div>}
               
               {/* Date de réservation avec badge si demandé */}
               <div className="text-xs text-vet-brown/70 flex items-center gap-2">
                 <Clock className="h-3 w-3" />
-                Réservé le {new Date(booking.created_at).toLocaleDateString('fr-FR', { 
-                  day: '2-digit', 
+                Réservé le {new Date(booking.created_at).toLocaleDateString('fr-FR', {
+                  day: '2-digit',
                   month: 'short',
                   hour: '2-digit',
                   minute: '2-digit'
                 })}
                 {showDateBadge && (() => {
                   const badge = getDateBadge(booking.created_at);
-                  return (
-                    <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full border ${badge.className}`}>
+                  return <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full border ${badge.className}`}>
                       {badge.text}
-                    </span>
-                  );
+                    </span>;
                 })()}
               </div>
               
-              {booking.urgency_score && booking.urgency_score >= 8 && (
-                <AlertTriangle className="h-4 w-4 text-red-500 animate-pulse" />
-              )}
+              {booking.urgency_score && booking.urgency_score >= 8 && <AlertTriangle className="h-4 w-4 text-red-500 animate-pulse" />}
             </div>
             
             {/* Statut */}
@@ -413,11 +354,7 @@ const VetAppointments = () => {
                     </div>
                   </div>
                   <div className="mt-2">
-                    <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
-                      booking.client_status === 'new' 
-                        ? 'bg-purple-100 text-purple-800 border border-purple-200' 
-                        : 'bg-blue-100 text-blue-800 border border-blue-200'
-                    }`}>
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${booking.client_status === 'new' ? 'bg-purple-100 text-purple-800 border border-purple-200' : 'bg-blue-100 text-blue-800 border border-blue-200'}`}>
                       <Users className="h-3 w-3" />
                       {booking.client_status === 'new' ? 'Nouveau client' : 'Déjà client'}
                     </span>
@@ -428,85 +365,56 @@ const VetAppointments = () => {
               {/* Colonne 2: Analyse & Symptômes */}
               <div className="lg:col-span-2 space-y-3">
                 {/* Résumé de l'analyse IA - Toujours affiché si disponible */}
-                {booking.ai_analysis && isValidAiAnalysis(booking.ai_analysis) && (
-                  <div className="bg-blue-50/50 border border-blue-200/50 rounded-lg p-3">
+                {booking.ai_analysis && isValidAiAnalysis(booking.ai_analysis) && <div className="bg-blue-50/50 border border-blue-200/50 rounded-lg p-3">
                     <div className="flex items-start gap-2">
                       <div className="text-lg">🤖</div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-xs font-bold text-blue-900 mb-1">Analyse IA</h4>
+                        <h4 className="text-xs font-bold text-blue-900 mb-1">Motif du RDV</h4>
                         <p className="text-sm text-blue-800 leading-relaxed">
                           {booking.ai_analysis.analysis_summary}
                         </p>
                       </div>
                     </div>
-                  </div>
-                )}
+                  </div>}
                 
                 {/* Motif de consultation - Toujours affiché */}
                 <div className="bg-vet-beige/30 rounded-lg p-3">
                   <p className="text-sm text-vet-brown">
-                    <span className="font-medium">Motif:</span> {
-                      booking.consultation_reason === 'consultation-convenance' ? 'Consultation de convenance' :
-                      booking.consultation_reason === 'symptomes-anomalie' ? 'Symptômes ou anomalie' :
-                      booking.consultation_reason === 'urgence' ? 'Urgence' : 'Consultation'
-                    }
+                    <span className="font-medium">Motif:</span> {booking.consultation_reason === 'consultation-convenance' ? 'Consultation de convenance' : booking.consultation_reason === 'symptomes-anomalie' ? 'Symptômes ou anomalie' : booking.consultation_reason === 'urgence' ? 'Urgence' : 'Consultation'}
                   </p>
                   {/* Afficher les options de convenance si disponibles */}
-                  {booking.consultation_reason === 'consultation-convenance' && booking.convenience_options && booking.convenience_options.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {booking.convenience_options.map((opt, idx) => (
-                        <span key={idx} className="text-[10px] bg-vet-sage/20 text-vet-sage px-2 py-1 rounded-full border border-vet-sage/30">
+                  {booking.consultation_reason === 'consultation-convenance' && booking.convenience_options && booking.convenience_options.length > 0 && <div className="mt-2 flex flex-wrap gap-1">
+                      {booking.convenience_options.map((opt, idx) => <span key={idx} className="text-[10px] bg-vet-sage/20 text-vet-sage px-2 py-1 rounded-full border border-vet-sage/30">
                           {opt}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  {booking.custom_text && (
-                    <p className="text-xs text-vet-brown/80 mt-2 italic">{booking.custom_text}</p>
-                  )}
+                        </span>)}
+                    </div>}
+                  {booking.custom_text && <p className="text-xs text-vet-brown/80 mt-2 italic">{booking.custom_text}</p>}
                 </div>
 
                 {/* Symptômes et commentaire */}
                 <div className="flex flex-col gap-2">
-                  {booking.selected_symptoms && booking.selected_symptoms.length > 0 && (
-                    <div className="bg-amber-50/50 border border-amber-200/50 rounded-lg p-2">
+                  {booking.selected_symptoms && booking.selected_symptoms.length > 0 && <div className="bg-amber-50/50 border border-amber-200/50 rounded-lg p-2">
                       <p className="text-xs font-bold text-amber-900 mb-1">Symptômes signalés</p>
                       <div className="flex flex-wrap gap-1">
-                        {booking.selected_symptoms.map((symptom, idx) => (
-                          <span key={idx} className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-full">
+                        {booking.selected_symptoms.map((symptom, idx) => <span key={idx} className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-full">
                             {symptom}
-                          </span>
-                        ))}
+                          </span>)}
                       </div>
-                    </div>
-                  )}
+                    </div>}
 
                   {/* Bouton pour voir les photos jointes */}
-                  {hasPhotos && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => photoGalleryRefs.current[booking.id]?.openFirstPhoto()}
-                      className="relative bg-vet-sage/10 border-vet-sage text-vet-sage hover:bg-vet-sage hover:text-white transition-colors"
-                    >
+                  {hasPhotos && <Button type="button" variant="outline" size="sm" onClick={() => photoGalleryRefs.current[booking.id]?.openFirstPhoto()} className="relative bg-vet-sage/10 border-vet-sage text-vet-sage hover:bg-vet-sage hover:text-white transition-colors">
                       <Camera className="h-4 w-4 mr-2" />
                       Voir les photos jointes
-                      <Badge 
-                        variant="secondary" 
-                        className="ml-2 bg-vet-sage text-white px-2 py-0.5 rounded-full animate-pulse"
-                      >
+                      <Badge variant="secondary" className="ml-2 bg-vet-sage text-white px-2 py-0.5 rounded-full animate-pulse">
                         {photoKeys.length}
                       </Badge>
-                    </Button>
-                  )}
+                    </Button>}
 
-                  {booking.client_comment && (
-                    <div className="bg-slate-50/50 border border-slate-200/50 rounded-lg p-2">
+                  {booking.client_comment && <div className="bg-slate-50/50 border border-slate-200/50 rounded-lg p-2">
                       <p className="text-xs font-bold text-slate-900 mb-1">Commentaire client</p>
                       <p className="text-xs text-slate-700 italic">"{booking.client_comment}"</p>
-                    </div>
-                  )}
+                    </div>}
                 </div>
               </div>
             </div>
@@ -514,78 +422,45 @@ const VetAppointments = () => {
 
           {/* Footer avec actions */}
           <div className="px-4 py-3 bg-vet-beige/10 border-t border-vet-blue/10 flex items-center justify-between gap-3">
-            {booking.appointment_date ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate(`/vet/planning?date=${booking.appointment_date}`)}
-                className="bg-gradient-to-r from-vet-sage/20 to-vet-sage/10 border-vet-sage/40 hover:from-vet-sage/30 hover:to-vet-sage/20 hover:border-vet-sage/60 text-vet-navy font-semibold shadow-sm transition-all duration-200"
-              >
+            {booking.appointment_date ? <Button variant="outline" size="sm" onClick={() => navigate(`/vet/planning?date=${booking.appointment_date}`)} className="bg-gradient-to-r from-vet-sage/20 to-vet-sage/10 border-vet-sage/40 hover:from-vet-sage/30 hover:to-vet-sage/20 hover:border-vet-sage/60 text-vet-navy font-semibold shadow-sm transition-all duration-200">
                 <Calendar className="h-4 w-4 mr-2" />
-                RDV prévu le {new Date(booking.appointment_date).toLocaleDateString('fr-FR', { 
-                  day: '2-digit', 
-                  month: 'long'
-                })} à {booking.appointment_time}
-              </Button>
-            ) : (
-              <div className="flex items-center gap-2 text-vet-brown/70 text-sm">
+                RDV prévu le {new Date(booking.appointment_date).toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: 'long'
+              })} à {booking.appointment_time}
+              </Button> : <div className="flex items-center gap-2 text-vet-brown/70 text-sm">
                 <Calendar className="h-4 w-4" />
                 Date à définir
-              </div>
-            )}
+              </div>}
             
             <div className="flex items-center gap-2">
-              {booking.status === "pending" && (
-                <Button 
-                  size="sm" 
-                  className="bg-vet-sage hover:bg-vet-sage/90 text-white"
-                  onClick={() => handleStatusChange(booking.id, 'confirmed')}
-                >
+              {booking.status === "pending" && <Button size="sm" className="bg-vet-sage hover:bg-vet-sage/90 text-white" onClick={() => handleStatusChange(booking.id, 'confirmed')}>
                   ✓ Confirmer
-                </Button>
-              )}
+                </Button>}
               
-              {booking.status !== "cancelled" && booking.status !== "completed" && (
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="border-red-300 text-red-600 hover:bg-red-50"
-                  onClick={() => handleStatusChange(booking.id, 'cancelled')}
-                >
+              {booking.status !== "cancelled" && booking.status !== "completed" && <Button size="sm" variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => handleStatusChange(booking.id, 'cancelled')}>
                   ✕ Annuler
-                </Button>
-              )}
+                </Button>}
             </div>
           </div>
           
           {/* Galerie de photos - invisible jusqu'au clic */}
-          {booking.conditional_answers && (
-            <PhotoGallery 
-              ref={(ref) => {
-                if (ref) photoGalleryRefs.current[booking.id] = ref;
-              }} 
-              conditionalAnswers={booking.conditional_answers} 
-            />
-          )}
-        </div>
-          );
-        })}
+          {booking.conditional_answers && <PhotoGallery ref={ref => {
+            if (ref) photoGalleryRefs.current[booking.id] = ref;
+          }} conditionalAnswers={booking.conditional_answers} />}
+        </div>;
+      })}
 
-        {bookingsList.length === 0 && (
-        <div className="text-center py-12">
+        {bookingsList.length === 0 && <div className="text-center py-12">
           <Globe className="h-16 w-16 text-vet-blue mx-auto mb-4 opacity-50" />
           <h3 className="text-xl font-semibold text-vet-navy mb-2">{emptyMessage}</h3>
           <p className="text-vet-brown">
             {searchTerm ? 'Essayez de modifier vos critères de recherche' : 'Aucune réservation pour cette date'}
           </p>
-        </div>
-        )}
-      </div>
-    );
+        </div>}
+      </div>;
   };
-
-  return (
-    <div className="container mx-auto py-6 space-y-6">
+  return <div className="container mx-auto py-6 space-y-6">
       {/* En-tête */}
       <div className="flex items-center justify-between">
         <div>
@@ -601,35 +476,22 @@ const VetAppointments = () => {
       <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={goToPreviousDay}
-              className="border-vet-navy/30"
-            >
+            <Button variant="outline" size="sm" onClick={goToPreviousDay} className="border-vet-navy/30">
               <ChevronLeft className="h-4 w-4" />
             </Button>
             
             <div className="flex flex-col items-center gap-1">
               <div className="text-xl font-bold text-vet-navy">
-                {format(selectedDate, 'EEEE d MMMM yyyy', { locale: fr })}
+                {format(selectedDate, 'EEEE d MMMM yyyy', {
+                locale: fr
+              })}
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={goToToday}
-                className="text-xs text-vet-sage hover:text-vet-sage/80"
-              >
+              <Button variant="ghost" size="sm" onClick={goToToday} className="text-xs text-vet-sage hover:text-vet-sage/80">
                 Aujourd'hui
               </Button>
             </div>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={goToNextDay}
-              className="border-vet-navy/30"
-            >
+            <Button variant="outline" size="sm" onClick={goToNextDay} className="border-vet-navy/30">
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
@@ -642,12 +504,7 @@ const VetAppointments = () => {
           {/* Recherche */}
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-vet-brown" />
-            <Input
-              placeholder="Rechercher par nom d'animal, propriétaire ou téléphone..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage"
-            />
+            <Input placeholder="Rechercher par nom d'animal, propriétaire ou téléphone..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 border-vet-blue/30 focus:border-vet-sage focus:ring-vet-sage" />
           </div>
 
           {/* Filtres par urgence et tri */}
@@ -658,71 +515,36 @@ const VetAppointments = () => {
                 <Flame className="h-4 w-4" />
                 Niveau d'urgence:
               </span>
-              <Button
-                size="sm"
-                variant={urgencyFilter === 'all' ? 'default' : 'outline'}
-                onClick={() => setUrgencyFilter('all')}
-                className={urgencyFilter === 'all' ? 'bg-vet-sage hover:bg-vet-sage/90' : ''}
-              >
+              <Button size="sm" variant={urgencyFilter === 'all' ? 'default' : 'outline'} onClick={() => setUrgencyFilter('all')} className={urgencyFilter === 'all' ? 'bg-vet-sage hover:bg-vet-sage/90' : ''}>
                 Tous
-                {pendingBookingsForCount.length > 0 && (
-                  <Badge className="ml-2 bg-vet-navy hover:bg-vet-navy text-white px-1.5 py-0 text-xs min-w-[20px] h-5 flex items-center justify-center">
+                {pendingBookingsForCount.length > 0 && <Badge className="ml-2 bg-vet-navy hover:bg-vet-navy text-white px-1.5 py-0 text-xs min-w-[20px] h-5 flex items-center justify-center">
                     {pendingBookingsForCount.length}
-                  </Badge>
-                )}
+                  </Badge>}
               </Button>
-              <Button
-                size="sm"
-                variant={urgencyFilter === 'critical' ? 'default' : 'outline'}
-                onClick={() => setUrgencyFilter('critical')}
-                className={`relative ${urgencyFilter === 'critical' ? 'bg-red-500 hover:bg-red-600' : 'border-red-300 text-red-600 hover:bg-red-50'}`}
-              >
+              <Button size="sm" variant={urgencyFilter === 'critical' ? 'default' : 'outline'} onClick={() => setUrgencyFilter('critical')} className={`relative ${urgencyFilter === 'critical' ? 'bg-red-500 hover:bg-red-600' : 'border-red-300 text-red-600 hover:bg-red-50'}`}>
                 <AlertTriangle className="h-3 w-3 mr-1" />
                 Critique (≥8)
-                {criticalCount > 0 && (
-                  <Badge className="ml-2 bg-red-700 hover:bg-red-700 text-white px-1.5 py-0 text-xs min-w-[20px] h-5 flex items-center justify-center animate-pulse">
+                {criticalCount > 0 && <Badge className="ml-2 bg-red-700 hover:bg-red-700 text-white px-1.5 py-0 text-xs min-w-[20px] h-5 flex items-center justify-center animate-pulse">
                     {criticalCount}
-                  </Badge>
-                )}
+                  </Badge>}
               </Button>
-              <Button
-                size="sm"
-                variant={urgencyFilter === 'high' ? 'default' : 'outline'}
-                onClick={() => setUrgencyFilter('high')}
-                className={urgencyFilter === 'high' ? 'bg-orange-500 hover:bg-orange-600' : 'border-orange-300 text-orange-600 hover:bg-orange-50'}
-              >
+              <Button size="sm" variant={urgencyFilter === 'high' ? 'default' : 'outline'} onClick={() => setUrgencyFilter('high')} className={urgencyFilter === 'high' ? 'bg-orange-500 hover:bg-orange-600' : 'border-orange-300 text-orange-600 hover:bg-orange-50'}>
                 Élevée (6-7)
-                {highCount > 0 && (
-                  <Badge className="ml-2 bg-orange-700 hover:bg-orange-700 text-white px-1.5 py-0 text-xs min-w-[20px] h-5 flex items-center justify-center">
+                {highCount > 0 && <Badge className="ml-2 bg-orange-700 hover:bg-orange-700 text-white px-1.5 py-0 text-xs min-w-[20px] h-5 flex items-center justify-center">
                     {highCount}
-                  </Badge>
-                )}
+                  </Badge>}
               </Button>
-              <Button
-                size="sm"
-                variant={urgencyFilter === 'medium' ? 'default' : 'outline'}
-                onClick={() => setUrgencyFilter('medium')}
-                className={urgencyFilter === 'medium' ? 'bg-yellow-500 hover:bg-yellow-600' : 'border-yellow-300 text-yellow-600 hover:bg-yellow-50'}
-              >
+              <Button size="sm" variant={urgencyFilter === 'medium' ? 'default' : 'outline'} onClick={() => setUrgencyFilter('medium')} className={urgencyFilter === 'medium' ? 'bg-yellow-500 hover:bg-yellow-600' : 'border-yellow-300 text-yellow-600 hover:bg-yellow-50'}>
                 Moyenne (4-5)
-                {mediumCount > 0 && (
-                  <Badge className="ml-2 bg-yellow-700 hover:bg-yellow-700 text-white px-1.5 py-0 text-xs min-w-[20px] h-5 flex items-center justify-center">
+                {mediumCount > 0 && <Badge className="ml-2 bg-yellow-700 hover:bg-yellow-700 text-white px-1.5 py-0 text-xs min-w-[20px] h-5 flex items-center justify-center">
                     {mediumCount}
-                  </Badge>
-                )}
+                  </Badge>}
               </Button>
-              <Button
-                size="sm"
-                variant={urgencyFilter === 'low' ? 'default' : 'outline'}
-                onClick={() => setUrgencyFilter('low')}
-                className={urgencyFilter === 'low' ? 'bg-green-500 hover:bg-green-600' : 'border-green-300 text-green-600 hover:bg-green-50'}
-              >
+              <Button size="sm" variant={urgencyFilter === 'low' ? 'default' : 'outline'} onClick={() => setUrgencyFilter('low')} className={urgencyFilter === 'low' ? 'bg-green-500 hover:bg-green-600' : 'border-green-300 text-green-600 hover:bg-green-50'}>
                 Faible (&lt;4)
-                {lowCount > 0 && (
-                  <Badge className="ml-2 bg-green-700 hover:bg-green-700 text-white px-1.5 py-0 text-xs min-w-[20px] h-5 flex items-center justify-center">
+                {lowCount > 0 && <Badge className="ml-2 bg-green-700 hover:bg-green-700 text-white px-1.5 py-0 text-xs min-w-[20px] h-5 flex items-center justify-center">
                     {lowCount}
-                  </Badge>
-                )}
+                  </Badge>}
               </Button>
             </div>
 
@@ -732,20 +554,10 @@ const VetAppointments = () => {
                 <ArrowUpDown className="h-4 w-4" />
                 Trier par:
               </span>
-              <Button
-                size="sm"
-                variant={sortBy === 'urgency' ? 'default' : 'outline'}
-                onClick={() => setSortBy('urgency')}
-                className={sortBy === 'urgency' ? 'bg-vet-sage hover:bg-vet-sage/90' : ''}
-              >
+              <Button size="sm" variant={sortBy === 'urgency' ? 'default' : 'outline'} onClick={() => setSortBy('urgency')} className={sortBy === 'urgency' ? 'bg-vet-sage hover:bg-vet-sage/90' : ''}>
                 Urgence
               </Button>
-              <Button
-                size="sm"
-                variant={sortBy === 'date' ? 'default' : 'outline'}
-                onClick={() => setSortBy('date')}
-                className={sortBy === 'date' ? 'bg-vet-sage hover:bg-vet-sage/90' : ''}
-              >
+              <Button size="sm" variant={sortBy === 'date' ? 'default' : 'outline'} onClick={() => setSortBy('date')} className={sortBy === 'date' ? 'bg-vet-sage hover:bg-vet-sage/90' : ''}>
                 Date
               </Button>
             </div>
@@ -759,46 +571,31 @@ const VetAppointments = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="border-b border-vet-blue/20 px-6">
               <TabsList className="bg-transparent h-auto p-0">
-                <TabsTrigger 
-                  value="all-pending" 
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-vet-sage rounded-none px-6 py-3"
-                >
+                <TabsTrigger value="all-pending" className="data-[state=active]:border-b-2 data-[state=active]:border-vet-sage rounded-none px-6 py-3">
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4" />
                     <span>Tous à confirmer</span>
-                    {allPendingBookings.length > 0 && (
-                      <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse">
+                    {allPendingBookings.length > 0 && <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse">
                         {allPendingBookings.length}
-                      </span>
-                    )}
+                      </span>}
                   </div>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="pending" 
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-vet-sage rounded-none px-6 py-3"
-                >
+                <TabsTrigger value="pending" className="data-[state=active]:border-b-2 data-[state=active]:border-vet-sage rounded-none px-6 py-3">
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4" />
                     <span>À confirmer (jour sélectionné)</span>
-                    {pendingBookings.length > 0 && (
-                      <span className="ml-2 bg-yellow-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    {pendingBookings.length > 0 && <span className="ml-2 bg-yellow-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                         {pendingBookings.length}
-                      </span>
-                    )}
+                      </span>}
                   </div>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="confirmed" 
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-vet-sage rounded-none px-6 py-3"
-                >
+                <TabsTrigger value="confirmed" className="data-[state=active]:border-b-2 data-[state=active]:border-vet-sage rounded-none px-6 py-3">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     <span>Confirmés</span>
-                    {confirmedBookings.length > 0 && (
-                      <span className="ml-2 bg-vet-sage text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    {confirmedBookings.length > 0 && <span className="ml-2 bg-vet-sage text-white text-xs font-bold px-2 py-0.5 rounded-full">
                         {confirmedBookings.length}
-                      </span>
-                    )}
+                      </span>}
                   </div>
                 </TabsTrigger>
               </TabsList>
@@ -819,7 +616,7 @@ const VetAppointments = () => {
         </CardContent>
       </Card>
 
-      <AlertDialog open={bookingToConfirm !== null} onOpenChange={(open) => !open && handleCancelConfirmation()}>
+      <AlertDialog open={bookingToConfirm !== null} onOpenChange={open => !open && handleCancelConfirmation()}>
         <AlertDialogPortal>
           <AlertDialogContent className="max-w-md">
             <AlertDialogHeader>
@@ -832,107 +629,63 @@ const VetAppointments = () => {
                     </label>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          className={`w-full h-auto min-h-9 justify-between text-sm ${
-                            selectedConsultationTypeIds.length === 0 ? 'border-red-500 border-2' : ''
-                          }`}
-                        >
+                        <Button variant="outline" role="combobox" className={`w-full h-auto min-h-9 justify-between text-sm ${selectedConsultationTypeIds.length === 0 ? 'border-red-500 border-2' : ''}`}>
                           <div className="flex flex-wrap gap-1 flex-1 overflow-hidden max-w-[90%]">
-                            {selectedTypes.length === 0 ? (
-                              <span className="text-muted-foreground">Sélectionnez le(s) type(s)...</span>
-                            ) : selectedTypes.length === 1 ? (
-                              <Badge
-                                variant="secondary"
-                                className="text-xs px-2 py-0.5 gap-1 hover:bg-secondary/80 cursor-pointer flex items-center max-w-full"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRemoveConsultationType(selectedTypes[0].id);
-                                }}
-                              >
+                            {selectedTypes.length === 0 ? <span className="text-muted-foreground">Sélectionnez le(s) type(s)...</span> : selectedTypes.length === 1 ? <Badge variant="secondary" className="text-xs px-2 py-0.5 gap-1 hover:bg-secondary/80 cursor-pointer flex items-center max-w-full" onClick={e => {
+                            e.stopPropagation();
+                            handleRemoveConsultationType(selectedTypes[0].id);
+                          }}>
                                 <span className="truncate">
                                   {selectedTypes[0].name} ({selectedTypes[0].duration_minutes} min)
                                 </span>
                                 <X className="h-3 w-3 shrink-0" />
-                              </Badge>
-                            ) : (
-                              <>
-                                <Badge
-                                  variant="secondary"
-                                  className="text-xs px-2 py-0.5 gap-1 hover:bg-secondary/80 cursor-pointer flex items-center"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleRemoveConsultationType(selectedTypes[0].id);
-                                  }}
-                                >
+                              </Badge> : <>
+                                <Badge variant="secondary" className="text-xs px-2 py-0.5 gap-1 hover:bg-secondary/80 cursor-pointer flex items-center" onClick={e => {
+                              e.stopPropagation();
+                              handleRemoveConsultationType(selectedTypes[0].id);
+                            }}>
                                   <span className="truncate max-w-[120px]">
                                     {selectedTypes[0].name}
                                   </span>
                                   <X className="h-3 w-3 shrink-0" />
                                 </Badge>
-                                <Badge
-                                  variant="secondary"
-                                  className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 border-blue-200"
-                                >
+                                <Badge variant="secondary" className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 border-blue-200">
                                   +{selectedTypes.length - 1} autre{selectedTypes.length > 2 ? 's' : ''}
                                 </Badge>
-                              </>
-                            )}
+                              </>}
                           </div>
                           <ChevronDown className="h-4 w-4 shrink-0 opacity-50 ml-1" />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-[320px] p-2 bg-white z-50" align="start">
                         <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                          {selectedTypes.length > 0 && (
-                            <div className="pb-2 border-b mb-2">
+                          {selectedTypes.length > 0 && <div className="pb-2 border-b mb-2">
                               <div className="text-xs font-medium text-gray-500 mb-2">
                                 Sélectionné{selectedTypes.length > 1 ? 's' : ''} ({selectedTypes.reduce((sum, t) => sum + t.duration_minutes, 0)} min total)
                               </div>
                               <div className="flex flex-wrap gap-1">
-                                {selectedTypes.map((type) => (
-                                  <Badge
-                                    key={type.id}
-                                    variant="secondary"
-                                    className="text-xs px-2 py-0.5 gap-1 hover:bg-secondary/80 cursor-pointer"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleRemoveConsultationType(type.id);
-                                    }}
-                                  >
+                                {selectedTypes.map(type => <Badge key={type.id} variant="secondary" className="text-xs px-2 py-0.5 gap-1 hover:bg-secondary/80 cursor-pointer" onClick={e => {
+                              e.stopPropagation();
+                              handleRemoveConsultationType(type.id);
+                            }}>
                                     {type.name} ({type.duration_minutes}m)
                                     <X className="h-3 w-3" />
-                                  </Badge>
-                                ))}
+                                  </Badge>)}
                               </div>
-                            </div>
-                          )}
-                          {consultationTypes.map((type) => (
-                            <div key={type.id} className="flex items-center space-x-2 hover:bg-gray-50 p-1.5 rounded">
-                              <Checkbox
-                                id={`confirm-type-${type.id}`}
-                                checked={selectedConsultationTypeIds.includes(type.id)}
-                                onCheckedChange={() => handleConsultationTypeToggle(type.id)}
-                                className="h-4 w-4"
-                              />
-                              <label
-                                htmlFor={`confirm-type-${type.id}`}
-                                className="text-sm font-normal leading-none cursor-pointer flex-1"
-                              >
+                            </div>}
+                          {consultationTypes.map(type => <div key={type.id} className="flex items-center space-x-2 hover:bg-gray-50 p-1.5 rounded">
+                              <Checkbox id={`confirm-type-${type.id}`} checked={selectedConsultationTypeIds.includes(type.id)} onCheckedChange={() => handleConsultationTypeToggle(type.id)} className="h-4 w-4" />
+                              <label htmlFor={`confirm-type-${type.id}`} className="text-sm font-normal leading-none cursor-pointer flex-1">
                                 {type.name} <span className="text-gray-500">({type.duration_minutes} min)</span>
                               </label>
-                            </div>
-                          ))}
+                            </div>)}
                         </div>
                       </PopoverContent>
                     </Popover>
-                    {selectedConsultationTypeIds.length === 0 && (
-                      <p className="text-xs text-orange-600 mt-2 flex items-center gap-1">
+                    {selectedConsultationTypeIds.length === 0 && <p className="text-xs text-orange-600 mt-2 flex items-center gap-1">
                         <AlertTriangle className="h-3 w-3" />
                         Champ obligatoire pour afficher la couleur dans le planning
-                      </p>
-                    )}
+                      </p>}
                   </div>
                   <p className="text-sm text-muted-foreground">
                     Un email de confirmation sera automatiquement envoyé au client.
@@ -944,19 +697,13 @@ const VetAppointments = () => {
               <AlertDialogCancel onClick={handleCancelConfirmation}>
                 Annuler
               </AlertDialogCancel>
-              <AlertDialogAction 
-                onClick={handleConfirmConfirmation}
-                disabled={selectedConsultationTypeIds.length === 0}
-                className="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+              <AlertDialogAction onClick={handleConfirmConfirmation} disabled={selectedConsultationTypeIds.length === 0} className="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 disabled:cursor-not-allowed">
                 Valider ✓
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialogPortal>
       </AlertDialog>
-    </div>
-  );
+    </div>;
 };
-
 export default VetAppointments;
