@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Clock, MapPin, Phone, User, Heart, ChevronDown } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface BookingSummaryCardProps {
@@ -26,7 +26,12 @@ export const BookingSummaryCard = ({
   animalSpecies
 }: BookingSummaryCardProps) => {
   const isMobile = useIsMobile();
-  const [isOpen, setIsOpen] = useState(!isMobile); // Ouvert par défaut sur desktop/tablette, fermé sur mobile
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    // Update isOpen once isMobile is determined
+    setIsOpen(!isMobile);
+  }, [isMobile]);
   
   return (
     <Card className="bg-white/90 backdrop-blur-sm border-vet-sage/30 shadow-lg mb-3">
