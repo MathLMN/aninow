@@ -367,7 +367,7 @@ const VetAppointments = () => {
                 {/* Résumé de l'analyse IA - Toujours affiché si disponible */}
                 {booking.ai_analysis && isValidAiAnalysis(booking.ai_analysis) && <div className="bg-blue-50/50 border border-blue-200/50 rounded-lg p-3">
                     <div className="flex items-start gap-2">
-                      <div className="text-lg">🤖</div>
+                      <div className="text-lg">🩺</div>
                       <div className="flex-1 min-w-0">
                         <h4 className="text-xs font-bold text-blue-900 mb-1">Motif du RDV</h4>
                         <p className="text-sm text-blue-800 leading-relaxed">
