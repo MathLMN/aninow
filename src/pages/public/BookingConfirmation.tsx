@@ -299,7 +299,7 @@ const BookingConfirmation = () => {
 
           {/* Contenu additionnel (masqué par défaut) */}
           {showAdvice && (
-            <div className="space-y-4 animate-fade-in">
+            <div className="space-y-4 animate-fade-in mb-6">
               {/* Conseils personnalisés */}
               <PersonalizedAdviceCard 
                 advice={advice}
