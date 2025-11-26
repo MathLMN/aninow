@@ -1,6 +1,5 @@
 
-import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useState } from "react";
 import { DailyCalendarView } from "@/components/planning/DailyCalendarView";
 import { WeeklyCalendarView } from "@/components/planning/WeeklyCalendarView";
 import { PlanningHeader } from "@/components/planning/PlanningHeader";
@@ -16,7 +15,6 @@ import { useSlotManagement } from "@/hooks/useSlotManagement";
 import { useAppointmentClipboard } from "@/hooks/useAppointmentClipboard";
 
 export default function VetPlanning() {
-  const [searchParams] = useSearchParams();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'daily' | 'weekly'>('daily');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -187,29 +185,6 @@ export default function VetPlanning() {
       refreshBookings();
     }
   };
-
-  // Handle URL parameters to navigate to specific date and open appointment
-  useEffect(() => {
-    const dateParam = searchParams.get('date');
-    const bookingIdParam = searchParams.get('bookingId');
-
-    if (dateParam) {
-      const parsedDate = new Date(dateParam);
-      if (!isNaN(parsedDate.getTime())) {
-        setSelectedDate(parsedDate);
-      }
-    }
-
-    if (bookingIdParam && bookings.length > 0) {
-      const booking = bookings.find(b => b.id === bookingIdParam);
-      if (booking) {
-        // Small delay to ensure the view is rendered
-        setTimeout(() => {
-          handleAppointmentClick(booking);
-        }, 100);
-      }
-    }
-  }, [searchParams, bookings]);
 
   // Filter bookings for selected date (daily view)
   const todayBookings = bookings.filter(booking => {
