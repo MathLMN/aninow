@@ -9,7 +9,6 @@ import { DailyCalendarGrid } from "./DailyCalendarGrid";
 import { BlockSlotModal } from "./BlockSlotModal";
 import { EnhancedDateNavigation } from "./EnhancedDateNavigation";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
-import { useClinicSettings } from "@/hooks/useClinicSettings";
 
 interface DailyCalendarViewProps {
   selectedDate: Date;
@@ -72,7 +71,6 @@ export const DailyCalendarView = ({
   } | null>(null);
   
   const { veterinarians: allVeterinarians } = useClinicVeterinarians();
-  const { settings } = useClinicSettings();
 
   const navigateDay = (direction: 'prev' | 'next') => {
     const newDate = new Date(selectedDate);
@@ -94,44 +92,14 @@ export const DailyCalendarView = ({
     setBlockSlotData(null);
   };
 
-  // Créer les colonnes pour l'affichage avec ordre personnalisé
-  const columns = (() => {
-    const activeVets = veterinarians.filter(vet => vet.is_active);
-    const columnsOrder = settings?.veterinarian_columns_order || [];
-    
-    // Si un ordre personnalisé existe
-    if (columnsOrder.length > 0) {
-      const orderedColumns = [];
-      
-      // Ajouter les colonnes dans l'ordre défini
-      for (const columnId of columnsOrder) {
-        if (columnId === 'asv') {
-          orderedColumns.push({ id: 'asv', title: 'ASV' });
-        } else {
-          const vet = activeVets.find(v => v.id === columnId);
-          if (vet) {
-            orderedColumns.push({ id: vet.id, title: vet.name });
-          }
-        }
-      }
-      
-      // Ajouter les nouveaux vétérinaires qui ne sont pas dans l'ordre
-      const orderedIds = new Set(columnsOrder);
-      const newVets = activeVets
-        .filter(vet => !orderedIds.has(vet.id))
-        .map(vet => ({ id: vet.id, title: vet.name }));
-      
-      return [...orderedColumns, ...newVets];
-    }
-    
-    // Ordre par défaut: ASV puis vétérinaires par ordre alphabétique
-    return [
-      { id: 'asv', title: 'ASV' },
-      ...activeVets
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map(vet => ({ id: vet.id, title: vet.name }))
-    ];
-  })();
+  // Créer les colonnes pour l'affichage
+  const columns = [{
+    id: 'asv',
+    title: 'ASV'
+  }, ...veterinarians.filter(vet => vet.is_active).map(vet => ({
+    id: vet.id,
+    title: vet.name
+  }))];
 
   // Configuration des horaires simplifiée - horaires ouverts de 8h à 19h
   const daySchedule = {

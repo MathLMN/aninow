@@ -18,7 +18,6 @@ import { useClinicAccess } from "@/hooks/useClinicAccess";
 import { VeterinarianAbsenceManager } from "./VeterinarianAbsenceManager";
 import { VeterinarianWeeklySchedule } from "./VeterinarianWeeklySchedule";
 import { ConvenienceOptionsManager } from "./ConvenienceOptionsManager";
-import { VeterinarianColumnsOrderManager } from "./VeterinarianColumnsOrderManager";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -1230,31 +1229,6 @@ export const ClinicSettingsForm = () => {
 
       <VeterinarianAbsenceManager veterinarians={veterinarians.filter(vet => vet.is_active)} />
       
-      {/* Ordre des colonnes du planning */}
-      <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-        <CardHeader>
-          <CardTitle className="text-vet-navy flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-vet-sage" />
-            Ordre d'affichage des colonnes du planning
-          </CardTitle>
-          <CardDescription>
-            Réorganisez l'ordre des colonnes vétérinaires affichées dans votre planning quotidien
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <VeterinarianColumnsOrderManager
-            veterinarians={veterinarians}
-            currentOrder={settings?.veterinarian_columns_order || []}
-            asvEnabled={settings?.asv_enabled ?? true}
-            onOrderChange={(newOrder) => {
-              updateSettings({
-                veterinarian_columns_order: newOrder
-              });
-            }}
-          />
-        </CardContent>
-      </Card>
-
       <EmailPreviewModal open={isEmailPreviewOpen} onOpenChange={setIsEmailPreviewOpen} clinicName={form.watch("clinicName")} clinicPhone={form.watch("clinicPhone")} clinicAddress={form.watch("clinicAddressStreet") && form.watch("clinicAddressCity") && form.watch("clinicAddressPostalCode") ? `${form.watch("clinicAddressStreet")}, ${form.watch("clinicAddressPostalCode")} ${form.watch("clinicAddressCity")}` : undefined} />
     </div>;
 };

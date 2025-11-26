@@ -50,7 +50,6 @@ interface ClinicSettings {
   default_slot_duration_minutes?: number
   minimum_booking_delay_hours?: number
   convenience_options_config?: ConvenienceOption[]
-  veterinarian_columns_order?: string[]
   clinic_id?: string
   created_at?: string
   updated_at?: string
@@ -131,8 +130,7 @@ const getDefaultSettings = (): ClinicSettings => ({
     { value: "castration-sterilisation", label: "Castration/Stérilisation (pré-opératoire)", color: "bg-purple-100 text-purple-600 border-purple-200", isActive: true },
     { value: "detartrage-extractions", label: "Détartrage/Extractions dentaires (pré-opératoire)", color: "bg-pink-100 text-pink-600 border-pink-200", isActive: true },
     { value: "autre", label: "Autre (Précisez)", color: "bg-gray-100 text-gray-600 border-gray-200", isActive: true, isOther: true }
-  ],
-  veterinarian_columns_order: []
+  ]
 });
 
 export const useClinicSettings = () => {
@@ -188,8 +186,7 @@ export const useClinicSettings = () => {
           clinic_address_city: data.clinic_address_city || '',
           clinic_address_postal_code: data.clinic_address_postal_code || '',
           clinic_address_country: data.clinic_address_country || 'France',
-          convenience_options_config: (data.convenience_options_config as unknown as ConvenienceOption[]) || getDefaultSettings().convenience_options_config,
-          veterinarian_columns_order: ((data as any).veterinarian_columns_order as string[]) || []
+          convenience_options_config: (data.convenience_options_config as unknown as ConvenienceOption[]) || getDefaultSettings().convenience_options_config
         };
         setSettings(settingsData);
       } else {
@@ -241,7 +238,6 @@ export const useClinicSettings = () => {
         default_slot_duration_minutes: updatedSettings.default_slot_duration_minutes || 30,
         minimum_booking_delay_hours: updatedSettings.minimum_booking_delay_hours || 0,
         convenience_options_config: updatedSettings.convenience_options_config ? JSON.parse(JSON.stringify(updatedSettings.convenience_options_config)) : undefined,
-        veterinarian_columns_order: updatedSettings.veterinarian_columns_order || [],
         clinic_id: currentClinicId
       };
       
@@ -299,8 +295,7 @@ export const useClinicSettings = () => {
         clinic_address_city: data.clinic_address_city || '',
         clinic_address_postal_code: data.clinic_address_postal_code || '',
         clinic_address_country: data.clinic_address_country || 'France',
-        convenience_options_config: (data.convenience_options_config as ConvenienceOption[]) || getDefaultSettings().convenience_options_config,
-        veterinarian_columns_order: ((data as any).veterinarian_columns_order as string[]) || []
+        convenience_options_config: (data.convenience_options_config as ConvenienceOption[]) || getDefaultSettings().convenience_options_config
       };
       
       console.log('🔄 Updating local state with:', settingsData);
