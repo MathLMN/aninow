@@ -102,8 +102,32 @@ export const generateColumns = (
     });
   }
 
-  // Ajouter les colonnes des vétérinaires actifs
-  veterinarians.filter(vet => vet.is_active).forEach(vet => {
+  // Filtrer les vétérinaires actifs
+  const activeVets = veterinarians.filter(vet => vet.is_active);
+  
+  // Trier selon l'ordre personnalisé si disponible
+  let orderedVets = activeVets;
+  if (settings?.veterinarian_columns_order && settings.veterinarian_columns_order.length > 0) {
+    // Créer une map pour accès rapide
+    const vetMap = new Map(activeVets.map(v => [v.id, v]));
+    
+    // Trier selon l'ordre enregistré
+    const ordered = settings.veterinarian_columns_order
+      .map((id: string) => vetMap.get(id))
+      .filter(Boolean);
+    
+    // Ajouter les nouveaux vétérinaires (non présents dans l'ordre enregistré) à la fin
+    const orderedIds = new Set(settings.veterinarian_columns_order);
+    const newVets = activeVets.filter(v => !orderedIds.has(v.id));
+    
+    orderedVets = [...ordered, ...newVets];
+  } else {
+    // Si pas d'ordre personnalisé, trier alphabétiquement
+    orderedVets = [...activeVets].sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  // Ajouter les colonnes des vétérinaires dans l'ordre
+  orderedVets.forEach(vet => {
     const isAbsent = selectedDate ? isVeterinarianAbsent(vet.id, selectedDate, absences) : false;
     
     columns.push({

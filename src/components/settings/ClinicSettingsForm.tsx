@@ -387,6 +387,43 @@ export const ClinicSettingsForm = () => {
     }
     setOpenVeterinarianSchedules(newOpenVets);
   };
+  
+  // Ordre personnalisé des vétérinaires pour le planning
+  const orderedVeterinarians = React.useMemo(() => {
+    if (!settings.veterinarian_columns_order || settings.veterinarian_columns_order.length === 0) {
+      // Si pas d'ordre personnalisé, retourner l'ordre alphabétique par défaut
+      return [...veterinarians].sort((a, b) => a.name.localeCompare(b.name));
+    }
+    
+    // Créer une map pour accès rapide
+    const vetMap = new Map(veterinarians.map(v => [v.id, v]));
+    
+    // Trier selon l'ordre enregistré
+    const ordered = settings.veterinarian_columns_order
+      .map(id => vetMap.get(id))
+      .filter(Boolean) as Veterinarian[];
+    
+    // Ajouter les nouveaux vétérinaires (non présents dans l'ordre enregistré) à la fin
+    const orderedIds = new Set(settings.veterinarian_columns_order);
+    const newVets = veterinarians.filter(v => !orderedIds.has(v.id));
+    
+    return [...ordered, ...newVets];
+  }, [veterinarians, settings.veterinarian_columns_order]);
+  
+  const handleVeterinarianDragEnd = async (result: DropResult) => {
+    if (!result.destination) return;
+    
+    const items = Array.from(orderedVeterinarians);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    
+    // Sauvegarder le nouvel ordre
+    const newOrder = items.map(v => v.id);
+    await updateSettings({
+      veterinarian_columns_order: newOrder
+    });
+  };
+  
   const [isConsultationTypeDialogOpen, setIsConsultationTypeDialogOpen] = useState(false);
   const [newConsultationType, setNewConsultationType] = useState<NewConsultationType>({
     name: '',
@@ -1147,77 +1184,111 @@ export const ClinicSettingsForm = () => {
           </div>
 
           <div className="space-y-3">
-            {veterinarians.map(vet => {
-            const vetSchedules = schedules.filter(s => s.veterinarian_id === vet.id);
-            const isScheduleOpen = openVeterinarianSchedules.has(vet.id);
-            return <div key={vet.id} className="border border-vet-blue/20 rounded-lg bg-vet-beige/10">
-                  <div className="flex items-center justify-between p-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-medium text-vet-navy">{vet.name}</h4>
-                        <Badge variant={vet.is_active ? "default" : "secondary"} className={vet.is_active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}>
-                          {vet.is_active ? 'Actif' : 'Inactif'}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-vet-brown">{vet.specialty}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Collapsible open={isScheduleOpen} onOpenChange={() => toggleVeterinarianSchedule(vet.id)}>
-                        <CollapsibleTrigger asChild>
-                          <Button size="sm" variant="outline" className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {isScheduleOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                            <span className="text-xs">Horaires</span>
-                          </Button>
-                        </CollapsibleTrigger>
-                      </Collapsible>
-                      <Button size="sm" variant="outline" onClick={() => {
-                    setEditingVeterinarian(vet);
-                    const isCustomSpecialty = vet.specialty && !SPECIALTY_OPTIONS.slice(0, -1).includes(vet.specialty);
-                    setNewVeterinarian({
-                      name: vet.name,
-                      specialty: isCustomSpecialty ? 'Autre' : vet.specialty || '',
-                      is_active: vet.is_active
-                    });
-                    setCustomSpecialty(isCustomSpecialty ? vet.specialty : '');
-                    setIsVetDialogOpen(true);
-                  }}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Êtes-vous sûr de vouloir supprimer {vet.name} ? Cette action est irréversible.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Annuler</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => deleteVeterinarian(vet.id)} className="bg-red-600 hover:bg-red-700">
-                              Supprimer
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
+            <DragDropContext onDragEnd={handleVeterinarianDragEnd}>
+              <Droppable droppableId="veterinarians">
+                {(provided) => (
+                  <div 
+                    {...provided.droppableProps} 
+                    ref={provided.innerRef}
+                    className="space-y-3"
+                  >
+                    {orderedVeterinarians.map((vet, index) => {
+                      const vetSchedules = schedules.filter(s => s.veterinarian_id === vet.id);
+                      const isScheduleOpen = openVeterinarianSchedules.has(vet.id);
+                      return (
+                        <Draggable key={vet.id} draggableId={vet.id} index={index}>
+                          {(provided, snapshot) => (
+                            <div 
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              className={cn(
+                                "border border-vet-blue/20 rounded-lg bg-vet-beige/10 transition-shadow",
+                                snapshot.isDragging && "shadow-lg ring-2 ring-vet-sage"
+                              )}
+                            >
+                              <div className="flex items-center justify-between p-4">
+                                <div className="flex items-center gap-3 flex-1">
+                                  <div 
+                                    {...provided.dragHandleProps}
+                                    className="cursor-grab active:cursor-grabbing text-vet-brown/50 hover:text-vet-brown transition-colors"
+                                  >
+                                    <GripVertical className="h-5 w-5" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <h4 className="font-medium text-vet-navy">{vet.name}</h4>
+                                      <Badge variant={vet.is_active ? "default" : "secondary"} className={vet.is_active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}>
+                                        {vet.is_active ? 'Actif' : 'Inactif'}
+                                      </Badge>
+                                    </div>
+                                    <p className="text-sm text-vet-brown">{vet.specialty}</p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Collapsible open={isScheduleOpen} onOpenChange={() => toggleVeterinarianSchedule(vet.id)}>
+                                    <CollapsibleTrigger asChild>
+                                      <Button size="sm" variant="outline" className="flex items-center gap-1">
+                                        <Clock className="h-4 w-4" />
+                                        {isScheduleOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                                        <span className="text-xs">Horaires</span>
+                                      </Button>
+                                    </CollapsibleTrigger>
+                                  </Collapsible>
+                                  <Button size="sm" variant="outline" onClick={() => {
+                                    setEditingVeterinarian(vet);
+                                    const isCustomSpecialty = vet.specialty && !SPECIALTY_OPTIONS.slice(0, -1).includes(vet.specialty);
+                                    setNewVeterinarian({
+                                      name: vet.name,
+                                      specialty: isCustomSpecialty ? 'Autre' : vet.specialty || '',
+                                      is_active: vet.is_active
+                                    });
+                                    setCustomSpecialty(isCustomSpecialty ? vet.specialty : '');
+                                    setIsVetDialogOpen(true);
+                                  }}>
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          Êtes-vous sûr de vouloir supprimer {vet.name} ? Cette action est irréversible.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => deleteVeterinarian(vet.id)} className="bg-red-600 hover:bg-red-700">
+                                          Supprimer
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </div>
+                              </div>
+                              
+                              <Collapsible open={isScheduleOpen} onOpenChange={() => toggleVeterinarianSchedule(vet.id)}>
+                                <CollapsibleContent>
+                                  <div className="px-4 pb-4">
+                                    <Separator className="mb-4" />
+                                    <VeterinarianWeeklySchedule veterinarian={vet} schedules={vetSchedules} />
+                                  </div>
+                                </CollapsibleContent>
+                              </Collapsible>
+                            </div>
+                          )}
+                        </Draggable>
+                      );
+                    })}
+                    {provided.placeholder}
                   </div>
-                  
-                  <Collapsible open={isScheduleOpen} onOpenChange={() => toggleVeterinarianSchedule(vet.id)}>
-                    <CollapsibleContent>
-                      <div className="px-4 pb-4">
-                        <Separator className="mb-4" />
-                        <VeterinarianWeeklySchedule veterinarian={vet} schedules={vetSchedules} />
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-                </div>;
-          })}
+                )}
+              </Droppable>
+            </DragDropContext>
             
             {veterinarians.length === 0 && <div className="text-center py-8 text-vet-brown bg-vet-beige/10 rounded-lg border border-vet-blue/20">
                 <Users className="h-8 w-8 mx-auto mb-2 text-vet-blue/60" />
