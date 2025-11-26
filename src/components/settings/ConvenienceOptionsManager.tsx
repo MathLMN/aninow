@@ -219,14 +219,7 @@ export const ConvenienceOptionsManager: React.FC<ConvenienceOptionsManagerProps>
   };
 
   return (
-    <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base text-vet-navy">Options de consultation de convenance</CardTitle>
-        <CardDescription className="text-sm">
-          Personnalisez les options proposées aux clients lors de la prise de rendez-vous en ligne
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3">
+    <div className="space-y-3">
         {/* Liste des options */}
         <DragDropContext onDragEnd={handleDragEnd}>
           <Droppable droppableId="convenience-options">
@@ -421,7 +414,6 @@ export const ConvenienceOptionsManager: React.FC<ConvenienceOptionsManagerProps>
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </CardContent>
-    </Card>
+    </div>
   );
 };
