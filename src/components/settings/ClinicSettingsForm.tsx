@@ -27,7 +27,6 @@ import { cn } from "@/lib/utils";
 import { useSlotManagement } from "@/hooks/useSlotManagement";
 import { supabase } from '@/integrations/supabase/client';
 import { EmailPreviewModal } from "./EmailPreviewModal";
-
 interface ClinicSettings {
   clinic_name: string;
   clinic_phone: string;
@@ -40,7 +39,6 @@ interface ClinicSettings {
   online_booking_enabled: boolean;
   default_slot_duration_minutes: number;
 }
-
 const defaultSettings: ClinicSettings = {
   clinic_name: "Clinique Vétérinaire",
   clinic_phone: "",
@@ -53,7 +51,6 @@ const defaultSettings: ClinicSettings = {
   online_booking_enabled: true,
   default_slot_duration_minutes: 15
 };
-
 const formSchema = z.object({
   clinicName: z.string().min(2, {
     message: "Le nom de la clinique doit comporter au moins 2 caractères."
@@ -71,20 +68,17 @@ const formSchema = z.object({
   defaultSlotDurationMinutes: z.number().min(5).max(60).default(15),
   minimumBookingDelayHours: z.number().min(0).default(0)
 });
-
 interface Veterinarian {
   id: string;
   name: string;
   specialty: string;
   is_active: boolean;
 }
-
 interface NewVeterinarian {
   name: string;
   specialty: string;
   is_active: boolean;
 }
-
 interface ConsultationType {
   id: string;
   name: string;
@@ -92,47 +86,114 @@ interface ConsultationType {
   color?: string;
   is_default?: boolean;
 }
-
 interface NewConsultationType {
   name: string;
   duration_minutes: number;
   color: string;
 }
-
-const SPECIALTY_OPTIONS = [
-  "Médecine générale",
-  "Ophtalmologie", 
-  "Dermatologie",
-  "Chirurgie",
-  "Imagerie médicale",
-  "Autre"
-];
-
-const DAYS_OF_WEEK = [
-  { key: 'monday', label: 'Lundi' },
-  { key: 'tuesday', label: 'Mardi' },
-  { key: 'wednesday', label: 'Mercredi' },
-  { key: 'thursday', label: 'Jeudi' },
-  { key: 'friday', label: 'Vendredi' },
-  { key: 'saturday', label: 'Samedi' },
-  { key: 'sunday', label: 'Dimanche' }
-];
-
+const SPECIALTY_OPTIONS = ["Médecine générale", "Ophtalmologie", "Dermatologie", "Chirurgie", "Imagerie médicale", "Autre"];
+const DAYS_OF_WEEK = [{
+  key: 'monday',
+  label: 'Lundi'
+}, {
+  key: 'tuesday',
+  label: 'Mardi'
+}, {
+  key: 'wednesday',
+  label: 'Mercredi'
+}, {
+  key: 'thursday',
+  label: 'Jeudi'
+}, {
+  key: 'friday',
+  label: 'Vendredi'
+}, {
+  key: 'saturday',
+  label: 'Samedi'
+}, {
+  key: 'sunday',
+  label: 'Dimanche'
+}];
 const getDefaultDailySchedules = () => ({
-  monday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
-  tuesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
-  wednesday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
-  thursday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
-  friday: { isOpen: true, morning: { start: '08:00', end: '12:00' }, afternoon: { start: '14:00', end: '18:00' } },
-  saturday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } },
-  sunday: { isOpen: false, morning: { start: '', end: '' }, afternoon: { start: '', end: '' } }
+  monday: {
+    isOpen: true,
+    morning: {
+      start: '08:00',
+      end: '12:00'
+    },
+    afternoon: {
+      start: '14:00',
+      end: '18:00'
+    }
+  },
+  tuesday: {
+    isOpen: true,
+    morning: {
+      start: '08:00',
+      end: '12:00'
+    },
+    afternoon: {
+      start: '14:00',
+      end: '18:00'
+    }
+  },
+  wednesday: {
+    isOpen: true,
+    morning: {
+      start: '08:00',
+      end: '12:00'
+    },
+    afternoon: {
+      start: '14:00',
+      end: '18:00'
+    }
+  },
+  thursday: {
+    isOpen: true,
+    morning: {
+      start: '08:00',
+      end: '12:00'
+    },
+    afternoon: {
+      start: '14:00',
+      end: '18:00'
+    }
+  },
+  friday: {
+    isOpen: true,
+    morning: {
+      start: '08:00',
+      end: '12:00'
+    },
+    afternoon: {
+      start: '14:00',
+      end: '18:00'
+    }
+  },
+  saturday: {
+    isOpen: false,
+    morning: {
+      start: '',
+      end: ''
+    },
+    afternoon: {
+      start: '',
+      end: ''
+    }
+  },
+  sunday: {
+    isOpen: false,
+    morning: {
+      start: '',
+      end: ''
+    },
+    afternoon: {
+      start: '',
+      end: ''
+    }
+  }
 });
-
-const CONSULTATION_TYPE_COLORS = [
-  "#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", 
-  "#06B6D4", "#84CC16", "#F97316", "#EC4899", "#6366F1"
-];
-
+const CONSULTATION_TYPE_COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#06B6D4", "#84CC16", "#F97316", "#EC4899", "#6366F1"];
 export const ClinicSettingsForm = () => {
   const {
     settings,
@@ -145,11 +206,19 @@ export const ClinicSettingsForm = () => {
     updateVeterinarian,
     deleteVeterinarian
   } = useClinicVeterinarians();
-  const { schedules } = useVeterinarianSchedules();
-  const { consultationTypes, fetchConsultationTypes } = useSlotManagement();
-  const { currentClinicId } = useClinicAccess();
-  const { toast } = useToast();
-
+  const {
+    schedules
+  } = useVeterinarianSchedules();
+  const {
+    consultationTypes,
+    fetchConsultationTypes
+  } = useSlotManagement();
+  const {
+    currentClinicId
+  } = useClinicAccess();
+  const {
+    toast
+  } = useToast();
   const [isVetDialogOpen, setIsVetDialogOpen] = useState(false);
   const [newVeterinarian, setNewVeterinarian] = useState<NewVeterinarian>({
     name: 'Dr. ',
@@ -162,7 +231,6 @@ export const ClinicSettingsForm = () => {
   const [isClinicScheduleOpen, setIsClinicScheduleOpen] = useState(false);
   const [tempDailySchedules, setTempDailySchedules] = useState(getDefaultDailySchedules());
   const [isEmailPreviewOpen, setIsEmailPreviewOpen] = useState(false);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -179,7 +247,6 @@ export const ClinicSettingsForm = () => {
       minimumBookingDelayHours: 0
     }
   });
-
   useEffect(() => {
     if (settings) {
       form.reset({
@@ -202,18 +269,14 @@ export const ClinicSettingsForm = () => {
   // Nettoyage: supprimer de la base les anciens types par défaut (si encore présents)
   useEffect(() => {
     if (!currentClinicId) return;
-
     const deleteObsoleteDefaults = async () => {
       const names = ["Consultation médicale", "Vaccination", "Prise de sang"];
       console.log("🧹 Suppression des types de consultation par défaut obsolètes…", names);
 
       // Supprimer pour la clinique courante
-      const { error: clinicErr } = await supabase
-        .from('consultation_types')
-        .delete()
-        .in('name', names)
-        .eq('clinic_id', currentClinicId);
-
+      const {
+        error: clinicErr
+      } = await supabase.from('consultation_types').delete().in('name', names).eq('clinic_id', currentClinicId);
       if (clinicErr) {
         console.error("Erreur suppression (clinic scope):", clinicErr);
       } else {
@@ -221,22 +284,17 @@ export const ClinicSettingsForm = () => {
       }
 
       // Supprimer éventuels enregistrements globaux (clinic_id NULL)
-      const { error: globalErr } = await supabase
-        .from('consultation_types')
-        .delete()
-        .in('name', names)
-        .is('clinic_id', null);
-
+      const {
+        error: globalErr
+      } = await supabase.from('consultation_types').delete().in('name', names).is('clinic_id', null);
       if (globalErr) {
         console.error("Erreur suppression (global scope):", globalErr);
       } else {
         console.log("✔️ Suppression (global scope) effectuée.");
       }
     };
-
     deleteObsoleteDefaults();
   }, [currentClinicId]);
-
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const success = await updateSettings({
       clinic_name: values.clinicName,
@@ -251,7 +309,6 @@ export const ClinicSettingsForm = () => {
       default_slot_duration_minutes: values.defaultSlotDurationMinutes,
       minimum_booking_delay_hours: values.minimumBookingDelayHours || 0
     });
-
     if (success) {
       toast({
         title: "Paramètres mis à jour",
@@ -265,14 +322,12 @@ export const ClinicSettingsForm = () => {
       });
     }
   };
-
   const onPlanningSubmit = async (values: z.infer<typeof formSchema>) => {
     const success = await updateSettings({
       asv_enabled: values.asvEnabled,
       default_slot_duration_minutes: values.defaultSlotDurationMinutes,
       daily_schedules: tempDailySchedules
     });
-
     if (success) {
       toast({
         title: "Configuration du planning mise à jour",
@@ -286,17 +341,14 @@ export const ClinicSettingsForm = () => {
       });
     }
   };
-
   const handleScheduleUpdate = (updatedSchedules: any) => {
     setTempDailySchedules(updatedSchedules);
   };
-
   const handleVeterinarianSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Déterminer la spécialité finale
     const finalSpecialty = newVeterinarian.specialty === 'Autre' ? customSpecialty : newVeterinarian.specialty;
-    
     if (!newVeterinarian.name.trim() || newVeterinarian.name.trim() === 'Dr.' || !finalSpecialty.trim()) {
       toast({
         title: "Erreur",
@@ -305,7 +357,6 @@ export const ClinicSettingsForm = () => {
       });
       return;
     }
-
     const success = await (editingVeterinarian ? updateVeterinarian(editingVeterinarian.id, {
       name: newVeterinarian.name,
       specialty: finalSpecialty,
@@ -315,7 +366,6 @@ export const ClinicSettingsForm = () => {
       specialty: finalSpecialty,
       is_active: newVeterinarian.is_active
     }));
-
     if (success) {
       setIsVetDialogOpen(false);
       setNewVeterinarian({
@@ -327,7 +377,6 @@ export const ClinicSettingsForm = () => {
       setEditingVeterinarian(null);
     }
   };
-
   const toggleVeterinarianSchedule = (vetId: string) => {
     const newOpenVets = new Set(openVeterinarianSchedules);
     if (newOpenVets.has(vetId)) {
@@ -337,7 +386,6 @@ export const ClinicSettingsForm = () => {
     }
     setOpenVeterinarianSchedules(newOpenVets);
   };
-
   const [isConsultationTypeDialogOpen, setIsConsultationTypeDialogOpen] = useState(false);
   const [newConsultationType, setNewConsultationType] = useState<NewConsultationType>({
     name: '',
@@ -345,11 +393,9 @@ export const ClinicSettingsForm = () => {
     color: '#3B82F6'
   });
   const [editingConsultationType, setEditingConsultationType] = useState<ConsultationType | null>(null);
-
   const refreshConsultationTypes = async () => {
     await fetchConsultationTypes();
   };
-
   const handleConsultationTypeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newConsultationType.name.trim()) {
@@ -360,44 +406,36 @@ export const ClinicSettingsForm = () => {
       });
       return;
     }
-
     try {
       if (editingConsultationType) {
-        const { error } = await supabase
-          .from('consultation_types')
-          .update({
-            name: newConsultationType.name,
-            duration_minutes: newConsultationType.duration_minutes,
-            color: newConsultationType.color
-          })
-          .eq('id', editingConsultationType.id);
-
+        const {
+          error
+        } = await supabase.from('consultation_types').update({
+          name: newConsultationType.name,
+          duration_minutes: newConsultationType.duration_minutes,
+          color: newConsultationType.color
+        }).eq('id', editingConsultationType.id);
         if (error) throw error;
-        
         toast({
           title: "Type de consultation modifié",
           description: "Le type de consultation a été mis à jour avec succès"
         });
       } else {
-        const { error } = await supabase
-          .from('consultation_types')
-          .insert([{
-            name: newConsultationType.name,
-            duration_minutes: newConsultationType.duration_minutes,
-            color: newConsultationType.color,
-            clinic_id: currentClinicId
-          }]);
-
+        const {
+          error
+        } = await supabase.from('consultation_types').insert([{
+          name: newConsultationType.name,
+          duration_minutes: newConsultationType.duration_minutes,
+          color: newConsultationType.color,
+          clinic_id: currentClinicId
+        }]);
         if (error) throw error;
-        
         toast({
           title: "Type de consultation créé",
           description: "Le nouveau type de consultation a été ajouté avec succès"
         });
       }
-
       await refreshConsultationTypes();
-      
       setIsConsultationTypeDialogOpen(false);
       setNewConsultationType({
         name: '',
@@ -414,18 +452,14 @@ export const ClinicSettingsForm = () => {
       });
     }
   };
-
   const handleDeleteConsultationType = async (typeId: string) => {
     try {
       // Vérifier si le type est utilisé dans des rendez-vous
-      const { data: bookingsData, error: bookingsError } = await supabase
-        .from('bookings')
-        .select('id')
-        .eq('consultation_type_id', typeId)
-        .limit(1);
-
+      const {
+        data: bookingsData,
+        error: bookingsError
+      } = await supabase.from('bookings').select('id').eq('consultation_type_id', typeId).limit(1);
       if (bookingsError) throw bookingsError;
-
       if (bookingsData && bookingsData.length > 0) {
         toast({
           title: "Impossible de supprimer",
@@ -436,14 +470,11 @@ export const ClinicSettingsForm = () => {
       }
 
       // Vérifier si le type est utilisé dans des créneaux disponibles
-      const { data: slotsData, error: slotsError } = await supabase
-        .from('available_slots')
-        .select('id')
-        .eq('consultation_type_id', typeId)
-        .limit(1);
-
+      const {
+        data: slotsData,
+        error: slotsError
+      } = await supabase.from('available_slots').select('id').eq('consultation_type_id', typeId).limit(1);
       if (slotsError) throw slotsError;
-
       if (slotsData && slotsData.length > 0) {
         toast({
           title: "Impossible de supprimer",
@@ -454,18 +485,14 @@ export const ClinicSettingsForm = () => {
       }
 
       // Si non utilisé, procéder à la suppression
-      const { error } = await supabase
-        .from('consultation_types')
-        .delete()
-        .eq('id', typeId);
-
+      const {
+        error
+      } = await supabase.from('consultation_types').delete().eq('id', typeId);
       if (error) throw error;
-      
       toast({
         title: "Type de consultation supprimé",
         description: "Le type de consultation a été supprimé avec succès"
       });
-
       await refreshConsultationTypes();
     } catch (error) {
       console.error('Error deleting consultation type:', error);
@@ -479,9 +506,7 @@ export const ClinicSettingsForm = () => {
 
   // Afficher désormais tous les types existants sans distinction "par défaut"
   const displayedConsultationTypes = consultationTypes;
-
-  return (
-    <div className="space-y-8">
+  return <div className="space-y-8">
       <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
         <CardHeader>
           <CardTitle className="text-vet-navy flex items-center">
@@ -496,106 +521,78 @@ export const ClinicSettingsForm = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="clinicName"
-                  render={({ field }) => (
-                    <FormItem>
+                <FormField control={form.control} name="clinicName" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Nom de la clinique *</FormLabel>
                       <FormControl>
                         <Input placeholder="Clinique Vétérinaire" {...field} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    </FormItem>} />
                 
-                <FormField
-                  control={form.control}
-                  name="clinicPhone"
-                  render={({ field }) => (
-                    <FormItem>
+                <FormField control={form.control} name="clinicPhone" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Téléphone</FormLabel>
                       <FormControl>
                         <Input placeholder="01 23 45 67 89" {...field} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    </FormItem>} />
               </div>
 
-              <FormField
-                control={form.control}
-                name="clinicEmail"
-                render={({ field }) => (
-                  <FormItem>
+              <FormField control={form.control} name="clinicEmail" render={({
+              field
+            }) => <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input placeholder="contact@clinique.fr" {...field} />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  </FormItem>} />
 
               <Separator />
 
               <div className="grid md:grid-cols-3 gap-4">
-                <FormField
-                  control={form.control}
-                  name="clinicAddressStreet"
-                  render={({ field }) => (
-                    <FormItem>
+                <FormField control={form.control} name="clinicAddressStreet" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Adresse (rue)</FormLabel>
                       <FormControl>
                         <Input placeholder="123 rue de la République" {...field} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="clinicAddressCity"
-                  render={({ field }) => (
-                    <FormItem>
+                    </FormItem>} />
+                <FormField control={form.control} name="clinicAddressCity" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Ville</FormLabel>
                       <FormControl>
                         <Input placeholder="Paris" {...field} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="clinicAddressPostalCode"
-                  render={({ field }) => (
-                    <FormItem>
+                    </FormItem>} />
+                <FormField control={form.control} name="clinicAddressPostalCode" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Code Postal</FormLabel>
                       <FormControl>
                         <Input placeholder="75001" {...field} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    </FormItem>} />
               </div>
 
-              <FormField
-                control={form.control}
-                name="clinicAddressCountry"
-                render={({ field }) => (
-                  <FormItem>
+              <FormField control={form.control} name="clinicAddressCountry" render={({
+              field
+            }) => <FormItem>
                     <FormLabel>Pays</FormLabel>
                     <FormControl>
                       <Input placeholder="France" {...field} />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  </FormItem>} />
 
               <Separator className="my-4" />
 
@@ -604,12 +601,7 @@ export const ClinicSettingsForm = () => {
                 <Label className="text-sm text-muted-foreground">
                   Prévisualisation
                 </Label>
-                <Button 
-                  type="button"
-                  variant="outline" 
-                  onClick={() => setIsEmailPreviewOpen(true)}
-                  className="w-full"
-                >
+                <Button type="button" variant="outline" onClick={() => setIsEmailPreviewOpen(true)} className="w-full">
                   <Mail className="mr-2 h-4 w-4" />
                   Voir l'aperçu de l'email de confirmation
                 </Button>
@@ -660,30 +652,24 @@ export const ClinicSettingsForm = () => {
                   <div>
                     <h4 className="text-md font-medium text-vet-navy mb-3">Types de consultations</h4>
                     <div className="space-y-2">
-                      {displayedConsultationTypes.map(type => (
-                        <div key={type.id} className="flex items-center justify-between p-3 border border-vet-blue/20 rounded-lg bg-white/50">
+                      {displayedConsultationTypes.map(type => <div key={type.id} className="flex items-center justify-between p-3 border border-vet-blue/20 rounded-lg bg-white/50">
                           <div className="flex items-center gap-3">
-                            <div 
-                              className="w-4 h-4 rounded-full border"
-                              style={{ backgroundColor: type.color }}
-                            />
+                            <div className="w-4 h-4 rounded-full border" style={{
+                          backgroundColor: type.color
+                        }} />
                             <span className="font-medium text-vet-navy">{type.name}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="text-sm text-vet-brown">{type.duration_minutes} min</span>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setEditingConsultationType(type);
-                                setNewConsultationType({
-                                  name: type.name,
-                                  duration_minutes: type.duration_minutes,
-                                  color: type.color || '#3B82F6'
-                                });
-                                setIsConsultationTypeDialogOpen(true);
-                              }}
-                            >
+                            <Button size="sm" variant="outline" onClick={() => {
+                          setEditingConsultationType(type);
+                          setNewConsultationType({
+                            name: type.name,
+                            duration_minutes: type.duration_minutes,
+                            color: type.color || '#3B82F6'
+                          });
+                          setIsConsultationTypeDialogOpen(true);
+                        }}>
                               <Edit className="h-4 w-4" />
                             </Button>
                             <AlertDialog>
@@ -701,33 +687,25 @@ export const ClinicSettingsForm = () => {
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => handleDeleteConsultationType(type.id)}
-                                    className="bg-red-600 hover:bg-red-700"
-                                  >
+                                  <AlertDialogAction onClick={() => handleDeleteConsultationType(type.id)} className="bg-red-600 hover:bg-red-700">
                                     Supprimer
                                   </AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
                             </AlertDialog>
                           </div>
-                        </div>
-                      ))}
+                        </div>)}
 
                       <Dialog open={isConsultationTypeDialogOpen} onOpenChange={setIsConsultationTypeDialogOpen}>
                         <DialogTrigger asChild>
-                          <Button
-                            onClick={() => {
-                              setEditingConsultationType(null);
-                              setNewConsultationType({
-                                name: '',
-                                duration_minutes: 30,
-                                color: '#3B82F6'
-                              });
-                            }}
-                            className="bg-vet-blue hover:bg-vet-blue/90 text-white w-full"
-                            variant="outline"
-                          >
+                          <Button onClick={() => {
+                          setEditingConsultationType(null);
+                          setNewConsultationType({
+                            name: '',
+                            duration_minutes: 30,
+                            color: '#3B82F6'
+                          });
+                        }} className="bg-vet-blue hover:bg-vet-blue/90 text-white w-full" variant="outline">
                             <Plus className="h-4 w-4 mr-2" />
                             Ajouter un type personnalisé
                           </Button>
@@ -745,58 +723,36 @@ export const ClinicSettingsForm = () => {
                             <div className="grid gap-4 py-4">
                               <div className="space-y-2">
                                 <Label htmlFor="type-name">Nom du type *</Label>
-                                <Input
-                                  id="type-name"
-                                  value={newConsultationType.name}
-                                  onChange={(e) => setNewConsultationType(prev => ({
-                                    ...prev,
-                                    name: e.target.value
-                                  }))}
-                                  placeholder="Ex: Consultation urgence"
-                                  required
-                                />
+                                <Input id="type-name" value={newConsultationType.name} onChange={e => setNewConsultationType(prev => ({
+                                ...prev,
+                                name: e.target.value
+                              }))} placeholder="Ex: Consultation urgence" required />
                               </div>
                               <div className="space-y-2">
                                 <Label htmlFor="type-duration">Durée (minutes) *</Label>
-                                <Select
-                                  value={newConsultationType.duration_minutes.toString()}
-                                  onValueChange={(value) => setNewConsultationType(prev => ({
-                                    ...prev,
-                                    duration_minutes: parseInt(value)
-                                  }))}
-                                >
+                                <Select value={newConsultationType.duration_minutes.toString()} onValueChange={value => setNewConsultationType(prev => ({
+                                ...prev,
+                                duration_minutes: parseInt(value)
+                              }))}>
                                   <SelectTrigger>
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    {[10, 15, 20, 30, 45, 60, 90, 120].map(duration => (
-                                      <SelectItem key={duration} value={duration.toString()}>
+                                    {[10, 15, 20, 30, 45, 60, 90, 120].map(duration => <SelectItem key={duration} value={duration.toString()}>
                                         {duration} minutes
-                                      </SelectItem>
-                                    ))}
+                                      </SelectItem>)}
                                   </SelectContent>
                                 </Select>
                               </div>
                               <div className="space-y-2">
                                 <Label>Couleur</Label>
                                 <div className="flex gap-2 flex-wrap">
-                                  {CONSULTATION_TYPE_COLORS.map(color => (
-                                    <button
-                                      key={color}
-                                      type="button"
-                                      className={cn(
-                                        "w-8 h-8 rounded-full border-2 transition-all",
-                                        newConsultationType.color === color
-                                          ? "border-vet-navy scale-110"
-                                          : "border-gray-200 hover:scale-105"
-                                      )}
-                                      style={{ backgroundColor: color }}
-                                      onClick={() => setNewConsultationType(prev => ({
-                                        ...prev,
-                                        color
-                                      }))}
-                                    />
-                                  ))}
+                                  {CONSULTATION_TYPE_COLORS.map(color => <button key={color} type="button" className={cn("w-8 h-8 rounded-full border-2 transition-all", newConsultationType.color === color ? "border-vet-navy scale-110" : "border-gray-200 hover:scale-105")} style={{
+                                  backgroundColor: color
+                                }} onClick={() => setNewConsultationType(prev => ({
+                                  ...prev,
+                                  color
+                                }))} />)}
                                 </div>
                               </div>
                             </div>
@@ -816,11 +772,9 @@ export const ClinicSettingsForm = () => {
                 </div>
               </div>
 
-              <FormField
-                control={form.control}
-                name="asvEnabled"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <FormField control={form.control} name="asvEnabled" render={({
+              field
+            }) => <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
                       <FormLabel>Ajouter la colonne ASV dans votre planning</FormLabel>
                       <FormDescription>
@@ -830,9 +784,7 @@ export const ClinicSettingsForm = () => {
                     <FormControl>
                       <Switch checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
-                  </FormItem>
-                )}
-              />
+                  </FormItem>} />
 
               <div className="border border-vet-blue/30 rounded-lg bg-gradient-to-r from-vet-beige/5 to-vet-sage/5">
                 <Collapsible open={isClinicScheduleOpen} onOpenChange={setIsClinicScheduleOpen}>
@@ -848,26 +800,16 @@ export const ClinicSettingsForm = () => {
                               Horaires d'ouverture de votre clinique
                             </h3>
                             <p className="text-sm text-vet-brown/80">
-                              {isClinicScheduleOpen 
-                                ? "Configurez les créneaux disponibles pour la prise de rendez-vous" 
-                                : "Cliquez pour configurer vos horaires d'ouverture"
-                              }
+                              {isClinicScheduleOpen ? "Configurez les créneaux disponibles pour la prise de rendez-vous" : "Cliquez pour configurer vos horaires d'ouverture"}
                             </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge 
-                            variant="outline" 
-                            className="bg-vet-sage/10 text-vet-sage border-vet-sage/30"
-                          >
+                          <Badge variant="outline" className="bg-vet-sage/10 text-vet-sage border-vet-sage/30">
                             {isClinicScheduleOpen ? "Fermer" : "Configurer"}
                           </Badge>
                           <div className="p-1 rounded-full bg-vet-blue/10 transition-transform duration-200">
-                            {isClinicScheduleOpen ? (
-                              <ChevronDown className="h-5 w-5 text-vet-blue" />
-                            ) : (
-                              <ChevronRight className="h-5 w-5 text-vet-blue" />
-                            )}
+                            {isClinicScheduleOpen ? <ChevronDown className="h-5 w-5 text-vet-blue" /> : <ChevronRight className="h-5 w-5 text-vet-blue" />}
                           </div>
                         </div>
                       </div>
@@ -885,113 +827,103 @@ export const ClinicSettingsForm = () => {
                       
                       <div className="space-y-3">
                         {DAYS_OF_WEEK.map(day => {
-                          const daySchedule = tempDailySchedules?.[day.key] || {
-                            isOpen: day.key !== 'saturday' && day.key !== 'sunday',
-                            morning: { start: '08:00', end: '12:00' },
-                            afternoon: { start: '14:00', end: '18:00' }
-                          };
-
-                          return (
-                            <div key={day.key} className="flex items-center gap-4 p-3 border border-vet-blue/20 rounded-lg bg-white/50">
+                        const daySchedule = tempDailySchedules?.[day.key] || {
+                          isOpen: day.key !== 'saturday' && day.key !== 'sunday',
+                          morning: {
+                            start: '08:00',
+                            end: '12:00'
+                          },
+                          afternoon: {
+                            start: '14:00',
+                            end: '18:00'
+                          }
+                        };
+                        return <div key={day.key} className="flex items-center gap-4 p-3 border border-vet-blue/20 rounded-lg bg-white/50">
                               <div className="w-20 text-sm font-medium text-vet-navy">
                                 {day.label}
                               </div>
                               
                               <div className="flex items-center gap-2">
-                                <Switch
-                                  checked={daySchedule.isOpen}
-                                  onCheckedChange={(checked) => {
-                                    const updatedSchedules = {
-                                      ...tempDailySchedules,
-                                      [day.key]: {
-                                        ...daySchedule,
-                                        isOpen: checked
-                                      }
-                                    };
-                                    handleScheduleUpdate(updatedSchedules);
-                                  }}
-                                />
+                                <Switch checked={daySchedule.isOpen} onCheckedChange={checked => {
+                              const updatedSchedules = {
+                                ...tempDailySchedules,
+                                [day.key]: {
+                                  ...daySchedule,
+                                  isOpen: checked
+                                }
+                              };
+                              handleScheduleUpdate(updatedSchedules);
+                            }} />
                                 <span className="text-xs text-vet-brown w-16">
                                   {daySchedule.isOpen ? 'Ouvert' : 'Fermé'}
                                 </span>
                               </div>
 
-                              {daySchedule.isOpen && (
-                                <div className="flex items-center gap-2 flex-1">
+                              {daySchedule.isOpen && <div className="flex items-center gap-2 flex-1">
                                   <div className="flex items-center gap-1">
-                                    <Input
-                                      type="time"
-                                      value={daySchedule.morning.start}
-                                      onChange={(e) => {
-                                        const updatedSchedules = {
-                                          ...tempDailySchedules,
-                                          [day.key]: {
-                                            ...daySchedule,
-                                            morning: { ...daySchedule.morning, start: e.target.value }
-                                          }
-                                        };
-                                        handleScheduleUpdate(updatedSchedules);
-                                      }}
-                                      className="w-20 text-xs"
-                                    />
+                                    <Input type="time" value={daySchedule.morning.start} onChange={e => {
+                                const updatedSchedules = {
+                                  ...tempDailySchedules,
+                                  [day.key]: {
+                                    ...daySchedule,
+                                    morning: {
+                                      ...daySchedule.morning,
+                                      start: e.target.value
+                                    }
+                                  }
+                                };
+                                handleScheduleUpdate(updatedSchedules);
+                              }} className="w-20 text-xs" />
                                     <span className="text-xs text-vet-brown">-</span>
-                                    <Input
-                                      type="time"
-                                      value={daySchedule.morning.end}
-                                      onChange={(e) => {
-                                        const updatedSchedules = {
-                                          ...tempDailySchedules,
-                                          [day.key]: {
-                                            ...daySchedule,
-                                            morning: { ...daySchedule.morning, end: e.target.value }
-                                          }
-                                        };
-                                        handleScheduleUpdate(updatedSchedules);
-                                      }}
-                                      className="w-20 text-xs"
-                                    />
+                                    <Input type="time" value={daySchedule.morning.end} onChange={e => {
+                                const updatedSchedules = {
+                                  ...tempDailySchedules,
+                                  [day.key]: {
+                                    ...daySchedule,
+                                    morning: {
+                                      ...daySchedule.morning,
+                                      end: e.target.value
+                                    }
+                                  }
+                                };
+                                handleScheduleUpdate(updatedSchedules);
+                              }} className="w-20 text-xs" />
                                   </div>
                                   
                                   <span className="text-xs text-vet-brown px-2">/</span>
                                   
                                   <div className="flex items-center gap-1">
-                                    <Input
-                                      type="time"
-                                      value={daySchedule.afternoon.start}
-                                      onChange={(e) => {
-                                        const updatedSchedules = {
-                                          ...tempDailySchedules,
-                                          [day.key]: {
-                                            ...daySchedule,
-                                            afternoon: { ...daySchedule.afternoon, start: e.target.value }
-                                          }
-                                        };
-                                        handleScheduleUpdate(updatedSchedules);
-                                      }}
-                                      className="w-20 text-xs"
-                                    />
+                                    <Input type="time" value={daySchedule.afternoon.start} onChange={e => {
+                                const updatedSchedules = {
+                                  ...tempDailySchedules,
+                                  [day.key]: {
+                                    ...daySchedule,
+                                    afternoon: {
+                                      ...daySchedule.afternoon,
+                                      start: e.target.value
+                                    }
+                                  }
+                                };
+                                handleScheduleUpdate(updatedSchedules);
+                              }} className="w-20 text-xs" />
                                     <span className="text-xs text-vet-brown">-</span>
-                                    <Input
-                                      type="time"
-                                      value={daySchedule.afternoon.end}
-                                      onChange={(e) => {
-                                        const updatedSchedules = {
-                                          ...tempDailySchedules,
-                                          [day.key]: {
-                                            ...daySchedule,
-                                            afternoon: { ...daySchedule.afternoon, end: e.target.value }
-                                          }
-                                        };
-                                        handleScheduleUpdate(updatedSchedules);
-                                      }}
-                                      className="w-20 text-xs"
-                                    />
+                                    <Input type="time" value={daySchedule.afternoon.end} onChange={e => {
+                                const updatedSchedules = {
+                                  ...tempDailySchedules,
+                                  [day.key]: {
+                                    ...daySchedule,
+                                    afternoon: {
+                                      ...daySchedule.afternoon,
+                                      end: e.target.value
+                                    }
+                                  }
+                                };
+                                handleScheduleUpdate(updatedSchedules);
+                              }} className="w-20 text-xs" />
                                   </div>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
+                                </div>}
+                            </div>;
+                      })}
                       </div>
                     </div>
                   </CollapsibleContent>
@@ -1003,11 +935,7 @@ export const ClinicSettingsForm = () => {
         
         <div className="px-6 pb-6">
           <div className="pt-4 border-t border-vet-blue/20">
-            <Button 
-              type="button" 
-              onClick={form.handleSubmit(onPlanningSubmit)}
-              className="bg-vet-blue hover:bg-vet-blue/90 text-white w-full"
-            >
+            <Button type="button" onClick={form.handleSubmit(onPlanningSubmit)} className="bg-vet-blue hover:bg-vet-blue/90 text-white w-full">
               Enregistrer la configuration du planning
             </Button>
             <p className="text-xs text-vet-brown/60 mt-2 text-center">
@@ -1030,11 +958,9 @@ export const ClinicSettingsForm = () => {
         <CardContent className="space-y-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="onlineBookingEnabled"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border border-vet-blue/20 p-4 bg-gradient-to-r from-vet-blue/5 to-transparent">
+              <FormField control={form.control} name="onlineBookingEnabled" render={({
+              field
+            }) => <FormItem className="flex flex-row items-center justify-between rounded-lg border border-vet-blue/20 p-4 bg-gradient-to-r from-vet-blue/5 to-transparent">
                     <div className="space-y-0.5">
                       <FormLabel className="text-base font-semibold text-vet-navy">
                         Activer la prise de rendez-vous en ligne
@@ -1042,57 +968,38 @@ export const ClinicSettingsForm = () => {
                       <FormDescription className="text-sm text-vet-brown/70">
                         Lorsque désactivé, les clients verront un message les invitant à contacter la clinique par téléphone.
                         <br />
-                        <span className="font-medium text-vet-navy mt-2 inline-block">
-                          ⚠️ Utilisez cette option pour préparer votre clinique avant le lancement officiel.
-                        </span>
+                        
                       </FormDescription>
                     </div>
                     <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        className="data-[state=checked]:bg-vet-sage"
-                      />
+                      <Switch checked={field.value} onCheckedChange={field.onChange} className="data-[state=checked]:bg-vet-sage" />
                     </FormControl>
-                  </FormItem>
-                )}
-              />
+                  </FormItem>} />
 
-              <FormField
-                control={form.control}
-                name="defaultSlotDurationMinutes"
-                render={({ field }) => (
-                  <FormItem>
+              <FormField control={form.control} name="defaultSlotDurationMinutes" render={({
+              field
+            }) => <FormItem>
                     <FormLabel>Durée d'un créneau en ligne (minutes)</FormLabel>
-                    <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value.toString()}>
+                    <Select onValueChange={value => field.onChange(parseInt(value))} defaultValue={field.value.toString()}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionner la durée" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {[5, 10, 15, 20, 30, 45, 60].map(duration => (
-                          <SelectItem key={duration} value={duration.toString()}>
+                        {[5, 10, 15, 20, 30, 45, 60].map(duration => <SelectItem key={duration} value={duration.toString()}>
                             {duration} minutes
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
                     </Select>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  </FormItem>} />
 
-              <FormField
-                control={form.control}
-                name="minimumBookingDelayHours"
-                render={({ field }) => (
-                  <FormItem>
+              <FormField control={form.control} name="minimumBookingDelayHours" render={({
+              field
+            }) => <FormItem>
                     <FormLabel>Délai minimum de prise de RDV en ligne</FormLabel>
-                    <Select 
-                      onValueChange={(value) => field.onChange(parseInt(value))} 
-                      defaultValue={field.value?.toString() || "0"}
-                    >
+                    <Select onValueChange={value => field.onChange(parseInt(value))} defaultValue={field.value?.toString() || "0"}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionner un délai" />
@@ -1113,15 +1020,10 @@ export const ClinicSettingsForm = () => {
                       Définit le délai minimum avant lequel un client peut prendre rendez-vous en ligne
                     </p>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  </FormItem>} />
 
               <div className="flex justify-end">
-                <Button 
-                  type="submit"
-                  className="bg-vet-sage hover:bg-vet-sage/90 text-white"
-                >
+                <Button type="submit" className="bg-vet-sage hover:bg-vet-sage/90 text-white">
                   Enregistrer les paramètres
                 </Button>
               </div>
@@ -1145,18 +1047,15 @@ export const ClinicSettingsForm = () => {
             <h3 className="text-lg font-medium text-vet-navy">Vétérinaires</h3>
             <Dialog open={isVetDialogOpen} onOpenChange={setIsVetDialogOpen}>
               <DialogTrigger asChild>
-                <Button
-                  onClick={() => {
-                    setEditingVeterinarian(null);
-                    setNewVeterinarian({
-                      name: 'Dr. ',
-                      specialty: '',
-                      is_active: true
-                    });
-                    setCustomSpecialty('');
-                  }}
-                  className="bg-vet-blue hover:bg-vet-blue/90 text-white"
-                >
+                <Button onClick={() => {
+                setEditingVeterinarian(null);
+                setNewVeterinarian({
+                  name: 'Dr. ',
+                  specialty: '',
+                  is_active: true
+                });
+                setCustomSpecialty('');
+              }} className="bg-vet-blue hover:bg-vet-blue/90 text-white">
                   <Plus className="h-4 w-4 mr-2" />
                   Ajouter un vétérinaire
                 </Button>
@@ -1174,63 +1073,40 @@ export const ClinicSettingsForm = () => {
                   <div className="grid gap-4 py-4">
                     <div className="space-y-2">
                       <Label htmlFor="vet-name">Nom complet *</Label>
-                      <Input
-                        id="vet-name"
-                        value={newVeterinarian.name}
-                        onChange={(e) => setNewVeterinarian(prev => ({
-                          ...prev,
-                          name: e.target.value
-                        }))}
-                        placeholder="Dr. Martin Dupont"
-                        required
-                      />
+                      <Input id="vet-name" value={newVeterinarian.name} onChange={e => setNewVeterinarian(prev => ({
+                      ...prev,
+                      name: e.target.value
+                    }))} placeholder="Dr. Martin Dupont" required />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="vet-specialty">Spécialité *</Label>
-                      <Select
-                        value={newVeterinarian.specialty}
-                        onValueChange={(value) => {
-                          setNewVeterinarian(prev => ({
-                            ...prev,
-                            specialty: value
-                          }));
-                          if (value !== 'Autre') {
-                            setCustomSpecialty('');
-                          }
-                        }}
-                      >
+                      <Select value={newVeterinarian.specialty} onValueChange={value => {
+                      setNewVeterinarian(prev => ({
+                        ...prev,
+                        specialty: value
+                      }));
+                      if (value !== 'Autre') {
+                        setCustomSpecialty('');
+                      }
+                    }}>
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionnez une spécialité" />
                         </SelectTrigger>
                         <SelectContent>
-                          {SPECIALTY_OPTIONS.map((specialty) => (
-                            <SelectItem key={specialty} value={specialty}>
+                          {SPECIALTY_OPTIONS.map(specialty => <SelectItem key={specialty} value={specialty}>
                               {specialty}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
                       </Select>
-                      {newVeterinarian.specialty === 'Autre' && (
-                        <div className="mt-2">
-                          <Input
-                            id="custom-specialty"
-                            value={customSpecialty}
-                            onChange={(e) => setCustomSpecialty(e.target.value)}
-                            placeholder="Précisez la spécialité"
-                            required
-                          />
-                        </div>
-                      )}
+                      {newVeterinarian.specialty === 'Autre' && <div className="mt-2">
+                          <Input id="custom-specialty" value={customSpecialty} onChange={e => setCustomSpecialty(e.target.value)} placeholder="Précisez la spécialité" required />
+                        </div>}
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Switch
-                        id="vet-active"
-                        checked={newVeterinarian.is_active}
-                        onCheckedChange={(checked) => setNewVeterinarian(prev => ({
-                          ...prev,
-                          is_active: checked
-                        }))}
-                      />
+                      <Switch id="vet-active" checked={newVeterinarian.is_active} onCheckedChange={checked => setNewVeterinarian(prev => ({
+                      ...prev,
+                      is_active: checked
+                    }))} />
                       <Label htmlFor="vet-active">Vétérinaire actif</Label>
                     </div>
                   </div>
@@ -1249,11 +1125,9 @@ export const ClinicSettingsForm = () => {
 
           <div className="space-y-3">
             {veterinarians.map(vet => {
-              const vetSchedules = schedules.filter(s => s.veterinarian_id === vet.id);
-              const isScheduleOpen = openVeterinarianSchedules.has(vet.id);
-              
-              return (
-                <div key={vet.id} className="border border-vet-blue/20 rounded-lg bg-vet-beige/10">
+            const vetSchedules = schedules.filter(s => s.veterinarian_id === vet.id);
+            const isScheduleOpen = openVeterinarianSchedules.has(vet.id);
+            return <div key={vet.id} className="border border-vet-blue/20 rounded-lg bg-vet-beige/10">
                   <div className="flex items-center justify-between p-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
@@ -1267,36 +1141,24 @@ export const ClinicSettingsForm = () => {
                     <div className="flex items-center gap-2">
                       <Collapsible open={isScheduleOpen} onOpenChange={() => toggleVeterinarianSchedule(vet.id)}>
                         <CollapsibleTrigger asChild>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="flex items-center gap-1"
-                          >
+                          <Button size="sm" variant="outline" className="flex items-center gap-1">
                             <Clock className="h-4 w-4" />
-                            {isScheduleOpen ? (
-                              <ChevronDown className="h-4 w-4" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4" />
-                            )}
+                            {isScheduleOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                             <span className="text-xs">Horaires</span>
                           </Button>
                         </CollapsibleTrigger>
                       </Collapsible>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setEditingVeterinarian(vet);
-                          const isCustomSpecialty = vet.specialty && !SPECIALTY_OPTIONS.slice(0, -1).includes(vet.specialty);
-                          setNewVeterinarian({
-                            name: vet.name,
-                            specialty: isCustomSpecialty ? 'Autre' : (vet.specialty || ''),
-                            is_active: vet.is_active
-                          });
-                          setCustomSpecialty(isCustomSpecialty ? vet.specialty : '');
-                          setIsVetDialogOpen(true);
-                        }}
-                      >
+                      <Button size="sm" variant="outline" onClick={() => {
+                    setEditingVeterinarian(vet);
+                    const isCustomSpecialty = vet.specialty && !SPECIALTY_OPTIONS.slice(0, -1).includes(vet.specialty);
+                    setNewVeterinarian({
+                      name: vet.name,
+                      specialty: isCustomSpecialty ? 'Autre' : vet.specialty || '',
+                      is_active: vet.is_active
+                    });
+                    setCustomSpecialty(isCustomSpecialty ? vet.specialty : '');
+                    setIsVetDialogOpen(true);
+                  }}>
                         <Edit className="h-4 w-4" />
                       </Button>
                       <AlertDialog>
@@ -1314,10 +1176,7 @@ export const ClinicSettingsForm = () => {
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Annuler</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => deleteVeterinarian(vet.id)}
-                              className="bg-red-600 hover:bg-red-700"
-                            >
+                            <AlertDialogAction onClick={() => deleteVeterinarian(vet.id)} className="bg-red-600 hover:bg-red-700">
                               Supprimer
                             </AlertDialogAction>
                           </AlertDialogFooter>
@@ -1330,48 +1189,30 @@ export const ClinicSettingsForm = () => {
                     <CollapsibleContent>
                       <div className="px-4 pb-4">
                         <Separator className="mb-4" />
-                        <VeterinarianWeeklySchedule
-                          veterinarian={vet}
-                          schedules={vetSchedules}
-                        />
+                        <VeterinarianWeeklySchedule veterinarian={vet} schedules={vetSchedules} />
                       </div>
                     </CollapsibleContent>
                   </Collapsible>
-                </div>
-              );
-            })}
+                </div>;
+          })}
             
-            {veterinarians.length === 0 && (
-              <div className="text-center py-8 text-vet-brown bg-vet-beige/10 rounded-lg border border-vet-blue/20">
+            {veterinarians.length === 0 && <div className="text-center py-8 text-vet-brown bg-vet-beige/10 rounded-lg border border-vet-blue/20">
                 <Users className="h-8 w-8 mx-auto mb-2 text-vet-blue/60" />
                 <p>Aucun vétérinaire ajouté</p>
                 <p className="text-sm">Commencez par ajouter votre premier vétérinaire</p>
-              </div>
-            )}
+              </div>}
           </div>
         </CardContent>
       </Card>
 
       <VeterinarianAbsenceManager veterinarians={veterinarians.filter(vet => vet.is_active)} />
       
-      <ConvenienceOptionsManager
-        options={settings?.convenience_options_config || []}
-        onOptionsChange={(newOptions) => {
-          updateSettings({ convenience_options_config: newOptions });
-        }}
-      />
+      <ConvenienceOptionsManager options={settings?.convenience_options_config || []} onOptionsChange={newOptions => {
+      updateSettings({
+        convenience_options_config: newOptions
+      });
+    }} />
       
-      <EmailPreviewModal 
-        open={isEmailPreviewOpen}
-        onOpenChange={setIsEmailPreviewOpen}
-        clinicName={form.watch("clinicName")}
-        clinicPhone={form.watch("clinicPhone")}
-        clinicAddress={
-          form.watch("clinicAddressStreet") && form.watch("clinicAddressCity") && form.watch("clinicAddressPostalCode")
-            ? `${form.watch("clinicAddressStreet")}, ${form.watch("clinicAddressPostalCode")} ${form.watch("clinicAddressCity")}`
-            : undefined
-        }
-      />
-    </div>
-  );
+      <EmailPreviewModal open={isEmailPreviewOpen} onOpenChange={setIsEmailPreviewOpen} clinicName={form.watch("clinicName")} clinicPhone={form.watch("clinicPhone")} clinicAddress={form.watch("clinicAddressStreet") && form.watch("clinicAddressCity") && form.watch("clinicAddressPostalCode") ? `${form.watch("clinicAddressStreet")}, ${form.watch("clinicAddressPostalCode")} ${form.watch("clinicAddressCity")}` : undefined} />
+    </div>;
 };
