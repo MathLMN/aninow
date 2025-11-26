@@ -7,7 +7,7 @@ import { ManuallyCreatedAccountsList } from './ManuallyCreatedAccountsList';
 import ClinicsManagementSection from './ClinicsManagementSection';
 import { FormQuestionsManager } from './FormQuestionsManager';
 import { UrgencyFeedbacksSection } from './UrgencyFeedbacksSection';
-import { Building2, Users, UserPlus, BarChart3, FileQuestion, MessageSquareText } from "lucide-react";
+import { Building2, Users, UserPlus, BarChart3, FileQuestion, MessageSquareText, FlaskConical, Calendar } from "lucide-react";
 
 const AdminDashboard = () => {
   const [showFormQuestionsManager, setShowFormQuestionsManager] = useState(false);
@@ -126,6 +126,30 @@ const AdminDashboard = () => {
             <ManuallyCreatedAccountsList />
           </div>
         </div>
+
+        {/* Test Mode */}
+        <Card className="bg-orange-50/50 backdrop-blur-sm border-orange-200">
+          <CardHeader>
+            <CardTitle className="flex items-center text-orange-700">
+              <FlaskConical className="h-5 w-5 mr-2" />
+              Mode test
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <p className="text-vet-brown text-sm">
+                Testez le parcours de prise de rendez-vous en ligne avec la clinique fictive.
+              </p>
+              <Button 
+                onClick={() => window.open('/clinic-00000000/booking', '_blank')}
+                className="bg-orange-500 hover:bg-orange-600 w-full"
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                Tester la prise de RDV
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Form Questions Management */}
         <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/20">

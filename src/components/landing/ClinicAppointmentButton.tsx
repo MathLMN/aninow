@@ -34,6 +34,7 @@ const ClinicAppointmentButton = () => {
       const { data, error } = await supabase
         .from('clinics')
         .select('id, name, slug')
+        .neq('slug', 'clinic-00000000') // Exclure la clinique de test
         .order('name');
 
       if (error) throw error;
