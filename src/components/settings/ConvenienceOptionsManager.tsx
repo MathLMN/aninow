@@ -220,13 +220,13 @@ export const ConvenienceOptionsManager: React.FC<ConvenienceOptionsManagerProps>
 
   return (
     <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30">
-      <CardHeader>
-        <CardTitle className="text-vet-navy">Options de consultation de convenance</CardTitle>
-        <CardDescription>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base text-vet-navy">Options de consultation de convenance</CardTitle>
+        <CardDescription className="text-sm">
           Personnalisez les options proposées aux clients lors de la prise de rendez-vous en ligne
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
         {/* Liste des options */}
         <DragDropContext onDragEnd={handleDragEnd}>
           <Droppable droppableId="convenience-options">
@@ -234,7 +234,7 @@ export const ConvenienceOptionsManager: React.FC<ConvenienceOptionsManagerProps>
               <div
                 {...provided.droppableProps}
                 ref={provided.innerRef}
-                className="space-y-2"
+                className="space-y-1.5"
               >
                 {options.map((option, index) => (
                   <Draggable
@@ -247,7 +247,7 @@ export const ConvenienceOptionsManager: React.FC<ConvenienceOptionsManagerProps>
                       <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
-                        className={`group flex items-center gap-3 p-3 bg-card rounded-lg border transition-all ${
+                        className={`group flex items-center gap-2 p-2 bg-card rounded-md border transition-all ${
                           snapshot.isDragging
                             ? 'border-primary shadow-lg'
                             : option.isActive
@@ -264,22 +264,22 @@ export const ConvenienceOptionsManager: React.FC<ConvenienceOptionsManagerProps>
                               : 'cursor-grab active:cursor-grabbing'
                           } text-muted-foreground hover:text-foreground transition-colors`}
                         >
-                          <GripVertical className="h-5 w-5" />
+                          <GripVertical className="h-4 w-4" />
                         </div>
 
                         {/* Badge de l'option */}
-                        <div className={`flex-1 px-4 py-2 rounded-full border text-sm font-medium ${option.color} flex items-center gap-2`}>
+                        <div className={`flex-1 px-3 py-1 rounded-full border text-xs font-medium ${option.color} flex items-center gap-1.5`}>
                           {option.label}
                           {option.isOther && <Lock className="h-3 w-3" />}
                         </div>
 
                         {/* Actions */}
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-0.5">
                           {/* Toggle actif/inactif */}
                           <Switch
                             checked={option.isActive}
                             onCheckedChange={() => handleToggleActive(option.value)}
-                            className="data-[state=checked]:bg-primary"
+                            className="data-[state=checked]:bg-primary scale-75"
                           />
 
                           {/* Bouton éditer */}
@@ -288,9 +288,9 @@ export const ConvenienceOptionsManager: React.FC<ConvenienceOptionsManagerProps>
                             size="icon"
                             onClick={() => handleEditClick(option)}
                             disabled={option.isOther}
-                            className="h-9 w-9 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
                           >
-                            <Edit className="h-4 w-4" />
+                            <Edit className="h-3.5 w-3.5" />
                           </Button>
 
                           {/* Bouton supprimer */}
@@ -300,9 +300,9 @@ export const ConvenienceOptionsManager: React.FC<ConvenienceOptionsManagerProps>
                                 variant="ghost"
                                 size="icon"
                                 disabled={option.isOther}
-                                className="h-9 w-9 opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive"
+                                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive"
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-3.5 w-3.5" />
                               </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
@@ -335,9 +335,9 @@ export const ConvenienceOptionsManager: React.FC<ConvenienceOptionsManagerProps>
         </DragDropContext>
 
         {/* Bouton ajouter */}
-        <Button onClick={handleAddNew} variant="outline" className="w-full">
-          <Plus className="h-4 w-4 mr-2" />
-          Ajouter une option
+        <Button onClick={handleAddNew} variant="outline" size="sm" className="w-full">
+          <Plus className="h-3.5 w-3.5 mr-1.5" />
+          <span className="text-xs">Ajouter une option</span>
         </Button>
 
         {/* Dialog ajouter/modifier */}
