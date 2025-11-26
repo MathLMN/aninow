@@ -6,10 +6,12 @@ import { ManualClinicCreationModal } from './ManualClinicCreationModal';
 import { ManuallyCreatedAccountsList } from './ManuallyCreatedAccountsList';
 import ClinicsManagementSection from './ClinicsManagementSection';
 import { FormQuestionsManager } from './FormQuestionsManager';
-import { Building2, Users, UserPlus, BarChart3, FileQuestion } from "lucide-react";
+import { UrgencyFeedbacksSection } from './UrgencyFeedbacksSection';
+import { Building2, Users, UserPlus, BarChart3, FileQuestion, MessageSquareText } from "lucide-react";
 
 const AdminDashboard = () => {
   const [showFormQuestionsManager, setShowFormQuestionsManager] = useState(false);
+  const [showUrgencyFeedbacks, setShowUrgencyFeedbacks] = useState(false);
 
   if (showFormQuestionsManager) {
     return (
@@ -23,6 +25,23 @@ const AdminDashboard = () => {
             ← Retour au tableau de bord
           </Button>
           <FormQuestionsManager />
+        </div>
+      </div>
+    );
+  }
+
+  if (showUrgencyFeedbacks) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-vet-beige via-background to-vet-blue/20 p-6">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <Button
+            variant="outline"
+            onClick={() => setShowUrgencyFeedbacks(false)}
+            className="mb-4"
+          >
+            ← Retour au tableau de bord
+          </Button>
+          <UrgencyFeedbacksSection />
         </div>
       </div>
     );
@@ -130,6 +149,33 @@ const AdminDashboard = () => {
               >
                 <FileQuestion className="h-4 w-4 mr-2" />
                 Accéder à la gestion des questions
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Urgency Feedbacks */}
+        <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/20">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between text-vet-navy">
+              <div className="flex items-center">
+                <MessageSquareText className="h-5 w-5 mr-2" />
+                Feedbacks d'urgence
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <p className="text-vet-brown text-sm">
+                Consultez les retours des équipes vétérinaires sur l'évaluation automatique des niveaux d'urgence par l'IA.
+                Ces données permettent d'améliorer continuellement la précision du système.
+              </p>
+              <Button 
+                onClick={() => setShowUrgencyFeedbacks(true)}
+                className="bg-vet-sage hover:bg-vet-sage/90 w-full"
+              >
+                <MessageSquareText className="h-4 w-4 mr-2" />
+                Voir les feedbacks d'urgence
               </Button>
             </div>
           </CardContent>
