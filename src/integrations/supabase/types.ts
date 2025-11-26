@@ -424,6 +424,7 @@ export type Database = {
           minimum_booking_delay_hours: number | null
           online_booking_enabled: boolean
           updated_at: string
+          veterinarian_columns_order: string[] | null
         }
         Insert: {
           asv_enabled?: boolean
@@ -443,6 +444,7 @@ export type Database = {
           minimum_booking_delay_hours?: number | null
           online_booking_enabled?: boolean
           updated_at?: string
+          veterinarian_columns_order?: string[] | null
         }
         Update: {
           asv_enabled?: boolean
@@ -462,6 +464,7 @@ export type Database = {
           minimum_booking_delay_hours?: number | null
           online_booking_enabled?: boolean
           updated_at?: string
+          veterinarian_columns_order?: string[] | null
         }
         Relationships: [
           {
