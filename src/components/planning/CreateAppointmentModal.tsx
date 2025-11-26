@@ -4,7 +4,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, AlertCircle, TrendingUp, UserX, CheckCircle, XCircle, Trash2 } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { AlertTriangle, AlertCircle, TrendingUp, UserX, CheckCircle, XCircle, Trash2, ThumbsUp, ThumbsDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AppointmentSection } from "./appointment-form/AppointmentSection";
 import { ClientSection } from "./appointment-form/ClientSection";
@@ -57,6 +60,10 @@ export const CreateAppointmentModal = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showCreateConfirmDialog, setShowCreateConfirmDialog] = useState(false);
+  const [showUrgencyFeedback, setShowUrgencyFeedback] = useState(false);
+  const [urgencyFeedbackCorrect, setUrgencyFeedbackCorrect] = useState<boolean | null>(null);
+  const [suggestedUrgency, setSuggestedUrgency] = useState<'critical' | 'moderate' | 'low' | ''>('');
+  const [feedbackReason, setFeedbackReason] = useState('');
 
   // Initialize form data when modal opens
   useEffect(() => {
@@ -119,22 +126,17 @@ export const CreateAppointmentModal = ({
     if (score >= 8) return {
       color: 'bg-red-100 text-red-800 border-red-300',
       icon: AlertTriangle,
-      label: 'URGENCE ÉLEVÉE'
+      label: 'Urgence critique'
     };
-    if (score >= 6) return {
+    if (score >= 5) return {
       color: 'bg-orange-100 text-orange-800 border-orange-300',
       icon: AlertCircle,
       label: 'Urgence modérée'
     };
-    if (score >= 4) return {
-      color: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-      icon: TrendingUp,
-      label: 'Priorité moyenne'
-    };
     return {
       color: 'bg-green-100 text-green-800 border-green-300',
       icon: TrendingUp,
-      label: 'Priorité faible'
+      label: 'Urgence faible'
     };
   };
 
@@ -269,6 +271,50 @@ export const CreateAppointmentModal = ({
     setShowCreateConfirmDialog(false);
   };
 
+  // Handle urgency feedback
+  const handleSubmitUrgencyFeedback = async () => {
+    if (urgencyFeedbackCorrect === null) {
+      toast({
+        title: "Sélection requise",
+        description: "Veuillez indiquer si l'évaluation de l'urgence est correcte.",
+        variant: "destructive",
+        duration: 3000
+      });
+      return;
+    }
+
+    if (urgencyFeedbackCorrect === false && !suggestedUrgency) {
+      toast({
+        title: "Niveau manquant",
+        description: "Veuillez sélectionner le niveau d'urgence qui aurait été plus adapté.",
+        variant: "destructive",
+        duration: 3000
+      });
+      return;
+    }
+
+    // TODO: Enregistrer le feedback dans Supabase (nouvelle table ou champ JSON)
+    console.log("Feedback d'urgence:", {
+      bookingId: appointmentToEdit?.id,
+      originalScore: urgencyScore,
+      isCorrect: urgencyFeedbackCorrect,
+      suggestedLevel: suggestedUrgency,
+      reason: feedbackReason
+    });
+
+    toast({
+      title: "Feedback enregistré",
+      description: "Merci pour votre retour, cela nous aide à améliorer l'évaluation automatique.",
+      duration: 3000
+    });
+
+    // Reset et fermer
+    setShowUrgencyFeedback(false);
+    setUrgencyFeedbackCorrect(null);
+    setSuggestedUrgency('');
+    setFeedbackReason('');
+  };
+
   // Handle save changes in edit mode
   const handleSaveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -327,16 +373,29 @@ export const CreateAppointmentModal = ({
                 }
               </DialogDescription>
             </div>
-            {/* Indicateur d'urgence pour les RDV en ligne */}
+            {/* Indicateur d'urgence pour les RDV en ligne - Cliquable */}
             {isEditMode && isOnlineBooking && urgencyConfig && UrgencyIcon && (
-              <Badge className={cn(
-                "px-3 py-1.5 text-xs font-bold border-2 flex items-center gap-1.5 flex-shrink-0",
-                urgencyConfig.color,
-                urgencyScore >= 8 && "animate-pulse"
-              )}>
-                <UrgencyIcon className="h-3.5 w-3.5" />
-                {urgencyConfig.label} ({urgencyScore}/10)
-              </Badge>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowUrgencyFeedback(true)}
+                className={cn(
+                  "px-4 py-2.5 text-xs font-bold border-2 flex items-center gap-2 flex-shrink-0 transition-all hover:scale-105 hover:shadow-lg",
+                  urgencyConfig.color,
+                  "hover:bg-opacity-90",
+                  urgencyScore >= 8 && "animate-pulse shadow-lg"
+                )}
+              >
+                <UrgencyIcon className="h-4 w-4" />
+                <div className="flex flex-col items-start">
+                  <span className="text-[10px] font-semibold uppercase tracking-wide opacity-90">
+                    {urgencyConfig.label}
+                  </span>
+                  <span className="text-base font-extrabold">
+                    {urgencyScore}/10
+                  </span>
+                </div>
+              </Button>
             )}
           </div>
         </DialogHeader>
@@ -553,6 +612,145 @@ export const CreateAppointmentModal = ({
                 className="bg-vet-sage hover:bg-vet-sage/90 text-white"
               >
                 Valider la création
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Dialog de feedback sur l'évaluation d'urgence */}
+        <AlertDialog open={showUrgencyFeedback} onOpenChange={setShowUrgencyFeedback}>
+          <AlertDialogContent className="max-w-2xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2 text-vet-navy">
+                <AlertTriangle className="h-5 w-5 text-orange-500" />
+                Évaluation de l'urgence
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-sm">
+                Votre retour nous aide à améliorer la précision de l'évaluation automatique de l'urgence.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <div className="space-y-6 py-4">
+              {/* Affichage du score actuel */}
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-vet-navy mb-1">Évaluation actuelle:</p>
+                    <div className="flex items-center gap-2">
+                      {urgencyConfig && UrgencyIcon && (
+                        <>
+                          <UrgencyIcon className="h-5 w-5" />
+                          <span className="text-lg font-bold">{urgencyConfig.label}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-4xl font-extrabold text-vet-sage">
+                    {urgencyScore}/10
+                  </div>
+                </div>
+              </div>
+
+              {/* Question principale */}
+              <div className="space-y-3">
+                <Label className="text-base font-semibold text-vet-navy">
+                  L'urgence est-elle bien évaluée ?
+                </Label>
+                <RadioGroup
+                  value={urgencyFeedbackCorrect === null ? "" : urgencyFeedbackCorrect ? "yes" : "no"}
+                  onValueChange={(value) => {
+                    setUrgencyFeedbackCorrect(value === "yes");
+                    if (value === "yes") {
+                      setSuggestedUrgency('');
+                      setFeedbackReason('');
+                    }
+                  }}
+                  className="flex gap-4"
+                >
+                  <div className="flex items-center space-x-2 bg-green-50 border-2 border-green-200 rounded-lg px-4 py-3 cursor-pointer hover:bg-green-100 transition-colors flex-1">
+                    <RadioGroupItem value="yes" id="correct-yes" />
+                    <Label htmlFor="correct-yes" className="cursor-pointer flex items-center gap-2 flex-1">
+                      <ThumbsUp className="h-5 w-5 text-green-600" />
+                      <span className="font-semibold text-green-700">Oui, c'est correct</span>
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2 bg-red-50 border-2 border-red-200 rounded-lg px-4 py-3 cursor-pointer hover:bg-red-100 transition-colors flex-1">
+                    <RadioGroupItem value="no" id="correct-no" />
+                    <Label htmlFor="correct-no" className="cursor-pointer flex items-center gap-2 flex-1">
+                      <ThumbsDown className="h-5 w-5 text-red-600" />
+                      <span className="font-semibold text-red-700">Non, ce n'est pas correct</span>
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              {/* Si incorrect: choisir le bon niveau */}
+              {urgencyFeedbackCorrect === false && (
+                <div className="space-y-3 animate-in fade-in duration-300">
+                  <Label className="text-base font-semibold text-vet-navy">
+                    Quel niveau d'urgence aurait été plus adapté ?
+                  </Label>
+                  <RadioGroup
+                    value={suggestedUrgency}
+                    onValueChange={(value) => setSuggestedUrgency(value as 'critical' | 'moderate' | 'low')}
+                    className="space-y-2"
+                  >
+                    <div className="flex items-center space-x-2 bg-red-50 border-2 border-red-300 rounded-lg px-4 py-3 cursor-pointer hover:bg-red-100 transition-colors">
+                      <RadioGroupItem value="critical" id="urgency-critical" />
+                      <Label htmlFor="urgency-critical" className="cursor-pointer flex items-center gap-2 flex-1">
+                        <AlertTriangle className="h-4 w-4 text-red-600" />
+                        <span className="font-semibold text-red-700">Urgence critique (≥8/10)</span>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 bg-orange-50 border-2 border-orange-300 rounded-lg px-4 py-3 cursor-pointer hover:bg-orange-100 transition-colors">
+                      <RadioGroupItem value="moderate" id="urgency-moderate" />
+                      <Label htmlFor="urgency-moderate" className="cursor-pointer flex items-center gap-2 flex-1">
+                        <AlertCircle className="h-4 w-4 text-orange-600" />
+                        <span className="font-semibold text-orange-700">Urgence modérée (5-7/10)</span>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 bg-green-50 border-2 border-green-300 rounded-lg px-4 py-3 cursor-pointer hover:bg-green-100 transition-colors">
+                      <RadioGroupItem value="low" id="urgency-low" />
+                      <Label htmlFor="urgency-low" className="cursor-pointer flex items-center gap-2 flex-1">
+                        <TrendingUp className="h-4 w-4 text-green-600" />
+                        <span className="font-semibold text-green-700">Urgence faible (&lt;5/10)</span>
+                      </Label>
+                    </div>
+                  </RadioGroup>
+
+                  {/* Raison */}
+                  <div className="space-y-2 pt-2">
+                    <Label htmlFor="feedback-reason" className="text-sm font-medium text-vet-navy">
+                      Pourquoi ? (optionnel)
+                    </Label>
+                    <Textarea
+                      id="feedback-reason"
+                      value={feedbackReason}
+                      onChange={(e) => setFeedbackReason(e.target.value)}
+                      placeholder="Ex: Le symptôme était plus grave que prévu, ou au contraire moins urgent..."
+                      className="min-h-[80px] resize-none"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                onClick={() => {
+                  setShowUrgencyFeedback(false);
+                  setUrgencyFeedbackCorrect(null);
+                  setSuggestedUrgency('');
+                  setFeedbackReason('');
+                }}
+              >
+                Annuler
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleSubmitUrgencyFeedback}
+                className="bg-vet-sage hover:bg-vet-sage/90 text-white"
+              >
+                Envoyer le feedback
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
