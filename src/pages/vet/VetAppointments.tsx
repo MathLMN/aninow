@@ -10,7 +10,7 @@ import { format, addDays, subDays, isSameDay, parseISO, differenceInDays } from 
 import { fr } from "date-fns/locale";
 import { PhotoGallery, PhotoGalleryRef } from "@/components/planning/appointment-details/PhotoGallery";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogPortal } from "@/components/ui/alert-dialog";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useClinicAccess } from "@/hooks/useClinicAccess";
@@ -19,6 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 const VetAppointments = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [urgencyFilter, setUrgencyFilter] = useState<'all' | 'critical' | 'high' | 'medium' | 'low'>('all');
@@ -513,19 +514,25 @@ const VetAppointments = () => {
 
           {/* Footer avec actions */}
           <div className="px-4 py-3 bg-vet-beige/10 border-t border-vet-blue/10 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-vet-brown/60" />
-              <span className="text-sm text-vet-brown">
-                {booking.appointment_date ? (
-                  <>RDV prévu le {new Date(booking.appointment_date).toLocaleDateString('fr-FR', { 
-                    day: '2-digit', 
-                    month: 'long'
-                  })} à {booking.appointment_time}</>
-                ) : (
-                  'Date à définir'
-                )}
-              </span>
-            </div>
+            {booking.appointment_date ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(`/vet/planning?date=${booking.appointment_date}`)}
+                className="bg-gradient-to-r from-vet-sage/20 to-vet-sage/10 border-vet-sage/40 hover:from-vet-sage/30 hover:to-vet-sage/20 hover:border-vet-sage/60 text-vet-navy font-semibold shadow-sm transition-all duration-200"
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                RDV prévu le {new Date(booking.appointment_date).toLocaleDateString('fr-FR', { 
+                  day: '2-digit', 
+                  month: 'long'
+                })} à {booking.appointment_time}
+              </Button>
+            ) : (
+              <div className="flex items-center gap-2 text-vet-brown/70 text-sm">
+                <Calendar className="h-4 w-4" />
+                Date à définir
+              </div>
+            )}
             
             <div className="flex items-center gap-2">
               {booking.status === "pending" && (
