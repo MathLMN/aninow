@@ -377,20 +377,6 @@ const VetAppointments = () => {
                     </div>
                   </div>}
                 
-                {/* Motif de consultation - Toujours affiché */}
-                <div className="bg-vet-beige/30 rounded-lg p-3">
-                  <p className="text-sm text-vet-brown">
-                    <span className="font-medium">Motif:</span> {booking.consultation_reason === 'consultation-convenance' ? 'Consultation de convenance' : booking.consultation_reason === 'symptomes-anomalie' ? 'Symptômes ou anomalie' : booking.consultation_reason === 'urgence' ? 'Urgence' : 'Consultation'}
-                  </p>
-                  {/* Afficher les options de convenance si disponibles */}
-                  {booking.consultation_reason === 'consultation-convenance' && booking.convenience_options && booking.convenience_options.length > 0 && <div className="mt-2 flex flex-wrap gap-1">
-                      {booking.convenience_options.map((opt, idx) => <span key={idx} className="text-[10px] bg-vet-sage/20 text-vet-sage px-2 py-1 rounded-full border border-vet-sage/30">
-                          {opt}
-                        </span>)}
-                    </div>}
-                  {booking.custom_text && <p className="text-xs text-vet-brown/80 mt-2 italic">{booking.custom_text}</p>}
-                </div>
-
                 {/* Symptômes et commentaire */}
                 <div className="flex flex-col gap-2">
                   {booking.selected_symptoms && booking.selected_symptoms.length > 0 && <div className="bg-amber-50/50 border border-amber-200/50 rounded-lg p-2">
