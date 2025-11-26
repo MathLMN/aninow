@@ -115,9 +115,9 @@ export const TimeSlotCell = ({
   // Calculer la hauteur du rendez-vous en fonction de sa durée
   const getAppointmentHeight = (booking: any) => {
     const duration = booking.duration_minutes || 15;
-    // Chaque tranche de 15 minutes = 20px de hauteur
+    // Chaque tranche de 15 minutes = 24px de hauteur
     const slotsNeeded = Math.ceil(duration / 15);
-    return slotsNeeded * 20;
+    return slotsNeeded * 24;
   };
 
   // Récupérer la couleur du type de consultation
@@ -220,7 +220,7 @@ export const TimeSlotCell = ({
       <div
         className={cn(
           "border-l border-gray-200/30 relative transition-colors",
-          "h-5", // Hauteur harmonisée avec la grille
+          "h-6", // Hauteur harmonisée avec la grille
           getCellBackground(),
           canInteract && "cursor-pointer group hover:bg-blue-50/30",
           !canInteract && canCreateTask && "group hover:bg-yellow-50/30"
@@ -240,8 +240,8 @@ export const TimeSlotCell = ({
               }
             }}
             style={{ 
-              height: `${blockedSlotsCount * 20}px`,
-              minHeight: '20px'
+              height: `${blockedSlotsCount * 24}px`,
+              minHeight: '24px'
             }}
           >
             <div className="text-center px-1 w-full">
