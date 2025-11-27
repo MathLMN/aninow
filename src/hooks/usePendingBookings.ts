@@ -74,10 +74,9 @@ export const usePendingBookings = () => {
             setPendingBookings(prev => [payload.new as BookingRow, ...prev]);
             setUnreadCount(prev => prev + 1);
             
-            toast({
-              title: "Nouvelle demande de rendez-vous",
-              description: `${payload.new.client_name} souhaite prendre rendez-vous pour ${payload.new.animal_name}`,
-            });
+            // La notification toast a été supprimée pour éviter la confusion
+            // L'écran qui crée le RDV a déjà sa propre notification de succès
+            // Les autres écrans voient juste le badge rouge mis à jour
           }
         }
       )
