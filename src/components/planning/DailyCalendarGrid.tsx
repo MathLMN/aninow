@@ -187,14 +187,13 @@ export const DailyCalendarGrid = ({
 
   return (
     <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 h-full flex flex-col">
-      <CardContent className="p-0 flex flex-col h-full">
-        {/* Wrapper avec scroll horizontal */}
-        <div className="overflow-x-auto flex-1 flex flex-col">
-          {/* En-tête fixe des colonnes - hauteur harmonisée */}
+      <CardContent className="p-0 flex flex-col h-full overflow-hidden">
+        {/* En-tête fixe des colonnes avec scroll horizontal synchronisé */}
+        <div className="overflow-x-auto overflow-y-hidden flex-shrink-0 border-b border-vet-blue/20 bg-vet-beige/30" id="planning-header">
           <div 
-            className="grid border-b border-vet-blue/20 bg-vet-beige/30 flex-shrink-0 h-12" 
+            className="grid h-12" 
             style={{
-              gridTemplateColumns: `80px repeat(${columns.length}, minmax(${minColumnWidth}px, 1fr))`,
+              gridTemplateColumns: `80px repeat(${columns.length}, ${minColumnWidth}px)`,
               minWidth: `${totalMinWidth}px`
             }}
           >
@@ -231,26 +230,29 @@ export const DailyCalendarGrid = ({
               );
             })}
           </div>
+        </div>
 
-          {/* Zone scrollable verticalement avec les créneaux horaires */}
-          <div className="flex-1 overflow-hidden">
-            <ScrollArea className="h-full">
-              <div className="relative" style={{ minWidth: `${totalMinWidth}px` }}>
-                {timeSlots.map((time, timeIndex) => {
-                  const isOpen = isTimeSlotOpen(time, daySchedule);
-                  
-                  return (
-                    <div 
-                      key={time} 
-                      className={cn(
-                        "grid border-b border-gray-200/50",
-                        slotHeightClass
-                      )} 
-                      style={{
-                        gridTemplateColumns: `80px repeat(${columns.length}, minmax(${minColumnWidth}px, 1fr))`,
-                        position: 'relative'
-                      }}
-                    >
+        {/* Zone scrollable verticalement ET horizontalement avec les créneaux horaires */}
+        <div className="flex-1 overflow-auto" id="planning-body">
+          <div 
+            className="relative" 
+            style={{ minWidth: `${totalMinWidth}px` }}
+          >
+            {timeSlots.map((time, timeIndex) => {
+              const isOpen = isTimeSlotOpen(time, daySchedule);
+              
+              return (
+                <div 
+                  key={time} 
+                  className={cn(
+                    "grid border-b border-gray-200/50",
+                    slotHeightClass
+                  )} 
+                  style={{
+                    gridTemplateColumns: `80px repeat(${columns.length}, ${minColumnWidth}px)`,
+                    position: 'relative'
+                  }}
+                >
                     {/* Colonne horaire - alignement centré */}
                     <div className={cn(
                       "text-xs text-center font-medium border-r flex items-center justify-center px-1",
@@ -301,13 +303,11 @@ export const DailyCalendarGrid = ({
                       );
                     })}
                   </div>
-                );
-              })}
+                  );
+                })}
               </div>
-            </ScrollArea>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
+            </div>
+          </CardContent>
+        </Card>
+      );
+    };
