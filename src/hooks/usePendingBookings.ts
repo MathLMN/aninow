@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useClinicAccess } from '@/hooks/useClinicAccess';
 import type { Database } from '@/integrations/supabase/types';
 
 type BookingRow = Database['public']['Tables']['bookings']['Row'];
@@ -11,8 +12,14 @@ export const usePendingBookings = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { currentClinicId } = useClinicAccess();
 
   const fetchPendingBookings = async () => {
+    if (!currentClinicId) {
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       
@@ -20,6 +27,7 @@ export const usePendingBookings = () => {
         .from('bookings')
         .select('*')
         .eq('status', 'pending')
+        .eq('clinic_id', currentClinicId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -46,6 +54,8 @@ export const usePendingBookings = () => {
   };
 
   useEffect(() => {
+    if (!currentClinicId) return;
+    
     fetchPendingBookings();
 
     // Écouter les nouvelles réservations et les mises à jour en temps réel
@@ -91,7 +101,7 @@ export const usePendingBookings = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [currentClinicId]);
 
   return {
     pendingBookings,
