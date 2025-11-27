@@ -72,6 +72,15 @@
 
   body {
     @apply bg-background text-foreground font-sans;
+    /* Support des safe areas pour iPhone avec encoche */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  /* Empêcher le zoom automatique sur iOS Safari lors du focus sur les inputs */
+  @supports (-webkit-touch-callout: none) {
+    input, select, textarea {
+      font-size: 16px !important;
+    }
   }
 }
 
