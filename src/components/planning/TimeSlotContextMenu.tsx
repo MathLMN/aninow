@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger, ContextMenuSeparator } from "@/components/ui/context-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Plus, Check, X, Copy, Scissors, Clipboard, Trash2, Clock, User, Calendar } from "lucide-react";
+import { formatDateLocal } from '@/utils/date';
 
 interface TimeSlotContextMenuProps {
   children: React.ReactNode;
@@ -42,7 +43,7 @@ export const TimeSlotContextMenu = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [bookingToDelete, setBookingToDelete] = useState<any>(null);
 
-  const dateStr = selectedDate.toISOString().split('T')[0];
+  const dateStr = formatDateLocal(selectedDate);
   const pendingBookings = bookings.filter(b => b.status === 'pending');
   const confirmedBookings = bookings.filter(b => b.status === 'confirmed');
   
