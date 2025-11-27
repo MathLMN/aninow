@@ -226,8 +226,8 @@ export const usePublicBookingSlots = () => {
                 }
               }
               
-              // 3. Vérifier les blocs récurrents
-              const isBlockedByRecurring = recurringBlocks?.some(block => {
+              // 3. Vérifier les blocs récurrents (CORRECTION: toujours traiter comme un tableau)
+              const isBlockedByRecurring = (recurringBlocks || []).some(block => {
                 if (block.veterinarian_id !== vet.id) return false;
                 if (block.day_of_week !== dayOfWeek) return false;
                 
@@ -243,11 +243,17 @@ export const usePublicBookingSlots = () => {
                 const blockStart = blockStartH * 60 + blockStartM;
                 const blockEnd = blockEndH * 60 + blockEndM;
                 
-                return slotTime >= blockStart && slotTime < blockEnd;
+                const isBlocked = slotTime >= blockStart && slotTime < blockEnd;
+                
+                if (isBlocked) {
+                  console.log(`🚫 Bloc récurrent détecté: ${block.title} (${block.start_time}-${block.end_time}) bloque ${timeSlot} pour ${vet.name}`);
+                }
+                
+                return isBlocked;
               });
               
               if (isBlockedByRecurring) {
-                console.log(`🚫 Slot ${timeSlot} blocked by recurring block for vet ${vet.name}`);
+                console.log(`🚫 Slot ${timeSlot} REJETÉ - bloqué par un bloc récurrent pour ${vet.name}`);
                 continue;
               }
               
@@ -284,14 +290,16 @@ export const usePublicBookingSlots = () => {
             }
           }
 
-          // Regrouper les créneaux par heure pour éviter les doublons
+          // CORRECTION: Regrouper les créneaux en stockant TOUS les vétérinaires disponibles
           const groupedSlots: { [key: string]: any } = {};
           daySlots.forEach(slot => {
             const timeKey = slot.time;
             
             if (!groupedSlots[timeKey]) {
               groupedSlots[timeKey] = {
-                ...slot,
+                date: slot.date,
+                time: slot.time,
+                veterinarian_id: null, // Pas d'ID principal - sera déterminé lors de la sélection
                 availableVeterinarians: [slot.veterinarian_id]
               };
             } else {
@@ -302,6 +310,14 @@ export const usePublicBookingSlots = () => {
 
           // Convertir les créneaux groupés en tableau
           daySlots = Object.values(groupedSlots);
+          
+          // Log détaillé des créneaux groupés
+          daySlots.forEach(slot => {
+            const vetNames = slot.availableVeterinarians
+              .map((id: string) => veterinarians.find(v => v.id === id)?.name || id)
+              .join(', ');
+            console.log(`✅ Créneau ${slot.time} - Vétérinaires disponibles: ${vetNames}`);
+          });
 
           // Filtrer selon le délai minimum de réservation
           daySlots = filterSlotsByMinimumDelay(daySlots, dateStr, minimumDelayHours);
