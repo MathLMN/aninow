@@ -94,4 +94,31 @@
   .border-vet-blue { border-color: hsl(var(--vet-blue)); }
   .border-vet-beige { border-color: hsl(var(--vet-beige)); }
   .border-vet-sage { border-color: hsl(var(--vet-sage)); }
+
+  /* Agrandir les flèches d'incrémentation des inputs number de manière responsive */
+  .duration-input-spinner::-webkit-inner-spin-button,
+  .duration-input-spinner::-webkit-outer-spin-button {
+    opacity: 1;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+  }
+
+  /* Grand écran: flèches encore plus grandes */
+  @media (min-width: 1024px) {
+    .duration-input-spinner::-webkit-inner-spin-button,
+    .duration-input-spinner::-webkit-outer-spin-button {
+      width: 28px;
+      height: 28px;
+    }
+  }
+
+  /* Très grand écran: flèches maximales */
+  @media (min-width: 1920px) {
+    .duration-input-spinner::-webkit-inner-spin-button,
+    .duration-input-spinner::-webkit-outer-spin-button {
+      width: 36px;
+      height: 36px;
+    }
+  }
 }

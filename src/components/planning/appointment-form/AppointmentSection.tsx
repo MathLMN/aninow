@@ -218,7 +218,7 @@ export const AppointmentSection = ({
               step="5"
               value={formData.duration}
               onChange={(e) => onFieldUpdate('duration', parseInt(e.target.value) || 15)}
-              className={`h-7 text-xs ${validationErrors.duration ? 'border-red-500 border-2' : ''}`}
+              className={`h-7 text-xs duration-input-spinner ${validationErrors.duration ? 'border-red-500 border-2' : ''}`}
             />
           </div>
           <div>
