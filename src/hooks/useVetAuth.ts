@@ -28,6 +28,7 @@ export const useVetAuth = () => {
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
   const [clinicAccess, setClinicAccess] = useState<ClinicAccess | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -42,8 +43,12 @@ export const useVetAuth = () => {
         // Fetch profile when user logs in
         if (session?.user) {
           console.log('👤 User authenticated, fetching profile for user ID:', session.user.id);
+          
+          // Don't show loading screen for token refresh events
+          const shouldShowLoading = event !== 'TOKEN_REFRESHED';
+          
           setTimeout(() => {
-            fetchUserProfile(session.user.id);
+            fetchUserProfile(session.user.id, shouldShowLoading);
           }, 0);
         } else {
           console.log('🚪 User logged out, clearing profiles');
@@ -71,10 +76,14 @@ export const useVetAuth = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchUserProfile = async (userId: string) => {
+  const fetchUserProfile = async (userId: string, showLoading = true) => {
     try {
       console.log('🔄 Starting profile fetch for user:', userId);
-      setIsLoading(true);
+      
+      // Only show loading screen during initial load
+      if (showLoading && isInitialLoad) {
+        setIsLoading(true);
+      }
       
       // First, check for admin profile
       console.log('👨‍💼 Checking for admin profile...');
@@ -91,6 +100,7 @@ export const useVetAuth = () => {
         console.log('✅ Admin profile found:', adminData);
         setAdminProfile(adminData);
         setIsLoading(false);
+        setIsInitialLoad(false);
         return;
       }
 
@@ -118,10 +128,12 @@ export const useVetAuth = () => {
       }
       
       setIsLoading(false);
+      setIsInitialLoad(false);
     } catch (error) {
       console.error('❌ Error in fetchUserProfile:', error);
       console.error('🚨 This might be a database structure issue');
       setIsLoading(false);
+      setIsInitialLoad(false);
     }
   };
 
