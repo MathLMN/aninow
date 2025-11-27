@@ -194,7 +194,7 @@ const handler = async (req: Request): Promise<Response> => {
             
             <h3>⚠️ Informations importantes</h3>
             <ul>
-              <li>Merci d'arriver 5 minutes avant l'heure du rendez-vous</li>
+              <li>Merci d'arriver 10 minutes avant l'heure du rendez-vous</li>
               <li>N'oubliez pas le carnet de santé de votre animal</li>
               <li>Si vous devez annuler, merci de nous prévenir au plus tôt</li>
             </ul>
