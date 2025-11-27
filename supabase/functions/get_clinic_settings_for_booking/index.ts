@@ -54,6 +54,27 @@ serve(async (req) => {
       .eq('clinic_id', clinic.id)
       .single()
 
+    // Get recurring blocks
+    const { data: recurringBlocks } = await supabaseClient
+      .from('recurring_slot_blocks')
+      .select('*')
+      .eq('clinic_id', clinic.id)
+      .eq('is_active', true)
+
+    // Get vet schedules
+    const { data: vetSchedules } = await supabaseClient
+      .from('veterinarian_schedules')
+      .select('*')
+      .eq('clinic_id', clinic.id)
+
+    // Get vet absences (future only)
+    const today = new Date().toISOString().split('T')[0]
+    const { data: vetAbsences } = await supabaseClient
+      .from('veterinarian_absences')
+      .select('*')
+      .eq('clinic_id', clinic.id)
+      .gte('end_date', today)
+
     if (settingsError) {
       console.error('Settings error:', settingsError)
       // Return default settings if none found
@@ -73,7 +94,13 @@ serve(async (req) => {
       }
       
       return new Response(
-        JSON.stringify({ clinic, settings: defaultSettings }),
+        JSON.stringify({ 
+          clinic, 
+          settings: defaultSettings,
+          recurringBlocks: recurringBlocks || [],
+          vetSchedules: vetSchedules || [],
+          vetAbsences: vetAbsences || []
+        }),
         { 
           status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -82,7 +109,13 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ clinic, settings }),
+      JSON.stringify({ 
+        clinic, 
+        settings,
+        recurringBlocks: recurringBlocks || [],
+        vetSchedules: vetSchedules || [],
+        vetAbsences: vetAbsences || []
+      }),
       { 
         status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
