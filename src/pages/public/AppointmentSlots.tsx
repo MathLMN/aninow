@@ -70,10 +70,14 @@ const AppointmentSlots = () => {
     setSelectedDate(date)
     setSelectedTime(time)
     
-    // Si plusieurs vétérinaires disponibles et pas de préférence, choisir aléatoirement
     let finalVetId: string;
     
-    if (Array.isArray(veterinarianId) && veterinarianId.length > 1 && noVeterinarianPreference) {
+    // CORRECTION: Si l'utilisateur a déjà choisi un vétérinaire spécifique,
+    // conserver ce choix au lieu d'utiliser le veterinarian_id du slot
+    if (selectedVeterinarianId && !noVeterinarianPreference) {
+      finalVetId = selectedVeterinarianId;
+      console.log(`👨‍⚕️ Préférence utilisateur conservée: ${selectedVeterinarianId} (${selectedVeterinarianName})`);
+    } else if (Array.isArray(veterinarianId) && veterinarianId.length > 1 && noVeterinarianPreference) {
       // Sélection aléatoire parmi les vétérinaires disponibles
       const randomIndex = Math.floor(Math.random() * veterinarianId.length);
       finalVetId = veterinarianId[randomIndex];
@@ -84,9 +88,12 @@ const AppointmentSlots = () => {
       finalVetId = veterinarianId;
     }
     
-    setSelectedVeterinarianId(finalVetId);
-    const vet = veterinarians?.find((v: any) => v.id === finalVetId);
-    setSelectedVeterinarianName(vet?.name || '');
+    // Ne mettre à jour l'ID que si pas de préférence explicite existante
+    if (!selectedVeterinarianId || noVeterinarianPreference) {
+      setSelectedVeterinarianId(finalVetId);
+      const vet = veterinarians?.find((v: any) => v.id === finalVetId);
+      setSelectedVeterinarianName(vet?.name || '');
+    }
   }
 
   const handleSubmit = () => {
