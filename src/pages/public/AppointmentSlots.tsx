@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useSearchParams } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
@@ -35,16 +35,42 @@ const AppointmentSlots = () => {
 
   const { availableSlots, veterinarians, isLoading } = usePublicBookingSlots()
   
-  // Filtrer les créneaux en fonction du vétérinaire sélectionné
-  const filteredSlots = noVeterinarianPreference || !selectedVeterinarianId 
-    ? availableSlots 
-    : availableSlots.map(daySlot => ({
-        ...daySlot,
-        slots: daySlot.slots.filter(slot => 
-          slot.veterinarian_id === selectedVeterinarianId ||
-          slot.availableVeterinarians?.includes(selectedVeterinarianId)
-        )
-      })).filter(daySlot => daySlot.slots.length > 0)
+  // useRef pour éviter les stale closures
+  const selectedVetIdRef = useRef(selectedVeterinarianId)
+  useEffect(() => {
+    selectedVetIdRef.current = selectedVeterinarianId
+  }, [selectedVeterinarianId])
+  
+  // Filtrer les créneaux strictement selon le vétérinaire sélectionné
+  const filteredSlots = useMemo(() => {
+    console.log("🔍 Filtrage des créneaux:", {
+      noVeterinarianPreference,
+      selectedVeterinarianId,
+      selectedVeterinarianName,
+      totalSlots: availableSlots.length
+    })
+
+    // Si "Pas de préférence" ou aucun vétérinaire sélectionné, montrer tous les créneaux
+    if (noVeterinarianPreference || !selectedVeterinarianId) {
+      console.log("✅ Affichage de tous les créneaux (pas de préférence)")
+      return availableSlots
+    }
+
+    // Sinon, filtrer strictement pour le vétérinaire choisi
+    const filtered = availableSlots.map(daySlot => ({
+      ...daySlot,
+      slots: daySlot.slots.filter(slot => 
+        slot.availableVeterinarians?.includes(selectedVeterinarianId)
+      )
+    })).filter(daySlot => daySlot.slots.length > 0)
+
+    console.log(`✅ Créneaux filtrés pour ${selectedVeterinarianName}:`, {
+      joursDisponibles: filtered.length,
+      totalCreneaux: filtered.reduce((sum, day) => sum + day.slots.length, 0)
+    })
+
+    return filtered
+  }, [availableSlots, selectedVeterinarianId, selectedVeterinarianName, noVeterinarianPreference])
 
   useEffect(() => {
     const vetId = searchParams.get('veterinarianId')
@@ -69,50 +95,51 @@ const AppointmentSlots = () => {
   }
 
   const handleSlotSelect = (date: string, time: string, veterinarianId: string | string[], availableVets?: string[]) => {
+    console.log("🔍 handleSlotSelect appelé:", { 
+      date, 
+      time, 
+      veterinarianId,
+      availableVets,
+      currentSelectedVetId: selectedVeterinarianId,
+      currentSelectedVetName: selectedVeterinarianName,
+      noVeterinarianPreference 
+    })
+
     setSelectedDate(date)
     setSelectedTime(time)
-    
-    let finalVetId: string;
-    
-    // VALIDATION CRITIQUE: Si l'utilisateur a choisi un vétérinaire spécifique,
-    // vérifier qu'il est bien disponible sur ce créneau
+
+    // Si l'utilisateur a choisi un vétérinaire spécifique, NE JAMAIS CHANGER SON CHOIX
     if (selectedVeterinarianId && !noVeterinarianPreference) {
-      const vetsArray = availableVets || (Array.isArray(veterinarianId) ? veterinarianId : [veterinarianId]);
+      const vetsArray = availableVets || []
       
+      // VALIDATION : vérifier que le vétérinaire choisi est disponible sur ce créneau
       if (!vetsArray.includes(selectedVeterinarianId)) {
-        console.error(`❌ ERREUR: Le vétérinaire ${selectedVeterinarianName} (${selectedVeterinarianId}) n'est PAS disponible sur ce créneau!`);
-        console.error(`   Vétérinaires disponibles:`, vetsArray.map(id => {
-          const vet = veterinarians?.find((v: any) => v.id === id);
-          return `${vet?.name} (${id})`;
-        }));
-        
+        console.error(`❌ ERREUR: Le vétérinaire sélectionné ${selectedVeterinarianName} (${selectedVeterinarianId}) n'est PAS disponible sur ce créneau!`)
+        console.error(`Vétérinaires disponibles sur ce créneau:`, vetsArray)
         toast({
-          title: "Ce vétérinaire n'est pas disponible",
-          description: "Le vétérinaire sélectionné n'est pas disponible sur ce créneau. Veuillez en choisir un autre ou sélectionner 'Pas de préférence'.",
+          title: "Ce vétérinaire n'est pas disponible sur ce créneau",
+          description: `${selectedVeterinarianName} n'est pas disponible à cette heure. Veuillez sélectionner un autre créneau.`,
           variant: "destructive"
-        });
-        return;
+        })
+        return
       }
-      
-      finalVetId = selectedVeterinarianId;
-      console.log(`✅ Préférence utilisateur validée: ${selectedVeterinarianName} (${selectedVeterinarianId}) est disponible`);
-    } else if (Array.isArray(veterinarianId) && veterinarianId.length > 1 && noVeterinarianPreference) {
-      // Sélection aléatoire parmi les vétérinaires disponibles
-      const randomIndex = Math.floor(Math.random() * veterinarianId.length);
-      finalVetId = veterinarianId[randomIndex];
-      const vetName = veterinarians?.find((v: any) => v.id === finalVetId)?.name;
-      console.log(`🎲 Attribution aléatoire: ${vetName} sélectionné (${randomIndex + 1}/${veterinarianId.length})`);
-    } else if (Array.isArray(veterinarianId)) {
-      finalVetId = veterinarianId[0];
-    } else {
-      finalVetId = veterinarianId;
+
+      // ✅ Le vétérinaire choisi est disponible - garder le choix de l'utilisateur
+      console.log(`✅ VALIDATION OK: Le vétérinaire choisi ${selectedVeterinarianName} est bien disponible sur ce créneau`)
+      console.log(`✅ Créneau sélectionné pour ${selectedVeterinarianName} sans modification du choix utilisateur`)
+      return // Sortir ici sans changer le vétérinaire sélectionné
     }
-    
-    // Ne mettre à jour l'ID que si pas de préférence explicite existante
-    if (!selectedVeterinarianId || noVeterinarianPreference) {
-      setSelectedVeterinarianId(finalVetId);
-      const vet = veterinarians?.find((v: any) => v.id === finalVetId);
-      setSelectedVeterinarianName(vet?.name || '');
+
+    // Si "Pas de préférence" : attribution automatique aléatoire
+    if (noVeterinarianPreference && availableVets && availableVets.length > 0) {
+      const randomIndex = Math.floor(Math.random() * availableVets.length)
+      const assignedVetId = availableVets[randomIndex]
+      const assignedVet = veterinarians?.find((v: any) => v.id === assignedVetId)
+      
+      setSelectedVeterinarianId(assignedVetId)
+      setSelectedVeterinarianName(assignedVet?.name || '')
+      
+      console.log(`🎲 Attribution automatique (pas de préférence): ${assignedVet?.name}`)
     }
   }
 
