@@ -185,7 +185,7 @@ export const DailyCalendarGrid = ({
     <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 h-full flex flex-col">
       <CardContent className="p-0 flex flex-col h-full">
         {/* En-tête fixe des colonnes - hauteur harmonisée */}
-        <div className={`grid border-b border-vet-blue/20 bg-vet-beige/30 flex-shrink-0 h-12`} style={{gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`}}>
+        <div className={`grid border-b border-vet-blue/20 bg-vet-beige/30 flex-shrink-0 min-h-12`} style={{gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`}}>
           {/* Colonne vide pour aligner avec la colonne horaire */}
           <div className="p-2 border-r border-vet-blue/20 flex items-center justify-center">
             <div className="text-xs text-vet-brown text-center font-medium">
