@@ -181,78 +181,64 @@ export const DailyCalendarGrid = ({
     return blockedSlotInfo;
   }, [timeSlots, columns, slotBookings]);
 
-  // Largeur minimale par colonne pour garder une bonne lisibilité
-  const minColumnWidth = 180; // pixels
-  const totalMinWidth = 80 + (columns.length * minColumnWidth); // 80px pour la colonne horaire
-
   return (
     <Card className="bg-white/90 backdrop-blur-sm border-vet-blue/30 h-full flex flex-col">
-      <CardContent className="p-0 flex flex-col h-full overflow-hidden">
-        {/* En-tête fixe des colonnes avec scroll horizontal synchronisé */}
-        <div className="overflow-x-auto overflow-y-hidden flex-shrink-0 border-b border-vet-blue/20 bg-vet-beige/30" id="planning-header">
-          <div 
-            className="grid h-12" 
-            style={{
-              gridTemplateColumns: `80px repeat(${columns.length}, ${minColumnWidth}px)`,
-              minWidth: `${totalMinWidth}px`
-            }}
-          >
-            {/* Colonne vide pour aligner avec la colonne horaire */}
-            <div className="p-2 border-r border-vet-blue/20 flex items-center justify-center">
-              <div className="text-xs text-vet-brown text-center font-medium">
-                Horaires
-              </div>
+      <CardContent className="p-0 flex flex-col h-full">
+        {/* En-tête fixe des colonnes - hauteur harmonisée */}
+        <div className={`grid border-b border-vet-blue/20 bg-vet-beige/30 flex-shrink-0 h-12`} style={{gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`}}>
+          {/* Colonne vide pour aligner avec la colonne horaire */}
+          <div className="p-2 border-r border-vet-blue/20 flex items-center justify-center">
+            <div className="text-xs text-vet-brown text-center font-medium">
+              Horaires
             </div>
-            
-            {/* Colonnes des vétérinaires */}
-            {columns.map((column) => {
-              // Compter le total des RDV pour cette colonne pour toute la journée
-              const totalBookings = timeSlots.reduce((total, time) => {
-                const key = `${time}-${column.id}`;
-                const bookingsForSlot = slotBookings[key] || [];
-                // Ne compter que les vrais rendez-vous, pas les blocages
-                return total + bookingsForSlot.filter(b => 
-                  !b.is_blocked && 
-                  !b.recurring_block_id && 
-                  b.booking_source !== 'blocked'
-                ).length;
-              }, 0);
-
-              return (
-                <div key={column.id} className="p-2 text-center border-l border-vet-blue/20 flex flex-col justify-center">
-                  <div className="font-semibold text-sm text-vet-navy leading-tight">
-                    {column.title}
-                  </div>
-                  <div className="text-xs text-vet-brown mt-1">
-                    {totalBookings} RDV
-                  </div>
-                </div>
-              );
-            })}
           </div>
+          
+          {/* Colonnes des vétérinaires */}
+          {columns.map((column) => {
+            // Compter le total des RDV pour cette colonne pour toute la journée
+            const totalBookings = timeSlots.reduce((total, time) => {
+              const key = `${time}-${column.id}`;
+              const bookingsForSlot = slotBookings[key] || [];
+              // Ne compter que les vrais rendez-vous, pas les blocages
+              return total + bookingsForSlot.filter(b => 
+                !b.is_blocked && 
+                !b.recurring_block_id && 
+                b.booking_source !== 'blocked'
+              ).length;
+            }, 0);
+
+            return (
+              <div key={column.id} className="p-2 text-center border-l border-vet-blue/20 flex flex-col justify-center">
+                <div className="font-semibold text-sm text-vet-navy leading-tight">
+                  {column.title}
+                </div>
+                <div className="text-xs text-vet-brown mt-1">
+                  {totalBookings} RDV
+                </div>
+              </div>
+            );
+          })}
         </div>
 
-        {/* Zone scrollable verticalement ET horizontalement avec les créneaux horaires */}
-        <div className="flex-1 overflow-auto" id="planning-body">
-          <div 
-            className="relative" 
-            style={{ minWidth: `${totalMinWidth}px` }}
-          >
-            {timeSlots.map((time, timeIndex) => {
-              const isOpen = isTimeSlotOpen(time, daySchedule);
-              
-              return (
-                <div 
-                  key={time} 
-                  className={cn(
-                    "grid border-b border-gray-200/50",
-                    slotHeightClass
-                  )} 
-                  style={{
-                    gridTemplateColumns: `80px repeat(${columns.length}, ${minColumnWidth}px)`,
-                    position: 'relative'
-                  }}
-                >
+        {/* Zone scrollable avec les créneaux horaires - hauteur ajustée */}
+        <div className="flex-1 overflow-hidden">
+          <ScrollArea className="h-full">
+            <div className="relative">
+              {timeSlots.map((time, timeIndex) => {
+                const isOpen = isTimeSlotOpen(time, daySchedule);
+                
+                return (
+                  <div 
+                    key={time} 
+                    className={cn(
+                      "grid border-b border-gray-200/50",
+                      slotHeightClass
+                    )} 
+                    style={{
+                      gridTemplateColumns: `80px repeat(${columns.length}, 1fr)`,
+                      position: 'relative'
+                    }}
+                  >
                     {/* Colonne horaire - alignement centré */}
                     <div className={cn(
                       "text-xs text-center font-medium border-r flex items-center justify-center px-1",
@@ -303,11 +289,12 @@ export const DailyCalendarGrid = ({
                       );
                     })}
                   </div>
-                  );
-                })}
-              </div>
+                );
+              })}
             </div>
-          </CardContent>
-        </Card>
-      );
-    };
+          </ScrollArea>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
