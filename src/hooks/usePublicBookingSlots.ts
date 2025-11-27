@@ -97,37 +97,10 @@ export const usePublicBookingSlots = () => {
         const settings = clinicData.settings;
         const minimumDelayHours = settings.minimum_booking_delay_hours || 0;
         
-        // Récupérer les horaires des vétérinaires
-        const { data: vetSchedules, error: schedError } = await supabase
-          .from('veterinarian_schedules')
-          .select('*')
-          .eq('clinic_id', currentClinic.id);
-          
-        if (schedError) {
-          console.error('❌ Error fetching vet schedules:', schedError);
-        }
-        
-        // Récupérer les absences des vétérinaires
-        const { data: vetAbsences, error: absError } = await supabase
-          .from('veterinarian_absences')
-          .select('*')
-          .eq('clinic_id', currentClinic.id)
-          .gte('end_date', format(today, 'yyyy-MM-dd'));
-          
-        if (absError) {
-          console.error('❌ Error fetching vet absences:', absError);
-        }
-        
-        // Récupérer les blocs récurrents
-        const { data: recurringBlocks, error: blocksError } = await supabase
-          .from('recurring_slot_blocks')
-          .select('*')
-          .eq('clinic_id', currentClinic.id)
-          .eq('is_active', true);
-          
-        if (blocksError) {
-          console.error('❌ Error fetching recurring blocks:', blocksError);
-        }
+        // Utiliser les données de la edge function (qui bypasse les RLS)
+        const vetSchedules = clinicData.vetSchedules || [];
+        const vetAbsences = clinicData.vetAbsences || [];
+        const recurringBlocks = clinicData.recurringBlocks || [];
         
         console.log('📊 Loaded scheduling data:', {
           vetSchedules: vetSchedules?.length || 0,
