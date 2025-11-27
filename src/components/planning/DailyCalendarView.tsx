@@ -9,6 +9,8 @@ import { DailyCalendarGrid } from "./DailyCalendarGrid";
 import { BlockSlotModal } from "./BlockSlotModal";
 import { EnhancedDateNavigation } from "./EnhancedDateNavigation";
 import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
+import { useClinicSettings } from "@/hooks/useClinicSettings";
+import { generateColumns } from "./utils/scheduleUtils";
 import type { ZoomLevel } from "@/pages/vet/VetPlanning";
 
 interface DailyCalendarViewProps {
@@ -74,6 +76,7 @@ export const DailyCalendarView = ({
   } | null>(null);
   
   const { veterinarians: allVeterinarians } = useClinicVeterinarians();
+  const { settings } = useClinicSettings();
 
   const navigateDay = (direction: 'prev' | 'next') => {
     const newDate = new Date(selectedDate);
@@ -95,14 +98,8 @@ export const DailyCalendarView = ({
     setBlockSlotData(null);
   };
 
-  // Créer les colonnes pour l'affichage
-  const columns = [{
-    id: 'asv',
-    title: 'ASV'
-  }, ...veterinarians.filter(vet => vet.is_active).map(vet => ({
-    id: vet.id,
-    title: vet.name
-  }))];
+  // Créer les colonnes pour l'affichage en utilisant l'ordre personnalisé
+  const columns = generateColumns(veterinarians, settings, selectedDate);
 
   // Configuration des horaires simplifiée - horaires ouverts de 8h à 19h
   const daySchedule = {
