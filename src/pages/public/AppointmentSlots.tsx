@@ -12,11 +12,13 @@ import { Progress } from '@/components/ui/progress'
 import { useClinicContext } from '@/contexts/ClinicContext'
 import { Calendar, Clock, Sun, Moon, ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useToast } from '@/hooks/use-toast'
 
 const AppointmentSlots = () => {
   const { bookingData, updateBookingData } = useBookingFormData()
   const { navigateNext, getPreviousRoute } = useMultiTenantBookingNavigation()
   const location = useLocation()
+  const { toast } = useToast()
   
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
@@ -66,22 +68,40 @@ const AppointmentSlots = () => {
     setSelectedTime(null) // Reset selected time when date changes
   }
 
-  const handleSlotSelect = (date: string, time: string, veterinarianId: string | string[]) => {
+  const handleSlotSelect = (date: string, time: string, veterinarianId: string | string[], availableVets?: string[]) => {
     setSelectedDate(date)
     setSelectedTime(time)
     
     let finalVetId: string;
     
-    // CORRECTION: Si l'utilisateur a déjà choisi un vétérinaire spécifique,
-    // conserver ce choix au lieu d'utiliser le veterinarian_id du slot
+    // VALIDATION CRITIQUE: Si l'utilisateur a choisi un vétérinaire spécifique,
+    // vérifier qu'il est bien disponible sur ce créneau
     if (selectedVeterinarianId && !noVeterinarianPreference) {
+      const vetsArray = availableVets || (Array.isArray(veterinarianId) ? veterinarianId : [veterinarianId]);
+      
+      if (!vetsArray.includes(selectedVeterinarianId)) {
+        console.error(`❌ ERREUR: Le vétérinaire ${selectedVeterinarianName} (${selectedVeterinarianId}) n'est PAS disponible sur ce créneau!`);
+        console.error(`   Vétérinaires disponibles:`, vetsArray.map(id => {
+          const vet = veterinarians?.find((v: any) => v.id === id);
+          return `${vet?.name} (${id})`;
+        }));
+        
+        toast({
+          title: "Ce vétérinaire n'est pas disponible",
+          description: "Le vétérinaire sélectionné n'est pas disponible sur ce créneau. Veuillez en choisir un autre ou sélectionner 'Pas de préférence'.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       finalVetId = selectedVeterinarianId;
-      console.log(`👨‍⚕️ Préférence utilisateur conservée: ${selectedVeterinarianId} (${selectedVeterinarianName})`);
+      console.log(`✅ Préférence utilisateur validée: ${selectedVeterinarianName} (${selectedVeterinarianId}) est disponible`);
     } else if (Array.isArray(veterinarianId) && veterinarianId.length > 1 && noVeterinarianPreference) {
       // Sélection aléatoire parmi les vétérinaires disponibles
       const randomIndex = Math.floor(Math.random() * veterinarianId.length);
       finalVetId = veterinarianId[randomIndex];
-      console.log(`🎲 Attribution aléatoire: vétérinaire ${randomIndex + 1}/${veterinarianId.length} sélectionné`);
+      const vetName = veterinarians?.find((v: any) => v.id === finalVetId)?.name;
+      console.log(`🎲 Attribution aléatoire: ${vetName} sélectionné (${randomIndex + 1}/${veterinarianId.length})`);
     } else if (Array.isArray(veterinarianId)) {
       finalVetId = veterinarianId[0];
     } else {
@@ -214,7 +234,12 @@ const AppointmentSlots = () => {
                     ? "bg-vet-sage hover:bg-vet-sage/90 text-white border-vet-sage shadow-md" 
                     : "bg-vet-blue/10 border-vet-blue/30 text-vet-navy hover:bg-vet-sage/20 hover:border-vet-sage/50"
                 )}
-                onClick={() => handleSlotSelect(slot.date, slot.time, slot.veterinarian_id)}
+                onClick={() => handleSlotSelect(
+                  slot.date, 
+                  slot.time, 
+                  slot.veterinarian_id, 
+                  slot.availableVeterinarians
+                )}
               >
                 <div className="flex items-center">
                   <Clock className="h-3 w-3 mr-2" />
