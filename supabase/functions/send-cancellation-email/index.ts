@@ -254,9 +254,14 @@ const handler = async (req: Request): Promise<Response> => {
       // Parse the original request to get booking details
       const requestData = await req.clone().json();
       
+      // ✅ Validation basique des données d'email log
+      if (!requestData.client_email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(requestData.client_email)) {
+        throw new Error('Email destinataire invalide');
+      }
+      
       await supabase.from("email_logs").insert({
-        booking_id: requestData.booking_id,
-        recipient_email: requestData.client_email,
+        booking_id: requestData.booking_id || null,
+        recipient_email: requestData.client_email.slice(0, 255),
         email_type: "cancellation",
         status: "failed",
         error_message: error.message,

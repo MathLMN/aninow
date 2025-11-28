@@ -1,7 +1,8 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { createClinicSchema, updateClinicSchema } from '@/utils/validation';
+import { z } from 'zod';
 
 interface CreateClinicData {
   name: string;
@@ -25,12 +26,12 @@ export const useClinicManagement = () => {
     setIsLoading(true);
     
     try {
+      // ✅ Validation stricte avec Zod
+      const validated = createClinicSchema.parse(clinicData);
+      
       const { data, error } = await supabase
         .from('clinics')
-        .insert([{
-          name: clinicData.name,
-          slug: clinicData.slug
-        }])
+        .insert([validated])
         .select()
         .single();
 
@@ -44,9 +45,15 @@ export const useClinicManagement = () => {
       return data;
     } catch (error) {
       console.error('Erreur lors de la création de la clinique:', error);
+      
+      let errorMessage = "Impossible de créer la clinique";
+      if (error instanceof z.ZodError) {
+        errorMessage = `Validation échouée: ${error.issues.map(e => e.message).join(', ')}`;
+      }
+      
       toast({
         title: "Erreur",
-        description: "Impossible de créer la clinique",
+        description: errorMessage,
         variant: "destructive"
       });
       throw error;
@@ -84,9 +91,12 @@ export const useClinicManagement = () => {
     setIsLoading(true);
     
     try {
+      // ✅ Validation stricte avec Zod
+      const validated = updateClinicSchema.parse(updates);
+      
       const { data, error } = await supabase
         .from('clinics')
-        .update(updates)
+        .update(validated)
         .eq('id', id)
         .select()
         .single();
@@ -101,9 +111,15 @@ export const useClinicManagement = () => {
       return data;
     } catch (error) {
       console.error('Erreur lors de la mise à jour de la clinique:', error);
+      
+      let errorMessage = "Impossible de mettre à jour la clinique";
+      if (error instanceof z.ZodError) {
+        errorMessage = `Validation échouée: ${error.issues.map(e => e.message).join(', ')}`;
+      }
+      
       toast({
         title: "Erreur",
-        description: "Impossible de mettre à jour la clinique",
+        description: errorMessage,
         variant: "destructive"
       });
       throw error;

@@ -446,11 +446,15 @@ export const ClinicSettingsForm = () => {
     }
     try {
       if (editingConsultationType) {
+        // ✅ Validation avec Zod
+        const { consultationTypeSchema } = await import('@/utils/validation');
+        const validated = consultationTypeSchema.parse(newConsultationType);
+        
         const {
           error
         } = await supabase.from('consultation_types').update({
-          name: newConsultationType.name,
-          duration_minutes: newConsultationType.duration_minutes,
+          name: validated.name,
+          duration_minutes: validated.duration_minutes,
           color: newConsultationType.color
         }).eq('id', editingConsultationType.id);
         if (error) throw error;
@@ -459,11 +463,15 @@ export const ClinicSettingsForm = () => {
           description: "Le type de consultation a été mis à jour avec succès"
         });
       } else {
+        // ✅ Validation avec Zod
+        const { consultationTypeSchema } = await import('@/utils/validation');
+        const validated = consultationTypeSchema.parse(newConsultationType);
+        
         const {
           error
         } = await supabase.from('consultation_types').insert([{
-          name: newConsultationType.name,
-          duration_minutes: newConsultationType.duration_minutes,
+          name: validated.name,
+          duration_minutes: validated.duration_minutes,
           color: newConsultationType.color,
           clinic_id: currentClinicId
         }]);
