@@ -100,7 +100,7 @@ export const useVetBookings = () => {
     });
 
     return [...rawBookings, ...recurringBookings];
-  }, [rawBookings, currentClinicId, generateRecurringBlocksForDate]);
+  }, [rawBookings, currentClinicId, generateRecurringBlocksForDate, recurringBlocks]);
 
   // Calculer les statistiques basées uniquement sur les vrais rendez-vous
   const stats = useMemo(() => {

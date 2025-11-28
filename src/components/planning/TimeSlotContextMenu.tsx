@@ -49,13 +49,34 @@ export const TimeSlotContextMenu = ({
   const pendingBookings = bookings.filter(b => b.status === 'pending' && !b.is_blocked);
   const confirmedBookings = bookings.filter(b => b.status === 'confirmed' && !b.is_blocked);
   const blockedBookings = bookings.filter(b => b.is_blocked || b.recurring_block_id || b.booking_source === 'blocked');
-  const recurringBlockedBooking = blockedBookings.find(b => b.recurring_block_id);
   
+  // Ne considérer QUE les bookings virtuels générés avec booking_source = 'recurring-block'
+  const recurringBlockedBooking = blockedBookings.find(b => 
+    b.booking_source === 'recurring-block' && 
+    b.recurring_block_id &&
+    typeof b.recurring_block_id === 'string'
+  );
+  
+  // Bookings bloqués manuellement (pas de recurring_block_id OU booking_source différent)
+  const hasManualBlock = blockedBookings.some(b => 
+    b.booking_source === 'blocked' || 
+    (b.is_blocked && b.booking_source !== 'recurring-block')
+  );
+  
+  console.log('🔍 TimeSlot Context - All bookings:', bookings.length);
   console.log('🔍 Blocked bookings:', blockedBookings.map(b => ({ 
     id: b.id, 
     recurring_block_id: b.recurring_block_id,
-    booking_source: b.booking_source 
+    booking_source: b.booking_source,
+    is_blocked: b.is_blocked
   })));
+  console.log('🔍 Recurring blocked booking:', recurringBlockedBooking ? {
+    id: recurringBlockedBooking.id,
+    recurring_block_id: recurringBlockedBooking.recurring_block_id,
+    typeof_recurring_block_id: typeof recurringBlockedBooking.recurring_block_id,
+    booking_source: recurringBlockedBooking.booking_source
+  } : 'none');
+  console.log('🔍 Has manual block:', hasManualBlock);
   
   const handleCreateAppointment = () => {
     onCreateAppointment({
@@ -193,34 +214,51 @@ export const TimeSlotContextMenu = ({
           {/* Actions pour les créneaux bloqués */}
           {blockedBookings.length > 0 && (
             <>
-              {recurringBlockedBooking && recurringBlockedBooking.recurring_block_id && onUnblockRecurringForDay ? (
+              {recurringBlockedBooking && onUnblockRecurringForDay ? (
                 // Pour les blocages récurrents : seulement débloquer ce jour
                 <ContextMenuItem
                   onClick={() => {
-                    console.log('🔓 Déblocage ponctuel pour block ID:', recurringBlockedBooking.recurring_block_id);
-                    onUnblockRecurringForDay(
-                      recurringBlockedBooking.recurring_block_id,
-                      dateStr
-                    );
+                    const blockId = recurringBlockedBooking.recurring_block_id;
+                    console.log('🔓 Attempting to unblock:', {
+                      blockId,
+                      dateStr,
+                      type: typeof blockId,
+                      isString: typeof blockId === 'string',
+                      length: blockId?.length
+                    });
+                    
+                    // Vérifier que blockId est bien un UUID valide
+                    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                    if (!blockId || !uuidRegex.test(blockId)) {
+                      console.error('❌ Invalid UUID for recurring_block_id:', blockId);
+                      return;
+                    }
+                    
+                    onUnblockRecurringForDay(blockId, dateStr);
                   }}
                   className="text-orange-600 flex items-center gap-2"
                 >
                   <Unlock className="h-4 w-4" />
                   Débloquer ce jour uniquement
                 </ContextMenuItem>
-              ) : (
+              ) : hasManualBlock ? (
                 // Pour les blocages manuels : permettre la suppression
                 <ContextMenuItem
                   onClick={() => {
-                    const booking = blockedBookings[0];
-                    handleDeleteClick(booking);
+                    const booking = blockedBookings.find(b => 
+                      b.booking_source === 'blocked' || 
+                      (b.is_blocked && b.booking_source !== 'recurring-block')
+                    );
+                    if (booking) {
+                      handleDeleteClick(booking);
+                    }
                   }}
                   className="text-red-600 flex items-center gap-2"
                 >
                   <Trash2 className="h-4 w-4" />
                   Supprimer le blocage
                 </ContextMenuItem>
-              )}
+              ) : null}
               <ContextMenuSeparator />
             </>
           )}
