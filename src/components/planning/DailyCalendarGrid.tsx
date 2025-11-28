@@ -4,9 +4,11 @@ import { TimeSlotCell } from "./TimeSlotCell";
 import { generateAllTimeSlots, isTimeSlotOpen, getBookingsForSlot, isFullHour } from "./utils/scheduleUtils";
 import { isVeterinarianAbsent } from "./utils/veterinarianAbsenceUtils";
 import { useVeterinarianAbsences } from "@/hooks/useVeterinarianAbsences";
+import { useVeterinarianSchedules } from "@/hooks/useVeterinarianSchedules";
 import { useClinicSettings } from "@/hooks/useClinicSettings";
 import { useClinicAccess } from "@/hooks/useClinicAccess";
 import { useSlotManagement } from "@/hooks/useSlotManagement";
+import { isVeterinarianNotWorking } from "./utils/veterinarianAbsenceUtils";
 import { useState, useEffect, useMemo } from "react";
 import { formatDateLocal } from "@/utils/date";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -58,6 +60,7 @@ export const DailyCalendarGrid = ({
   const { settings } = useClinicSettings();
   const { currentClinicId } = useClinicAccess();
   const { absences } = useVeterinarianAbsences();
+  const { schedules } = useVeterinarianSchedules();
   const { consultationTypes } = useSlotManagement();
   const timeSlots = generateAllTimeSlots();
   
@@ -256,8 +259,10 @@ export const DailyCalendarGrid = ({
                       const slotBookingsForCell = slotBookings[key] || [];
                       const blockInfo = getBlockedSlotInfo[key];
                       
-                      // Vérifier si le vétérinaire est absent (seulement pour les colonnes vétérinaire, pas ASV)
+                      // Vérifier si le vétérinaire est absent ou en repos (seulement pour les colonnes vétérinaire, pas ASV)
                       const isVetAbsent = column.id !== 'asv' && isVeterinarianAbsent(column.id, selectedDate, absences);
+                      const isVetNotWorking = column.id !== 'asv' && isVeterinarianNotWorking(column.id, selectedDate, schedules);
+                      const isVetUnavailable = isVetAbsent || isVetNotWorking;
                       
                       return (
                         <TimeSlotCell
@@ -279,7 +284,7 @@ export const DailyCalendarGrid = ({
                           onPasteBooking={onPasteBooking}
                           onDeleteBooking={onDeleteBooking}
                           onBlockSlot={onBlockSlot}
-                          isVeterinarianAbsent={isVetAbsent}
+                          isVeterinarianAbsent={isVetUnavailable}
                           isFirstBlockedSlot={blockInfo?.isFirst || false}
                           blockedSlotsCount={blockInfo?.count || 1}
                           consultationTypes={consultationTypes}

@@ -1,7 +1,7 @@
 import { isWithinInterval } from 'date-fns';
 import { processBookingWithoutPreference } from './appointmentAssignment';
 import { getAssignedVeterinarian } from './slotAssignmentUtils';
-import { isVeterinarianAbsent } from './veterinarianAbsenceUtils';
+import { isVeterinarianAbsent, isVeterinarianNotWorking } from './veterinarianAbsenceUtils';
 
 export const generateAllTimeSlots = () => {
   const timeSlots = [];
@@ -88,7 +88,8 @@ export const generateColumns = (
   veterinarians: any[], 
   settings: any, 
   selectedDate?: Date, 
-  absences: any[] = []
+  absences: any[] = [],
+  schedules: any[] = []
 ) => {
   const columns = [];
 
@@ -129,13 +130,14 @@ export const generateColumns = (
   // Ajouter les colonnes des vétérinaires dans l'ordre
   orderedVets.forEach(vet => {
     const isAbsent = selectedDate ? isVeterinarianAbsent(vet.id, selectedDate, absences) : false;
+    const isNotWorking = selectedDate ? isVeterinarianNotWorking(vet.id, selectedDate, schedules) : false;
     
     columns.push({
       id: vet.id,
       title: vet.name,
       type: 'veterinarian',
-      isDisabled: isAbsent,
-      absenceInfo: isAbsent ? 'Absent' : null
+      isDisabled: isAbsent || isNotWorking,
+      absenceInfo: isAbsent ? 'Absent' : (isNotWorking ? 'Repos' : null)
     });
   });
 
@@ -201,16 +203,22 @@ export const isSlotDisabled = (
   columnId: string,
   selectedDate: Date,
   daySchedule: any,
-  absences: any[] = []
+  absences: any[] = [],
+  schedules: any[] = []
 ): boolean => {
   // Vérifier si la clinique est fermée
   if (!isTimeSlotOpen(time, daySchedule)) {
     return true;
   }
 
-  // Pour les colonnes vétérinaires, vérifier les absences
-  if (columnId !== 'asv' && isVeterinarianAbsent(columnId, selectedDate, absences)) {
-    return true;
+  // Pour les colonnes vétérinaires, vérifier les absences et les jours de repos
+  if (columnId !== 'asv') {
+    if (isVeterinarianAbsent(columnId, selectedDate, absences)) {
+      return true;
+    }
+    if (isVeterinarianNotWorking(columnId, selectedDate, schedules)) {
+      return true;
+    }
   }
 
   return false;
