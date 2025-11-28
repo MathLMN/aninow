@@ -57,11 +57,13 @@ export const TimeSlotContextMenu = ({
     typeof b.recurring_block_id === 'string'
   );
   
-  // Bookings bloqués manuellement (pas de recurring_block_id OU booking_source différent)
-  const hasManualBlock = blockedBookings.some(b => 
-    b.booking_source === 'blocked' || 
-    (b.is_blocked && b.booking_source !== 'recurring-block')
+  // Bookings bloqués manuellement: tout blocage qui N'EST PAS un blocage récurrent virtuel
+  const manualBlockedBookings = blockedBookings.filter(b => 
+    b.booking_source !== 'recurring-block' &&
+    b.is_blocked === true
   );
+  
+  const hasManualBlock = manualBlockedBookings.length > 0;
   
   console.log('🔍 TimeSlot Context - All bookings:', bookings.length);
   console.log('🔍 Blocked bookings:', blockedBookings.map(b => ({ 
@@ -73,9 +75,13 @@ export const TimeSlotContextMenu = ({
   console.log('🔍 Recurring blocked booking:', recurringBlockedBooking ? {
     id: recurringBlockedBooking.id,
     recurring_block_id: recurringBlockedBooking.recurring_block_id,
-    typeof_recurring_block_id: typeof recurringBlockedBooking.recurring_block_id,
     booking_source: recurringBlockedBooking.booking_source
   } : 'none');
+  console.log('🔍 Manual blocked bookings:', manualBlockedBookings.map(b => ({
+    id: b.id,
+    booking_source: b.booking_source,
+    is_blocked: b.is_blocked
+  })));
   console.log('🔍 Has manual block:', hasManualBlock);
   
   const handleCreateAppointment = () => {
@@ -241,14 +247,11 @@ export const TimeSlotContextMenu = ({
                   <Unlock className="h-4 w-4" />
                   Débloquer ce jour uniquement
                 </ContextMenuItem>
-              ) : hasManualBlock ? (
+              ) : hasManualBlock && onDeleteBooking ? (
                 // Pour les blocages manuels : permettre la suppression
                 <ContextMenuItem
                   onClick={() => {
-                    const booking = blockedBookings.find(b => 
-                      b.booking_source === 'blocked' || 
-                      (b.is_blocked && b.booking_source !== 'recurring-block')
-                    );
+                    const booking = manualBlockedBookings[0];
                     if (booking) {
                       handleDeleteClick(booking);
                     }
