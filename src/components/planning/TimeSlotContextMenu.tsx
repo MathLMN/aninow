@@ -51,6 +51,12 @@ export const TimeSlotContextMenu = ({
   const blockedBookings = bookings.filter(b => b.is_blocked || b.recurring_block_id || b.booking_source === 'blocked');
   const recurringBlockedBooking = blockedBookings.find(b => b.recurring_block_id);
   
+  console.log('🔍 Blocked bookings:', blockedBookings.map(b => ({ 
+    id: b.id, 
+    recurring_block_id: b.recurring_block_id,
+    booking_source: b.booking_source 
+  })));
+  
   const handleCreateAppointment = () => {
     onCreateAppointment({
       date: dateStr,
@@ -187,10 +193,11 @@ export const TimeSlotContextMenu = ({
           {/* Actions pour les créneaux bloqués */}
           {blockedBookings.length > 0 && (
             <>
-              {recurringBlockedBooking && onUnblockRecurringForDay ? (
+              {recurringBlockedBooking && recurringBlockedBooking.recurring_block_id && onUnblockRecurringForDay ? (
                 // Pour les blocages récurrents : seulement débloquer ce jour
                 <ContextMenuItem
                   onClick={() => {
+                    console.log('🔓 Déblocage ponctuel pour block ID:', recurringBlockedBooking.recurring_block_id);
                     onUnblockRecurringForDay(
                       recurringBlockedBooking.recurring_block_id,
                       dateStr
