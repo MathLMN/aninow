@@ -2,6 +2,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
+import { blockSlotSchema } from "@/utils/validation";
+import { z } from "zod";
 
 
 export const useBlockSlots = () => {
@@ -9,14 +11,7 @@ export const useBlockSlots = () => {
   const queryClient = useQueryClient();
 
   const blockSlotsMutation = useMutation({
-    mutationFn: async ({
-      date,
-      startTime,
-      endTime,
-      veterinarianId,
-      clinicId,
-      reason
-    }: {
+    mutationFn: async (params: {
       date: string;
       startTime: string;
       endTime: string;
@@ -24,7 +19,12 @@ export const useBlockSlots = () => {
       clinicId: string;
       reason?: string;
     }) => {
-      console.log('🔄 Blocking time slots:', { date, startTime, endTime, veterinarianId, clinicId });
+      // ✅ Validation stricte avec Zod
+      try {
+        const validated = blockSlotSchema.parse(params);
+        console.log('🔄 Blocking time slots:', validated);
+        
+        const { date, startTime, endTime, veterinarianId, clinicId, reason } = validated;
       
 // Créer UN SEUL booking bloqué pour toute la plage horaire
       const bookingToInsert: Database['public']['Tables']['bookings']['Insert'] = {
@@ -58,8 +58,15 @@ export const useBlockSlots = () => {
         throw new Error(`Erreur d'insertion: ${error.message}`);
       }
 
-      console.log('✅ Blocked bookings created:', data?.length);
-      return data;
+        console.log('✅ Blocked bookings created:', data?.length);
+        return data;
+      } catch (validationError) {
+        if (validationError instanceof z.ZodError) {
+          console.error('❌ Validation error:', validationError.issues);
+          throw new Error(`Validation échouée: ${validationError.issues.map(e => e.message).join(', ')}`);
+        }
+        throw validationError;
+      }
     },
     onSuccess: () => {
       console.log('✅ Block slots mutation succeeded');
