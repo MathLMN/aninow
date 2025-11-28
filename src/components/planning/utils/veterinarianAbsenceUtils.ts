@@ -10,6 +10,12 @@ interface VeterinarianAbsence {
   is_recurring: boolean;
 }
 
+interface VeterinarianSchedule {
+  veterinarian_id: string;
+  day_of_week: number;
+  is_working: boolean;
+}
+
 export const isVeterinarianAbsent = (
   veterinarianId: string,
   date: Date,
@@ -54,4 +60,22 @@ export const shouldDisableVeterinarianColumn = (
   absences: VeterinarianAbsence[]
 ): boolean => {
   return isVeterinarianAbsent(veterinarianId, date, absences);
+};
+
+export const isVeterinarianNotWorking = (
+  veterinarianId: string,
+  date: Date,
+  schedules: VeterinarianSchedule[]
+): boolean => {
+  const dayOfWeek = date.getDay(); // 0 = dimanche, 1 = lundi, etc.
+  
+  const schedule = schedules.find(
+    s => s.veterinarian_id === veterinarianId && s.day_of_week === dayOfWeek
+  );
+  
+  // Si pas de schedule trouvé, on considère qu'il travaille (par défaut)
+  if (!schedule) return false;
+  
+  // Retourne true si is_working est false
+  return !schedule.is_working;
 };
