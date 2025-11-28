@@ -807,7 +807,6 @@ export type Database = {
           description: string | null
           end_date: string | null
           end_time: string
-          excluded_dates: string[] | null
           id: string
           is_active: boolean
           start_date: string | null
@@ -823,7 +822,6 @@ export type Database = {
           description?: string | null
           end_date?: string | null
           end_time: string
-          excluded_dates?: string[] | null
           id?: string
           is_active?: boolean
           start_date?: string | null
@@ -839,7 +837,6 @@ export type Database = {
           description?: string | null
           end_date?: string | null
           end_time?: string
-          excluded_dates?: string[] | null
           id?: string
           is_active?: boolean
           start_date?: string | null
