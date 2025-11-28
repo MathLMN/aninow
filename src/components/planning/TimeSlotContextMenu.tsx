@@ -187,7 +187,8 @@ export const TimeSlotContextMenu = ({
           {/* Actions pour les créneaux bloqués */}
           {blockedBookings.length > 0 && (
             <>
-              {recurringBlockedBooking && onUnblockRecurringForDay && (
+              {recurringBlockedBooking && onUnblockRecurringForDay ? (
+                // Pour les blocages récurrents : seulement débloquer ce jour
                 <ContextMenuItem
                   onClick={() => {
                     onUnblockRecurringForDay(
@@ -200,17 +201,19 @@ export const TimeSlotContextMenu = ({
                   <Unlock className="h-4 w-4" />
                   Débloquer ce jour uniquement
                 </ContextMenuItem>
+              ) : (
+                // Pour les blocages manuels : permettre la suppression
+                <ContextMenuItem
+                  onClick={() => {
+                    const booking = blockedBookings[0];
+                    handleDeleteClick(booking);
+                  }}
+                  className="text-red-600 flex items-center gap-2"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Supprimer le blocage
+                </ContextMenuItem>
               )}
-              <ContextMenuItem
-                onClick={() => {
-                  const booking = blockedBookings[0];
-                  handleDeleteClick(booking);
-                }}
-                className="text-red-600 flex items-center gap-2"
-              >
-                <Trash2 className="h-4 w-4" />
-                Supprimer le blocage
-              </ContextMenuItem>
               <ContextMenuSeparator />
             </>
           )}
