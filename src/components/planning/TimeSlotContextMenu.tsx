@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger, ContextMenuSeparator } from "@/components/ui/context-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Check, X, Copy, Scissors, Clipboard, Trash2, Clock, User, Calendar } from "lucide-react";
+import { Plus, Check, X, Copy, Scissors, Clipboard, Trash2, Clock, User, Calendar, Unlock } from "lucide-react";
 import { formatDateLocal } from '@/utils/date';
 
 interface TimeSlotContextMenuProps {
@@ -19,6 +19,7 @@ interface TimeSlotContextMenuProps {
   onPasteBooking?: (timeSlot: { date: string; time: string; veterinarian?: string }) => void;
   onDeleteBooking?: (bookingId: string) => void;
   onBlockSlot?: (timeSlot: { date: string; time: string; veterinarian: string }) => void;
+  onUnblockRecurringForDay?: (blockId: string, date: string) => void;
   hasBookings: boolean;
   hasClipboard?: boolean;
 }
@@ -37,6 +38,7 @@ export const TimeSlotContextMenu = ({
   onPasteBooking,
   onDeleteBooking,
   onBlockSlot,
+  onUnblockRecurringForDay,
   hasBookings,
   hasClipboard = false
 }: TimeSlotContextMenuProps) => {
@@ -44,8 +46,10 @@ export const TimeSlotContextMenu = ({
   const [bookingToDelete, setBookingToDelete] = useState<any>(null);
 
   const dateStr = formatDateLocal(selectedDate);
-  const pendingBookings = bookings.filter(b => b.status === 'pending');
-  const confirmedBookings = bookings.filter(b => b.status === 'confirmed');
+  const pendingBookings = bookings.filter(b => b.status === 'pending' && !b.is_blocked);
+  const confirmedBookings = bookings.filter(b => b.status === 'confirmed' && !b.is_blocked);
+  const blockedBookings = bookings.filter(b => b.is_blocked || b.recurring_block_id || b.booking_source === 'blocked');
+  const recurringBlockedBooking = blockedBookings.find(b => b.recurring_block_id);
   
   const handleCreateAppointment = () => {
     onCreateAppointment({
@@ -176,6 +180,37 @@ export const TimeSlotContextMenu = ({
                   </ContextMenuItem>
                 </div>
               ))}
+              <ContextMenuSeparator />
+            </>
+          )}
+
+          {/* Actions pour les créneaux bloqués */}
+          {blockedBookings.length > 0 && (
+            <>
+              {recurringBlockedBooking && onUnblockRecurringForDay && (
+                <ContextMenuItem
+                  onClick={() => {
+                    onUnblockRecurringForDay(
+                      recurringBlockedBooking.recurring_block_id,
+                      dateStr
+                    );
+                  }}
+                  className="text-orange-600 flex items-center gap-2"
+                >
+                  <Unlock className="h-4 w-4" />
+                  Débloquer ce jour uniquement
+                </ContextMenuItem>
+              )}
+              <ContextMenuItem
+                onClick={() => {
+                  const booking = blockedBookings[0];
+                  handleDeleteClick(booking);
+                }}
+                className="text-red-600 flex items-center gap-2"
+              >
+                <Trash2 className="h-4 w-4" />
+                Supprimer le blocage
+              </ContextMenuItem>
               <ContextMenuSeparator />
             </>
           )}

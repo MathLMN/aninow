@@ -1,5 +1,6 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useEffect } from "react";
 import { DailyCalendarView } from "@/components/planning/DailyCalendarView";
 import { WeeklyCalendarView } from "@/components/planning/WeeklyCalendarView";
 import { PlanningHeader } from "@/components/planning/PlanningHeader";
@@ -13,6 +14,8 @@ import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { usePlanningActions } from "@/hooks/usePlanningActions";
 import { useSlotManagement } from "@/hooks/useSlotManagement";
 import { useAppointmentClipboard } from "@/hooks/useAppointmentClipboard";
+import { useRecurringSlotBlocks } from "@/hooks/useRecurringSlotBlocks";
+import { useClinicAccess } from "@/hooks/useClinicAccess";
 
 export type ZoomLevel = 'compact' | 'normal' | 'large';
 
@@ -57,6 +60,9 @@ export default function VetPlanning() {
     hasClipboard,
     getClipboardAppointment
   } = useAppointmentClipboard();
+
+  const { currentClinicId } = useClinicAccess();
+  const { excludeDateFromBlock } = useRecurringSlotBlocks();
 
   const handleCreateAppointment = (timeSlot: { date: string; time: string; veterinarian?: string }) => {
     console.log('🎯 Opening create modal with time slot:', timeSlot);
@@ -197,6 +203,15 @@ export default function VetPlanning() {
     }
   };
 
+  const handleUnblockRecurringForDay = async (blockId: string, date: string) => {
+    try {
+      await excludeDateFromBlock({ blockId, dateToExclude: date });
+      await refreshBookings();
+    } catch (error) {
+      console.error('Error unblocking recurring slot:', error);
+    }
+  };
+
   // Filter bookings for selected date (daily view)
   const todayBookings = bookings.filter(booking => {
     if (viewMode === 'daily') {
@@ -262,6 +277,7 @@ export default function VetPlanning() {
                   onPasteBooking={handlePasteBooking}
                   onDeleteBooking={handleDeleteBooking}
                   onBlockSlot={handleBlockSlot}
+                  onUnblockRecurringForDay={handleUnblockRecurringForDay}
                   hasClipboard={hasClipboard()}
                   sidebarMode={true}
                   zoomLevel={zoomLevel}
@@ -300,6 +316,7 @@ export default function VetPlanning() {
                 onPasteBooking={handlePasteBooking}
                 onDeleteBooking={handleDeleteBooking}
                 onBlockSlot={handleBlockSlot}
+                onUnblockRecurringForDay={handleUnblockRecurringForDay}
                 hasClipboard={hasClipboard()}
                 mainViewMode={true}
                 zoomLevel={zoomLevel}

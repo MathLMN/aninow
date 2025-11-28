@@ -16,6 +16,7 @@ export interface RecurringSlotBlock {
   end_time: string;
   start_date?: string;
   end_date?: string;
+  excluded_dates?: string[];
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -198,10 +199,12 @@ export const useRecurringSlotBlocks = () => {
     const blocksForDay = recurringBlocks.filter(block => {
       const matchesDay = block.day_of_week === dayOfWeek;
       const inRange = isDateInBlockRange(date, block);
+      // Vérifier si cette date est exclue
+      const isExcluded = block.excluded_dates?.includes(dateStr) ?? false;
       
-      console.log(`Block ${block.id}: day_of_week=${block.day_of_week}, matches=${matchesDay}, inRange=${inRange}, start_date=${block.start_date}, end_date=${block.end_date}`);
+      console.log(`Block ${block.id}: day_of_week=${block.day_of_week}, matches=${matchesDay}, inRange=${inRange}, excluded=${isExcluded}, start_date=${block.start_date}, end_date=${block.end_date}`);
       
-      return matchesDay && inRange;
+      return matchesDay && inRange && !isExcluded;
     });
     
     console.log(`📅 Found ${blocksForDay.length} matching blocks for ${dateStr}`);
@@ -253,6 +256,46 @@ export const useRecurringSlotBlocks = () => {
     return Math.round((end.getTime() - start.getTime()) / (1000 * 60));
   };
 
+  const excludeDateFromBlock = useMutation({
+    mutationFn: async ({ blockId, dateToExclude }: { blockId: string; dateToExclude: string }) => {
+      // Récupérer le bloc actuel
+      const { data: block, error: fetchError } = await supabase
+        .from('recurring_slot_blocks')
+        .select('excluded_dates')
+        .eq('id', blockId)
+        .single();
+      
+      if (fetchError) throw fetchError;
+      
+      const currentExcluded = block?.excluded_dates || [];
+      const newExcluded = [...currentExcluded, dateToExclude];
+      
+      // Mettre à jour avec la nouvelle date exclue
+      const { error } = await supabase
+        .from('recurring_slot_blocks')
+        .update({ excluded_dates: newExcluded })
+        .eq('id', blockId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['recurring-slot-blocks', currentClinicId] });
+      queryClient.invalidateQueries({ queryKey: ['vet-bookings'] });
+      toast({
+        title: "Créneau débloqué",
+        description: "Ce jour a été exceptionnellement débloqué",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erreur",
+        description: "Impossible de débloquer ce créneau",
+        variant: "destructive",
+      });
+      console.error("Error excluding date from block:", error);
+    },
+  });
+
   return {
     recurringBlocks,
     generateRecurringBlocksForDate,
@@ -260,8 +303,10 @@ export const useRecurringSlotBlocks = () => {
     createRecurringBlock: createRecurringBlock.mutateAsync,
     updateRecurringBlock: updateRecurringBlock.mutateAsync,
     deleteRecurringBlock: deleteRecurringBlock.mutateAsync,
+    excludeDateFromBlock: excludeDateFromBlock.mutateAsync,
     isCreating: createRecurringBlock.isPending,
     isUpdating: updateRecurringBlock.isPending,
-    isDeleting: deleteRecurringBlock.isPending
+    isDeleting: deleteRecurringBlock.isPending,
+    isExcluding: excludeDateFromBlock.isPending
   };
 };
