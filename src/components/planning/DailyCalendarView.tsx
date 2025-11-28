@@ -43,6 +43,7 @@ interface DailyCalendarViewProps {
     time: string;
     veterinarian: string;
   }) => void;
+  onUnblockRecurringForDay?: (blockId: string, date: string) => void;
   hasClipboard?: boolean;
   sidebarMode?: boolean;
   mainViewMode?: boolean;
@@ -65,6 +66,7 @@ export const DailyCalendarView = ({
   onPasteBooking,
   onDeleteBooking,
   onBlockSlot,
+  onUnblockRecurringForDay,
   hasClipboard = false,
   sidebarMode = false,
   mainViewMode = false,
@@ -214,6 +216,7 @@ export const DailyCalendarView = ({
         onPasteBooking={onPasteBooking}
         onDeleteBooking={onDeleteBooking} 
         onBlockSlot={handleBlockSlot}
+        onUnblockRecurringForDay={onUnblockRecurringForDay}
         hasClipboard={hasClipboard}
         zoomLevel={zoomLevel}
       />

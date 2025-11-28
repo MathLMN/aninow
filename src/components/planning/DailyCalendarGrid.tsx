@@ -31,6 +31,7 @@ interface DailyCalendarGridProps {
   onPasteBooking?: (timeSlot: { date: string; time: string; veterinarian?: string }) => void;
   onDeleteBooking?: (bookingId: string) => void;
   onBlockSlot?: (timeSlot: { date: string; time: string; veterinarian: string }) => void;
+  onUnblockRecurringForDay?: (blockId: string, date: string) => void;
   hasClipboard?: boolean;
   fixedHeaders?: boolean;
   zoomLevel?: ZoomLevel;
@@ -53,6 +54,7 @@ export const DailyCalendarGrid = ({
   onPasteBooking,
   onDeleteBooking,
   onBlockSlot,
+  onUnblockRecurringForDay,
   hasClipboard = false,
   fixedHeaders = false,
   zoomLevel = 'normal'
@@ -284,6 +286,7 @@ export const DailyCalendarGrid = ({
                           onPasteBooking={onPasteBooking}
                           onDeleteBooking={onDeleteBooking}
                           onBlockSlot={onBlockSlot}
+                          onUnblockRecurringForDay={onUnblockRecurringForDay}
                           isVeterinarianAbsent={isVetUnavailable}
                           isFirstBlockedSlot={blockInfo?.isFirst || false}
                           blockedSlotsCount={blockInfo?.count || 1}

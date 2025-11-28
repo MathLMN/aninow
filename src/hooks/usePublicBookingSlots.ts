@@ -208,6 +208,12 @@ export const usePublicBookingSlots = () => {
                 if (block.start_date && new Date(block.start_date) > date) return false;
                 if (block.end_date && new Date(block.end_date) < date) return false;
                 
+                // Vérifier si cette date est exclue du blocage récurrent
+                if (block.excluded_dates?.includes(dateStr)) {
+                  console.log(`✅ Date ${dateStr} débloquée exceptionnellement pour ${block.title}`);
+                  return false;
+                }
+                
                 const [slotHour, slotMinute] = timeSlot.split(':').map(Number);
                 const [blockStartH, blockStartM] = block.start_time.split(':').map(Number);
                 const [blockEndH, blockEndM] = block.end_time.split(':').map(Number);
