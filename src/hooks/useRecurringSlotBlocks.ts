@@ -241,7 +241,8 @@ export const useRecurringSlotBlocks = () => {
         // Métadonnées pour identifier les blocages récurrents
         recurring_block_id: block.id,
         recurring_block_title: block.title,
-        recurring_block_description: block.description
+        recurring_block_description: block.description,
+        booking_source: 'recurring-block' as const
       }));
     });
     
