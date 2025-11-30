@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger, ContextMenuSeparator } from "@/components/ui/context-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Check, X, Copy, Scissors, Clipboard, Trash2, Clock, User, Calendar } from "lucide-react";
+import { Plus, Check, X, Copy, Scissors, Clipboard, Trash2, Clock, User, Calendar, Unlock } from "lucide-react";
 import { formatDateLocal } from '@/utils/date';
 
 interface TimeSlotContextMenuProps {
@@ -19,6 +19,7 @@ interface TimeSlotContextMenuProps {
   onPasteBooking?: (timeSlot: { date: string; time: string; veterinarian?: string }) => void;
   onDeleteBooking?: (bookingId: string) => void;
   onBlockSlot?: (timeSlot: { date: string; time: string; veterinarian: string }) => void;
+  onUnblockRecurringSlot?: (blockId: string, date: string) => void;
   hasBookings: boolean;
   hasClipboard?: boolean;
 }
@@ -37,6 +38,7 @@ export const TimeSlotContextMenu = ({
   onPasteBooking,
   onDeleteBooking,
   onBlockSlot,
+  onUnblockRecurringSlot,
   hasBookings,
   hasClipboard = false
 }: TimeSlotContextMenuProps) => {
@@ -46,6 +48,7 @@ export const TimeSlotContextMenu = ({
   const dateStr = formatDateLocal(selectedDate);
   const pendingBookings = bookings.filter(b => b.status === 'pending');
   const confirmedBookings = bookings.filter(b => b.status === 'confirmed');
+  const recurringBlockedBookings = bookings.filter(b => b.recurring_block_id);
   
   const handleCreateAppointment = () => {
     onCreateAppointment({
@@ -175,6 +178,25 @@ export const TimeSlotContextMenu = ({
                     Supprimer - {booking.client_name}
                   </ContextMenuItem>
                 </div>
+              ))}
+              <ContextMenuSeparator />
+            </>
+          )}
+
+          {/* Option de déblocage pour les créneaux récurrents bloqués */}
+          {recurringBlockedBookings.length > 0 && onUnblockRecurringSlot && (
+            <>
+              {recurringBlockedBookings.map((booking) => (
+                <ContextMenuItem
+                  key={`unblock-${booking.id}`}
+                  onClick={() => {
+                    onUnblockRecurringSlot(booking.recurring_block_id, dateStr);
+                  }}
+                  className="flex items-center gap-2 text-green-600"
+                >
+                  <Unlock className="h-4 w-4" />
+                  Débloquer ce jour uniquement
+                </ContextMenuItem>
               ))}
               <ContextMenuSeparator />
             </>
