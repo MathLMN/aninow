@@ -13,6 +13,7 @@ import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { usePlanningActions } from "@/hooks/usePlanningActions";
 import { useSlotManagement } from "@/hooks/useSlotManagement";
 import { useAppointmentClipboard } from "@/hooks/useAppointmentClipboard";
+import { useRecurringSlotBlocks } from "@/hooks/useRecurringSlotBlocks";
 
 export type ZoomLevel = 'compact' | 'normal' | 'large';
 
@@ -39,6 +40,7 @@ export default function VetPlanning() {
   const { bookings, refreshBookings } = useVetBookings();
   const { veterinarians } = useClinicVeterinarians();
   const { consultationTypes } = useSlotManagement();
+  const { addExcludedDate } = useRecurringSlotBlocks();
 
   const {
     validateBooking,
@@ -197,6 +199,15 @@ export default function VetPlanning() {
     }
   };
 
+  const handleUnblockRecurringSlot = async (blockId: string, date: string) => {
+    try {
+      await addExcludedDate({ blockId, dateToExclude: date });
+      refreshBookings(); // Rafraîchir l'affichage
+    } catch (error) {
+      console.error('Error unblocking slot:', error);
+    }
+  };
+
   // Filter bookings for selected date (daily view)
   const todayBookings = bookings.filter(booking => {
     if (viewMode === 'daily') {
@@ -262,6 +273,7 @@ export default function VetPlanning() {
                   onPasteBooking={handlePasteBooking}
                   onDeleteBooking={handleDeleteBooking}
                   onBlockSlot={handleBlockSlot}
+                  onUnblockRecurringSlot={handleUnblockRecurringSlot}
                   hasClipboard={hasClipboard()}
                   sidebarMode={true}
                   zoomLevel={zoomLevel}
@@ -300,6 +312,7 @@ export default function VetPlanning() {
                 onPasteBooking={handlePasteBooking}
                 onDeleteBooking={handleDeleteBooking}
                 onBlockSlot={handleBlockSlot}
+                onUnblockRecurringSlot={handleUnblockRecurringSlot}
                 hasClipboard={hasClipboard()}
                 mainViewMode={true}
                 zoomLevel={zoomLevel}

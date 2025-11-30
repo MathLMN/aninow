@@ -24,6 +24,7 @@ interface TimeSlotCellProps {
   onCutBooking?: (booking: any) => void;
   onPasteBooking?: (timeSlot: { date: string; time: string; veterinarian?: string }) => void;
   onDeleteBooking?: (bookingId: string) => void;
+  onUnblockRecurringSlot?: (blockId: string, date: string) => void;
   // Nouvelle prop pour indiquer si le vétérinaire est absent
   isVeterinarianAbsent?: boolean;
   // Nouvelles props pour gérer l'affichage des blocages
@@ -53,6 +54,7 @@ export const TimeSlotCell = ({
   onPasteBooking,
   onDeleteBooking,
   onBlockSlot,
+  onUnblockRecurringSlot,
   isVeterinarianAbsent = false,
   isFirstBlockedSlot = false,
   blockedSlotsCount = 1,
@@ -215,6 +217,7 @@ export const TimeSlotCell = ({
       onPasteBooking={onPasteBooking}
       onDeleteBooking={onDeleteBooking}
       onBlockSlot={onBlockSlot}
+      onUnblockRecurringSlot={onUnblockRecurringSlot}
       hasBookings={bookings.length > 0}
       hasClipboard={hasClipboard}
     >

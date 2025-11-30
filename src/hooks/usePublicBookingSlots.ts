@@ -204,6 +204,13 @@ export const usePublicBookingSlots = () => {
                 if (block.veterinarian_id !== vet.id) return false;
                 if (block.day_of_week !== dayOfWeek) return false;
                 
+                // NOUVEAU : Vérifier si la date est exclue
+                const excludedDates = block.excluded_dates || [];
+                if (excludedDates.includes(dateStr)) {
+                  console.log(`📅 Block ${block.title} is excluded for ${dateStr} - slot available`);
+                  return false; // Le bloc ne s'applique pas car la date est exclue
+                }
+                
                 // Vérifier si le bloc est actif pour cette date
                 if (block.start_date && new Date(block.start_date) > date) return false;
                 if (block.end_date && new Date(block.end_date) < date) return false;
