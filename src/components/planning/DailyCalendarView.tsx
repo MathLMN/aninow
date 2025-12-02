@@ -12,7 +12,7 @@ import { useClinicVeterinarians } from "@/hooks/useClinicVeterinarians";
 import { useClinicSettings } from "@/hooks/useClinicSettings";
 import { useVeterinarianSchedules } from "@/hooks/useVeterinarianSchedules";
 import { useVeterinarianAbsences } from "@/hooks/useVeterinarianAbsences";
-import { generateColumns } from "./utils/scheduleUtils";
+import { generateColumns, getDaySchedule } from "./utils/scheduleUtils";
 import type { ZoomLevel } from "@/pages/vet/VetPlanning";
 
 interface DailyCalendarViewProps {
@@ -107,18 +107,8 @@ export const DailyCalendarView = ({
   // Créer les colonnes pour l'affichage en utilisant l'ordre personnalisé
   const columns = generateColumns(veterinarians, settings, selectedDate, absences, schedules);
 
-  // Configuration des horaires simplifiée - horaires ouverts de 8h à 19h
-  const daySchedule = {
-    isOpen: true,
-    morning: {
-      start: "08:00",
-      end: "12:00"
-    },
-    afternoon: {
-      start: "14:00",
-      end: "19:00"
-    }
-  };
+  // Récupérer les horaires du jour sélectionné depuis les paramètres de la clinique
+  const daySchedule = getDaySchedule(selectedDate, settings);
 
   // Si c'est le mode sidebar, afficher seulement le calendrier
   if (sidebarMode) {
