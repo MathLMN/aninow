@@ -121,7 +121,8 @@ export const useClinicVeterinarians = () => {
         morning_start: '08:00',
         morning_end: '12:00',
         afternoon_start: '14:00',
-        afternoon_end: '18:00'
+        afternoon_end: '18:00',
+        available_for_online_booking: true
       }));
 
       const { error: scheduleError } = await supabase

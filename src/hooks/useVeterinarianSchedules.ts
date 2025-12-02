@@ -14,6 +14,7 @@ export interface VeterinarianSchedule {
   afternoon_start?: string;
   afternoon_end?: string;
   clinic_id?: string;
+  available_for_online_booking?: boolean;
 }
 
 export const useVeterinarianSchedules = () => {
@@ -68,6 +69,7 @@ export const useVeterinarianSchedules = () => {
         afternoon_start: schedule.afternoon_start || null,
         afternoon_end: schedule.afternoon_end || null,
         clinic_id: currentClinicId,
+        available_for_online_booking: schedule.available_for_online_booking ?? true,
       };
 
       const { data, error } = await supabase

@@ -19,6 +19,7 @@ interface DayScheduleRowProps {
     morning_end?: string;
     afternoon_start?: string;
     afternoon_end?: string;
+    available_for_online_booking?: boolean;
   };
   onScheduleChange: (field: string, value: string | boolean) => void;
 }
@@ -42,13 +43,23 @@ export const DayScheduleRow: React.FC<DayScheduleRowProps> = ({
         </div>
         
         {schedule.is_working && (
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              checked={schedule.has_special_hours}
-              onCheckedChange={(checked) => onScheduleChange('has_special_hours', checked)}
-            />
-            <Label className="text-xs text-vet-brown">Horaires spéciaux</Label>
-          </div>
+          <>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                checked={schedule.has_special_hours}
+                onCheckedChange={(checked) => onScheduleChange('has_special_hours', checked)}
+              />
+              <Label className="text-xs text-vet-brown">Horaires spéciaux</Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                checked={schedule.available_for_online_booking ?? true}
+                onCheckedChange={(checked) => onScheduleChange('available_for_online_booking', checked)}
+              />
+              <Label className="text-xs text-vet-brown">Dispo. en ligne</Label>
+            </div>
+          </>
         )}
       </div>
       
