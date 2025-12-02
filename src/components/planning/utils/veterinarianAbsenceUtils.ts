@@ -73,8 +73,12 @@ export const isVeterinarianNotWorking = (
     s => s.veterinarian_id === veterinarianId && s.day_of_week === dayOfWeek
   );
   
-  // Si pas de schedule trouvé, on considère qu'il travaille (par défaut)
-  if (!schedule) return false;
+  // Si pas de schedule trouvé, considérer le week-end comme non travaillé par défaut
+  if (!schedule) {
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    console.log(`⚠️ No schedule found for vet ${veterinarianId} on day ${dayOfWeek}, defaulting to: ${isWeekend ? 'not working' : 'working'}`);
+    return isWeekend; // Samedi/Dimanche = repos par défaut, sinon travaillé
+  }
   
   // Retourne true si is_working est false
   return !schedule.is_working;
