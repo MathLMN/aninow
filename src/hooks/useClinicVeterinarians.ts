@@ -95,7 +95,8 @@ export const useClinicVeterinarians = () => {
 
       console.log('🔄 Adding veterinarian:', vetData);
       
-      const { data, error } = await supabase
+      // 1. Créer le vétérinaire
+      const { data: newVet, error: vetError } = await supabase
         .from('clinic_veterinarians')
         .insert([{
           ...vetData,
@@ -104,13 +105,37 @@ export const useClinicVeterinarians = () => {
         .select()
         .single();
 
-      if (error) {
-        console.error('❌ Error adding veterinarian:', error);
-        throw error;
+      if (vetError) {
+        console.error('❌ Error adding veterinarian:', vetError);
+        throw vetError;
       }
 
-      console.log('✅ Veterinarian added:', data);
-      return data;
+      console.log('✅ Veterinarian added:', newVet);
+
+      // 2. Créer automatiquement les 7 schedules par défaut (Lundi-Vendredi travaillés, Samedi-Dimanche repos)
+      const defaultSchedules = [0, 1, 2, 3, 4, 5, 6].map(day => ({
+        veterinarian_id: newVet.id,
+        clinic_id: currentClinicId,
+        day_of_week: day,
+        is_working: day >= 1 && day <= 5, // Lundi-Vendredi = true, Samedi/Dimanche = false
+        morning_start: '08:00',
+        morning_end: '12:00',
+        afternoon_start: '14:00',
+        afternoon_end: '18:00'
+      }));
+
+      const { error: scheduleError } = await supabase
+        .from('veterinarian_schedules')
+        .insert(defaultSchedules);
+
+      if (scheduleError) {
+        console.error('⚠️ Warning: Could not create default schedules:', scheduleError);
+        // On ne fait pas échouer la création du vétérinaire si les schedules échouent
+      } else {
+        console.log('✅ Default schedules created for veterinarian:', newVet.id);
+      }
+
+      return newVet;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clinic-veterinarians'] });
