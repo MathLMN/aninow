@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useClinicContext } from '@/contexts/ClinicContext';
 import { format, addDays, isToday, parseISO, addHours, isAfter, startOfDay } from 'date-fns';
 import { isVeterinarianAbsent } from '@/components/planning/utils/veterinarianAbsenceUtils';
+import { isFrenchPublicHoliday } from '@/components/planning/utils/scheduleUtils';
 
 export const usePublicBookingSlots = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -116,6 +117,12 @@ export const usePublicBookingSlots = () => {
           const dayOfWeek = date.getDay();
           const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
           const dayName = dayNames[dayOfWeek];
+          
+          // Exclure les jours fériés
+          if (isFrenchPublicHoliday(date)) {
+            console.log(`🚫 Public holiday on ${dateStr}`);
+            continue;
+          }
           
           // Vérifier si la clinique est ouverte ce jour
           const daySchedule = settings.daily_schedules?.[dayName];

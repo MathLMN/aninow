@@ -3,6 +3,66 @@ import { processBookingWithoutPreference } from './appointmentAssignment';
 import { getAssignedVeterinarian } from './slotAssignmentUtils';
 import { isVeterinarianAbsent, isVeterinarianNotWorking } from './veterinarianAbsenceUtils';
 
+// Calcul de la date de Pâques (algorithme de Butcher)
+const getEasterDate = (year: number): Date => {
+  const a = year % 19;
+  const b = Math.floor(year / 100);
+  const c = year % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31) - 1;
+  const day = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(year, month, day);
+};
+
+export const isFrenchPublicHoliday = (date: Date): boolean => {
+  const day = date.getDate();
+  const month = date.getMonth(); // 0-indexed
+  const year = date.getFullYear();
+
+  // Jours fériés fixes
+  const fixedHolidays = [
+    { day: 1, month: 0 },   // 1er janvier
+    { day: 1, month: 4 },   // 1er mai
+    { day: 8, month: 4 },   // 8 mai
+    { day: 14, month: 6 },  // 14 juillet
+    { day: 15, month: 7 },  // 15 août
+    { day: 1, month: 10 },  // 1er novembre
+    { day: 11, month: 10 }, // 11 novembre
+    { day: 25, month: 11 }, // 25 décembre
+  ];
+
+  if (fixedHolidays.some(h => h.day === day && h.month === month)) {
+    return true;
+  }
+
+  // Jours fériés mobiles basés sur Pâques
+  const easter = getEasterDate(year);
+  const easterMonday = new Date(easter);
+  easterMonday.setDate(easter.getDate() + 1);
+  
+  const ascension = new Date(easter);
+  ascension.setDate(easter.getDate() + 39);
+  
+  const whitMonday = new Date(easter);
+  whitMonday.setDate(easter.getDate() + 50);
+
+  const mobileHolidays = [easterMonday, ascension, whitMonday];
+  
+  return mobileHolidays.some(h => 
+    h.getDate() === day && 
+    h.getMonth() === month && 
+    h.getFullYear() === year
+  );
+};
+
 export const generateAllTimeSlots = () => {
   const timeSlots = [];
   for (let hour = 7; hour <= 21; hour++) {
@@ -57,6 +117,11 @@ export const getDaySchedule = (selectedDate: Date, settings: any) => {
       morning: { start: "08:00", end: "12:00" },
       afternoon: { start: "14:00", end: "19:00" }
     };
+  }
+
+  // Si c'est un jour férié, utiliser les horaires du dimanche (fermé)
+  if (isFrenchPublicHoliday(selectedDate)) {
+    return settings.daily_schedules['sunday'];
   }
 
   const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const;
