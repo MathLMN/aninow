@@ -1054,6 +1054,7 @@ export type Database = {
         Row: {
           afternoon_end: string | null
           afternoon_start: string | null
+          available_for_online_booking: boolean | null
           clinic_id: string | null
           created_at: string
           day_of_week: number
@@ -1067,6 +1068,7 @@ export type Database = {
         Insert: {
           afternoon_end?: string | null
           afternoon_start?: string | null
+          available_for_online_booking?: boolean | null
           clinic_id?: string | null
           created_at?: string
           day_of_week: number
@@ -1080,6 +1082,7 @@ export type Database = {
         Update: {
           afternoon_end?: string | null
           afternoon_start?: string | null
+          available_for_online_booking?: boolean | null
           clinic_id?: string | null
           created_at?: string
           day_of_week?: number

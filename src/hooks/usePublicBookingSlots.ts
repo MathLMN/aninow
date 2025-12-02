@@ -159,7 +159,8 @@ export const usePublicBookingSlots = () => {
                 s => s.veterinarian_id === vet.id && s.day_of_week === dayOfWeek
               );
               
-              if (vetDaySchedule && !vetDaySchedule.is_working) {
+              // Vérifier si le vétérinaire ne travaille pas ce jour OU si les réservations en ligne sont fermées
+              if (vetDaySchedule && (!vetDaySchedule.is_working || vetDaySchedule.available_for_online_booking === false)) {
                 continue;
               }
               

@@ -23,10 +23,12 @@ interface VeterinarianSchedule {
   morning_end?: string;
   afternoon_start?: string;
   afternoon_end?: string;
+  available_for_online_booking?: boolean;
 }
 
 interface ExtendedVeterinarianSchedule extends VeterinarianSchedule {
   has_special_hours: boolean;
+  available_for_online_booking: boolean;
 }
 
 interface VeterinarianWeeklyScheduleProps {
@@ -76,7 +78,8 @@ export const VeterinarianWeeklySchedule: React.FC<VeterinarianWeeklyScheduleProp
         morning_end: existingSchedule?.morning_end || defaultSchedule.morning_end,
         afternoon_start: existingSchedule?.afternoon_start || defaultSchedule.afternoon_start,
         afternoon_end: existingSchedule?.afternoon_end || defaultSchedule.afternoon_end,
-        has_special_hours: hasSpecialHours
+        has_special_hours: hasSpecialHours,
+        available_for_online_booking: existingSchedule?.available_for_online_booking ?? true
       };
     });
   });
@@ -100,6 +103,14 @@ export const VeterinarianWeeklySchedule: React.FC<VeterinarianWeeklyScheduleProp
         if (schedule.day_of_week !== dayOfWeek) return schedule;
         
         const updatedSchedule = { ...schedule, [field]: value };
+        
+        // Si on désactive le jour, forcer available_for_online_booking à false
+        if (field === 'is_working' && !value) {
+          return {
+            ...updatedSchedule,
+            available_for_online_booking: false
+          };
+        }
         
         // If disabling special hours, revert to default schedule
         if (field === 'has_special_hours' && !value) {
